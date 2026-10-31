@@ -421,8 +421,10 @@ body {
 
 #tela-servicos .cartao-personagem-header {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 8px;
+    right: 8px;
+    width: 68px;
+    height: 68px;
 }
 
 .cartao-personagem-header {
@@ -462,6 +464,11 @@ body {
     .cartao-personagem-header {
         width: 80px;
         height: 80px;
+    }
+
+    #tela-servicos .cartao-personagem-header {
+        width: 56px;
+        height: 56px;
     }
 }
 

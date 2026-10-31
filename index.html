@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSlash</title>
+    <link rel="icon" type="image/png" href="imagens/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Tela inicial com cartao central -->
+    <div id="tela-inicial">
+        <!-- Canvas para efeito de onda azul -->
+        <canvas id="canvas-onda" class="canvas-onda"></canvas>
+        <!-- Logo do site -->
+        <img class="logo-site" src="imagens/logo.png" alt="FinSlash Logo" />
+        <div class="cartao-central" id="cartao-central">
+            <p class="texto-cartao">começar</p>
+        </div>
+    </div>
+
+    <!-- Popup de selecao de personagens -->
+    <div id="popup-personagens" class="popup hidden">
+        <div class="popup-conteudo">
+            <h2 class="titulo-popup">escolha o seu personagem</h2>
+            <div class="grid-personagens" id="grid-personagens">
+                <!-- Os 12 cartoes de personagens serao gerados via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup de personagem selecionado -->
+    <div id="popup-personagem-selecionado" class="popup hidden">
+        <div class="popup-conteudo-selecionado">
+            <div class="imagem-personagem-selecionado" id="imagem-personagem-selecionado">
+                <!-- Imagem do personagem selecionado sera inserida aqui -->
+            </div>
+            <div class="botoes-navegacao-selecionado">
+                <button class="botao botao-voltar-vermelho" id="botao-voltar-selecionado">Voltar</button>
+                <button class="botao botao-seguir" id="botao-seguir-selecionado">Seguir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup de animacao de celebracao -->
+    <div id="popup-animacao" class="popup hidden">
+        <div class="popup-conteudo-animacao">
+            <img id="gif-celebracao" class="gif-celebracao" src="" alt="Celebracao" />
+        </div>
+    </div>
+
+    <!-- Tela de servicos AWS -->
+    <div id="tela-servicos" class="hidden">
+        <!-- Header com logo e personagem -->
+        <div class="header-pagina">
+            <img class="logo-header" src="imagens/logo.png" alt="FinSlash Logo" />
+            <div class="cartao-personagem-header" id="cartao-personagem-header">
+                <img id="imagem-personagem-header" src="" alt="Personagem" />
+            </div>
+        </div>
+        <div class="servicos-container">
+            <h2 class="titulo-servicos">servicos aws</h2>
+            <div class="grid-servicos" id="grid-servicos">
+                <!-- Os 30 cartoes de servicos serao gerados via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

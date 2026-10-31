@@ -1,0 +1,585 @@
+/* Reset basico e configuracoes globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ffffff;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Canvas para efeito de onda azul */
+.canvas-onda {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Tela inicial com cartao central */
+#tela-inicial {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    min-height: 100vh;
+    padding: 20px;
+    padding-bottom: 80px;
+    background-color: #ffffff;
+}
+
+.cartao-central {
+    position: relative;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 40px 30px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 90%;
+    width: 320px;
+}
+
+.cartao-central:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.cartao-central:active {
+    transform: scale(0.98);
+}
+
+.texto-cartao {
+    font-family: 'Varela Round', 'Quicksand', 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #3b82f6;
+    text-transform: lowercase;
+}
+
+.logo-site {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 250px;
+    width: 100%;
+    z-index: 10;
+}
+
+/* Popup de selecao de personagens */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.popup-conteudo {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.titulo-popup {
+    font-family: 'Varela Round', 'Quicksand', 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    color: #3b82f6;
+    margin-bottom: 20px;
+    text-transform: lowercase;
+}
+
+/* Grid de personagens 4x3 (12 cartoes) */
+.grid-personagens {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.cartao-personagem {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.cartao-personagem:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cartao-personagem.selecionado {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+.imagem-personagem {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Botoes de navegacao */
+.botao {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.botao:hover {
+    transform: translateY(-2px);
+}
+
+.botao:active {
+    transform: scale(0.96);
+}
+
+.botao-seguir {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border: 2px solid #3b82f6;
+}
+
+.botao-voltar-vermelho {
+    background-color: #ef4444;
+    color: #ffffff;
+    border: 2px solid #ef4444;
+}
+
+/* Popup de personagem selecionado */
+.popup-conteudo-selecionado {
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 100%;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.imagem-personagem-selecionado {
+    width: 100%;
+    max-width: 300px;
+    aspect-ratio: 1;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.imagem-personagem-selecionado img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.botoes-navegacao-selecionado {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+/* Popup de animacao de celebracao */
+.popup-conteudo-animacao {
+    background-color: transparent;
+    max-width: 100%;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.gif-celebracao {
+    max-width: 100%;
+    max-height: 400px;
+    transition: transform 0.1s ease;
+    border-radius: 16px;
+}
+
+/* Classes utilitarias */
+.hidden {
+    display: none !important;
+}
+
+/* Tela de jornada AWS */
+#tela-jornada {
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.jornada-conteudo {
+    text-align: center;
+    color: #333333;
+}
+
+/* Responsividade para diferentes tamanhos de tela */
+@media (max-width: 360px) {
+    #tela-inicial {
+        padding-bottom: 60px;
+    }
+    
+    .logo-site {
+        max-width: 180px;
+        top: 20px;
+    }
+    
+    .texto-cartao {
+        font-size: 1.8rem;
+    }
+    
+    .titulo-popup {
+        font-size: 1.2rem;
+    }
+    
+    .grid-personagens {
+        gap: 8px;
+    }
+    
+    .cartao-personagem {
+        padding: 4px;
+    }
+    
+    .botao {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .popup-conteudo-selecionado {
+        max-width: 300px;
+    }
+    
+    .imagem-personagem-selecionado {
+        max-width: 250px;
+    }
+    
+    .gif-celebracao {
+        max-height: 250px;
+    }
+    
+    .cartao-servico {
+        height: 100px;
+        padding: 12px;
+    }
+    
+    .icone-servico {
+        font-size: 1.2rem;
+        margin-bottom: 6px;
+    }
+    
+    .nome-servico {
+        font-size: 0.65rem;
+    }
+}
+
+@media (min-width: 768px) {
+    #tela-inicial {
+        padding-bottom: 100px;
+    }
+    
+    .texto-cartao {
+        font-size: 3rem;
+    }
+    
+    .popup-conteudo {
+        max-width: 500px;
+    }
+    
+    .titulo-popup {
+        font-size: 1.8rem;
+    }
+    
+    .grid-personagens {
+        gap: 16px;
+    }
+    
+    .cartao-personagem {
+        padding: 8px;
+    }
+    
+    .popup-conteudo-selecionado {
+        max-width: 450px;
+    }
+    
+    .imagem-personagem-selecionado {
+        max-width: 350px;
+    }
+    
+    .gif-celebracao {
+        max-height: 400px;
+    }
+}
+
+@media (min-width: 1024px) {
+    #tela-inicial {
+        padding-bottom: 120px;
+    }
+    
+    .texto-cartao {
+        font-size: 3.5rem;
+    }
+    
+    .popup-conteudo {
+        max-width: 600px;
+    }
+    
+    .grid-personagens {
+        gap: 20px;
+    }
+    
+    .gif-celebracao {
+        max-height: 500px;
+    }
+}
+
+/* Tela de servicos AWS */
+#tela-servicos {
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f8fafc;
+}
+
+/* Header com logo e personagem */
+.header-pagina {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-popup {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    margin-bottom: 16px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+}
+
+.logo-header {
+    width: 80px;
+    height: auto;
+    z-index: 10;
+}
+
+.cartao-personagem-header {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #3b82f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cartao-personagem-header img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Responsividade para header em mobile */
+@media (max-width: 768px) {
+    .header-pagina {
+        padding: 8px 12px;
+        margin-bottom: 15px;
+    }
+    
+    .header-popup {
+        padding: 8px 12px;
+        margin-bottom: 12px;
+    }
+    
+    .logo-header {
+        width: 50px;
+    }
+    
+    .cartao-personagem-header {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+.servicos-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.titulo-servicos {
+    font-family: 'Varela Round', 'Quicksand', 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #3b82f6;
+    text-align: center;
+    margin-bottom: 30px;
+    text-transform: lowercase;
+}
+
+.grid-servicos {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(150px, 200px));
+    grid-template-rows: repeat(7, 140px);
+    gap: 16px;
+    margin: 0 auto 24px auto;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.cartao-servico {
+    background-color: #ffffff;
+    border: 2px solid #0066ff;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    height: 140px;
+    width: 100%;
+    min-width: 150px;
+}
+
+.cartao-servico:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 102, 255, 0.2);
+    border-color: #0052cc;
+}
+
+.cartao-servico:active {
+    transform: scale(0.98);
+}
+
+.icone-servico {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    color: #0066ff;
+}
+
+.nome-servico {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    color: #1e293b;
+    line-height: 1.3;
+}
+
+/* Responsividade para servicos em mobile */
+@media (max-width: 768px) {
+    .servicos-container {
+        padding: 10px;
+    }
+    
+    .grid-servicos {
+        grid-template-columns: repeat(4, minmax(70px, 85px));
+        grid-template-rows: repeat(8, 100px);
+        gap: 10px;
+        max-width: 100%;
+        padding: 0 10px;
+    }
+    
+    .cartao-servico {
+        height: 100px;
+        padding: 12px;
+        min-width: 70px;
+    }
+    
+    .icone-servico {
+        font-size: 1.5rem;
+        margin-bottom: 6px;
+    }
+    
+    .nome-servico {
+        font-size: 0.65rem;
+        line-height: 1.2;
+    }
+    
+    .titulo-servicos {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .grid-servicos {
+        grid-template-columns: repeat(5, minmax(130px, 160px));
+        grid-template-rows: repeat(6, 120px);
+        gap: 12px;
+        max-width: 900px;
+    }
+    
+    .cartao-servico {
+        height: 120px;
+        min-width: 130px;
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .grid-servicos {
+        grid-template-columns: repeat(5, minmax(140px, 180px));
+        grid-template-rows: repeat(6, 130px);
+        gap: 14px;
+        max-width: 1000px;
+    }
+    
+    .cartao-servico {
+        height: 130px;
+        min-width: 140px;
+    }
+}

@@ -239,7 +239,7 @@ function iniciarAnimacaoCelebracao() {
     const duracaoCrescimento = 1000;
     const tempoExibicaoFinal = ['imagens/gif10.gif', 'imagens/gif11.gif'].includes(personagemTemp.gif)
         ? 5000
-        : 3000;
+        : 2000;
     let inicioAnimacao;
 
     const animar = (tempoAtual) => {
@@ -254,7 +254,7 @@ function iniciarAnimacaoCelebracao() {
         if (progresso < 1) {
             requestAnimationFrame(animar);
         } else {
-            // Mantem os GIFs 10 e 11 por cinco segundos; os demais, por tres.
+            // Mantem os GIFs 10 e 11 por cinco segundos; os demais, por dois.
             window.setTimeout(() => {
                 popupAnimacao.classList.add('hidden');
                 irParaJornada();

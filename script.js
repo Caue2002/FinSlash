@@ -234,16 +234,18 @@ function iniciarAnimacaoCelebracao() {
     // Abre o popup de animacao
     popupAnimacao.classList.remove('hidden');
     
-    gifCelebracao.style.transform = 'scale(0.5)';
-
     const duracaoCrescimento = 1000;
     const gifsMenores = ['imagens/gif1.gif', 'imagens/gif2.gif', 'imagens/gif3.gif', 'imagens/gif8.gif', 'imagens/gif10.gif', 'imagens/gif12.gif'];
     const gifsMaiores = ['imagens/gif5.gif', 'imagens/gif11.gif'];
-    const tamanhoFinal = gifsMenores.includes(personagemTemp.gif)
-        ? 1.3
-        : gifsMaiores.includes(personagemTemp.gif)
-            ? 1.7
-            : 1.5;
+    const tamanhoFinal = personagemTemp.gif === 'imagens/gif5.gif'
+        ? 1.8
+        : gifsMenores.includes(personagemTemp.gif)
+            ? 1.3
+            : gifsMaiores.includes(personagemTemp.gif)
+                ? 1.7
+                : 1.5;
+    const deslocamentoVertical = personagemTemp.gif === 'imagens/gif5.gif' ? -12 : 0;
+    gifCelebracao.style.transform = `translateY(${deslocamentoVertical}px) scale(0.5)`;
     const tempoExibicaoFinal = ['imagens/gif10.gif', 'imagens/gif11.gif'].includes(personagemTemp.gif)
         ? 5000
         : 2000;
@@ -256,7 +258,7 @@ function iniciarAnimacaoCelebracao() {
 
         const progresso = Math.min((tempoAtual - inicioAnimacao) / duracaoCrescimento, 1);
         const tamanho = 0.5 + progresso * (tamanhoFinal - 0.5);
-        gifCelebracao.style.transform = `scale(${tamanho})`;
+        gifCelebracao.style.transform = `translateY(${deslocamentoVertical}px) scale(${tamanho})`;
 
         if (progresso < 1) {
             requestAnimationFrame(animar);

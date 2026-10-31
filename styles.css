@@ -419,6 +419,12 @@ body {
     left: 0;
 }
 
+#tela-servicos .cartao-personagem-header {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
 .cartao-personagem-header {
     width: 100px;
     height: 100px;

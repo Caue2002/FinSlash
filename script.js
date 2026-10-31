@@ -244,7 +244,7 @@ function iniciarAnimacaoCelebracao() {
             : gifsMaiores.includes(personagemTemp.gif)
                 ? 1.7
                 : 1.5;
-    const deslocamentoVertical = personagemTemp.gif === 'imagens/gif5.gif' ? -24 : 0;
+    const deslocamentoVertical = personagemTemp.gif === 'imagens/gif5.gif' ? -160 : 0;
     gifCelebracao.style.transform = `translateY(${deslocamentoVertical}px) scale(0.5)`;
     const tempoExibicaoFinal = ['imagens/gif10.gif', 'imagens/gif11.gif'].includes(personagemTemp.gif)
         ? 5000

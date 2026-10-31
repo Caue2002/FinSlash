@@ -237,7 +237,7 @@ function iniciarAnimacaoCelebracao() {
     gifCelebracao.style.transform = 'scale(0.5)';
 
     const duracaoCrescimento = 1000;
-    const tempoExibicaoFinal = 3000;
+    const tempoExibicaoFinal = 5000;
     let inicioAnimacao;
 
     const animar = (tempoAtual) => {
@@ -246,13 +246,13 @@ function iniciarAnimacaoCelebracao() {
         }
 
         const progresso = Math.min((tempoAtual - inicioAnimacao) / duracaoCrescimento, 1);
-        const tamanho = 0.5 + progresso * 1.5;
+        const tamanho = 0.5 + progresso;
         gifCelebracao.style.transform = `scale(${tamanho})`;
 
         if (progresso < 1) {
             requestAnimationFrame(animar);
         } else {
-            // Mantem o GIF visivel por tres segundos apos o crescimento.
+            // Mantem o GIF visivel por cinco segundos apos o crescimento.
             window.setTimeout(() => {
                 popupAnimacao.classList.add('hidden');
                 irParaJornada();

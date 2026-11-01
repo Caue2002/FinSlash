@@ -491,7 +491,7 @@ body {
     display: grid;
     grid-template-columns: repeat(5, minmax(135px, 180px));
     grid-template-rows: repeat(7, 120px);
-    gap: 16px;
+    gap: 20px;
     margin: 0 auto 24px auto;
     max-width: 1200px;
     width: 100%;
@@ -547,7 +547,7 @@ body {
     .grid-servicos {
         grid-template-columns: repeat(4, minmax(65px, 80px));
         grid-template-rows: repeat(8, 88px);
-        gap: 10px;
+        gap: 12px;
         max-width: 100%;
         padding: 0 10px;
     }
@@ -578,7 +578,7 @@ body {
     .grid-servicos {
         grid-template-columns: repeat(5, minmax(118px, 145px));
         grid-template-rows: repeat(6, 104px);
-        gap: 12px;
+        gap: 15px;
         max-width: 900px;
     }
     
@@ -592,7 +592,7 @@ body {
     .grid-servicos {
         grid-template-columns: repeat(5, minmax(128px, 160px));
         grid-template-rows: repeat(6, 112px);
-        gap: 14px;
+        gap: 17px;
         max-width: 1000px;
     }
     

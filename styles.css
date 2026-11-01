@@ -524,9 +524,11 @@ body {
 }
 
 .icone-servico {
-    font-size: 2rem;
-    margin-bottom: 12px;
-    color: #0066ff;
+    width: 84px;
+    height: 76px;
+    object-fit: contain;
+    margin-bottom: 6px;
+    flex-shrink: 0;
 }
 
 .nome-servico {
@@ -559,7 +561,8 @@ body {
     }
     
     .icone-servico {
-        font-size: 1.5rem;
+        width: 58px;
+        height: 54px;
         margin-bottom: 6px;
     }
     

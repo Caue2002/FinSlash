@@ -283,9 +283,10 @@ function gerarCartoesServicos() {
         cartao.className = 'cartao-servico';
         cartao.dataset.index = index;
         
-        const icone = document.createElement('div');
+        const icone = document.createElement('img');
         icone.className = 'icone-servico';
-        icone.textContent = servico.icone;
+        icone.src = `imagens/servicos/servico${String(index + 1).padStart(2, '0')}.png`;
+        icone.alt = servico.nome;
 
         const nome = document.createElement('p');
         nome.className = 'nome-servico';

@@ -288,12 +288,7 @@ function gerarCartoesServicos() {
         icone.src = `imagens/servicos/servico${String(index + 1).padStart(2, '0')}.png`;
         icone.alt = servico.nome;
         
-        const nome = document.createElement('p');
-        nome.className = 'nome-servico';
-        nome.textContent = servico.nome;
-        
         cartao.appendChild(icone);
-        cartao.appendChild(nome);
         gridServicos.appendChild(cartao);
         
         // Adiciona evento de clique para selecionar servico

@@ -57,14 +57,50 @@
         <!-- Header com logo e personagem -->
         <div class="header-pagina">
             <img class="logo-header" src="imagens/logo.png" alt="FinSlash Logo" />
+            <div class="busca-servicos" id="busca-servicos">
+                <label class="campo-busca-servicos">
+                    <svg class="icone-busca-servicos" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                        <path d="m16 16 5 5"></path>
+                    </svg>
+                    <input
+                        id="campo-busca-servicos"
+                        type="search"
+                        placeholder="Pesquise um serviço"
+                        autocomplete="off"
+                        aria-label="Pesquise um serviço"
+                        aria-controls="resultados-busca-servicos"
+                        aria-expanded="false"
+                    />
+                </label>
+                <div
+                    class="resultados-busca-servicos hidden"
+                    id="resultados-busca-servicos"
+                    role="listbox"
+                    aria-label="Serviços encontrados"
+                ></div>
+            </div>
             <div class="cartao-personagem-header" id="cartao-personagem-header">
                 <img id="imagem-personagem-header" src="" alt="Personagem" />
             </div>
         </div>
         <div class="servicos-container">
-            <h2 class="titulo-servicos">servicos aws</h2>
+            <h2 class="titulo-servicos">Serviços AWS</h2>
             <div class="grid-servicos" id="grid-servicos">
-                <!-- Os 30 cartoes de servicos serao gerados via JavaScript -->
+                <!-- Os cartoes de servicos serao gerados via JavaScript -->
+            </div>
+        </div>
+        <div
+            class="popup popup-cartao-servico hidden"
+            id="popup-cartao-servico"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Serviço encontrado"
+        >
+            <div class="conteudo-popup-cartao-servico">
+                <canvas class="canvas-onda" id="canvas-onda-popup-servico" aria-hidden="true"></canvas>
+                <button class="fechar-popup-cartao-servico" id="fechar-popup-cartao-servico" type="button" aria-label="Fechar">×</button>
+                <div id="cartao-ampliado-servico"></div>
             </div>
         </div>
     </div>

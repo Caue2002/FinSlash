@@ -1,4 +1,4 @@
-// Dados dos 12 personagens com cores imagens e gifs
+// Dados dos 18 personagens com cores imagens e gifs
 const personagens = [
     { cor: '#9ca3af', imagem: 'imagens/personagem1.png', gif: 'imagens/gif1.gif' },
     { cor: '#22c55e', imagem: 'imagens/personagem2.png', gif: 'imagens/gif2.gif' },
@@ -11,7 +11,13 @@ const personagens = [
     { cor: '#fbbf24', imagem: 'imagens/personagem9.png', gif: 'imagens/gif9.gif' },
     { cor: '#dc2626', imagem: 'imagens/personagem10.png', gif: 'imagens/gif10.gif' },
     { cor: '#f97316', imagem: 'imagens/personagem11.png', gif: 'imagens/gif11.gif' },
-    { cor: '#374151', imagem: 'imagens/personagem12.png', gif: 'imagens/gif12.gif' }
+    { cor: '#374151', imagem: 'imagens/personagem12.png', gif: 'imagens/gif12.gif' },
+    { cores: ['#ef4444', '#3b82f6'], imagem: 'imagens/personagem13.jpg', gif: 'imagens/gif13.gif' },
+    { cor: '#ec4899', imagem: 'imagens/personagem14.jpg', gif: 'imagens/gif14.gif' },
+    { cores: ['#2563eb', '#ffffff'], imagem: 'imagens/personagem15.jpg', gif: 'imagens/gif15.gif' },
+    { cor: '#f9a8d4', imagem: 'imagens/personagem16.jpg', gif: 'imagens/gif16.gif' },
+    { cor: '#3949ab', imagem: 'imagens/personagem17.png', gif: 'imagens/gif17.gif' },
+    { cores: ['#111827', '#2563eb'], imagem: 'imagens/personagem18.jpg', gif: 'imagens/gif18.gif' }
 ];
 
 // Dados dos servicos AWS
@@ -235,22 +241,43 @@ function gerarCartoesPersonagens() {
     personagens.forEach((personagem, index) => {
         const cartao = document.createElement('div');
         cartao.className = 'cartao-personagem';
-        cartao.style.backgroundColor = personagem.cor;
-        const corRGB = personagem.cor.match(/[0-9a-f]{2}/gi).map(valor => parseInt(valor, 16));
+        const cores = personagem.cores || [personagem.cor];
+        const coresRGB = cores.map(cor => cor.match(/[0-9a-f]{2}/gi).map(valor => parseInt(valor, 16)));
+        cartao.style.background = cores.length > 1
+            ? `linear-gradient(90deg, ${cores[0]} 50%, ${cores[1]} 50%)`
+            : cores[0];
+        if (cores.length > 1) {
+            cartao.classList.add('cartao-personagem-bicolor');
+        }
+        const corRGB = coresRGB[0];
         const corBrilho = corRGB.map(valor => Math.round(valor + (255 - valor) * 0.2)).join(', ');
         cartao.style.setProperty('--cor-brilho-personagem', `rgba(${corBrilho}, 1)`);
         cartao.style.setProperty('--cor-halo-personagem', `rgba(${corRGB.join(', ')}, 0.65)`);
+        cartao.style.setProperty(
+            '--gradiente-brilho-personagem',
+            `linear-gradient(90deg, ${cores[0]} 50%, ${cores[1] || cores[0]} 50%)`
+        );
         cartao.dataset.index = index;
         
+        const areaImagem = document.createElement('div');
+        areaImagem.className = 'area-imagem-personagem';
+
         const imagem = document.createElement('img');
         imagem.className = 'imagem-personagem';
         if (index === 6) {
             imagem.classList.add('imagem-personagem-sete');
+        } else if (index === 8) {
+            imagem.classList.add('imagem-personagem-nove');
+        } else if (index === 12) {
+            imagem.classList.add('imagem-personagem-treze');
+        } else if (index === 13) {
+            imagem.classList.add('imagem-personagem-catorze');
         }
         imagem.src = personagem.imagem;
         imagem.alt = 'Personagem';
         
-        cartao.appendChild(imagem);
+        areaImagem.appendChild(imagem);
+        cartao.appendChild(areaImagem);
         gridPersonagens.appendChild(cartao);
         
         // Adiciona evento de clique para selecionar personagem
@@ -273,7 +300,10 @@ function abrirPopupPersonagemSelecionado(index) {
     imagemPersonagemSelecionado.appendChild(imagem);
     
     // Define a cor de fundo do popup
-    popupConteudoSelecionado.style.backgroundColor = personagem.cor;
+    const cores = personagem.cores || [personagem.cor];
+    popupConteudoSelecionado.style.background = cores.length > 1
+        ? `linear-gradient(90deg, ${cores[0]} 50%, ${cores[1]} 50%)`
+        : cores[0];
     
     // Armazena o personagem selecionado
     personagemSelecionado = personagem;
@@ -285,7 +315,7 @@ function abrirPopupPersonagemSelecionado(index) {
 // Funcao para fechar o popup de personagem selecionado
 function fecharPopupPersonagemSelecionado() {
     popupPersonagemSelecionado.classList.add('hidden');
-    popupConteudoSelecionado.style.backgroundColor = '#ffffff';
+    popupConteudoSelecionado.style.background = '#ffffff';
 }
 
 // Funcao para abrir o popup de personagens
@@ -314,6 +344,9 @@ function iniciarAnimacaoCelebracao() {
     
     // Define o GIF do personagem selecionado
     gifCelebracao.src = personagemTemp.gif;
+    const cores = personagemTemp.cores || [personagemTemp.cor];
+    gifCelebracao.style.setProperty('--cor-brilho-celebracao', cores[0]);
+    gifCelebracao.style.setProperty('--cor-brilho-celebracao-secundaria', cores[1] || cores[0]);
     
     // Abre o popup de animacao
     popupAnimacao.classList.remove('hidden');
@@ -321,7 +354,13 @@ function iniciarAnimacaoCelebracao() {
     const duracaoCrescimento = 1000;
     const gifsMenores = ['imagens/gif1.gif', 'imagens/gif2.gif', 'imagens/gif3.gif', 'imagens/gif8.gif', 'imagens/gif10.gif', 'imagens/gif12.gif'];
     const gifsMaiores = ['imagens/gif5.gif', 'imagens/gif11.gif'];
-    const tamanhoFinal = personagemTemp.gif === 'imagens/gif7.gif'
+    const tamanhoFinal = personagemTemp.gif === 'imagens/gif18.gif'
+        ? 4
+        : personagemTemp.gif === 'imagens/gif13.gif'
+            ? 1.3
+        : personagemTemp.gif === 'imagens/gif16.gif'
+            ? 1.2
+        : personagemTemp.gif === 'imagens/gif7.gif'
         ? 2.5
         : personagemTemp.gif === 'imagens/gif12.gif'
             ? 1
@@ -332,8 +371,13 @@ function iniciarAnimacaoCelebracao() {
             : gifsMaiores.includes(personagemTemp.gif)
                 ? 1.7
                 : 1.5;
-    const deslocamentoVertical = personagemTemp.gif === 'imagens/gif5.gif' ? -160 : 0;
-    gifCelebracao.style.transform = `translateY(${deslocamentoVertical}px) scale(0.5)`;
+    const deslocamentoVertical = personagemTemp.gif === 'imagens/gif18.gif'
+        ? -120
+        : personagemTemp.gif === 'imagens/gif5.gif'
+            ? -160
+            : 0;
+    const deslocamentoHorizontal = personagemTemp.gif === 'imagens/gif13.gif' ? -25 : 0;
+    gifCelebracao.style.transform = `translate(${deslocamentoHorizontal}px, ${deslocamentoVertical}px) scale(0.5)`;
     const tempoExibicaoFinal = personagemTemp.gif === 'imagens/gif12.gif'
         ? 1000
         : ['imagens/gif10.gif', 'imagens/gif11.gif'].includes(personagemTemp.gif)
@@ -348,7 +392,7 @@ function iniciarAnimacaoCelebracao() {
 
         const progresso = Math.min((tempoAtual - inicioAnimacao) / duracaoCrescimento, 1);
         const tamanho = 0.5 + progresso * (tamanhoFinal - 0.5);
-        gifCelebracao.style.transform = `translateY(${deslocamentoVertical}px) scale(${tamanho})`;
+        gifCelebracao.style.transform = `translate(${deslocamentoHorizontal}px, ${deslocamentoVertical}px) scale(${tamanho})`;
 
         if (progresso < 1) {
             requestAnimationFrame(animar);

@@ -226,12 +226,6 @@ body {
     border: 2px solid #3b82f6;
 }
 
-.botao-voltar-vermelho {
-    background-color: #ef4444;
-    color: #ffffff;
-    border: 2px solid #ef4444;
-}
-
 /* Popup de personagem selecionado */
 .popup-conteudo-selecionado {
     border-radius: 20px;
@@ -270,12 +264,6 @@ body {
     margin-top: 16px;
     padding: 16px;
     border-radius: 12px;
-}
-
-.botoes-navegacao-selecionado .botao-voltar-vermelho:active {
-    outline: 3px solid rgba(239, 68, 68, 0.95);
-    outline-offset: 0;
-    box-shadow: 0 0 24px 8px rgba(239, 68, 68, 0.8);
 }
 
 .botoes-navegacao-selecionado .botao-seguir:active {

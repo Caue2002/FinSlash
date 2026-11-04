@@ -501,7 +501,7 @@ function iniciarAnimacaoCelebracao() {
         : personagemTemp.gif === 'imagens/gif12.gif'
             ? 1
         : personagemTemp.gif === 'imagens/gif5.gif'
-        ? 2
+        ? 2.5
         : gifsMenores.includes(personagemTemp.gif)
             ? 1.3
             : gifsMaiores.includes(personagemTemp.gif)
@@ -510,7 +510,7 @@ function iniciarAnimacaoCelebracao() {
     const deslocamentoVertical = personagemTemp.gif === 'imagens/gif18.gif'
         ? -120
         : personagemTemp.gif === 'imagens/gif5.gif'
-            ? 50
+            ? 30
             : 0;
     const deslocamentoHorizontal = personagemTemp.gif === 'imagens/gif13.gif' ? -25 : 0;
     gifCelebracao.style.transform = `translate(${deslocamentoHorizontal}px, ${deslocamentoVertical}px) scale(0.5)`;

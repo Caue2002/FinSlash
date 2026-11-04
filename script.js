@@ -493,7 +493,7 @@ function iniciarAnimacaoCelebracao() {
         : personagemTemp.gif === 'imagens/gif13.gif'
             ? 1.3
         : personagemTemp.gif === 'imagens/gif16.gif'
-            ? 1.2
+            ? 0.8
         : personagemTemp.gif === 'imagens/gif7.gif'
         ? 2.5
         : personagemTemp.gif === 'imagens/gif12.gif'

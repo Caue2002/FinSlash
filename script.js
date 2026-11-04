@@ -4,7 +4,7 @@ const personagens = [
     { cor: '#22c55e', imagem: 'imagens/personagem2.png', gif: 'imagens/gif2.gif' },
     { cor: '#1e40af', imagem: 'imagens/personagem3.png', gif: 'imagens/gif3.gif' },
     { cor: '#93c5fd', imagem: 'imagens/personagem4.png', gif: 'imagens/gif4.gif' },
-    { cor: '#fa8072', imagem: 'imagens/personagem5.png', gif: 'imagens/gif5.gif' },
+    { cores: ['#ffffff', '#facc15'], imagem: 'imagens/personagem5.png', gif: 'imagens/gif5.gif' },
     { cor: '#ec4899', imagem: 'imagens/personagem6.png', gif: 'imagens/gif6.gif' },
     { cor: '#c2410c', imagem: 'imagens/personagem7.png', gif: 'imagens/gif7.gif' },
     { cor: '#fca5a5', imagem: 'imagens/personagem8.png', gif: 'imagens/gif8.gif' },
@@ -83,6 +83,10 @@ const quantidadeIconesServico = 48;
 
 // Variavel para armazenar o personagem selecionado
 let personagemSelecionado = null;
+let celebracaoAtiva = 0;
+let timeoutCelebracao = null;
+let inicioGestoVoltar = null;
+let navegacaoVoltarPendente = false;
 
 // Elementos do DOM
 const cartaoCentral = document.getElementById('cartao-central');
@@ -93,7 +97,6 @@ const popupConteudoSelecionado = document.querySelector('.popup-conteudo-selecio
 const gridPersonagens = document.getElementById('grid-personagens');
 const imagemPersonagemSelecionado = document.getElementById('imagem-personagem-selecionado');
 const gifCelebracao = document.getElementById('gif-celebracao');
-const botaoVoltarSelecionado = document.getElementById('botao-voltar-selecionado');
 const botaoSeguirSelecionado = document.getElementById('botao-seguir-selecionado');
 const telaInicial = document.getElementById('tela-inicial');
 const telaServicos = document.getElementById('tela-servicos');
@@ -111,10 +114,123 @@ const canvasOndaPopupServico = document.getElementById('canvas-onda-popup-servic
 // Variaveis para sistema de onda azul
 let ondas = [];
 let animacaoOnda = null;
+let redimensionarCanvasOnda = null;
 let tempo = 0;
 let ondasPopupServico = [];
 let animacaoOndaPopupServico = null;
 let tempoOndaPopupServico = 0;
+
+function atualizarHistoricoAplicacao(tela, dados = {}, substituir = false) {
+    const estado = { app: 'FinSlash', tela, ...dados };
+    const metodo = substituir ? 'replaceState' : 'pushState';
+    window.history[metodo](estado, '', window.location.href);
+}
+
+function cancelarAnimacaoCelebracao() {
+    celebracaoAtiva += 1;
+    if (timeoutCelebracao !== null) {
+        window.clearTimeout(timeoutCelebracao);
+        timeoutCelebracao = null;
+    }
+    popupAnimacao.classList.add('hidden');
+}
+
+function renderizarTelaHistorico(estado) {
+    const tela = estado?.app === 'FinSlash' ? estado.tela : 'inicio';
+    cancelarAnimacaoCelebracao();
+
+    popupPersonagens.classList.add('hidden');
+    popupPersonagemSelecionado.classList.add('hidden');
+    ocultarPopupCartaoServico();
+    popupConteudoSelecionado.style.background = '#ffffff';
+
+    const mostrarServicos = tela === 'servicos' || tela === 'cartao-servico';
+    telaServicos.classList.toggle('hidden', !mostrarServicos);
+    telaInicial.classList.toggle('hidden', mostrarServicos);
+
+    if (mostrarServicos) {
+        fecharPopup();
+        if (personagens[estado.indicePersonagem]) {
+            personagemSelecionado = personagens[estado.indicePersonagem];
+            imagemPersonagemHeader.src = personagemSelecionado.imagem;
+        }
+        if (!gridServicos.children.length) {
+            gerarCartoesServicos();
+        }
+        if (tela === 'cartao-servico' && Number.isInteger(estado.indiceServico)) {
+            abrirPopupCartaoServicoVisual(estado.indiceServico);
+        }
+        return;
+    }
+
+    if (tela === 'personagens' || tela === 'personagem' || tela === 'celebracao') {
+        popupPersonagens.appendChild(canvasOnda);
+        popupPersonagens.classList.remove('hidden');
+        inicializarCanvasOnda();
+        if (!gridPersonagens.children.length) {
+            gerarCartoesPersonagens();
+        }
+        if ((tela === 'personagem' || tela === 'celebracao') && personagens[estado.indicePersonagem]) {
+            prepararPopupPersonagemSelecionado(estado.indicePersonagem);
+            popupPersonagemSelecionado.classList.remove('hidden');
+        }
+        if (tela === 'celebracao') {
+            popupPersonagemSelecionado.classList.add('hidden');
+            popupAnimacao.classList.remove('hidden');
+        }
+        return;
+    }
+
+    fecharPopup();
+    personagemSelecionado = null;
+    inicializarCanvasOnda();
+}
+
+function voltarPelaNavegacao() {
+    const tela = window.history.state?.app === 'FinSlash' ? window.history.state.tela : 'inicio';
+    if (tela === 'inicio' || navegacaoVoltarPendente) {
+        return;
+    }
+    navegacaoVoltarPendente = true;
+    window.history.back();
+    window.setTimeout(() => {
+        navegacaoVoltarPendente = false;
+    }, 500);
+}
+
+window.addEventListener('popstate', (event) => {
+    inicioGestoVoltar = null;
+    navegacaoVoltarPendente = false;
+    renderizarTelaHistorico(event.state);
+});
+
+document.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) {
+        inicioGestoVoltar = null;
+        return;
+    }
+    if (event.target instanceof Element
+        && event.target.closest('input, textarea, select, [contenteditable="true"]')) {
+        inicioGestoVoltar = null;
+        return;
+    }
+    const toque = event.touches[0];
+    inicioGestoVoltar = { x: toque.clientX, y: toque.clientY };
+}, { passive: true });
+
+document.addEventListener('touchend', (event) => {
+    if (!inicioGestoVoltar || event.changedTouches.length !== 1) {
+        inicioGestoVoltar = null;
+        return;
+    }
+    const toque = event.changedTouches[0];
+    const deslocamentoX = toque.clientX - inicioGestoVoltar.x;
+    const deslocamentoY = Math.abs(toque.clientY - inicioGestoVoltar.y);
+    inicioGestoVoltar = null;
+    if (deslocamentoX >= 80 && deslocamentoY <= 60) {
+        voltarPelaNavegacao();
+    }
+}, { passive: true });
 
 // Classe para representar uma onda azul
 class Onda {
@@ -149,15 +265,19 @@ class Onda {
 
 // Funcao para inicializar o canvas de onda azul
 function inicializarCanvasOnda() {
+    if (animacaoOnda) {
+        return;
+    }
+
     const ctx = canvasOnda.getContext('2d');
     
-    function redimensionarCanvas() {
+    redimensionarCanvasOnda = () => {
         canvasOnda.width = window.innerWidth;
         canvasOnda.height = window.innerHeight;
-    }
+    };
     
-    redimensionarCanvas();
-    window.addEventListener('resize', redimensionarCanvas);
+    redimensionarCanvasOnda();
+    window.addEventListener('resize', redimensionarCanvasOnda);
     
     // Cria varias ondas
     for (let i = 0; i < 5; i++) {
@@ -186,6 +306,10 @@ function pararAnimacaoOnda() {
     if (animacaoOnda) {
         cancelAnimationFrame(animacaoOnda);
         animacaoOnda = null;
+    }
+    if (redimensionarCanvasOnda) {
+        window.removeEventListener('resize', redimensionarCanvasOnda);
+        redimensionarCanvasOnda = null;
     }
     ondas = [];
 }
@@ -287,6 +411,11 @@ function gerarCartoesPersonagens() {
 
 // Funcao para abrir o popup de personagem selecionado
 function abrirPopupPersonagemSelecionado(index) {
+    atualizarHistoricoAplicacao('personagem', { indicePersonagem: index });
+    prepararPopupPersonagemSelecionado(index);
+}
+
+function prepararPopupPersonagemSelecionado(index) {
     const personagem = personagens[index];
     
     // Limpa e adiciona a imagem do personagem selecionado
@@ -320,6 +449,7 @@ function fecharPopupPersonagemSelecionado() {
 
 // Funcao para abrir o popup de personagens
 function abrirPopup() {
+    atualizarHistoricoAplicacao('personagens');
     popupPersonagens.appendChild(canvasOnda);
     popupPersonagens.classList.remove('hidden');
     gerarCartoesPersonagens();
@@ -338,6 +468,10 @@ function iniciarAnimacaoCelebracao() {
     
     // Salva a referencia ao personagem antes de fechar o popup
     const personagemTemp = personagemSelecionado;
+    const indicePersonagem = personagens.indexOf(personagemTemp);
+    atualizarHistoricoAplicacao('personagem', { indicePersonagem });
+    cancelarAnimacaoCelebracao();
+    const idCelebracao = ++celebracaoAtiva;
     
     // Fecha o popup de personagem selecionado
     fecharPopupPersonagemSelecionado();
@@ -365,7 +499,7 @@ function iniciarAnimacaoCelebracao() {
         : personagemTemp.gif === 'imagens/gif12.gif'
             ? 1
         : personagemTemp.gif === 'imagens/gif5.gif'
-        ? 1.8
+        ? 2
         : gifsMenores.includes(personagemTemp.gif)
             ? 1.3
             : gifsMaiores.includes(personagemTemp.gif)
@@ -374,7 +508,7 @@ function iniciarAnimacaoCelebracao() {
     const deslocamentoVertical = personagemTemp.gif === 'imagens/gif18.gif'
         ? -120
         : personagemTemp.gif === 'imagens/gif5.gif'
-            ? -160
+            ? 50
             : 0;
     const deslocamentoHorizontal = personagemTemp.gif === 'imagens/gif13.gif' ? -25 : 0;
     gifCelebracao.style.transform = `translate(${deslocamentoHorizontal}px, ${deslocamentoVertical}px) scale(0.5)`;
@@ -386,6 +520,9 @@ function iniciarAnimacaoCelebracao() {
     let inicioAnimacao;
 
     const animar = (tempoAtual) => {
+        if (idCelebracao !== celebracaoAtiva) {
+            return;
+        }
         if (inicioAnimacao === undefined) {
             inicioAnimacao = tempoAtual;
         }
@@ -398,7 +535,11 @@ function iniciarAnimacaoCelebracao() {
             requestAnimationFrame(animar);
         } else {
             // Mantem os GIFs 10 e 11 por cinco segundos; os demais, por dois.
-            window.setTimeout(() => {
+            timeoutCelebracao = window.setTimeout(() => {
+                if (idCelebracao !== celebracaoAtiva) {
+                    return;
+                }
+                timeoutCelebracao = null;
                 popupAnimacao.classList.add('hidden');
                 irParaJornada();
             }, tempoExibicaoFinal);
@@ -519,8 +660,20 @@ function atualizarResultadosBuscaServicos() {
 }
 
 function abrirPopupCartaoServico(index) {
+    atualizarHistoricoAplicacao('cartao-servico', {
+        indicePersonagem: personagens.indexOf(personagemSelecionado),
+        indiceServico: index
+    });
+    abrirPopupCartaoServicoVisual(index);
+}
+
+function abrirPopupCartaoServicoVisual(index) {
     const servico = servicosAWS[index];
     const cartaoOriginal = gridServicos.querySelector(`[data-index="${index}"]`);
+    if (!cartaoOriginal) {
+        console.error(`Cartao do servico nao encontrado para o indice ${index}.`);
+        return;
+    }
     const cartaoAmpliado = cartaoOriginal.cloneNode(true);
 
     cartaoAmpliado.classList.add('cartao-servico-ampliado');
@@ -545,6 +698,14 @@ function abrirPopupCartaoServico(index) {
 }
 
 function fecharPopupCartaoServico() {
+    if (window.history.state?.app === 'FinSlash' && window.history.state.tela === 'cartao-servico') {
+        window.history.back();
+        return;
+    }
+    ocultarPopupCartaoServico();
+}
+
+function ocultarPopupCartaoServico() {
     popupCartaoServico.classList.add('hidden');
     pararAnimacaoOndaPopupServico();
     cartaoAmpliadoServico.replaceChildren();
@@ -608,6 +769,9 @@ function irParaJornada() {
     
     // Salva a referencia ao personagem antes de limpar
     const personagemTemp = personagemSelecionado;
+    atualizarHistoricoAplicacao('servicos', {
+        indicePersonagem: personagens.indexOf(personagemTemp)
+    }, true);
     
     // Define a imagem do personagem no header da tela de servicos
     imagemPersonagemHeader.src = personagemTemp.imagem;
@@ -616,6 +780,7 @@ function irParaJornada() {
     personagemSelecionado = personagemTemp;
     
     // Exibe a tela de servicos
+    popupAnimacao.classList.add('hidden');
     telaServicos.classList.remove('hidden');
     
     console.log('Tela de servicos deve estar visivel agora');
@@ -660,24 +825,23 @@ document.addEventListener('click', (event) => {
     }
 });
 
-botaoVoltarSelecionado.addEventListener('click', fecharPopupPersonagemSelecionado);
-
 botaoSeguirSelecionado.addEventListener('click', iniciarAnimacaoCelebracao);
 
 // Fechar popup ao clicar fora do conteudo
 popupPersonagens.addEventListener('click', (event) => {
     if (event.target === popupPersonagens) {
-        fecharPopup();
+        voltarPelaNavegacao();
     }
 });
 
 popupPersonagemSelecionado.addEventListener('click', (event) => {
     if (event.target === popupPersonagemSelecionado) {
-        fecharPopupPersonagemSelecionado();
+        voltarPelaNavegacao();
     }
 });
 
 // Inicializacao
 document.addEventListener('DOMContentLoaded', () => {
+    window.history.replaceState({ app: 'FinSlash', tela: 'inicio' }, '', window.location.href);
     inicializarCanvasOnda();
 });

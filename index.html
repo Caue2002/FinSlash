@@ -24,8 +24,15 @@
 
     <!-- Popup de selecao de personagens -->
     <div id="popup-personagens" class="popup hidden">
+        <div class="cabecalho-menu-personagens">
+            <img class="logo-header logo-menu-personagens" src="imagens/logo.webp" alt="FinSlash Logo" />
+            <div class="personagem-menu-atual hidden" id="personagem-menu-atual">
+                <img id="avatar-personagem-menu" src="" alt="Personagem selecionado" />
+                <button class="botao-continuar-menu" id="botao-continuar-menu" type="button">Continuar</button>
+            </div>
+        </div>
         <div class="popup-conteudo">
-            <h2 class="titulo-popup">escolha o seu personagem</h2>
+            <h2 class="titulo-popup">ESCOLHA O SEU PERSONAGEM</h2>
             <div class="grid-personagens" id="grid-personagens">
                 <!-- Os cartoes de personagens serao gerados via JavaScript -->
             </div>
@@ -39,6 +46,7 @@
                 <!-- Imagem do personagem selecionado sera inserida aqui -->
             </div>
             <div class="botoes-navegacao-selecionado">
+                <button class="botao botao-voltar-selecionado" id="botao-voltar-selecionado" type="button">Voltar</button>
                 <button class="botao botao-seguir" id="botao-seguir-selecionado">Seguir</button>
             </div>
         </div>
@@ -141,6 +149,81 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <nav class="navegacao-app hidden" id="navegacao-app" aria-label="Navegação principal">
+        <button class="botao-navegacao-app" id="botao-menu-app" type="button" aria-label="Voltar ao menu de personagens">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"></path>
+            </svg>
+        </button>
+        <button class="botao-navegacao-app botao-pesquisa-app" id="botao-pesquisa-app" type="button" aria-label="Pesquisar serviços">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                <path d="m16 16 5 5"></path>
+            </svg>
+        </button>
+        <button
+            class="botao-navegacao-app botao-perfil-app"
+            id="botao-perfil-app"
+            type="button"
+            aria-label="Abrir perfil"
+            aria-haspopup="dialog"
+            aria-controls="popup-perfil"
+        >
+            <img class="avatar-navegacao-app hidden" id="avatar-navegacao-app" src="" alt="" />
+            <svg class="icone-perfil-app" id="icone-perfil-app" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21a8 8 0 0 1 16 0"></path>
+            </svg>
+        </button>
+    </nav>
+
+    <div
+        class="popup popup-perfil hidden"
+        id="popup-perfil"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-perfil"
+    >
+        <aside class="painel-perfil">
+            <button class="fechar-perfil" id="fechar-perfil" type="button" aria-label="Fechar perfil">×</button>
+            <div class="cabecalho-perfil">
+                <img id="avatar-perfil" src="" alt="" />
+                <div>
+                    <h2 id="titulo-perfil">Meu perfil</h2>
+                    <p id="nome-personagem-perfil">Explorador FinSlash</p>
+                </div>
+            </div>
+            <div class="abas-perfil" role="tablist" aria-label="Seções do perfil">
+                <button class="aba-perfil ativa" id="aba-historico-perfil" type="button" role="tab" aria-selected="true" aria-controls="conteudo-historico-perfil" data-aba-perfil="historico">Histórico</button>
+                <button class="aba-perfil" id="aba-medalhas-perfil" type="button" role="tab" aria-selected="false" aria-controls="conteudo-medalhas-perfil" data-aba-perfil="medalhas">Medalhas</button>
+                <button class="aba-perfil" id="aba-feedback-perfil" type="button" role="tab" aria-selected="false" aria-controls="conteudo-feedback-perfil" data-aba-perfil="feedback">Feedback</button>
+            </div>
+            <section class="conteudo-aba-perfil" id="conteudo-historico-perfil" role="tabpanel" aria-labelledby="aba-historico-perfil">
+                <h3>Serviços visitados</h3>
+                <div class="lista-historico-perfil" id="lista-historico-perfil"></div>
+            </section>
+            <section class="conteudo-aba-perfil hidden" id="conteudo-medalhas-perfil" role="tabpanel" aria-labelledby="aba-medalhas-perfil" hidden>
+                <h3>Suas conquistas</h3>
+                <div class="lista-medalhas-perfil" id="lista-medalhas-perfil"></div>
+            </section>
+            <section class="conteudo-aba-perfil hidden" id="conteudo-feedback-perfil" role="tabpanel" aria-labelledby="aba-feedback-perfil" hidden>
+                <h3>Compartilhe uma ideia</h3>
+                <p class="texto-feedback-perfil">O envio de feedback estará disponível quando a API e o banco de dados do FinSlash forem implementados.</p>
+                <textarea id="campo-feedback-perfil" maxlength="1000" placeholder="Envio disponível em breve" disabled></textarea>
+                <button class="botao-enviar-feedback" id="botao-enviar-feedback" type="button" disabled>Indisponível no momento</button>
+                <div class="ideias-perfil">
+                    <h4>Ideias para o perfil</h4>
+                    <ul>
+                        <li>Serviços favoritos</li>
+                        <li>Metas de estudo e progresso</li>
+                        <li>Sequência de dias explorando</li>
+                    </ul>
+                </div>
+            </section>
+            <footer class="rodape-perfil">Desenvolvido por Caue Ribeiro Ferreira · 2026</footer>
+        </aside>
     </div>
 
     <script src="script.js"></script>

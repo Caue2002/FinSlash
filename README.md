@@ -7,21 +7,16 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Seleção entre 18 personagens, cada um com imagem, cor e animação de comemoração.
 - Cartões com efeitos de brilho e cores personalizadas.
 - Tela de serviços com cartões ilustrados e pesquisa por nome.
+- Buscas recentes e retomada do personagem escolhido pelo avatar e botão Continuar no menu, salvas no navegador.
+- Perfil com histórico de serviços, medalhas e uma área reservada para feedback futuro.
 - Visualização ampliada de um serviço selecionado.
-- Navegação de retorno compatível com dispositivos móveis: botão voltar do aparelho ou do navegador e gesto de arrastar para a direita.
+- Barra inferior com atalhos para o menu, pesquisa de serviços e perfil; navegação de retorno compatível com dispositivos móveis.
+- Botão voltar do aparelho ou do navegador e gesto de arrastar para a direita.
 - Interface adaptável a diferentes tamanhos de tela.
 
 ## Como executar
 
-O projeto não requer compilação nem instalação de dependências. Para executar um servidor local, abra um terminal na pasta do projeto e inicie um servidor HTTP estático. Por exemplo, com Python instalado:
-
-```text
-python -m http.server 8000
-```
-
-Depois, acesse `http://localhost:8000` no navegador.
-
-Abrir o arquivo `index.html` diretamente também permite explorar a interface, mas o acesso ao microfone requer um contexto seguro: HTTPS ou `localhost`. A busca por voz também depende de um navegador compatível, como Chrome ou Edge, das permissões do microfone e da conexão com o serviço de reconhecimento de fala.
+O projeto não requer compilação nem instalação de dependências. Abra `index.html` no navegador para explorar a interface. Para usar o microfone, acesse por um contexto seguro: HTTPS ou `localhost`. A busca por voz também depende de um navegador compatível, como Chrome ou Edge, das permissões do microfone e da conexão com o serviço de reconhecimento de fala.
 
 ## Tecnologias
 
@@ -52,6 +47,8 @@ Os arquivos PNG e JPEG originais são mantidos; a interface usa versões WebP se
 ## Observações
 
 - Os nomes e ícones dos serviços são usados para fins de navegação e demonstração. A integração com uma API de diagnóstico ainda não está implementada.
+- Personagem, buscas recentes e histórico ficam armazenados localmente no navegador e podem ser apagados ao limpar os dados do site.
+- O envio de feedback está temporariamente desativado; será integrado junto com a futura API e o banco de dados.
 - As imagens, ilustrações e animações podem estar sujeitas a direitos autorais ou licenças de terceiros. A licença MIT do código deste projeto não concede direitos adicionais sobre esses materiais.
 
 ## Licença

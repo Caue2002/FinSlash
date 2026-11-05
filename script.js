@@ -80,9 +80,11 @@ const servicosAWS = [
     { nome: 'Amazon VPC', icone: '☁️' }
 ];
 const quantidadeIconesServico = 48;
+const chaveArmazenamentoAplicacao = 'finslash:preferencias';
 
 // Variavel para armazenar o personagem selecionado
 let personagemSelecionado = null;
+const dadosPersistidos = carregarDadosPersistidos();
 let celebracaoAtiva = 0;
 let timeoutCelebracao = null;
 let inicioGestoVoltar = null;
@@ -93,12 +95,16 @@ const gifsCelebracaoPrecarregados = new Map();
 const cartaoCentral = document.getElementById('cartao-central');
 const popupPersonagens = document.getElementById('popup-personagens');
 const popupPersonagemSelecionado = document.getElementById('popup-personagem-selecionado');
+const personagemMenuAtual = document.getElementById('personagem-menu-atual');
+const avatarPersonagemMenu = document.getElementById('avatar-personagem-menu');
+const botaoContinuarMenu = document.getElementById('botao-continuar-menu');
 const popupAnimacao = document.getElementById('popup-animacao');
 const popupConteudoSelecionado = document.querySelector('.popup-conteudo-selecionado');
 const gridPersonagens = document.getElementById('grid-personagens');
 const imagemPersonagemSelecionado = document.getElementById('imagem-personagem-selecionado');
 const gifCelebracao = document.getElementById('gif-celebracao');
 const botaoSeguirSelecionado = document.getElementById('botao-seguir-selecionado');
+const botaoVoltarSelecionado = document.getElementById('botao-voltar-selecionado');
 const telaInicial = document.getElementById('tela-inicial');
 const telaServicos = document.getElementById('tela-servicos');
 const gridServicos = document.getElementById('grid-servicos');
@@ -118,6 +124,247 @@ const botaoFecharPopupBuscaVoz = document.getElementById('fechar-popup-busca-voz
 const statusBuscaVoz = document.getElementById('status-busca-voz');
 const transcricaoBuscaVoz = document.getElementById('transcricao-busca-voz');
 const botaoTentarNovamenteBuscaVoz = document.getElementById('tentar-novamente-busca-voz');
+const navegacaoApp = document.getElementById('navegacao-app');
+const botaoMenuApp = document.getElementById('botao-menu-app');
+const botaoPesquisaApp = document.getElementById('botao-pesquisa-app');
+const botaoPerfilApp = document.getElementById('botao-perfil-app');
+const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
+const iconePerfilApp = document.getElementById('icone-perfil-app');
+const popupPerfil = document.getElementById('popup-perfil');
+const botaoFecharPerfil = document.getElementById('fechar-perfil');
+const avatarPerfil = document.getElementById('avatar-perfil');
+const nomePersonagemPerfil = document.getElementById('nome-personagem-perfil');
+const listaHistoricoPerfil = document.getElementById('lista-historico-perfil');
+const listaMedalhasPerfil = document.getElementById('lista-medalhas-perfil');
+const secoesPerfil = {
+    historico: document.getElementById('conteudo-historico-perfil'),
+    medalhas: document.getElementById('conteudo-medalhas-perfil'),
+    feedback: document.getElementById('conteudo-feedback-perfil')
+};
+
+function carregarDadosPersistidos() {
+    try {
+        const armazenado = window.localStorage.getItem(chaveArmazenamentoAplicacao);
+        if (!armazenado) {
+            return { indicePersonagem: null, buscasRecentes: [], historicoServicos: [] };
+        }
+
+        const dados = JSON.parse(armazenado);
+        if (!dados || typeof dados !== 'object' || Array.isArray(dados)) {
+            throw new TypeError('Os dados salvos do FinSlash nao possuem o formato esperado.');
+        }
+
+        const indicePersonagem = Number.isInteger(dados.indicePersonagem)
+            && personagens[dados.indicePersonagem]
+            ? dados.indicePersonagem
+            : null;
+        const buscasRecentes = Array.isArray(dados.buscasRecentes)
+            ? dados.buscasRecentes.filter(busca => typeof busca === 'string' && busca.trim()).slice(0, 5)
+            : [];
+        const historicoServicos = Array.isArray(dados.historicoServicos)
+            ? dados.historicoServicos
+                .filter(item => item && typeof item.nome === 'string'
+                    && servicosAWS.some(servico => servico.nome === item.nome)
+                    && Number.isFinite(item.data)
+                    && Number.isFinite(new Date(item.data).getTime()))
+                .slice(0, 50)
+            : [];
+
+        return { indicePersonagem, buscasRecentes, historicoServicos };
+    } catch (error) {
+        console.error('Nao foi possivel carregar as preferencias salvas do FinSlash.', error);
+        return { indicePersonagem: null, buscasRecentes: [], historicoServicos: [] };
+    }
+}
+
+function salvarDadosPersistidos() {
+    try {
+        window.localStorage.setItem(chaveArmazenamentoAplicacao, JSON.stringify(dadosPersistidos));
+    } catch (error) {
+        console.error('Nao foi possivel salvar as preferencias do FinSlash neste navegador.', error);
+    }
+}
+
+function salvarPersonagemSelecionado(index) {
+    dadosPersistidos.indicePersonagem = index;
+    salvarDadosPersistidos();
+    atualizarAvatarNavegacao();
+}
+
+function registrarBuscaRecente(busca) {
+    const texto = busca.trim();
+    if (!texto) {
+        return;
+    }
+
+    dadosPersistidos.buscasRecentes = [
+        texto,
+        ...dadosPersistidos.buscasRecentes.filter(item =>
+            normalizarBuscaServico(item) !== normalizarBuscaServico(texto)
+        )
+    ].slice(0, 5);
+    salvarDadosPersistidos();
+}
+
+function registrarServicoNoHistorico(servico) {
+    dadosPersistidos.historicoServicos = [
+        { nome: servico.nome, data: Date.now() },
+        ...dadosPersistidos.historicoServicos
+    ].slice(0, 50);
+    salvarDadosPersistidos();
+}
+
+function atualizarAvatarNavegacao() {
+    const personagem = personagens[dadosPersistidos.indicePersonagem];
+    if (!personagem) {
+        avatarNavegacaoApp.classList.add('hidden');
+        iconePerfilApp.classList.remove('hidden');
+        return;
+    }
+
+    avatarNavegacaoApp.src = personagem.imagem;
+    avatarNavegacaoApp.alt = 'Abrir perfil';
+    avatarNavegacaoApp.classList.remove('hidden');
+    iconePerfilApp.classList.add('hidden');
+}
+
+function atualizarDisponibilidadePesquisaNavegacao() {
+    const personagemDisponivel = Boolean(
+        personagemSelecionado || personagens[dadosPersistidos.indicePersonagem]
+    );
+    botaoPesquisaApp.disabled = telaServicos.classList.contains('hidden') && !personagemDisponivel;
+}
+
+function renderizarHistoricoPerfil() {
+    listaHistoricoPerfil.replaceChildren();
+    if (!dadosPersistidos.historicoServicos.length) {
+        const vazio = document.createElement('p');
+        vazio.className = 'mensagem-perfil-vazia';
+        vazio.textContent = 'Os serviços que você visitar aparecerão aqui.';
+        listaHistoricoPerfil.appendChild(vazio);
+        return;
+    }
+
+    dadosPersistidos.historicoServicos.forEach(item => {
+        const servico = servicosAWS.find(({ nome }) => nome === item.nome);
+        const indice = servicosAWS.indexOf(servico);
+        const botao = document.createElement('button');
+        botao.className = 'item-historico-perfil';
+        botao.type = 'button';
+
+        const nome = document.createElement('span');
+        nome.textContent = item.nome;
+        const data = document.createElement('time');
+        data.dateTime = new Date(item.data).toISOString();
+        data.textContent = new Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(item.data);
+        botao.append(nome, data);
+        botao.addEventListener('click', () => {
+            fecharPerfil();
+            campoBuscaServicos.value = item.nome;
+            abrirPopupCartaoServico(indice);
+        });
+        listaHistoricoPerfil.appendChild(botao);
+    });
+}
+
+function renderizarMedalhasPerfil() {
+    const total = new Set(dadosPersistidos.historicoServicos.map(item => item.nome)).size;
+    const conquistas = [
+        { limite: 1, nome: 'Primeiro passo', descricao: 'Explore seu primeiro serviço AWS.' },
+        { limite: 5, nome: 'Curioso', descricao: 'Explore 5 serviços AWS diferentes.' },
+        { limite: 10, nome: 'Explorador', descricao: 'Explore 10 serviços AWS diferentes.' }
+    ];
+    listaMedalhasPerfil.replaceChildren();
+
+    conquistas.forEach(conquista => {
+        const item = document.createElement('div');
+        item.className = `item-medalha-perfil${total >= conquista.limite ? ' conquistada' : ''}`;
+        const icone = document.createElement('span');
+        icone.className = 'icone-medalha-perfil';
+        icone.setAttribute('aria-hidden', 'true');
+        icone.textContent = total >= conquista.limite ? '🏅' : '🔒';
+        const detalhes = document.createElement('div');
+        const nome = document.createElement('strong');
+        nome.textContent = conquista.nome;
+        const descricao = document.createElement('p');
+        descricao.textContent = conquista.descricao;
+        const estado = document.createElement('span');
+        estado.textContent = total >= conquista.limite ? 'Conquistada' : 'Ainda não conquistada';
+        detalhes.append(nome, descricao, estado);
+        item.append(icone, detalhes);
+        listaMedalhasPerfil.appendChild(item);
+    });
+}
+
+function abrirPerfil() {
+    const personagem = personagens[dadosPersistidos.indicePersonagem];
+    if (personagem) {
+        avatarPerfil.src = personagem.imagem;
+        avatarPerfil.alt = 'Personagem selecionado';
+        avatarPerfil.classList.remove('hidden');
+        nomePersonagemPerfil.textContent = `Personagem ${dadosPersistidos.indicePersonagem + 1}`;
+    } else {
+        avatarPerfil.removeAttribute('src');
+        avatarPerfil.classList.add('hidden');
+        nomePersonagemPerfil.textContent = 'Escolha um personagem para começar';
+    }
+    renderizarHistoricoPerfil();
+    renderizarMedalhasPerfil();
+    popupPerfil.classList.remove('hidden');
+    botaoFecharPerfil.focus();
+}
+
+function fecharPerfil() {
+    popupPerfil.classList.add('hidden');
+}
+
+function mostrarMenuPersonagens() {
+    const indiceSalvo = dadosPersistidos.indicePersonagem;
+    const temPersonagemSalvo = Number.isInteger(indiceSalvo) && Boolean(personagens[indiceSalvo]);
+    fecharPerfil();
+    fecharPopupBuscaVoz(false);
+    popupAnimacao.classList.add('hidden');
+    popupPersonagemSelecionado.classList.add('hidden');
+    ocultarPopupCartaoServico();
+    popupPersonagens.appendChild(canvasOnda);
+    popupPersonagens.classList.remove('hidden');
+    telaInicial.classList.add('hidden');
+    telaServicos.classList.add('hidden');
+    navegacaoApp.classList.remove('hidden');
+    personagemSelecionado = temPersonagemSalvo ? personagens[indiceSalvo] : null;
+    atualizarDisponibilidadePesquisaNavegacao();
+    atualizarAvatarNavegacao();
+    if (!gridPersonagens.children.length) {
+        gerarCartoesPersonagens();
+    }
+
+    personagemMenuAtual.classList.toggle('hidden', !temPersonagemSalvo);
+    if (temPersonagemSalvo) {
+        avatarPersonagemMenu.src = personagemSelecionado.imagem;
+    } else {
+        avatarPersonagemMenu.removeAttribute('src');
+    }
+    inicializarCanvasOnda();
+}
+
+function atualizarConteudoAbaPerfil(abaAtiva) {
+    document.querySelectorAll('[data-aba-perfil]').forEach(botao => {
+        const ativo = botao.dataset.abaPerfil === abaAtiva;
+        botao.classList.toggle('ativa', ativo);
+        botao.setAttribute('aria-selected', String(ativo));
+        botao.tabIndex = ativo ? 0 : -1;
+    });
+    Object.entries(secoesPerfil).forEach(([nome, secao]) => {
+        const ativa = nome === abaAtiva;
+        secao.hidden = !ativa;
+        secao.classList.toggle('hidden', !ativa);
+    });
+}
 
 // Variaveis para sistema de onda azul
 let ondas = [];
@@ -158,6 +405,7 @@ function renderizarTelaHistorico(estado) {
     const tela = estado?.app === 'FinSlash' ? estado.tela : 'inicio';
     cancelarAnimacaoCelebracao();
     fecharPopupBuscaVoz(false);
+    fecharPerfil();
 
     popupPersonagens.classList.add('hidden');
     popupPersonagemSelecionado.classList.add('hidden');
@@ -167,13 +415,20 @@ function renderizarTelaHistorico(estado) {
     const mostrarServicos = tela === 'servicos' || tela === 'cartao-servico';
     telaServicos.classList.toggle('hidden', !mostrarServicos);
     telaInicial.classList.toggle('hidden', mostrarServicos);
+    navegacaoApp.classList.toggle('hidden', tela === 'inicio');
+    atualizarDisponibilidadePesquisaNavegacao();
 
     if (mostrarServicos) {
         fecharPopup();
-        if (personagens[estado.indicePersonagem]) {
-            personagemSelecionado = personagens[estado.indicePersonagem];
+        const indicePersonagem = Number.isInteger(estado?.indicePersonagem)
+            ? estado.indicePersonagem
+            : dadosPersistidos.indicePersonagem;
+        if (personagens[indicePersonagem]) {
+            personagemSelecionado = personagens[indicePersonagem];
             imagemPersonagemHeader.src = personagemSelecionado.imagem;
         }
+        atualizarDisponibilidadePesquisaNavegacao();
+        atualizarAvatarNavegacao();
         if (!gridServicos.children.length) {
             gerarCartoesServicos();
         }
@@ -190,9 +445,16 @@ function renderizarTelaHistorico(estado) {
         if (!gridPersonagens.children.length) {
             gerarCartoesPersonagens();
         }
-        if ((tela === 'personagem' || tela === 'celebracao') && personagens[estado.indicePersonagem]) {
+        gridPersonagens.classList.remove('hidden');
+        if ((tela === 'personagem' || tela === 'celebracao')
+            && Number.isInteger(estado?.indicePersonagem)
+            && personagens[estado.indicePersonagem]) {
             prepararPopupPersonagemSelecionado(estado.indicePersonagem);
             popupPersonagemSelecionado.classList.remove('hidden');
+        } else if (tela === 'personagens' && personagens[dadosPersistidos.indicePersonagem]) {
+            personagemSelecionado = personagens[dadosPersistidos.indicePersonagem];
+            imagemPersonagemHeader.src = personagemSelecionado.imagem;
+            mostrarMenuPersonagens();
         }
         if (tela === 'celebracao') {
             popupPersonagemSelecionado.classList.add('hidden');
@@ -618,6 +880,10 @@ function decodificarImagensPersonagens() {
 
 // Funcao para abrir o popup de personagem selecionado
 function abrirPopupPersonagemSelecionado(index) {
+    if (!personagens[index]) {
+        console.error(`Personagem invalido para o indice ${index}.`);
+        return;
+    }
     atualizarHistoricoAplicacao('personagem', { indicePersonagem: index });
     prepararPopupPersonagemSelecionado(index);
 }
@@ -645,6 +911,7 @@ function prepararPopupPersonagemSelecionado(index) {
     
     // Armazena o personagem selecionado
     personagemSelecionado = personagem;
+    atualizarDisponibilidadePesquisaNavegacao();
     
     // Abre o popup de personagem selecionado
     popupPersonagemSelecionado.classList.remove('hidden');
@@ -677,8 +944,10 @@ function fecharPopupPersonagemSelecionado() {
 // Funcao para abrir o popup de personagens
 function abrirPopup() {
     atualizarHistoricoAplicacao('personagens');
+    navegacaoApp.classList.remove('hidden');
     popupPersonagens.appendChild(canvasOnda);
     popupPersonagens.classList.remove('hidden');
+    mostrarMenuPersonagens();
 }
 
 // Funcao para fechar o popup de personagens
@@ -695,6 +964,11 @@ function iniciarAnimacaoCelebracao() {
     // Salva a referencia ao personagem antes de fechar o popup
     const personagemTemp = personagemSelecionado;
     const indicePersonagem = personagens.indexOf(personagemTemp);
+    if (indicePersonagem === -1) {
+        console.error('Nao foi possivel iniciar a jornada sem um personagem valido.');
+        return;
+    }
+    salvarPersonagemSelecionado(indicePersonagem);
     atualizarHistoricoAplicacao('personagem', { indicePersonagem });
     cancelarAnimacaoCelebracao();
     const idCelebracao = ++celebracaoAtiva;
@@ -1013,6 +1287,7 @@ async function iniciarReconhecimentoVoz() {
         }
 
         campoBuscaServicos.value = servicosAWS[indiceServico].nome;
+        registrarBuscaRecente(servicosAWS[indiceServico].nome);
         fecharPopupBuscaVoz(false);
         resultadosBuscaServicos.classList.add('hidden');
         campoBuscaServicos.setAttribute('aria-expanded', 'false');
@@ -1089,6 +1364,38 @@ function fecharPopupBuscaVoz(retornarFoco = true) {
     }
 }
 
+function renderizarBuscasRecentes() {
+    resultadosBuscaServicos.replaceChildren();
+    if (!dadosPersistidos.buscasRecentes.length) {
+        resultadosBuscaServicos.classList.add('hidden');
+        campoBuscaServicos.setAttribute('aria-expanded', 'false');
+        return;
+    }
+
+    const titulo = document.createElement('p');
+    titulo.className = 'titulo-buscas-recentes';
+    titulo.textContent = 'Buscas recentes';
+    resultadosBuscaServicos.appendChild(titulo);
+    dadosPersistidos.buscasRecentes.forEach(busca => {
+        const resultado = document.createElement('button');
+        resultado.className = 'resultado-busca-recente';
+        resultado.type = 'button';
+        resultado.setAttribute('role', 'option');
+        resultado.dataset.buscaRecente = busca;
+        const icone = document.createElement('span');
+        icone.className = 'icone-busca-recente';
+        icone.setAttribute('aria-hidden', 'true');
+        icone.textContent = '↺';
+        const texto = document.createElement('span');
+        texto.textContent = busca;
+        resultado.append(icone, texto);
+        resultadosBuscaServicos.appendChild(resultado);
+    });
+
+    resultadosBuscaServicos.classList.remove('hidden');
+    campoBuscaServicos.setAttribute('aria-expanded', 'true');
+}
+
 function atualizarResultadosBuscaServicos() {
     const consulta = normalizarBuscaServico(campoBuscaServicos.value);
 
@@ -1096,8 +1403,7 @@ function atualizarResultadosBuscaServicos() {
     resultadosBuscaServicos.innerHTML = '';
 
     if (!consulta) {
-        resultadosBuscaServicos.classList.add('hidden');
-        campoBuscaServicos.setAttribute('aria-expanded', 'false');
+        renderizarBuscasRecentes();
         return;
     }
 
@@ -1132,6 +1438,7 @@ function atualizarResultadosBuscaServicos() {
     const servicoExato = servicosAWS.findIndex(servico => normalizarBuscaServico(servico.nome) === consulta);
 
     if (servicoExato !== -1) {
+        registrarBuscaRecente(servicosAWS[servicoExato].nome);
         abrirPopupCartaoServico(servicoExato);
         resultadosBuscaServicos.classList.add('hidden');
         campoBuscaServicos.setAttribute('aria-expanded', 'false');
@@ -1143,6 +1450,11 @@ function atualizarResultadosBuscaServicos() {
 }
 
 function abrirPopupCartaoServico(index) {
+    if (!servicosAWS[index]) {
+        console.error(`Servico invalido para o indice ${index}.`);
+        return;
+    }
+    registrarServicoNoHistorico(servicosAWS[index]);
     atualizarHistoricoAplicacao('cartao-servico', {
         indicePersonagem: personagens.indexOf(personagemSelecionado),
         indiceServico: index
@@ -1195,6 +1507,14 @@ function ocultarPopupCartaoServico() {
 }
 
 function selecionarResultadoBusca(event) {
+    const resultadoRecente = event.target.closest('.resultado-busca-recente');
+    if (resultadoRecente) {
+        campoBuscaServicos.value = resultadoRecente.dataset.buscaRecente;
+        atualizarResultadosBuscaServicos();
+        campoBuscaServicos.focus();
+        return;
+    }
+
     const resultado = event.target.closest('.resultado-busca-servico');
     if (!resultado) {
         return;
@@ -1205,15 +1525,20 @@ function selecionarResultadoBusca(event) {
     const cartao = gridServicos.querySelector(`[data-index="${index}"]`);
 
     campoBuscaServicos.value = servico.nome;
+    registrarBuscaRecente(servico.nome);
     resultadosBuscaServicos.classList.add('hidden');
     campoBuscaServicos.setAttribute('aria-expanded', 'false');
     cartao.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    selecionarServico(servico);
     abrirPopupCartaoServico(index);
 }
 
 // Funcao para selecionar um servico
 function selecionarServico(servico) {
+    registrarServicoNoHistorico(servico);
+    if (!popupPerfil.classList.contains('hidden')) {
+        renderizarHistoricoPerfil();
+        renderizarMedalhasPerfil();
+    }
     // AQUI: Implementar funil de diagnostico de reducao de custos
     console.log('Servico selecionado:', servico.nome);
     console.log('Preparado para integracao com API Java Spring Boot para diagnostico');
@@ -1240,6 +1565,14 @@ function selecionarServico(servico) {
 // Funcao para transicionar para a tela de servicos AWS
 function irParaJornada() {
     console.log('Iniciando transicao para tela de servicos');
+    const personagemTemp = personagemSelecionado
+        || personagens[dadosPersistidos.indicePersonagem];
+    if (!personagemTemp) {
+        console.error('Nao foi possivel abrir os servicos sem um personagem selecionado.');
+        return;
+    }
+    personagemSelecionado = personagemTemp;
+    salvarPersonagemSelecionado(personagens.indexOf(personagemTemp));
     
     // Para a animacao de onda
     pararAnimacaoOnda();
@@ -1249,9 +1582,10 @@ function irParaJornada() {
     
     // Esconde a tela inicial
     telaInicial.classList.add('hidden');
+    fecharPerfil();
+    navegacaoApp.classList.remove('hidden');
     
     // Salva a referencia ao personagem antes de limpar
-    const personagemTemp = personagemSelecionado;
     atualizarHistoricoAplicacao('servicos', {
         indicePersonagem: personagens.indexOf(personagemTemp)
     }, true);
@@ -1265,11 +1599,14 @@ function irParaJornada() {
     // Exibe a tela de servicos
     popupAnimacao.classList.add('hidden');
     telaServicos.classList.remove('hidden');
+    atualizarDisponibilidadePesquisaNavegacao();
     
     console.log('Tela de servicos deve estar visivel agora');
     
     // Gera os cartoes de servicos
-    gerarCartoesServicos();
+    if (!gridServicos.children.length) {
+        gerarCartoesServicos();
+    }
     
     console.log('Personagem selecionado:', personagemSelecionado.imagem);
     console.log('Preparado para integracao com API Java Spring Boot');
@@ -1278,6 +1615,53 @@ function irParaJornada() {
 // Event Listeners
 cartaoCentral.addEventListener('click', abrirPopup);
 
+botaoMenuApp.addEventListener('click', () => {
+    atualizarHistoricoAplicacao('personagens', {
+        indicePersonagem: dadosPersistidos.indicePersonagem
+    });
+    mostrarMenuPersonagens();
+});
+botaoPesquisaApp.addEventListener('click', () => {
+    if (!telaServicos.classList.contains('hidden')) {
+        campoBuscaServicos.focus();
+        campoBuscaServicos.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
+    if (!personagemSelecionado && personagens[dadosPersistidos.indicePersonagem]) {
+        personagemSelecionado = personagens[dadosPersistidos.indicePersonagem];
+    }
+    if (!personagemSelecionado) {
+        return;
+    }
+    if (!popupPersonagemSelecionado.classList.contains('hidden')) {
+        botaoSeguirSelecionado.click();
+        return;
+    }
+    irParaJornada();
+});
+botaoContinuarMenu.addEventListener('click', irParaJornada);
+botaoVoltarSelecionado.addEventListener('click', () => {
+    if (botaoVoltarSelecionado.classList.contains('animando-voltar')) {
+        return;
+    }
+
+    botaoVoltarSelecionado.classList.add('animando-voltar');
+    botaoVoltarSelecionado.addEventListener('animationend', () => {
+        botaoVoltarSelecionado.classList.remove('animando-voltar');
+        voltarPelaNavegacao();
+    }, { once: true });
+});
+botaoPerfilApp.addEventListener('click', abrirPerfil);
+botaoFecharPerfil.addEventListener('click', fecharPerfil);
+popupPerfil.addEventListener('click', event => {
+    if (event.target === popupPerfil) {
+        fecharPerfil();
+    }
+});
+document.querySelectorAll('[data-aba-perfil]').forEach(botao => {
+    botao.addEventListener('click', () => atualizarConteudoAbaPerfil(botao.dataset.abaPerfil));
+});
 botaoBuscaVoz.addEventListener('click', abrirPopupBuscaVoz);
 botaoFecharPopupBuscaVoz.addEventListener('click', () => fecharPopupBuscaVoz());
 botaoTentarNovamenteBuscaVoz.addEventListener('click', iniciarReconhecimentoVoz);
@@ -1288,6 +1672,11 @@ popupBuscaVoz.addEventListener('click', (event) => {
 });
 
 campoBuscaServicos.addEventListener('input', atualizarResultadosBuscaServicos);
+campoBuscaServicos.addEventListener('focus', () => {
+    if (!campoBuscaServicos.value.trim()) {
+        renderizarBuscasRecentes();
+    }
+});
 resultadosBuscaServicos.addEventListener('click', selecionarResultadoBusca);
 campoBuscaServicos.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
@@ -1305,6 +1694,10 @@ popupCartaoServico.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !popupPerfil.classList.contains('hidden')) {
+        fecharPerfil();
+        return;
+    }
     if (event.key === 'Escape' && !popupBuscaVoz.classList.contains('hidden')) {
         fecharPopupBuscaVoz();
         return;
@@ -1339,6 +1732,8 @@ popupPersonagemSelecionado.addEventListener('click', (event) => {
 // Inicializacao
 document.addEventListener('DOMContentLoaded', () => {
     window.history.replaceState({ app: 'FinSlash', tela: 'inicio' }, '', window.location.href);
+    atualizarAvatarNavegacao();
+    atualizarDisponibilidadePesquisaNavegacao();
     gerarCartoesPersonagens();
     decodificarImagensPersonagens();
     inicializarCanvasOnda();

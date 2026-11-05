@@ -819,19 +819,8 @@ function gerarCartoesPersonagens() {
         imagem.alt = personagem.nome;
         imagem.src = personagem.imagem;
 
-        const nome = document.createElement('span');
-        nome.className = 'nome-personagem-cartao';
-        if (personagem.nome === 'Homem-Aranha') {
-            nome.classList.add('nome-personagem-cartao-longo');
-        }
-        nome.setAttribute('aria-hidden', 'true');
-        const textoNome = document.createElement('span');
-        textoNome.textContent = personagem.nome;
-        nome.appendChild(textoNome);
-        
         areaImagem.appendChild(imagem);
         cartao.appendChild(areaImagem);
-        cartao.appendChild(nome);
         cartoes.appendChild(cartao);
         
         // Adiciona evento de clique para selecionar personagem

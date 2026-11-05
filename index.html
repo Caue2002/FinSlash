@@ -61,7 +61,7 @@
     </div>
 
     <!-- Tela de servicos AWS -->
-    <div id="tela-servicos" class="hidden">
+    <div id="tela-servicos" class="tela-com-navegacao hidden">
         <!-- Header com logo e personagem -->
         <div class="header-pagina">
             <img class="logo-header" src="imagens/logo.webp" alt="FinSlash Logo" />
@@ -233,6 +233,33 @@
             </section>
             <footer class="rodape-perfil">Desenvolvido por Caue Ribeiro Ferreira · 2026</footer>
         </aside>
+    </div>
+
+    <div
+        class="popup popup-editar-nome-perfil hidden"
+        id="popup-editar-nome-perfil"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-editar-nome-perfil"
+        aria-describedby="descricao-editar-nome-perfil"
+    >
+        <form class="cartao-editar-nome-perfil" id="formulario-editar-nome-perfil">
+            <div class="icone-editar-nome-perfil" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+                </svg>
+            </div>
+            <h2 id="titulo-editar-nome-perfil">Como devemos chamar você?</h2>
+            <p id="descricao-editar-nome-perfil">Personalize seu perfil no FinSlash.</p>
+            <label for="campo-nome-perfil">Seu nome</label>
+            <input id="campo-nome-perfil" name="nome" type="text" maxlength="40" autocomplete="name" aria-describedby="erro-nome-perfil" />
+            <p class="erro-nome-perfil hidden" id="erro-nome-perfil" aria-live="polite"></p>
+            <div class="botoes-editar-nome-perfil">
+                <button class="botao-cancelar-edicao-nome" id="cancelar-edicao-nome-perfil" type="button">Cancelar</button>
+                <button class="botao-salvar-edicao-nome" type="submit">Salvar</button>
+            </div>
+        </form>
     </div>
 
     <script src="script.js"></script>

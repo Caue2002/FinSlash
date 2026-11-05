@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinSlash</title>
-    <link rel="icon" type="image/png" href="imagens/logo.png">
+    <link rel="icon" type="image/webp" href="imagens/logo.webp">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
         <!-- Canvas para efeito de onda azul -->
         <canvas id="canvas-onda" class="canvas-onda"></canvas>
         <!-- Logo do site -->
-        <img class="logo-site" src="imagens/logo.png" alt="FinSlash Logo" />
+        <img class="logo-site" src="imagens/logo.webp" alt="FinSlash Logo" />
         <div class="cartao-central" id="cartao-central">
             <p class="texto-cartao">começar</p>
         </div>
@@ -55,7 +55,7 @@
     <div id="tela-servicos" class="hidden">
         <!-- Header com logo e personagem -->
         <div class="header-pagina">
-            <img class="logo-header" src="imagens/logo.png" alt="FinSlash Logo" />
+            <img class="logo-header" src="imagens/logo.webp" alt="FinSlash Logo" />
             <div class="busca-servicos" id="busca-servicos">
                 <label class="campo-busca-servicos">
                     <svg class="icone-busca-servicos" viewBox="0 0 24 24" aria-hidden="true">
@@ -72,6 +72,19 @@
                         aria-expanded="false"
                     />
                 </label>
+                <button
+                    class="botao-busca-voz"
+                    id="botao-busca-voz"
+                    type="button"
+                    aria-label="Pesquisar serviço por voz"
+                    aria-haspopup="dialog"
+                    aria-controls="popup-busca-voz"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"></path>
+                        <path d="M19 11a7 7 0 0 1-14 0M12 18v4m-4 0h8"></path>
+                    </svg>
+                </button>
                 <div
                     class="resultados-busca-servicos hidden"
                     id="resultados-busca-servicos"
@@ -100,6 +113,32 @@
                 <canvas class="canvas-onda" id="canvas-onda-popup-servico" aria-hidden="true"></canvas>
                 <button class="fechar-popup-cartao-servico" id="fechar-popup-cartao-servico" type="button" aria-label="Fechar">×</button>
                 <div id="cartao-ampliado-servico"></div>
+            </div>
+        </div>
+        <div
+            class="popup popup-busca-voz hidden"
+            id="popup-busca-voz"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-popup-busca-voz"
+        >
+            <div class="conteudo-popup-busca-voz">
+                <button class="fechar-popup-busca-voz" id="fechar-popup-busca-voz" type="button" aria-label="Fechar">×</button>
+                <h2 id="titulo-popup-busca-voz">Pesquisa por voz</h2>
+                <div class="indicador-microfone-voz" aria-hidden="true">
+                    <canvas class="visualizador-onda-voz" id="canvas-onda-voz"></canvas>
+                    <div class="botao-microfone-voz">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"></path>
+                            <path d="M19 11a7 7 0 0 1-14 0M12 18v4m-4 0h8"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="status-busca-voz" id="status-busca-voz" aria-live="polite">Diga o nome de um serviço AWS</p>
+                <p class="transcricao-busca-voz" id="transcricao-busca-voz"></p>
+                <button class="tentar-novamente-busca-voz hidden" id="tentar-novamente-busca-voz" type="button">
+                    Tentar novamente
+                </button>
             </div>
         </div>
     </div>

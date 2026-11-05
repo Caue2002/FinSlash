@@ -171,6 +171,79 @@ body {
     overflow: visible;
 }
 
+.nome-personagem-cartao,
+.nome-personagem-selecionado {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(var(--cor-brilho-nome), 0.8);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.86);
+    color: #ffffff;
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow: 0 0 7px rgba(var(--cor-brilho-nome), 0.95);
+    box-shadow:
+        0 0 8px rgba(var(--cor-brilho-nome), 0.75),
+        0 0 16px rgba(var(--cor-brilho-nome), 0.5);
+}
+
+.nome-personagem-cartao::before,
+.nome-personagem-selecionado::before {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    background: rgb(var(--cor-brilho-nome));
+    content: "";
+    opacity: 0.5;
+    transform: scale(1.06);
+    filter: blur(9px);
+    animation: pulsar-brilho-personagem 1.5s ease-in-out infinite alternate;
+}
+
+.nome-personagem-cartao > span,
+.nome-personagem-selecionado > span {
+    position: relative;
+    z-index: 1;
+}
+
+.nome-personagem-cartao {
+    position: absolute;
+    z-index: 2;
+    right: 3px;
+    bottom: 3px;
+    left: 3px;
+    max-width: calc(100% - 6px);
+    margin: 0 auto;
+    padding: 2px 4px;
+    font-size: clamp(0.42rem, 1.9vw, 0.62rem);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+}
+
+.nome-personagem-cartao-longo {
+    padding-right: 2px;
+    padding-left: 2px;
+    font-size: clamp(0.34rem, 1.5vw, 0.5rem);
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+}
+
+@keyframes pulsar-brilho-personagem {
+    from {
+        opacity: 0.4;
+        transform: scale(1.05);
+    }
+
+    to {
+        opacity: 0.85;
+        transform: scale(1.16);
+    }
+}
+
 .cartao-personagem::before {
     content: "";
     position: absolute;
@@ -269,7 +342,7 @@ body {
     width: 100%;
     max-width: 300px;
     aspect-ratio: 1;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
     border-radius: 16px;
     overflow: hidden;
     background-color: rgba(255, 255, 255, 0.9);
@@ -280,6 +353,15 @@ body {
     height: 100%;
     object-fit: cover;
     border-radius: 12px;
+}
+
+.nome-personagem-selecionado {
+    max-width: 100%;
+    margin: 0 auto 4px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
 }
 
 .botoes-navegacao-selecionado {
@@ -308,22 +390,6 @@ body {
 .botoes-navegacao-selecionado .botao-voltar-selecionado:active {
     outline: 3px solid rgba(239, 68, 68, 0.95);
     outline-offset: 0;
-}
-
-.botao-voltar-selecionado.animando-voltar {
-    outline: 3px solid rgba(239, 68, 68, 0.95);
-    outline-offset: 0;
-    animation: pulsar-borda-vermelha 0.45s ease-out;
-}
-
-@keyframes pulsar-borda-vermelha {
-    from {
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.85);
-    }
-
-    to {
-        box-shadow: 0 0 0 9px rgba(239, 68, 68, 0);
-    }
 }
 
 .botoes-navegacao-selecionado .botao-seguir:active {
@@ -749,6 +815,12 @@ body {
     border-radius: 50%;
     background: linear-gradient(145deg, #60a5fa, #2563eb);
     box-shadow: 0 8px 26px rgba(37, 99, 235, 0.34);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+#popup-busca-voz.ouvindo-voz .botao-microfone-voz {
+    transform: scale(1.08);
+    box-shadow: 0 0 34px 12px rgba(59, 130, 246, 0.42);
 }
 
 .botao-microfone-voz svg {
@@ -1096,11 +1168,50 @@ button[class*="fechar"] {
     color: #1e3a8a;
     font-family: 'Varela Round', 'Segoe UI', sans-serif;
     font-size: 1.45rem;
+    margin: 0;
+}
+
+.titulo-perfil-edicao {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.editar-titulo-perfil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    border: 0;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    cursor: pointer;
+}
+
+.editar-titulo-perfil:hover,
+.editar-titulo-perfil:focus-visible {
+    background: #dbeafe;
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+.editar-titulo-perfil svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
 }
 
 .cabecalho-perfil p {
     margin-top: 4px;
     color: #64748b;
+    text-transform: uppercase;
 }
 
 .abas-perfil {

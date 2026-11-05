@@ -45,6 +45,7 @@
             <div class="imagem-personagem-selecionado" id="imagem-personagem-selecionado">
                 <!-- Imagem do personagem selecionado sera inserida aqui -->
             </div>
+            <p class="nome-personagem-selecionado" id="nome-personagem-selecionado"></p>
             <div class="botoes-navegacao-selecionado">
                 <button class="botao botao-voltar-selecionado" id="botao-voltar-selecionado" type="button">Voltar</button>
                 <button class="botao botao-seguir" id="botao-seguir-selecionado">Seguir</button>
@@ -191,7 +192,15 @@
             <div class="cabecalho-perfil">
                 <img id="avatar-perfil" src="" alt="" />
                 <div>
-                    <h2 id="titulo-perfil">Meu perfil</h2>
+                    <div class="titulo-perfil-edicao">
+                        <h2 id="titulo-perfil">Meu perfil</h2>
+                        <button class="editar-titulo-perfil" id="editar-titulo-perfil" type="button" aria-label="Editar nome do perfil" title="Editar nome do perfil">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <p id="nome-personagem-perfil">Explorador FinSlash</p>
                 </div>
             </div>

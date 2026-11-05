@@ -1089,13 +1089,19 @@ function normalizarBuscaServico(texto) {
         .replace(/\b(?:amazon|aws)\b/g, 'aws');
 }
 
+function normalizarPronunciaServico(texto) {
+    return normalizarBuscaServico(texto)
+        .replace(/\blamb[iy]d[ae]\b/g, 'lambda')
+        .replace(/\blambada\b/g, 'lambda');
+}
+
 function localizarServicoPorVoz(texto) {
     const palavrasIgnoradas = new Set([
         'a', 'abra', 'acessar', 'amazon', 'aws', 'da', 'das', 'de', 'do', 'dos',
         'eu', 'favor', 'me', 'mostra', 'mostrar', 'o', 'por', 'quero', 'servico',
         'servicos', 'um', 'uma'
     ]);
-    const palavrasFaladas = normalizarBuscaServico(texto)
+    const palavrasFaladas = normalizarPronunciaServico(texto)
         .replace(/[^a-z0-9]+/g, ' ')
         .trim()
         .split(/\s+/)
@@ -1107,35 +1113,54 @@ function localizarServicoPorVoz(texto) {
 
     const palavrasCompactadas = palavrasFaladas.join('');
     const aliasesVoz = {
-        'Amazon EC2': ['ec dois', 'e c dois', 'e c 2', 'i c dois'],
-        'AWS Lambda': ['lambida', 'lambda aws'],
+        'Amazon EC2': ['ec dois', 'e c dois', 'e c 2', 'i c dois', 'í ci tu', 'ec two'],
+        'AWS Lambda': ['lambida', 'lâmbida', 'lambada', 'lambda aws'],
         'Amazon ECS': ['e c s', 'e c esse', 'e ce esse', 'é que esse', 'ecs amazon'],
         'Amazon EKS': ['e k s', 'e k esse', 'e cá esse', 'eks amazon'],
+        'AWS Batch': ['batchi', 'béti', 'batch aws'],
+        'Amazon Aurora': ['aurora', 'amazon aurora'],
+        'Amazon DynamoDB': ['dynamo db', 'dínamo db', 'dinamo de be', 'dynamo de be'],
+        'Amazon RDS': ['r d s', 'erre de esse', 'r d esse'],
+        'Amazon ElastiCache': ['elastic cache', 'elasti cache', 'elast cache'],
+        'Amazon Redshift': ['red shift', 'redchift'],
         'Amazon S3': ['s três', 'esse três', 's tree', 's 3'],
         'Amazon EBS': ['e b s', 'e bê esse', 'e b esse'],
         'Amazon EFS': ['e f s', 'e efe esse', 'e f esse'],
-        'Amazon RDS': ['r d s', 'erre de esse', 'r d esse'],
-        'Amazon ElastiCache': ['elastic cache', 'elasti cache'],
-        'Amazon OpenSearch': ['open search'],
-        'Amazon SageMaker': ['sage maker', 'seij meiker'],
+        'AWS Glue': ['glu', 'glue aws'],
+        'Amazon OpenSearch': ['open search', 'open circh'],
+        'Amazon Bedrock': ['bed rock', 'bedróqui'],
+        'Amazon SageMaker': ['sage maker', 'seij meiker', 'seige meiker'],
         'Amazon MSK': ['m s k', 'eme esse cá'],
         'Amazon EMR': ['e m r', 'e eme erre'],
-        'Amazon Kinesis': ['quinesis', 'kinésis'],
+        'Amazon Kinesis': ['quinesis', 'kinésis', 'kinezes'],
+        'AWS Direct Connect': ['direct connect', 'dáirect connect'],
+        'Amazon CloudFront': ['cloud front', 'cláud front'],
         'AWS WAF': ['w a f', 'dábliu a efe'],
+        'NAT Gateway': ['net gateway', 'nat gateway'],
+        'Amazon API Gateway': ['api gateway', 'a p i gateway'],
+        'Amazon CloudWatch': ['cloud watch', 'cláud uatch'],
+        'AWS Config': ['config aws', 'confi'],
+        'AWS Secrets Manager': ['secrets manager', 'secret manager'],
+        'AWS CloudTrail': ['cloud trail', 'cláud treil'],
         'AWS KMS': ['k m s', 'cá eme esse'],
+        'AWS Shield': ['shield aws', 'chield'],
+        'AWS Trusted Advisor': ['trusted advisor', 'trusted adivisor'],
         'Amazon SQS': ['s q s', 'esse que esse'],
         'Amazon SNS': ['s n s', 'esse ene esse'],
-        'Amazon VPC': ['v p c', 'vê pê cê'],
-        'Amazon DynamoDB': ['dynamo db', 'dínamo db', 'dynamo de be'],
-        'Amazon API Gateway': ['api gateway', 'a p i gateway'],
-        'AWS IAM Access Analyzer': ['iam access analyzer', 'i am access analyzer'],
-        'AWS Direct Connect': ['direct connect'],
-        'Amazon CloudFront': ['cloud front'],
-        'Amazon CloudWatch': ['cloud watch'],
-        'Amazon EventBridge': ['event bridge'],
-        'Amazon DocumentDB': ['document db'],
-        'AWS MemoryDB for Redis': ['memory db redis', 'memory db for redis'],
-        'Amazon WorkSpaces': ['work spaces']
+        'Amazon EventBridge': ['event bridge', 'event brídge'],
+        'AWS DMS': ['d m s', 'de eme esse'],
+        'Amazon Neptune': ['neptune', 'néptun'],
+        'Amazon DocumentDB': ['document db', 'document de be'],
+        'AWS MemoryDB for Redis': ['memory db redis', 'memory db for redis', 'memory de be redis'],
+        'Amazon Athena': ['athena', 'atena'],
+        'Amazon Cognito': ['cognito', 'cogníto'],
+        'AWS IAM Access Analyzer': ['iam access analyzer', 'i am access analyzer', 'access analyzer'],
+        'AWS Transit Gateway': ['transit gateway', 'trânsito gateway'],
+        'Amazon Macie': ['maci', 'massie'],
+        'AWS Direct Connect Gateway': ['direct connect gateway', 'dáirect connect gateway'],
+        'AWS Storage Gateway': ['storage gateway', 'storage gueituei'],
+        'Amazon WorkSpaces': ['work spaces', 'work speices'],
+        'Amazon VPC': ['v p c', 'vê pê cê', 'vpc']
     };
     const palavrasIgnoradasAlias = palavrasIgnoradas;
     const formasFaladas = [];
@@ -1151,25 +1176,31 @@ function localizarServicoPorVoz(texto) {
             servico.nome,
             ...(aliasesVoz[servico.nome] || [])
         ];
-        const encontrou = nomes.some(nome => {
+        let maiorCorrespondencia = 0;
+        nomes.forEach(nome => {
             const palavrasNome = normalizarBuscaServico(nome)
                 .replace(/[^a-z0-9]+/g, ' ')
                 .trim()
                 .split(/\s+/)
                 .filter(palavra => palavra && !palavrasIgnoradasAlias.has(palavra));
             const compacto = palavrasNome.join('');
-            return compacto && (compacto === palavrasCompactadas
-                || formasFaladas.includes(compacto));
+            if (compacto && (compacto === palavrasCompactadas || formasFaladas.includes(compacto))) {
+                maiorCorrespondencia = Math.max(maiorCorrespondencia, compacto.length);
+            }
         });
-        if (encontrou) {
-            correspondenciasExatas.push(index);
+        if (maiorCorrespondencia > 0) {
+            correspondenciasExatas.push({ index, pontuacao: maiorCorrespondencia });
         }
     });
 
-    if (correspondenciasExatas.length === 1) {
-        return correspondenciasExatas[0];
+    correspondenciasExatas.sort((a, b) => b.pontuacao - a.pontuacao);
+    if (correspondenciasExatas.length > 0
+        && (correspondenciasExatas.length === 1
+            || correspondenciasExatas[0].pontuacao > correspondenciasExatas[1].pontuacao)) {
+        return correspondenciasExatas[0].index;
     }
-    if (correspondenciasExatas.length > 1) {
+    if (correspondenciasExatas.length > 1
+        && correspondenciasExatas[0].pontuacao === correspondenciasExatas[1].pontuacao) {
         return -1;
     }
 

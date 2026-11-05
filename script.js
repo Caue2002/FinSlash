@@ -1,23 +1,23 @@
 // Dados dos 18 personagens com cores imagens e gifs
 const personagens = [
-    { cor: '#9ca3af', imagem: 'imagens/personagem1.webp', gif: 'imagens/gif1.gif' },
-    { cor: '#22c55e', imagem: 'imagens/personagem2.webp', gif: 'imagens/gif2.gif' },
-    { cor: '#1e40af', imagem: 'imagens/personagem3.webp', gif: 'imagens/gif3.gif' },
-    { cor: '#93c5fd', imagem: 'imagens/personagem4.webp', gif: 'imagens/gif4.gif' },
-    { cores: ['#ffffff', '#facc15'], imagem: 'imagens/personagem5.webp', gif: 'imagens/gif5.gif' },
-    { cor: '#ec4899', imagem: 'imagens/personagem6.webp', gif: 'imagens/gif6.gif' },
-    { cor: '#c2410c', imagem: 'imagens/personagem7.webp', gif: 'imagens/gif7.gif' },
-    { cor: '#fca5a5', imagem: 'imagens/personagem8.webp', gif: 'imagens/gif8.gif' },
-    { cor: '#fbbf24', imagem: 'imagens/personagem9.webp', gif: 'imagens/gif9.gif' },
-    { cor: '#dc2626', imagem: 'imagens/personagem10.webp', gif: 'imagens/gif10.gif' },
-    { cor: '#f97316', imagem: 'imagens/personagem11.webp', gif: 'imagens/gif11.gif' },
-    { cor: '#374151', imagem: 'imagens/personagem12.webp', gif: 'imagens/gif12.gif' },
-    { cores: ['#ef4444', '#3b82f6'], imagem: 'imagens/personagem13.webp', gif: 'imagens/gif13.gif' },
-    { cor: '#ec4899', imagem: 'imagens/personagem14.webp', gif: 'imagens/gif14.gif' },
-    { cores: ['#2563eb', '#ffffff'], imagem: 'imagens/personagem15.webp', gif: 'imagens/gif15.gif' },
-    { cor: '#f9a8d4', imagem: 'imagens/personagem16.webp', gif: 'imagens/gif16.gif' },
-    { cor: '#3949ab', imagem: 'imagens/personagem17.webp', gif: 'imagens/gif17.gif' },
-    { cores: ['#111827', '#2563eb'], imagem: 'imagens/personagem18.webp', gif: 'imagens/gif18.gif' }
+    { nome: 'Killua', cor: '#9ca3af', imagem: 'imagens/personagem1.webp', gif: 'imagens/gif1.gif' },
+    { nome: 'Gon', cor: '#22c55e', imagem: 'imagens/personagem2.webp', gif: 'imagens/gif2.gif' },
+    { nome: 'Jinx', cor: '#1e40af', imagem: 'imagens/personagem3.webp', gif: 'imagens/gif3.gif' },
+    { nome: 'Satoru Gojo', cor: '#93c5fd', imagem: 'imagens/personagem4.webp', gif: 'imagens/gif4.gif' },
+    { nome: 'Gato Banana', cores: ['#ffffff', '#facc15'], imagem: 'imagens/personagem5.webp', gif: 'imagens/gif5.gif' },
+    { nome: 'Vi', cor: '#ec4899', imagem: 'imagens/personagem6.webp', gif: 'imagens/gif6.gif' },
+    { nome: 'Denji', cor: '#c2410c', imagem: 'imagens/personagem7.webp', gif: 'imagens/gif7.gif' },
+    { nome: 'Luffy', cor: '#fca5a5', imagem: 'imagens/personagem8.webp', gif: 'imagens/gif8.gif' },
+    { nome: 'Invencível', cor: '#fbbf24', imagem: 'imagens/personagem9.webp', gif: 'imagens/gif9.gif' },
+    { nome: 'Hello Kitty', cor: '#dc2626', imagem: 'imagens/personagem10.webp', gif: 'imagens/gif10.gif' },
+    { nome: 'Goku', cor: '#f97316', imagem: 'imagens/personagem11.webp', gif: 'imagens/gif11.gif' },
+    { nome: 'Itachi', cor: '#374151', imagem: 'imagens/personagem12.webp', gif: 'imagens/gif12.gif' },
+    { nome: 'Homem-Aranha', cores: ['#ef4444', '#3b82f6'], imagem: 'imagens/personagem13.webp', gif: 'imagens/gif13.gif' },
+    { nome: 'Mabel', cor: '#ec4899', imagem: 'imagens/personagem14.webp', gif: 'imagens/gif14.gif' },
+    { nome: 'Finn', cores: ['#2563eb', '#ffffff'], imagem: 'imagens/personagem15.webp', gif: 'imagens/gif15.gif' },
+    { nome: 'Nezuko', cor: '#f9a8d4', imagem: 'imagens/personagem16.webp', gif: 'imagens/gif16.gif' },
+    { nome: 'Kakashi', cor: '#3949ab', imagem: 'imagens/personagem17.webp', gif: 'imagens/gif17.gif' },
+    { nome: 'Vegeta', cores: ['#111827', '#2563eb'], imagem: 'imagens/personagem18.webp', gif: 'imagens/gif18.gif' }
 ];
 
 // Dados dos servicos AWS
@@ -102,6 +102,7 @@ const popupAnimacao = document.getElementById('popup-animacao');
 const popupConteudoSelecionado = document.querySelector('.popup-conteudo-selecionado');
 const gridPersonagens = document.getElementById('grid-personagens');
 const imagemPersonagemSelecionado = document.getElementById('imagem-personagem-selecionado');
+const nomePersonagemSelecionado = document.getElementById('nome-personagem-selecionado');
 const gifCelebracao = document.getElementById('gif-celebracao');
 const botaoSeguirSelecionado = document.getElementById('botao-seguir-selecionado');
 const botaoVoltarSelecionado = document.getElementById('botao-voltar-selecionado');
@@ -133,6 +134,8 @@ const iconePerfilApp = document.getElementById('icone-perfil-app');
 const popupPerfil = document.getElementById('popup-perfil');
 const botaoFecharPerfil = document.getElementById('fechar-perfil');
 const avatarPerfil = document.getElementById('avatar-perfil');
+const tituloPerfil = document.getElementById('titulo-perfil');
+const botaoEditarTituloPerfil = document.getElementById('editar-titulo-perfil');
 const nomePersonagemPerfil = document.getElementById('nome-personagem-perfil');
 const listaHistoricoPerfil = document.getElementById('lista-historico-perfil');
 const listaMedalhasPerfil = document.getElementById('lista-medalhas-perfil');
@@ -146,7 +149,7 @@ function carregarDadosPersistidos() {
     try {
         const armazenado = window.localStorage.getItem(chaveArmazenamentoAplicacao);
         if (!armazenado) {
-            return { indicePersonagem: null, buscasRecentes: [], historicoServicos: [] };
+            return { indicePersonagem: null, buscasRecentes: [], historicoServicos: [], nomePerfil: 'Meu perfil' };
         }
 
         const dados = JSON.parse(armazenado);
@@ -169,11 +172,14 @@ function carregarDadosPersistidos() {
                     && Number.isFinite(new Date(item.data).getTime()))
                 .slice(0, 50)
             : [];
+        const nomePerfil = typeof dados.nomePerfil === 'string' && dados.nomePerfil.trim()
+            ? dados.nomePerfil.trim().slice(0, 40)
+            : 'Meu perfil';
 
-        return { indicePersonagem, buscasRecentes, historicoServicos };
+        return { indicePersonagem, buscasRecentes, historicoServicos, nomePerfil };
     } catch (error) {
         console.error('Nao foi possivel carregar as preferencias salvas do FinSlash.', error);
-        return { indicePersonagem: null, buscasRecentes: [], historicoServicos: [] };
+        return { indicePersonagem: null, buscasRecentes: [], historicoServicos: [], nomePerfil: 'Meu perfil' };
     }
 }
 
@@ -302,12 +308,13 @@ function renderizarMedalhasPerfil() {
 }
 
 function abrirPerfil() {
+    tituloPerfil.textContent = dadosPersistidos.nomePerfil;
     const personagem = personagens[dadosPersistidos.indicePersonagem];
     if (personagem) {
         avatarPerfil.src = personagem.imagem;
-        avatarPerfil.alt = 'Personagem selecionado';
+        avatarPerfil.alt = personagem.nome;
         avatarPerfil.classList.remove('hidden');
-        nomePersonagemPerfil.textContent = `Personagem ${dadosPersistidos.indicePersonagem + 1}`;
+        nomePersonagemPerfil.textContent = personagem.nome;
     } else {
         avatarPerfil.removeAttribute('src');
         avatarPerfil.classList.add('hidden');
@@ -317,6 +324,17 @@ function abrirPerfil() {
     renderizarMedalhasPerfil();
     popupPerfil.classList.remove('hidden');
     botaoFecharPerfil.focus();
+}
+
+function editarNomePerfil() {
+    const nome = window.prompt('Como você gostaria de ser chamado?', dadosPersistidos.nomePerfil);
+    if (nome === null || !nome.trim()) {
+        return;
+    }
+
+    dadosPersistidos.nomePerfil = nome.trim().slice(0, 40);
+    tituloPerfil.textContent = dadosPersistidos.nomePerfil;
+    salvarDadosPersistidos();
 }
 
 function fecharPerfil() {
@@ -377,14 +395,8 @@ let tempoOndaPopupServico = 0;
 let animacaoOndaVoz = null;
 let tempoOndaVoz = 0;
 let nivelAudioVoz = 0;
+let nivelAlvoOndaVoz = 0;
 let reconhecimentoVoz = null;
-let reconhecimentoVozAtivo = false;
-let fluxoMicrofoneVoz = null;
-let contextoAudioVoz = null;
-let analisadorAudioVoz = null;
-let dadosAudioVoz = null;
-let quadroAudioVoz = null;
-let sessaoBuscaVoz = 0;
 
 function atualizarHistoricoAplicacao(tela, dados = {}, substituir = false) {
     const estado = { app: 'FinSlash', tela, ...dados };
@@ -674,6 +686,7 @@ function iniciarAnimacaoOndaVoz() {
         const centroX = largura / 2;
         const centroY = altura / 2;
         const escala = window.devicePixelRatio || 1;
+        nivelAudioVoz += (nivelAlvoOndaVoz - nivelAudioVoz) * 0.12;
         const nivel = nivelAudioVoz;
 
         ctx.clearRect(0, 0, largura, altura);
@@ -688,13 +701,8 @@ function iniciarAnimacaoOndaVoz() {
 
             for (let ponto = 0; ponto <= 120; ponto += 1) {
                 const angulo = (ponto / 120) * Math.PI * 2;
-                let variacaoAudio = 0;
-                if (dadosAudioVoz && nivel > 0.015) {
-                    const amostra = Math.floor((ponto / 120) * dadosAudioVoz.length);
-                    variacaoAudio = (dadosAudioVoz[amostra] - 128) / 128;
-                }
-                const ondulacao = Math.sin(angulo * 5 + tempoOndaVoz * 0.07 + anel) * 0.35;
-                const raio = raioBase + (variacaoAudio + ondulacao) * amplitude;
+                const ondulacao = Math.sin(angulo * 5 + tempoOndaVoz * 0.07 + anel) * (0.35 + nivel * 0.55);
+                const raio = raioBase + ondulacao * amplitude;
                 const x = centroX + Math.cos(angulo) * raio;
                 const y = centroY + Math.sin(angulo) * raio;
 
@@ -726,6 +734,7 @@ function pararAnimacaoOndaVoz() {
     }
     window.removeEventListener('resize', redimensionarCanvasOndaVoz);
     nivelAudioVoz = 0;
+    nivelAlvoOndaVoz = 0;
     const ctx = canvasOndaVoz.getContext('2d');
     if (ctx) {
         ctx.clearRect(0, 0, canvasOndaVoz.width, canvasOndaVoz.height);
@@ -733,86 +742,8 @@ function pararAnimacaoOndaVoz() {
 }
 
 function definirAtividadeBuscaVoz(ativa) {
+    nivelAlvoOndaVoz = ativa ? 1 : 0;
     popupBuscaVoz.classList.toggle('ouvindo-voz', ativa);
-}
-
-function atualizarNivelAudioVoz() {
-    if (!analisadorAudioVoz || !dadosAudioVoz) {
-        nivelAudioVoz *= 0.88;
-        quadroAudioVoz = requestAnimationFrame(atualizarNivelAudioVoz);
-        return;
-    }
-
-    analisadorAudioVoz.getByteTimeDomainData(dadosAudioVoz);
-    let somaQuadrados = 0;
-    for (let indice = 0; indice < dadosAudioVoz.length; indice += 1) {
-        const amostra = (dadosAudioVoz[indice] - 128) / 128;
-        somaQuadrados += amostra * amostra;
-    }
-
-    const nivelMedido = Math.min(Math.sqrt(somaQuadrados / dadosAudioVoz.length) * 5, 1);
-    nivelAudioVoz = nivelAudioVoz * 0.72 + nivelMedido * 0.28;
-    definirAtividadeBuscaVoz(nivelAudioVoz > 0.025);
-    quadroAudioVoz = requestAnimationFrame(atualizarNivelAudioVoz);
-}
-
-async function iniciarCapturaMicrofoneVoz(sessao) {
-    if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error('insecure-context');
-    }
-
-    const fluxo = await navigator.mediaDevices.getUserMedia({
-        audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true
-        },
-        video: false
-    });
-
-    if (sessao !== sessaoBuscaVoz || popupBuscaVoz.classList.contains('hidden')) {
-        fluxo.getTracks().forEach(faixa => faixa.stop());
-        return false;
-    }
-
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) {
-        fluxo.getTracks().forEach(faixa => faixa.stop());
-        throw new Error('audio-context');
-    }
-
-    fluxoMicrofoneVoz = fluxo;
-    contextoAudioVoz = new AudioContext();
-    await contextoAudioVoz.resume();
-    analisadorAudioVoz = contextoAudioVoz.createAnalyser();
-    analisadorAudioVoz.fftSize = 512;
-    analisadorAudioVoz.smoothingTimeConstant = 0.75;
-    contextoAudioVoz.createMediaStreamSource(fluxoMicrofoneVoz).connect(analisadorAudioVoz);
-    dadosAudioVoz = new Uint8Array(analisadorAudioVoz.fftSize);
-    atualizarNivelAudioVoz();
-    return true;
-}
-
-function pararCapturaMicrofoneVoz() {
-    if (quadroAudioVoz !== null) {
-        cancelAnimationFrame(quadroAudioVoz);
-        quadroAudioVoz = null;
-    }
-    if (fluxoMicrofoneVoz) {
-        fluxoMicrofoneVoz.getTracks().forEach(faixa => faixa.stop());
-        fluxoMicrofoneVoz = null;
-    }
-    if (contextoAudioVoz) {
-        const contexto = contextoAudioVoz;
-        contextoAudioVoz = null;
-        contexto.close().catch(error => {
-            console.error('Nao foi possivel encerrar o contexto de audio da busca por voz.', error);
-        });
-    }
-    analisadorAudioVoz = null;
-    dadosAudioVoz = null;
-    nivelAudioVoz = 0;
-    definirAtividadeBuscaVoz(false);
 }
 
 // Funcao para gerar os cartoes de personagens no grid
@@ -822,11 +753,14 @@ function gerarCartoesPersonagens() {
     personagens.forEach((personagem, index) => {
         const cartao = document.createElement('div');
         cartao.className = 'cartao-personagem';
+        cartao.setAttribute('aria-label', `Selecionar ${personagem.nome}`);
         const cores = personagem.cores || [personagem.cor];
         const coresRGB = cores.map(cor => cor.match(/[0-9a-f]{2}/gi).map(valor => parseInt(valor, 16)));
+        const corBrilhoNome = coresRGB.find(cor => Math.min(...cor) < 225) || coresRGB[0];
         cartao.style.background = cores.length > 1
             ? `linear-gradient(90deg, ${cores[0]} 50%, ${cores[1]} 50%)`
             : cores[0];
+        cartao.style.setProperty('--cor-brilho-nome', corBrilhoNome.join(', '));
         if (cores.length > 1) {
             cartao.classList.add('cartao-personagem-bicolor');
         }
@@ -856,11 +790,22 @@ function gerarCartoesPersonagens() {
         }
         imagem.loading = index < 9 ? 'eager' : 'lazy';
         imagem.decoding = 'async';
-        imagem.alt = 'Personagem';
+        imagem.alt = personagem.nome;
         imagem.src = personagem.imagem;
+
+        const nome = document.createElement('span');
+        nome.className = 'nome-personagem-cartao';
+        if (personagem.nome === 'Homem-Aranha') {
+            nome.classList.add('nome-personagem-cartao-longo');
+        }
+        nome.setAttribute('aria-hidden', 'true');
+        const textoNome = document.createElement('span');
+        textoNome.textContent = personagem.nome;
+        nome.appendChild(textoNome);
         
         areaImagem.appendChild(imagem);
         cartao.appendChild(areaImagem);
+        cartao.appendChild(nome);
         cartoes.appendChild(cartao);
         
         // Adiciona evento de clique para selecionar personagem
@@ -891,6 +836,14 @@ function abrirPopupPersonagemSelecionado(index) {
 function prepararPopupPersonagemSelecionado(index) {
     const personagem = personagens[index];
     precarregarGifCelebracao(personagem);
+    const cores = personagem.cores || [personagem.cor];
+    const coresRGB = cores.map(cor => cor.match(/[0-9a-f]{2}/gi).map(valor => parseInt(valor, 16)));
+    const corBrilhoNome = coresRGB.find(cor => Math.min(...cor) < 225) || coresRGB[0];
+    nomePersonagemSelecionado.replaceChildren();
+    const textoNomeSelecionado = document.createElement('span');
+    textoNomeSelecionado.textContent = personagem.nome;
+    nomePersonagemSelecionado.appendChild(textoNomeSelecionado);
+    nomePersonagemSelecionado.style.setProperty('--cor-brilho-nome', corBrilhoNome.join(', '));
     
     // Limpa e adiciona a imagem do personagem selecionado
     imagemPersonagemSelecionado.innerHTML = '';
@@ -900,11 +853,10 @@ function prepararPopupPersonagemSelecionado(index) {
     }
     imagem.decoding = 'async';
     imagem.src = personagem.imagem;
-    imagem.alt = 'Personagem selecionado';
+    imagem.alt = personagem.nome;
     imagemPersonagemSelecionado.appendChild(imagem);
     
     // Define a cor de fundo do popup
-    const cores = personagem.cores || [personagem.cor];
     popupConteudoSelecionado.style.background = cores.length > 1
         ? `linear-gradient(90deg, ${cores[0]} 50%, ${cores[1]} 50%)`
         : cores[0];
@@ -1162,21 +1114,18 @@ function definirStatusBuscaVoz(status, permitirNovaTentativa = false) {
     botaoTentarNovamenteBuscaVoz.classList.toggle('hidden', !permitirNovaTentativa);
 }
 
-async function iniciarReconhecimentoVoz() {
+function iniciarReconhecimentoVoz() {
     const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const sessao = ++sessaoBuscaVoz;
     transcricaoBuscaVoz.textContent = '';
     definirAtividadeBuscaVoz(false);
 
     if (reconhecimentoVoz) {
         const reconhecimentoAnterior = reconhecimentoVoz;
         reconhecimentoVoz = null;
-        reconhecimentoVozAtivo = false;
         reconhecimentoAnterior.stop();
     }
-    pararCapturaMicrofoneVoz();
 
-    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+    if (!window.isSecureContext) {
         definirStatusBuscaVoz('O microfone exige HTTPS ou acesso pelo endereço localhost.');
         botaoTentarNovamenteBuscaVoz.classList.add('hidden');
         return;
@@ -1203,40 +1152,10 @@ async function iniciarReconhecimentoVoz() {
         return;
     }
 
-    try {
-        const microfoneIniciado = await iniciarCapturaMicrofoneVoz(sessao);
-        if (!microfoneIniciado || sessao !== sessaoBuscaVoz) {
-            return;
-        }
-    } catch (error) {
-        console.error('Nao foi possivel acessar ou analisar o audio do microfone.', error);
-        pararCapturaMicrofoneVoz();
-        const mensagensErro = {
-            'NotAllowedError': 'Acesso ao microfone negado. Permita o uso do microfone nas configurações do navegador.',
-            'PermissionDeniedError': 'Acesso ao microfone negado. Permita o uso do microfone nas configurações do navegador.',
-            'NotFoundError': 'Nenhum microfone foi encontrado neste dispositivo.',
-            'NotReadableError': 'O microfone está sendo usado por outro aplicativo.',
-            'SecurityError': 'O microfone exige HTTPS ou acesso pelo endereço localhost.',
-            'insecure-context': 'O microfone exige HTTPS ou acesso pelo endereço localhost.',
-            'audio-context': 'Este navegador não oferece suporte à análise do microfone.'
-        };
-        definirStatusBuscaVoz(
-            mensagensErro[error.name] || 'Não foi possível iniciar o microfone. Verifique a conexão e as permissões.',
-            error.name !== 'SecurityError' && error.name !== 'insecure-context'
-        );
-        return;
-    }
-
-    if (sessao !== sessaoBuscaVoz) {
-        pararCapturaMicrofoneVoz();
-        return;
-    }
-
-    definirStatusBuscaVoz('Ouvindo...', false);
     reconhecimentoVoz = reconhecimento;
     reconhecimento.onstart = () => {
         if (reconhecimentoVoz === reconhecimento) {
-            reconhecimentoVozAtivo = true;
+            definirStatusBuscaVoz('Ouvindo...', false);
         }
     };
     reconhecimento.onspeechstart = () => {
@@ -1254,6 +1173,7 @@ async function iniciarReconhecimentoVoz() {
             return;
         }
 
+        definirAtividadeBuscaVoz(true);
         let textoFinal = '';
         let indiceServico = -1;
         for (let indice = event.resultIndex; indice < event.results.length; indice += 1) {
@@ -1280,6 +1200,7 @@ async function iniciarReconhecimentoVoz() {
             return;
         }
 
+        definirAtividadeBuscaVoz(false);
         transcricaoBuscaVoz.textContent = textoFinal;
         if (indiceServico === -1) {
             definirStatusBuscaVoz('Não encontrei esse serviço. Tente dizer o nome novamente.', true);
@@ -1306,33 +1227,36 @@ async function iniciarReconhecimentoVoz() {
             'no-speech': 'Não ouvi nenhuma fala. Tente novamente.'
         };
         reconhecimentoVoz = null;
-        reconhecimentoVozAtivo = false;
-        pararCapturaMicrofoneVoz();
+        definirAtividadeBuscaVoz(false);
         definirStatusBuscaVoz(
             mensagensErro[event.error] || 'Ocorreu um erro no reconhecimento de voz.',
             event.error !== 'not-allowed' && event.error !== 'service-not-allowed'
         );
+    };
+    reconhecimento.onnomatch = () => {
+        if (reconhecimentoVoz === reconhecimento) {
+            definirAtividadeBuscaVoz(false);
+            definirStatusBuscaVoz('Não identifiquei um serviço. Tente novamente.', true);
+        }
     };
     reconhecimento.onend = () => {
         if (reconhecimentoVoz !== reconhecimento) {
             return;
         }
 
-        reconhecimentoVozAtivo = false;
         reconhecimentoVoz = null;
-        pararCapturaMicrofoneVoz();
+        definirAtividadeBuscaVoz(false);
         if (statusBuscaVoz.textContent === 'Ouvindo...') {
             definirStatusBuscaVoz('Não ouvi nenhuma fala. Tente novamente.', true);
         }
     };
 
     try {
+        definirStatusBuscaVoz('Solicitando acesso ao microfone...', false);
         reconhecimento.start();
-        reconhecimentoVozAtivo = true;
     } catch (error) {
         reconhecimentoVoz = null;
-        reconhecimentoVozAtivo = false;
-        pararCapturaMicrofoneVoz();
+        definirAtividadeBuscaVoz(false);
         console.error('Nao foi possivel iniciar o reconhecimento de voz.', error);
         definirStatusBuscaVoz('Não foi possível iniciar o reconhecimento de voz. Tente novamente.', true);
     }
@@ -1348,14 +1272,11 @@ function abrirPopupBuscaVoz() {
 }
 
 function fecharPopupBuscaVoz(retornarFoco = true) {
-    sessaoBuscaVoz += 1;
     if (reconhecimentoVoz) {
         const reconhecimentoAtual = reconhecimentoVoz;
         reconhecimentoVoz = null;
-        reconhecimentoVozAtivo = false;
         reconhecimentoAtual.stop();
     }
-    pararCapturaMicrofoneVoz();
     definirAtividadeBuscaVoz(false);
     popupBuscaVoz.classList.add('hidden');
     pararAnimacaoOndaVoz();
@@ -1641,19 +1562,10 @@ botaoPesquisaApp.addEventListener('click', () => {
     irParaJornada();
 });
 botaoContinuarMenu.addEventListener('click', irParaJornada);
-botaoVoltarSelecionado.addEventListener('click', () => {
-    if (botaoVoltarSelecionado.classList.contains('animando-voltar')) {
-        return;
-    }
-
-    botaoVoltarSelecionado.classList.add('animando-voltar');
-    botaoVoltarSelecionado.addEventListener('animationend', () => {
-        botaoVoltarSelecionado.classList.remove('animando-voltar');
-        voltarPelaNavegacao();
-    }, { once: true });
-});
+botaoVoltarSelecionado.addEventListener('click', voltarPelaNavegacao);
 botaoPerfilApp.addEventListener('click', abrirPerfil);
 botaoFecharPerfil.addEventListener('click', fecharPerfil);
+botaoEditarTituloPerfil.addEventListener('click', editarNomePerfil);
 popupPerfil.addEventListener('click', event => {
     if (event.target === popupPerfil) {
         fecharPerfil();

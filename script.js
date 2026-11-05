@@ -1,23 +1,23 @@
 // Dados dos 18 personagens com cores imagens e gifs
 const personagens = [
-    { cor: '#9ca3af', imagem: 'imagens/personagem1.png', gif: 'imagens/gif1.gif' },
-    { cor: '#22c55e', imagem: 'imagens/personagem2.png', gif: 'imagens/gif2.gif' },
-    { cor: '#1e40af', imagem: 'imagens/personagem3.png', gif: 'imagens/gif3.gif' },
-    { cor: '#93c5fd', imagem: 'imagens/personagem4.png', gif: 'imagens/gif4.gif' },
-    { cores: ['#ffffff', '#facc15'], imagem: 'imagens/personagem5.png', gif: 'imagens/gif5.gif' },
-    { cor: '#ec4899', imagem: 'imagens/personagem6.png', gif: 'imagens/gif6.gif' },
-    { cor: '#c2410c', imagem: 'imagens/personagem7.png', gif: 'imagens/gif7.gif' },
-    { cor: '#fca5a5', imagem: 'imagens/personagem8.png', gif: 'imagens/gif8.gif' },
-    { cor: '#fbbf24', imagem: 'imagens/personagem9.png', gif: 'imagens/gif9.gif' },
-    { cor: '#dc2626', imagem: 'imagens/personagem10.png', gif: 'imagens/gif10.gif' },
-    { cor: '#f97316', imagem: 'imagens/personagem11.png', gif: 'imagens/gif11.gif' },
-    { cor: '#374151', imagem: 'imagens/personagem12.png', gif: 'imagens/gif12.gif' },
-    { cores: ['#ef4444', '#3b82f6'], imagem: 'imagens/personagem13.jpg', gif: 'imagens/gif13.gif' },
-    { cor: '#ec4899', imagem: 'imagens/personagem14.jpg', gif: 'imagens/gif14.gif' },
-    { cores: ['#2563eb', '#ffffff'], imagem: 'imagens/personagem15.jpg', gif: 'imagens/gif15.gif' },
-    { cor: '#f9a8d4', imagem: 'imagens/personagem16.jpg', gif: 'imagens/gif16.gif' },
-    { cor: '#3949ab', imagem: 'imagens/personagem17.png', gif: 'imagens/gif17.gif' },
-    { cores: ['#111827', '#2563eb'], imagem: 'imagens/personagem18.jpg', gif: 'imagens/gif18.gif' }
+    { cor: '#9ca3af', imagem: 'imagens/personagem1.webp', gif: 'imagens/gif1.gif' },
+    { cor: '#22c55e', imagem: 'imagens/personagem2.webp', gif: 'imagens/gif2.gif' },
+    { cor: '#1e40af', imagem: 'imagens/personagem3.webp', gif: 'imagens/gif3.gif' },
+    { cor: '#93c5fd', imagem: 'imagens/personagem4.webp', gif: 'imagens/gif4.gif' },
+    { cores: ['#ffffff', '#facc15'], imagem: 'imagens/personagem5.webp', gif: 'imagens/gif5.gif' },
+    { cor: '#ec4899', imagem: 'imagens/personagem6.webp', gif: 'imagens/gif6.gif' },
+    { cor: '#c2410c', imagem: 'imagens/personagem7.webp', gif: 'imagens/gif7.gif' },
+    { cor: '#fca5a5', imagem: 'imagens/personagem8.webp', gif: 'imagens/gif8.gif' },
+    { cor: '#fbbf24', imagem: 'imagens/personagem9.webp', gif: 'imagens/gif9.gif' },
+    { cor: '#dc2626', imagem: 'imagens/personagem10.webp', gif: 'imagens/gif10.gif' },
+    { cor: '#f97316', imagem: 'imagens/personagem11.webp', gif: 'imagens/gif11.gif' },
+    { cor: '#374151', imagem: 'imagens/personagem12.webp', gif: 'imagens/gif12.gif' },
+    { cores: ['#ef4444', '#3b82f6'], imagem: 'imagens/personagem13.webp', gif: 'imagens/gif13.gif' },
+    { cor: '#ec4899', imagem: 'imagens/personagem14.webp', gif: 'imagens/gif14.gif' },
+    { cores: ['#2563eb', '#ffffff'], imagem: 'imagens/personagem15.webp', gif: 'imagens/gif15.gif' },
+    { cor: '#f9a8d4', imagem: 'imagens/personagem16.webp', gif: 'imagens/gif16.gif' },
+    { cor: '#3949ab', imagem: 'imagens/personagem17.webp', gif: 'imagens/gif17.gif' },
+    { cores: ['#111827', '#2563eb'], imagem: 'imagens/personagem18.webp', gif: 'imagens/gif18.gif' }
 ];
 
 // Dados dos servicos AWS
@@ -87,6 +87,7 @@ let celebracaoAtiva = 0;
 let timeoutCelebracao = null;
 let inicioGestoVoltar = null;
 let navegacaoVoltarPendente = false;
+const gifsCelebracaoPrecarregados = new Map();
 
 // Elementos do DOM
 const cartaoCentral = document.getElementById('cartao-central');
@@ -110,6 +111,13 @@ const popupCartaoServico = document.getElementById('popup-cartao-servico');
 const cartaoAmpliadoServico = document.getElementById('cartao-ampliado-servico');
 const botaoFecharPopupCartaoServico = document.getElementById('fechar-popup-cartao-servico');
 const canvasOndaPopupServico = document.getElementById('canvas-onda-popup-servico');
+const botaoBuscaVoz = document.getElementById('botao-busca-voz');
+const popupBuscaVoz = document.getElementById('popup-busca-voz');
+const canvasOndaVoz = document.getElementById('canvas-onda-voz');
+const botaoFecharPopupBuscaVoz = document.getElementById('fechar-popup-busca-voz');
+const statusBuscaVoz = document.getElementById('status-busca-voz');
+const transcricaoBuscaVoz = document.getElementById('transcricao-busca-voz');
+const botaoTentarNovamenteBuscaVoz = document.getElementById('tentar-novamente-busca-voz');
 
 // Variaveis para sistema de onda azul
 let ondas = [];
@@ -119,6 +127,17 @@ let tempo = 0;
 let ondasPopupServico = [];
 let animacaoOndaPopupServico = null;
 let tempoOndaPopupServico = 0;
+let animacaoOndaVoz = null;
+let tempoOndaVoz = 0;
+let nivelAudioVoz = 0;
+let reconhecimentoVoz = null;
+let reconhecimentoVozAtivo = false;
+let fluxoMicrofoneVoz = null;
+let contextoAudioVoz = null;
+let analisadorAudioVoz = null;
+let dadosAudioVoz = null;
+let quadroAudioVoz = null;
+let sessaoBuscaVoz = 0;
 
 function atualizarHistoricoAplicacao(tela, dados = {}, substituir = false) {
     const estado = { app: 'FinSlash', tela, ...dados };
@@ -138,6 +157,7 @@ function cancelarAnimacaoCelebracao() {
 function renderizarTelaHistorico(estado) {
     const tela = estado?.app === 'FinSlash' ? estado.tela : 'inicio';
     cancelarAnimacaoCelebracao();
+    fecharPopupBuscaVoz(false);
 
     popupPersonagens.classList.add('hidden');
     popupPersonagemSelecionado.classList.add('hidden');
@@ -245,14 +265,14 @@ class Onda {
         this.cor = `rgba(59, 130, 246, ${this.opacidade})`;
     }
 
-    desenhar(ctx, tempo) {
+    desenhar(ctx, tempo, intensidade = 1, intervalo = 5) {
         ctx.beginPath();
         ctx.moveTo(0, this.canvas.height);
         
-        for (let x = 0; x <= this.canvas.width; x += 5) {
+        for (let x = 0; x <= this.canvas.width; x += intervalo) {
             const y = this.alturaBase + 
-                      Math.sin(x * this.frequencia + tempo * this.velocidade + this.fase) * this.amplitude +
-                      Math.sin(x * this.frequencia * 2 + tempo * this.velocidade * 1.5) * this.amplitude * 0.5;
+                      Math.sin(x * this.frequencia + tempo * this.velocidade + this.fase) * this.amplitude * intensidade +
+                      Math.sin(x * this.frequencia * 2 + tempo * this.velocidade * 1.5) * this.amplitude * 0.5 * intensidade;
             ctx.lineTo(x, y);
         }
         
@@ -285,15 +305,23 @@ function inicializarCanvasOnda() {
     }
     
     // Funcao de animacao
-    function animar() {
-        ctx.clearRect(0, 0, canvasOnda.width, canvasOnda.height);
-        tempo += 1;
-        
-        // Desenha todas as ondas
-        ondas.forEach(onda => {
-            onda.desenhar(ctx, tempo);
-        });
-        
+    let ultimoDesenho = 0;
+    function animar(tempoAtual) {
+        if (document.hidden) {
+            animacaoOnda = requestAnimationFrame(animar);
+            return;
+        }
+
+        if (tempoAtual - ultimoDesenho >= 1000 / 30) {
+            ultimoDesenho = tempoAtual;
+            ctx.clearRect(0, 0, canvasOnda.width, canvasOnda.height);
+            tempo += 1;
+
+            ondas.forEach(onda => {
+                onda.desenhar(ctx, tempo, 1, 8);
+            });
+        }
+
         animacaoOnda = requestAnimationFrame(animar);
     }
     
@@ -358,9 +386,176 @@ function pararAnimacaoOndaPopupServico() {
     ondasPopupServico = [];
 }
 
+function redimensionarCanvasOndaVoz() {
+    const tamanho = canvasOndaVoz.clientWidth;
+    const escala = window.devicePixelRatio || 1;
+    canvasOndaVoz.width = Math.round(tamanho * escala);
+    canvasOndaVoz.height = Math.round(tamanho * escala);
+}
+
+function iniciarAnimacaoOndaVoz() {
+    if (animacaoOndaVoz) {
+        return;
+    }
+
+    const ctx = canvasOndaVoz.getContext('2d');
+    if (!ctx) {
+        console.error('Nao foi possivel inicializar a animacao de ondas da busca por voz.');
+        return;
+    }
+
+    redimensionarCanvasOndaVoz();
+    window.addEventListener('resize', redimensionarCanvasOndaVoz);
+    function animar() {
+        const largura = canvasOndaVoz.width;
+        const altura = canvasOndaVoz.height;
+        const centroX = largura / 2;
+        const centroY = altura / 2;
+        const escala = window.devicePixelRatio || 1;
+        const nivel = nivelAudioVoz;
+
+        ctx.clearRect(0, 0, largura, altura);
+        ctx.save();
+        ctx.lineWidth = 2 * escala;
+        tempoOndaVoz += 1;
+
+        for (let anel = 0; anel < 3; anel += 1) {
+            const raioBase = (42 + anel * 19 + Math.sin(tempoOndaVoz * 0.035 - anel) * 2) * escala;
+            const amplitude = (2 + nivel * 12) * escala;
+            ctx.beginPath();
+
+            for (let ponto = 0; ponto <= 120; ponto += 1) {
+                const angulo = (ponto / 120) * Math.PI * 2;
+                let variacaoAudio = 0;
+                if (dadosAudioVoz && nivel > 0.015) {
+                    const amostra = Math.floor((ponto / 120) * dadosAudioVoz.length);
+                    variacaoAudio = (dadosAudioVoz[amostra] - 128) / 128;
+                }
+                const ondulacao = Math.sin(angulo * 5 + tempoOndaVoz * 0.07 + anel) * 0.35;
+                const raio = raioBase + (variacaoAudio + ondulacao) * amplitude;
+                const x = centroX + Math.cos(angulo) * raio;
+                const y = centroY + Math.sin(angulo) * raio;
+
+                if (ponto === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.closePath();
+            ctx.strokeStyle = anel % 2 === 0
+                ? `rgba(37, 99, 235, ${0.72 - anel * 0.12})`
+                : `rgba(255, 255, 255, ${0.95 - anel * 0.12})`;
+            ctx.stroke();
+        }
+
+        ctx.restore();
+        animacaoOndaVoz = requestAnimationFrame(animar);
+    }
+
+    animar();
+}
+
+function pararAnimacaoOndaVoz() {
+    if (animacaoOndaVoz) {
+        cancelAnimationFrame(animacaoOndaVoz);
+        animacaoOndaVoz = null;
+    }
+    window.removeEventListener('resize', redimensionarCanvasOndaVoz);
+    nivelAudioVoz = 0;
+    const ctx = canvasOndaVoz.getContext('2d');
+    if (ctx) {
+        ctx.clearRect(0, 0, canvasOndaVoz.width, canvasOndaVoz.height);
+    }
+}
+
+function definirAtividadeBuscaVoz(ativa) {
+    popupBuscaVoz.classList.toggle('ouvindo-voz', ativa);
+}
+
+function atualizarNivelAudioVoz() {
+    if (!analisadorAudioVoz || !dadosAudioVoz) {
+        nivelAudioVoz *= 0.88;
+        quadroAudioVoz = requestAnimationFrame(atualizarNivelAudioVoz);
+        return;
+    }
+
+    analisadorAudioVoz.getByteTimeDomainData(dadosAudioVoz);
+    let somaQuadrados = 0;
+    for (let indice = 0; indice < dadosAudioVoz.length; indice += 1) {
+        const amostra = (dadosAudioVoz[indice] - 128) / 128;
+        somaQuadrados += amostra * amostra;
+    }
+
+    const nivelMedido = Math.min(Math.sqrt(somaQuadrados / dadosAudioVoz.length) * 5, 1);
+    nivelAudioVoz = nivelAudioVoz * 0.72 + nivelMedido * 0.28;
+    definirAtividadeBuscaVoz(nivelAudioVoz > 0.025);
+    quadroAudioVoz = requestAnimationFrame(atualizarNivelAudioVoz);
+}
+
+async function iniciarCapturaMicrofoneVoz(sessao) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('insecure-context');
+    }
+
+    const fluxo = await navigator.mediaDevices.getUserMedia({
+        audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+        },
+        video: false
+    });
+
+    if (sessao !== sessaoBuscaVoz || popupBuscaVoz.classList.contains('hidden')) {
+        fluxo.getTracks().forEach(faixa => faixa.stop());
+        return false;
+    }
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) {
+        fluxo.getTracks().forEach(faixa => faixa.stop());
+        throw new Error('audio-context');
+    }
+
+    fluxoMicrofoneVoz = fluxo;
+    contextoAudioVoz = new AudioContext();
+    await contextoAudioVoz.resume();
+    analisadorAudioVoz = contextoAudioVoz.createAnalyser();
+    analisadorAudioVoz.fftSize = 512;
+    analisadorAudioVoz.smoothingTimeConstant = 0.75;
+    contextoAudioVoz.createMediaStreamSource(fluxoMicrofoneVoz).connect(analisadorAudioVoz);
+    dadosAudioVoz = new Uint8Array(analisadorAudioVoz.fftSize);
+    atualizarNivelAudioVoz();
+    return true;
+}
+
+function pararCapturaMicrofoneVoz() {
+    if (quadroAudioVoz !== null) {
+        cancelAnimationFrame(quadroAudioVoz);
+        quadroAudioVoz = null;
+    }
+    if (fluxoMicrofoneVoz) {
+        fluxoMicrofoneVoz.getTracks().forEach(faixa => faixa.stop());
+        fluxoMicrofoneVoz = null;
+    }
+    if (contextoAudioVoz) {
+        const contexto = contextoAudioVoz;
+        contextoAudioVoz = null;
+        contexto.close().catch(error => {
+            console.error('Nao foi possivel encerrar o contexto de audio da busca por voz.', error);
+        });
+    }
+    analisadorAudioVoz = null;
+    dadosAudioVoz = null;
+    nivelAudioVoz = 0;
+    definirAtividadeBuscaVoz(false);
+}
+
 // Funcao para gerar os cartoes de personagens no grid
 function gerarCartoesPersonagens() {
-    gridPersonagens.innerHTML = '';
+    const cartoes = document.createDocumentFragment();
     
     personagens.forEach((personagem, index) => {
         const cartao = document.createElement('div');
@@ -397,15 +592,27 @@ function gerarCartoesPersonagens() {
         } else if (index === 13) {
             imagem.classList.add('imagem-personagem-catorze');
         }
-        imagem.src = personagem.imagem;
+        imagem.loading = index < 9 ? 'eager' : 'lazy';
+        imagem.decoding = 'async';
         imagem.alt = 'Personagem';
+        imagem.src = personagem.imagem;
         
         areaImagem.appendChild(imagem);
         cartao.appendChild(areaImagem);
-        gridPersonagens.appendChild(cartao);
+        cartoes.appendChild(cartao);
         
         // Adiciona evento de clique para selecionar personagem
         cartao.addEventListener('click', () => abrirPopupPersonagemSelecionado(index));
+    });
+
+    gridPersonagens.replaceChildren(cartoes);
+}
+
+function decodificarImagensPersonagens() {
+    gridPersonagens.querySelectorAll('img[loading="eager"]').forEach(imagem => {
+        imagem.decode().catch(error => {
+            console.warn(`Nao foi possivel decodificar a imagem do personagem ${imagem.alt}.`, error);
+        });
     });
 }
 
@@ -417,6 +624,7 @@ function abrirPopupPersonagemSelecionado(index) {
 
 function prepararPopupPersonagemSelecionado(index) {
     const personagem = personagens[index];
+    precarregarGifCelebracao(personagem);
     
     // Limpa e adiciona a imagem do personagem selecionado
     imagemPersonagemSelecionado.innerHTML = '';
@@ -424,6 +632,7 @@ function prepararPopupPersonagemSelecionado(index) {
     if (index === 6) {
         imagem.classList.add('imagem-personagem-sete');
     }
+    imagem.decoding = 'async';
     imagem.src = personagem.imagem;
     imagem.alt = 'Personagem selecionado';
     imagemPersonagemSelecionado.appendChild(imagem);
@@ -441,6 +650,24 @@ function prepararPopupPersonagemSelecionado(index) {
     popupPersonagemSelecionado.classList.remove('hidden');
 }
 
+function precarregarGifCelebracao(personagem) {
+    if (gifsCelebracaoPrecarregados.has(personagem.gif)) {
+        return;
+    }
+
+    const imagem = new Image();
+    imagem.decoding = 'async';
+    imagem.fetchPriority = 'low';
+    imagem.src = personagem.gif;
+    gifsCelebracaoPrecarregados.set(personagem.gif, imagem);
+    imagem.decode().catch(error => {
+        if (gifsCelebracaoPrecarregados.get(personagem.gif) === imagem) {
+            gifsCelebracaoPrecarregados.delete(personagem.gif);
+        }
+        console.error(`Nao foi possivel preparar a animacao ${personagem.gif}.`, error);
+    });
+}
+
 // Funcao para fechar o popup de personagem selecionado
 function fecharPopupPersonagemSelecionado() {
     popupPersonagemSelecionado.classList.add('hidden');
@@ -452,7 +679,6 @@ function abrirPopup() {
     atualizarHistoricoAplicacao('personagens');
     popupPersonagens.appendChild(canvasOnda);
     popupPersonagens.classList.remove('hidden');
-    gerarCartoesPersonagens();
 }
 
 // Funcao para fechar o popup de personagens
@@ -553,7 +779,7 @@ function iniciarAnimacaoCelebracao() {
 
 // Funcao para gerar os cartoes de servicos AWS
 function gerarCartoesServicos() {
-    gridServicos.innerHTML = '';
+    const cartoes = document.createDocumentFragment();
     
     servicosAWS.forEach((servico, index) => {
         const cartao = document.createElement('div');
@@ -568,11 +794,13 @@ function gerarCartoesServicos() {
         
         cartao.appendChild(icone);
         cartao.appendChild(nome);
-        gridServicos.appendChild(cartao);
+        cartoes.appendChild(cartao);
         
         // Adiciona evento de clique para selecionar servico
         cartao.addEventListener('click', () => selecionarServico(servico));
     });
+
+    gridServicos.replaceChildren(cartoes);
 }
 
 function criarIconeServico(servico, index) {
@@ -582,7 +810,8 @@ function criarIconeServico(servico, index) {
 
     const icone = document.createElement('img');
     icone.className = 'icone-servico';
-    icone.src = `imagens/servicos/servico${String(index + 1).padStart(2, '0')}.png`;
+    icone.decoding = 'async';
+    icone.src = `imagens/servicos/servico${String(index + 1).padStart(2, '0')}.webp`;
     icone.alt = servico.nome;
     icone.addEventListener('error', () => {
         icone.replaceWith(criarIconeFallbackServico(servico, icone.className));
@@ -606,6 +835,258 @@ function normalizarBuscaServico(texto) {
         .replace(/[\u0300-\u036f]/g, '')
         .toLocaleLowerCase('pt-BR')
         .replace(/\b(?:amazon|aws)\b/g, 'aws');
+}
+
+function localizarServicoPorVoz(texto) {
+    const palavrasIgnoradas = new Set([
+        'a', 'abra', 'acessar', 'amazon', 'aws', 'da', 'das', 'de', 'do', 'dos',
+        'eu', 'favor', 'me', 'mostra', 'mostrar', 'o', 'por', 'quero', 'servico',
+        'servicos', 'um', 'uma'
+    ]);
+    const palavrasFaladas = normalizarBuscaServico(texto)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(palavra => palavra && !palavrasIgnoradas.has(palavra));
+
+    if (palavrasFaladas.length === 0) {
+        return -1;
+    }
+
+    const palavrasCompactadas = palavrasFaladas.join('');
+    const servicosCorrespondentes = servicosAWS
+        .map((servico, index) => {
+            const palavrasServico = normalizarBuscaServico(servico.nome)
+                .split(/\s+/)
+                .filter(palavra => palavra !== 'aws');
+            const correspondePorSequencia = palavrasServico.some((_, inicio) =>
+                palavrasServico.every((palavra, deslocamento) =>
+                    palavrasFaladas[inicio + deslocamento] === palavra
+                )
+            );
+            const correspondeCompactado = palavrasCompactadas === palavrasServico.join('');
+
+            return {
+                index,
+                pontuacao: correspondePorSequencia || correspondeCompactado ? palavrasServico.length : 0
+            };
+        })
+        .filter(({ pontuacao }) => pontuacao > 0)
+        .sort((a, b) => b.pontuacao - a.pontuacao);
+
+    if (servicosCorrespondentes.length === 0
+        || (servicosCorrespondentes.length > 1
+            && servicosCorrespondentes[0].pontuacao === servicosCorrespondentes[1].pontuacao)) {
+        return -1;
+    }
+
+    return servicosCorrespondentes[0].index;
+}
+
+function definirStatusBuscaVoz(status, permitirNovaTentativa = false) {
+    statusBuscaVoz.textContent = status;
+    botaoTentarNovamenteBuscaVoz.classList.toggle('hidden', !permitirNovaTentativa);
+}
+
+async function iniciarReconhecimentoVoz() {
+    const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const sessao = ++sessaoBuscaVoz;
+    transcricaoBuscaVoz.textContent = '';
+    definirAtividadeBuscaVoz(false);
+
+    if (reconhecimentoVoz) {
+        const reconhecimentoAnterior = reconhecimentoVoz;
+        reconhecimentoVoz = null;
+        reconhecimentoVozAtivo = false;
+        reconhecimentoAnterior.stop();
+    }
+    pararCapturaMicrofoneVoz();
+
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+        definirStatusBuscaVoz('O microfone exige HTTPS ou acesso pelo endereço localhost.');
+        botaoTentarNovamenteBuscaVoz.classList.add('hidden');
+        return;
+    }
+
+    if (!Reconhecimento) {
+        definirStatusBuscaVoz('Este navegador não oferece suporte à busca por voz. Use Chrome ou Edge.');
+        botaoTentarNovamenteBuscaVoz.classList.add('hidden');
+        return;
+    }
+
+    definirStatusBuscaVoz('Solicitando acesso ao microfone...', false);
+
+    let reconhecimento;
+    try {
+        reconhecimento = new Reconhecimento();
+        reconhecimento.lang = 'pt-BR';
+        reconhecimento.interimResults = true;
+        reconhecimento.continuous = false;
+        reconhecimento.maxAlternatives = 5;
+    } catch (error) {
+        console.error('Nao foi possivel preparar o reconhecimento de voz.', error);
+        definirStatusBuscaVoz('Não foi possível preparar a busca por voz.', true);
+        return;
+    }
+
+    try {
+        const microfoneIniciado = await iniciarCapturaMicrofoneVoz(sessao);
+        if (!microfoneIniciado || sessao !== sessaoBuscaVoz) {
+            return;
+        }
+    } catch (error) {
+        console.error('Nao foi possivel acessar ou analisar o audio do microfone.', error);
+        pararCapturaMicrofoneVoz();
+        const mensagensErro = {
+            'NotAllowedError': 'Acesso ao microfone negado. Permita o uso do microfone nas configurações do navegador.',
+            'PermissionDeniedError': 'Acesso ao microfone negado. Permita o uso do microfone nas configurações do navegador.',
+            'NotFoundError': 'Nenhum microfone foi encontrado neste dispositivo.',
+            'NotReadableError': 'O microfone está sendo usado por outro aplicativo.',
+            'SecurityError': 'O microfone exige HTTPS ou acesso pelo endereço localhost.',
+            'insecure-context': 'O microfone exige HTTPS ou acesso pelo endereço localhost.',
+            'audio-context': 'Este navegador não oferece suporte à análise do microfone.'
+        };
+        definirStatusBuscaVoz(
+            mensagensErro[error.name] || 'Não foi possível iniciar o microfone. Verifique a conexão e as permissões.',
+            error.name !== 'SecurityError' && error.name !== 'insecure-context'
+        );
+        return;
+    }
+
+    if (sessao !== sessaoBuscaVoz) {
+        pararCapturaMicrofoneVoz();
+        return;
+    }
+
+    definirStatusBuscaVoz('Ouvindo...', false);
+    reconhecimentoVoz = reconhecimento;
+    reconhecimento.onstart = () => {
+        if (reconhecimentoVoz === reconhecimento) {
+            reconhecimentoVozAtivo = true;
+        }
+    };
+    reconhecimento.onspeechstart = () => {
+        if (reconhecimentoVoz === reconhecimento) {
+            definirAtividadeBuscaVoz(true);
+        }
+    };
+    reconhecimento.onspeechend = () => {
+        if (reconhecimentoVoz === reconhecimento) {
+            definirAtividadeBuscaVoz(false);
+        }
+    };
+    reconhecimento.onresult = (event) => {
+        if (reconhecimentoVoz !== reconhecimento) {
+            return;
+        }
+
+        let textoFinal = '';
+        let indiceServico = -1;
+        for (let indice = event.resultIndex; indice < event.results.length; indice += 1) {
+            const resultado = event.results[indice];
+            const texto = resultado[0].transcript.trim();
+            if (!resultado.isFinal) {
+                transcricaoBuscaVoz.textContent = texto;
+                continue;
+            }
+
+            textoFinal = texto;
+            for (let alternativa = 0; alternativa < resultado.length; alternativa += 1) {
+                const textoAlternativo = resultado[alternativa].transcript.trim();
+                const correspondencia = localizarServicoPorVoz(textoAlternativo);
+                if (correspondencia !== -1) {
+                    indiceServico = correspondencia;
+                    textoFinal = textoAlternativo;
+                    break;
+                }
+            }
+        }
+
+        if (!textoFinal) {
+            return;
+        }
+
+        transcricaoBuscaVoz.textContent = textoFinal;
+        if (indiceServico === -1) {
+            definirStatusBuscaVoz('Não encontrei esse serviço. Tente dizer o nome novamente.', true);
+            return;
+        }
+
+        campoBuscaServicos.value = servicosAWS[indiceServico].nome;
+        fecharPopupBuscaVoz(false);
+        resultadosBuscaServicos.classList.add('hidden');
+        campoBuscaServicos.setAttribute('aria-expanded', 'false');
+        abrirPopupCartaoServico(indiceServico);
+    };
+    reconhecimento.onerror = (event) => {
+        if (reconhecimentoVoz !== reconhecimento) {
+            return;
+        }
+
+        const mensagensErro = {
+            'audio-capture': 'Não foi possível acessar o microfone deste dispositivo.',
+            'network': 'Falha no serviço de reconhecimento de voz. Verifique a conexão e tente novamente.',
+            'not-allowed': 'Permita o acesso ao microfone nas configurações do navegador.',
+            'service-not-allowed': 'O serviço de reconhecimento de voz foi bloqueado pelo navegador.',
+            'no-speech': 'Não ouvi nenhuma fala. Tente novamente.'
+        };
+        reconhecimentoVoz = null;
+        reconhecimentoVozAtivo = false;
+        pararCapturaMicrofoneVoz();
+        definirStatusBuscaVoz(
+            mensagensErro[event.error] || 'Ocorreu um erro no reconhecimento de voz.',
+            event.error !== 'not-allowed' && event.error !== 'service-not-allowed'
+        );
+    };
+    reconhecimento.onend = () => {
+        if (reconhecimentoVoz !== reconhecimento) {
+            return;
+        }
+
+        reconhecimentoVozAtivo = false;
+        reconhecimentoVoz = null;
+        pararCapturaMicrofoneVoz();
+        if (statusBuscaVoz.textContent === 'Ouvindo...') {
+            definirStatusBuscaVoz('Não ouvi nenhuma fala. Tente novamente.', true);
+        }
+    };
+
+    try {
+        reconhecimento.start();
+        reconhecimentoVozAtivo = true;
+    } catch (error) {
+        reconhecimentoVoz = null;
+        reconhecimentoVozAtivo = false;
+        pararCapturaMicrofoneVoz();
+        console.error('Nao foi possivel iniciar o reconhecimento de voz.', error);
+        definirStatusBuscaVoz('Não foi possível iniciar o reconhecimento de voz. Tente novamente.', true);
+    }
+}
+
+function abrirPopupBuscaVoz() {
+    resultadosBuscaServicos.classList.add('hidden');
+    campoBuscaServicos.setAttribute('aria-expanded', 'false');
+    popupBuscaVoz.classList.remove('hidden');
+    iniciarAnimacaoOndaVoz();
+    iniciarReconhecimentoVoz();
+    botaoFecharPopupBuscaVoz.focus();
+}
+
+function fecharPopupBuscaVoz(retornarFoco = true) {
+    sessaoBuscaVoz += 1;
+    if (reconhecimentoVoz) {
+        const reconhecimentoAtual = reconhecimentoVoz;
+        reconhecimentoVoz = null;
+        reconhecimentoVozAtivo = false;
+        reconhecimentoAtual.stop();
+    }
+    pararCapturaMicrofoneVoz();
+    definirAtividadeBuscaVoz(false);
+    popupBuscaVoz.classList.add('hidden');
+    pararAnimacaoOndaVoz();
+    if (retornarFoco && !botaoBuscaVoz.closest('.hidden')) {
+        botaoBuscaVoz.focus();
+    }
 }
 
 function atualizarResultadosBuscaServicos() {
@@ -797,6 +1278,15 @@ function irParaJornada() {
 // Event Listeners
 cartaoCentral.addEventListener('click', abrirPopup);
 
+botaoBuscaVoz.addEventListener('click', abrirPopupBuscaVoz);
+botaoFecharPopupBuscaVoz.addEventListener('click', () => fecharPopupBuscaVoz());
+botaoTentarNovamenteBuscaVoz.addEventListener('click', iniciarReconhecimentoVoz);
+popupBuscaVoz.addEventListener('click', (event) => {
+    if (event.target === popupBuscaVoz) {
+        fecharPopupBuscaVoz();
+    }
+});
+
 campoBuscaServicos.addEventListener('input', atualizarResultadosBuscaServicos);
 resultadosBuscaServicos.addEventListener('click', selecionarResultadoBusca);
 campoBuscaServicos.addEventListener('keydown', (event) => {
@@ -815,6 +1305,10 @@ popupCartaoServico.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !popupBuscaVoz.classList.contains('hidden')) {
+        fecharPopupBuscaVoz();
+        return;
+    }
     if (event.key === 'Escape' && !popupCartaoServico.classList.contains('hidden')) {
         fecharPopupCartaoServico();
     }
@@ -845,5 +1339,7 @@ popupPersonagemSelecionado.addEventListener('click', (event) => {
 // Inicializacao
 document.addEventListener('DOMContentLoaded', () => {
     window.history.replaceState({ app: 'FinSlash', tela: 'inicio' }, '', window.location.href);
+    gerarCartoesPersonagens();
+    decodificarImagensPersonagens();
     inicializarCanvasOnda();
 });

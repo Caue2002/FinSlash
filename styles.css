@@ -482,7 +482,7 @@ body {
 #campo-busca-servicos {
     width: 100%;
     min-width: 0;
-    padding: 0;
+    padding: 0 34px 0 0;
     border: 0;
     outline: 0;
     background: transparent;
@@ -494,6 +494,40 @@ body {
 #campo-busca-servicos::placeholder {
     color: #64748b;
     opacity: 1;
+}
+
+.botao-busca-voz {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 5px;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #3b82f6;
+    cursor: pointer;
+}
+
+.botao-busca-voz:hover,
+.botao-busca-voz:focus-visible {
+    outline: none;
+    background-color: #eff6ff;
+}
+
+.botao-busca-voz svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
 }
 
 .resultados-busca-servicos {
@@ -553,6 +587,146 @@ body {
 
 #popup-cartao-servico {
     overflow: hidden;
+}
+
+#popup-busca-voz {
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.82);
+}
+
+#popup-busca-voz .visualizador-onda-voz {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 0;
+    width: 228px;
+    height: 228px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.conteudo-popup-busca-voz {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(420px, 100%);
+    min-height: 430px;
+    padding: 48px 28px 32px;
+    border: 1px solid rgba(59, 130, 246, 0.18);
+    border-radius: 24px;
+    background-color: rgba(255, 255, 255, 0.86);
+    box-shadow: 0 20px 60px rgba(30, 64, 175, 0.2);
+    text-align: center;
+}
+
+.conteudo-popup-busca-voz h2 {
+    color: #1e3a8a;
+    font-family: 'Varela Round', 'Segoe UI', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.fechar-popup-busca-voz {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background-color: #eff6ff;
+    color: #2563eb;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.indicador-microfone-voz {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 240px;
+    width: 240px;
+    height: 240px;
+    margin: 14px 0 8px;
+    border-radius: 50%;
+}
+
+.botao-microfone-voz {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #60a5fa, #2563eb);
+    box-shadow: 0 8px 26px rgba(37, 99, 235, 0.34);
+}
+
+.botao-microfone-voz svg {
+    position: relative;
+    z-index: 1;
+    width: 42px;
+    height: 42px;
+    fill: none;
+    stroke: #ffffff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+}
+
+@media (max-width: 480px) {
+    .conteudo-popup-busca-voz {
+        min-height: 400px;
+        padding: 48px 20px 24px;
+    }
+
+    .indicador-microfone-voz {
+        flex-basis: 220px;
+        width: 220px;
+        height: 220px;
+    }
+
+    #popup-busca-voz .visualizador-onda-voz {
+        width: 212px;
+        height: 212px;
+    }
+}
+
+.status-busca-voz {
+    min-height: 1.5em;
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.transcricao-busca-voz {
+    min-height: 1.5em;
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 0.92rem;
+}
+
+.tentar-novamente-busca-voz {
+    margin-top: 14px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 20px;
+    background-color: #2563eb;
+    color: #ffffff;
+    font: inherit;
+    cursor: pointer;
+}
+
+.tentar-novamente-busca-voz:hover,
+.tentar-novamente-busca-voz:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.3);
+    outline-offset: 2px;
+    background-color: #1d4ed8;
 }
 
 #popup-cartao-servico .canvas-onda {

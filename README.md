@@ -13,15 +13,15 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 
 ## Como executar
 
-O projeto não requer compilação nem instalação de dependências. Abra o arquivo `index.html` em um navegador atualizado.
-
-Para executar um servidor local, abra um terminal na pasta do projeto e inicie um servidor HTTP estático. Por exemplo, com Python instalado:
+O projeto não requer compilação nem instalação de dependências. Para executar um servidor local, abra um terminal na pasta do projeto e inicie um servidor HTTP estático. Por exemplo, com Python instalado:
 
 ```text
 python -m http.server 8000
 ```
 
 Depois, acesse `http://localhost:8000` no navegador.
+
+Abrir o arquivo `index.html` diretamente também permite explorar a interface, mas o acesso ao microfone requer um contexto seguro: HTTPS ou `localhost`. A busca por voz também depende de um navegador compatível, como Chrome ou Edge, das permissões do microfone e da conexão com o serviço de reconhecimento de fala.
 
 ## Tecnologias
 
@@ -41,12 +41,13 @@ FinSlash/
 ├── LICENSE                 # Tradução informativa da licença MIT
 ├── README.md               # Documentação do projeto
 └── imagens/
-    ├── logo.png            # Logotipo
-    ├── personagem*.png     # Imagens dos personagens
-    ├── personagem*.jpg     # Imagens adicionais dos personagens
+    ├── logo.webp           # Logotipo otimizado sem perdas
+    ├── personagem*.webp    # Imagens otimizadas sem perdas
     ├── gif*.gif            # Animações dos personagens
-    └── servicos/           # Ícones dos serviços
+    └── servicos/           # Ícones dos serviços otimizados sem perdas
 ```
+
+Os arquivos PNG e JPEG originais são mantidos; a interface usa versões WebP sem perdas para reduzir o carregamento.
 
 ## Observações
 

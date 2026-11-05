@@ -12,6 +12,23 @@ body {
     overflow-x: hidden;
 }
 
+html,
+body,
+.popup-conteudo,
+.resultados-busca-servicos,
+.painel-perfil {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.popup-conteudo::-webkit-scrollbar,
+.resultados-busca-servicos::-webkit-scrollbar,
+.painel-perfil::-webkit-scrollbar {
+    display: none;
+}
+
 /* Canvas para efeito de onda azul */
 .canvas-onda {
     position: absolute;
@@ -117,6 +134,132 @@ body {
     padding-bottom: 32px;
     max-height: calc(100vh - 140px);
     background-color: transparent;
+}
+
+.popup-editar-nome-perfil {
+    z-index: 1500;
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(5px);
+}
+
+.cartao-editar-nome-perfil {
+    width: min(100%, 400px);
+    padding: 30px;
+    border: 1px solid #dbeafe;
+    border-radius: 24px;
+    background: linear-gradient(160deg, #ffffff 0%, #eff6ff 100%);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.3);
+    animation: surgir-cartao-editar-nome 0.2s ease-out;
+}
+
+@keyframes surgir-cartao-editar-nome {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.icone-editar-nome-perfil {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 18px;
+    border-radius: 16px;
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.icone-editar-nome-perfil svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+.cartao-editar-nome-perfil h2 {
+    color: #1e3a8a;
+    font-family: 'Varela Round', 'Segoe UI', sans-serif;
+    font-size: 1.4rem;
+}
+
+.cartao-editar-nome-perfil > p {
+    margin-top: 8px;
+    color: #64748b;
+}
+
+.cartao-editar-nome-perfil label {
+    display: block;
+    margin-top: 22px;
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.cartao-editar-nome-perfil input {
+    width: 100%;
+    height: 48px;
+    margin-top: 7px;
+    padding: 0 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    outline: none;
+    background: #ffffff;
+    color: #1e293b;
+    font: inherit;
+}
+
+.cartao-editar-nome-perfil input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
+}
+
+.cartao-editar-nome-perfil input[aria-invalid="true"] {
+    border-color: #dc2626;
+}
+
+.erro-nome-perfil {
+    margin-top: 6px;
+    color: #b91c1c;
+    font-size: 0.86rem;
+}
+
+.botoes-editar-nome-perfil {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.botoes-editar-nome-perfil button {
+    min-height: 42px;
+    padding: 0 17px;
+    border-radius: 12px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.botao-cancelar-edicao-nome {
+    border: 1px solid #bfdbfe;
+    background: #ffffff;
+    color: #2563eb;
+}
+
+.botao-salvar-edicao-nome {
+    border: 0;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #ffffff;
+    box-shadow: 0 5px 14px rgba(37, 99, 235, 0.25);
 }
 
 .cabecalho-menu-personagens {
@@ -546,6 +689,10 @@ body {
     min-height: 100vh;
     padding: 20px;
     background-color: #f8fafc;
+}
+
+#tela-servicos.tela-com-navegacao {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
 }
 
 /* Header com logo e personagem */
@@ -1383,22 +1530,6 @@ button.item-historico-perfil:focus-visible {
     font-size: 0.84rem;
 }
 
-@media (min-width: 769px) {
-    html,
-    body,
-    .popup-conteudo,
-    .painel-perfil {
-        scrollbar-width: none;
-    }
-
-    html::-webkit-scrollbar,
-    body::-webkit-scrollbar,
-    .popup-conteudo::-webkit-scrollbar,
-    .painel-perfil::-webkit-scrollbar {
-        display: none;
-    }
-}
-
 /* Responsividade para header em mobile */
 @media (max-width: 768px) {
     .header-pagina {
@@ -1420,8 +1551,11 @@ button.item-historico-perfil:focus-visible {
     }
 
     #popup-personagens .popup-conteudo {
-        margin-top: 80px;
-        max-height: calc(100vh - 120px);
+        margin-top: 76px;
+        padding-bottom: 112px;
+        padding-bottom: max(112px, calc(92px + env(safe-area-inset-bottom)));
+        max-height: calc(100vh - 108px);
+        max-height: calc(100dvh - 108px - env(safe-area-inset-bottom));
     }
 
     .cabecalho-menu-personagens {
@@ -1461,6 +1595,11 @@ button.item-historico-perfil:focus-visible {
         width: min(100%, 520px);
         min-width: 0;
         padding: 24px 20px;
+    }
+
+    .cartao-editar-nome-perfil {
+        padding: 24px;
+        border-radius: 20px;
     }
 }
 

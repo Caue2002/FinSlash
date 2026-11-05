@@ -136,6 +136,11 @@ const botaoFecharPerfil = document.getElementById('fechar-perfil');
 const avatarPerfil = document.getElementById('avatar-perfil');
 const tituloPerfil = document.getElementById('titulo-perfil');
 const botaoEditarTituloPerfil = document.getElementById('editar-titulo-perfil');
+const popupEditarNomePerfil = document.getElementById('popup-editar-nome-perfil');
+const formularioEditarNomePerfil = document.getElementById('formulario-editar-nome-perfil');
+const campoNomePerfil = document.getElementById('campo-nome-perfil');
+const erroNomePerfil = document.getElementById('erro-nome-perfil');
+const botaoCancelarEdicaoNomePerfil = document.getElementById('cancelar-edicao-nome-perfil');
 const nomePersonagemPerfil = document.getElementById('nome-personagem-perfil');
 const listaHistoricoPerfil = document.getElementById('lista-historico-perfil');
 const listaMedalhasPerfil = document.getElementById('lista-medalhas-perfil');
@@ -327,14 +332,35 @@ function abrirPerfil() {
 }
 
 function editarNomePerfil() {
-    const nome = window.prompt('Como você gostaria de ser chamado?', dadosPersistidos.nomePerfil);
-    if (nome === null || !nome.trim()) {
+    campoNomePerfil.value = dadosPersistidos.nomePerfil;
+    campoNomePerfil.removeAttribute('aria-invalid');
+    erroNomePerfil.textContent = '';
+    erroNomePerfil.classList.add('hidden');
+    popupEditarNomePerfil.classList.remove('hidden');
+    campoNomePerfil.focus();
+    campoNomePerfil.select();
+}
+
+function fecharEdicaoNomePerfil() {
+    popupEditarNomePerfil.classList.add('hidden');
+}
+
+function salvarNomePerfil(event) {
+    event.preventDefault();
+    const nome = campoNomePerfil.value.trim();
+    if (!nome) {
+        campoNomePerfil.setAttribute('aria-invalid', 'true');
+        erroNomePerfil.textContent = 'Digite um nome para continuar.';
+        erroNomePerfil.classList.remove('hidden');
+        campoNomePerfil.focus();
         return;
     }
 
-    dadosPersistidos.nomePerfil = nome.trim().slice(0, 40);
+    campoNomePerfil.removeAttribute('aria-invalid');
+    dadosPersistidos.nomePerfil = nome.slice(0, 40);
     tituloPerfil.textContent = dadosPersistidos.nomePerfil;
     salvarDadosPersistidos();
+    fecharEdicaoNomePerfil();
 }
 
 function fecharPerfil() {
@@ -1080,6 +1106,73 @@ function localizarServicoPorVoz(texto) {
     }
 
     const palavrasCompactadas = palavrasFaladas.join('');
+    const aliasesVoz = {
+        'Amazon EC2': ['ec dois', 'e c dois', 'e c 2', 'i c dois'],
+        'AWS Lambda': ['lambida', 'lambda aws'],
+        'Amazon ECS': ['e c s', 'e c esse', 'e ce esse', 'é que esse', 'ecs amazon'],
+        'Amazon EKS': ['e k s', 'e k esse', 'e cá esse', 'eks amazon'],
+        'Amazon S3': ['s três', 'esse três', 's tree', 's 3'],
+        'Amazon EBS': ['e b s', 'e bê esse', 'e b esse'],
+        'Amazon EFS': ['e f s', 'e efe esse', 'e f esse'],
+        'Amazon RDS': ['r d s', 'erre de esse', 'r d esse'],
+        'Amazon ElastiCache': ['elastic cache', 'elasti cache'],
+        'Amazon OpenSearch': ['open search'],
+        'Amazon SageMaker': ['sage maker', 'seij meiker'],
+        'Amazon MSK': ['m s k', 'eme esse cá'],
+        'Amazon EMR': ['e m r', 'e eme erre'],
+        'Amazon Kinesis': ['quinesis', 'kinésis'],
+        'AWS WAF': ['w a f', 'dábliu a efe'],
+        'AWS KMS': ['k m s', 'cá eme esse'],
+        'Amazon SQS': ['s q s', 'esse que esse'],
+        'Amazon SNS': ['s n s', 'esse ene esse'],
+        'Amazon VPC': ['v p c', 'vê pê cê'],
+        'Amazon DynamoDB': ['dynamo db', 'dínamo db', 'dynamo de be'],
+        'Amazon API Gateway': ['api gateway', 'a p i gateway'],
+        'AWS IAM Access Analyzer': ['iam access analyzer', 'i am access analyzer'],
+        'AWS Direct Connect': ['direct connect'],
+        'Amazon CloudFront': ['cloud front'],
+        'Amazon CloudWatch': ['cloud watch'],
+        'Amazon EventBridge': ['event bridge'],
+        'Amazon DocumentDB': ['document db'],
+        'AWS MemoryDB for Redis': ['memory db redis', 'memory db for redis'],
+        'Amazon WorkSpaces': ['work spaces']
+    };
+    const palavrasIgnoradasAlias = palavrasIgnoradas;
+    const formasFaladas = [];
+    for (let inicio = 0; inicio < palavrasFaladas.length; inicio += 1) {
+        for (let tamanho = 1; tamanho <= Math.min(5, palavrasFaladas.length - inicio); tamanho += 1) {
+            formasFaladas.push(palavrasFaladas.slice(inicio, inicio + tamanho).join(''));
+        }
+    }
+
+    const correspondenciasExatas = [];
+    servicosAWS.forEach((servico, index) => {
+        const nomes = [
+            servico.nome,
+            ...(aliasesVoz[servico.nome] || [])
+        ];
+        const encontrou = nomes.some(nome => {
+            const palavrasNome = normalizarBuscaServico(nome)
+                .replace(/[^a-z0-9]+/g, ' ')
+                .trim()
+                .split(/\s+/)
+                .filter(palavra => palavra && !palavrasIgnoradasAlias.has(palavra));
+            const compacto = palavrasNome.join('');
+            return compacto && (compacto === palavrasCompactadas
+                || formasFaladas.includes(compacto));
+        });
+        if (encontrou) {
+            correspondenciasExatas.push(index);
+        }
+    });
+
+    if (correspondenciasExatas.length === 1) {
+        return correspondenciasExatas[0];
+    }
+    if (correspondenciasExatas.length > 1) {
+        return -1;
+    }
+
     const servicosCorrespondentes = servicosAWS
         .map((servico, index) => {
             const palavrasServico = normalizarBuscaServico(servico.nome)
@@ -1092,9 +1185,45 @@ function localizarServicoPorVoz(texto) {
             );
             const correspondeCompactado = palavrasCompactadas === palavrasServico.join('');
 
+            let pontuacao = correspondePorSequencia || correspondeCompactado ? palavrasServico.length : 0;
+            const formasServico = [
+                servico.nome,
+                ...(aliasesVoz[servico.nome] || [])
+            ].map(nome => normalizarBuscaServico(nome)
+                .replace(/[^a-z0-9]+/g, ' ')
+                .trim()
+                .split(/\s+/)
+                .filter(palavra => palavra && !palavrasIgnoradasAlias.has(palavra))
+                .join(''))
+                .filter(forma => forma.length >= 5);
+            formasServico.forEach(forma => {
+                formasFaladas.forEach(formaFalada => {
+                    if (Math.min(forma.length, formaFalada.length) < 5
+                        || Math.abs(forma.length - formaFalada.length) > 2) {
+                        return;
+                    }
+                    let anterior = Array.from({ length: formaFalada.length + 1 }, (_, posicao) => posicao);
+                    for (let letra = 1; letra <= forma.length; letra += 1) {
+                        const atual = [letra];
+                        for (let posicao = 1; posicao <= formaFalada.length; posicao += 1) {
+                            atual[posicao] = Math.min(
+                                atual[posicao - 1] + 1,
+                                anterior[posicao] + 1,
+                                anterior[posicao - 1] + (forma[letra - 1] === formaFalada[posicao - 1] ? 0 : 1)
+                            );
+                        }
+                        anterior = atual;
+                    }
+                    const similaridade = 1 - anterior[formaFalada.length] / Math.max(forma.length, formaFalada.length);
+                    if (similaridade >= 0.72) {
+                        pontuacao = Math.max(pontuacao, similaridade);
+                    }
+                });
+            });
+
             return {
                 index,
-                pontuacao: correspondePorSequencia || correspondeCompactado ? palavrasServico.length : 0
+                pontuacao
             };
         })
         .filter(({ pontuacao }) => pontuacao > 0)
@@ -1102,11 +1231,11 @@ function localizarServicoPorVoz(texto) {
 
     if (servicosCorrespondentes.length === 0
         || (servicosCorrespondentes.length > 1
-            && servicosCorrespondentes[0].pontuacao === servicosCorrespondentes[1].pontuacao)) {
+            && servicosCorrespondentes[0].pontuacao - servicosCorrespondentes[1].pontuacao < 0.08)) {
         return -1;
     }
 
-    return servicosCorrespondentes[0].index;
+    return servicosCorrespondentes[0].pontuacao >= 0.72 ? servicosCorrespondentes[0].index : -1;
 }
 
 function definirStatusBuscaVoz(status, permitirNovaTentativa = false) {
@@ -1566,6 +1695,24 @@ botaoVoltarSelecionado.addEventListener('click', voltarPelaNavegacao);
 botaoPerfilApp.addEventListener('click', abrirPerfil);
 botaoFecharPerfil.addEventListener('click', fecharPerfil);
 botaoEditarTituloPerfil.addEventListener('click', editarNomePerfil);
+formularioEditarNomePerfil.addEventListener('submit', salvarNomePerfil);
+botaoCancelarEdicaoNomePerfil.addEventListener('click', fecharEdicaoNomePerfil);
+campoNomePerfil.addEventListener('input', () => {
+    campoNomePerfil.removeAttribute('aria-invalid');
+    erroNomePerfil.textContent = '';
+    erroNomePerfil.classList.add('hidden');
+});
+popupEditarNomePerfil.addEventListener('click', event => {
+    if (event.target === popupEditarNomePerfil) {
+        fecharEdicaoNomePerfil();
+    }
+});
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !popupEditarNomePerfil.classList.contains('hidden')) {
+        fecharEdicaoNomePerfil();
+        botaoEditarTituloPerfil.focus();
+    }
+});
 popupPerfil.addEventListener('click', event => {
     if (event.target === popupPerfil) {
         fecharPerfil();

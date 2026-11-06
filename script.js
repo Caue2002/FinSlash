@@ -719,7 +719,8 @@ function inicializarCanvasOnda() {
         }
 
         if (document.body.classList.contains('tela-servicos-ativa')
-            && canvasOnda.width === largura) {
+            && canvasOnda.width === largura
+            && ondas.length > 0) {
             return;
         }
 

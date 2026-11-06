@@ -1953,7 +1953,7 @@ function irParaJornada() {
     // Salva a referencia ao personagem antes de limpar
     atualizarHistoricoAplicacao('servicos', {
         indicePersonagem: personagens.indexOf(personagemTemp)
-    }, true);
+    });
     
     // Define a imagem do personagem no header da tela de servicos
     imagemPersonagemHeader.src = personagemTemp.imagem;

@@ -1168,12 +1168,82 @@ function gerarCartoesTopicosServico() {
         cartao.className = 'cartao-servico cartao-topico-servico';
         cartao.type = 'button';
         cartao.dataset.index = index;
-        cartao.textContent = topico.titulo;
+        adicionarTituloTopico(cartao, topico.titulo);
         cartao.addEventListener('click', () => abrirPopupTopicoServico(index));
         cartoes.appendChild(cartao);
     });
 
     gridTopicosServico.replaceChildren(cartoes);
+    ajustarPalavrasLongasTopicos();
+}
+
+function adicionarTituloTopico(cartao, titulo) {
+    const conteudoTitulo = document.createElement('span');
+    conteudoTitulo.className = 'conteudo-titulo-topico';
+    const segmentos = titulo.split(/(\([^)]*\))/g);
+
+    segmentos.forEach(segmento => {
+        const dentroDeParenteses = segmento.startsWith('(') && segmento.endsWith(')');
+        segmento.split(/(\s+)/u).forEach(parte => {
+            if (/^\s+$/u.test(parte)) {
+                conteudoTitulo.appendChild(document.createTextNode(parte));
+                return;
+            }
+
+            const padraoPalavra = /[\p{L}\p{N}]+(?:[-/][\p{L}\p{N}]+)*/gu;
+            let posicao = 0;
+            let correspondencia;
+
+            while ((correspondencia = padraoPalavra.exec(parte)) !== null) {
+                conteudoTitulo.appendChild(
+                    document.createTextNode(parte.slice(posicao, correspondencia.index))
+                );
+                const palavra = document.createElement('span');
+                palavra.className = 'palavra-titulo-topico';
+                if (dentroDeParenteses && correspondencia[0].includes('-')) {
+                    palavra.classList.add('palavra-hifen-topico');
+                }
+                palavra.textContent = correspondencia[0];
+                conteudoTitulo.appendChild(palavra);
+                posicao = correspondencia.index + correspondencia[0].length;
+            }
+
+            conteudoTitulo.appendChild(document.createTextNode(parte.slice(posicao)));
+        });
+    });
+
+    cartao.appendChild(conteudoTitulo);
+}
+
+function ajustarPalavrasLongasTopicos() {
+    const palavras = gridTopicosServico.querySelectorAll('.palavra-titulo-topico');
+    palavras.forEach(palavra => {
+        palavra.style.removeProperty('font-size');
+        palavra.classList.remove('palavra-quebra-topico');
+    });
+
+    if (!window.matchMedia('(max-width: 768px)').matches) {
+        return;
+    }
+
+    gridTopicosServico.querySelectorAll('.cartao-topico-servico').forEach(cartao => {
+        const estiloCartao = getComputedStyle(cartao);
+        const larguraDisponivel = cartao.clientWidth
+            - parseFloat(estiloCartao.paddingLeft)
+            - parseFloat(estiloCartao.paddingRight);
+        const tamanhoFonteBase = parseFloat(estiloCartao.fontSize);
+
+        cartao.querySelectorAll('.palavra-titulo-topico').forEach(palavra => {
+            const larguraPalavra = palavra.getBoundingClientRect().width;
+            if (larguraPalavra > larguraDisponivel) {
+                if (palavra.classList.contains('palavra-hifen-topico')) {
+                    palavra.style.fontSize = `${tamanhoFonteBase * (larguraDisponivel - 1) / larguraPalavra}px`;
+                } else {
+                    palavra.classList.add('palavra-quebra-topico');
+                }
+            }
+        });
+    });
 }
 
 function criarIconeServico(servico, index) {
@@ -1979,6 +2049,7 @@ popupCartaoServico.addEventListener('click', (event) => {
 botaoFecharPopupTopicoServico.addEventListener('click', fecharPopupTopicoServico);
 botaoVoltarTopicoServico.addEventListener('click', fecharPopupTopicoServico);
 botaoVoltarTelaTopicos.addEventListener('click', voltarParaTelaServicos);
+window.addEventListener('resize', ajustarPalavrasLongasTopicos);
 popupTopicoServico.addEventListener('click', (event) => {
     if (event.target === popupTopicoServico) {
         fecharPopupTopicoServico();

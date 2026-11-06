@@ -79,6 +79,91 @@ const servicosAWS = [
     { nome: 'Amazon WorkSpaces', icone: '🖥️' },
     { nome: 'Amazon VPC', icone: '☁️' }
 ];
+const topicosEC2 = [
+    {
+        titulo: 'Instâncias Superdimensionadas (Over-provisioning)',
+        descricao: 'Engenheiros alocam instâncias gigantes (ex: m5.8xlarge) para processamento diário temendo estouro de memória, mas a utilização real raramente passa de 5% de CPU/RAM no dia a dia.'
+    },
+    {
+        titulo: 'Ambientes de Staging/HML Rodando 24/7',
+        descricao: 'Servidores de desenvolvimento, testes e homologação continuam ativos durante madrugadas e finais de semana. Em bancos, onde há dezenas de times, isso gera mais de 100 horas de cobrança inútil por semana.'
+    },
+    {
+        titulo: 'Rodando Cargas Contínuas no Preço On-Demand',
+        descricao: 'Manter aplicações do Core Bancário com uso estável o ano todo pagando a taxa cheia On-Demand, sem contratar Compute Savings Plans ou Reserved Instances, desperdiçando até 72% de desconto.'
+    },
+    {
+        titulo: 'Compra de Savings Plan antes do Rightsizing',
+        descricao: 'Comprar contratos de 1 a 3 anos da AWS para garantir desconto em uma frota de EC2 sem antes reduzir as instâncias ao tamanho certo. O banco fica preso pagando por capacidade inútil no longo prazo.'
+    },
+    {
+        titulo: 'Execução de Banco de Dados Relacional em EC2',
+        descricao: 'Instalar bancos de dados manuais (MySQL/PostgreSQL) dentro de instâncias EC2 em vez de usar serviços gerenciados (como Aurora ou RDS). Além de custos operacionais altos, exige instâncias imensas com IOPS caros provisionados sem automação.'
+    },
+    {
+        titulo: 'Ignorar Famílias de Instâncias da Nova Geração',
+        descricao: 'Manter instâncias antigas em execução (ex: famílias t2 ou m4) por medo de migração, pagando mais caro por menos desempenho em comparação às gerações atuais (como t3/t4g, m6i/m7g).'
+    },
+    {
+        titulo: 'Processamento de Lotes (Batch) em Instâncias Dedicadas',
+        descricao: 'Rodar liquidações financeiras noturnas ou relatórios de risco em instâncias On-Demand fixas, em vez de usar instâncias Spot (com até 90% de desconto) ou AWS Batch transitório.'
+    },
+    {
+        titulo: 'Subutilização por Falta de Auto Scaling de Redução (Scale-In)',
+        descricao: 'Configurar grupos de Auto Scaling para criar novas instâncias durante picos de transações (ex: horário do almoço no PIX), mas esquecer de configurar a política de encerramento quando o tráfego cai.'
+    },
+    {
+        titulo: 'Arquivos de Log Armazenados em Discos Locais (EBS)',
+        descricao: 'Gravar DEBUG logs do banco diretamente no disco da máquina em vez de enviar para o CloudWatch/S3, forçando o aumento constante e desnecessário do tamanho dos discos rígidos virtuais.'
+    },
+    {
+        titulo: 'Uso do Processador x86 em Vez de Arquitetura ARM (Graviton)',
+        descricao: 'Manter microsserviços rodando exclusivamente na arquitetura Intel/AMD sem avaliar a migração para os chips AWS Graviton (baseados em ARM), que entregam melhor desempenho com custo de até 20% a 40% menor.'
+    },
+    {
+        titulo: 'Instâncias "Zumbis" (Orphaned Instances)',
+        descricao: 'Instâncias ligadas para realizar testes temporários de integrações de parceiros ou validação de código que foram esquecidas pelos desenvolvedores e continuam cobrando por meses.'
+    },
+    {
+        titulo: 'Endereços de IP Público (Elastic IP) Não Associados',
+        descricao: 'Manter endereços de IP estáticos públicos (Elastic IPs) criados na conta, mas desalocados de instâncias ativas, o que gera cobrança por hora por IP ocioso.'
+    },
+    {
+        titulo: 'Agendamento de Trabalhos (Cronjobs) em Servidores Permanentes',
+        descricao: 'Manter uma instância EC2 dedicada 24 horas por dia apenas para rodar uma tarefa automática (script) que dura 30 segundos no final da noite, em vez de migrar para AWS Lambda ou EventBridge Scheduler.'
+    },
+    {
+        titulo: 'Hospedagem de Front-end/Websites Estáticos em EC2',
+        descricao: 'Subir servidores Web (Nginx/Apache) em instâncias EC2 para entregar interfaces estáticas do Internet Banking, em vez de usar Amazon S3 + CloudFront (que custa frações de centavos).'
+    },
+    {
+        titulo: 'Discos EBS Não Excluídos ao Terminar a Instância',
+        descricao: 'Encerrar instâncias EC2 sem marcar a opção DeleteOnTerminate no disco raiz, deixando volumes de disco rígido (EBS) "órfãos" gerando cobrança perpétua na fatura.'
+    },
+    {
+        titulo: 'Tipo de Armazenamento de Disco Desatualizado (gp2 vs gp3)',
+        descricao: 'Manter volumes de disco do tipo gp2 padrão em vez de atualizar para gp3. O gp3 é até 20% mais barato e permite configurar velocidade (IOPS/Throughput) sem precisar pagar por espaço em disco adicional.'
+    },
+    {
+        titulo: 'Excesso de Discos Provisionados com IOPS Altos (io1/io2)',
+        descricao: 'Dimensionar discos com IOPS garantidos (io1/io2) no nível máximo para aplicações de baixo impacto, pagando taxas altíssimas por throughput que a aplicação nunca atinge.'
+    },
+    {
+        titulo: 'Falta de Restrição em Testes de Load Testing',
+        descricao: 'Ambientes de teste de estresse que sobem centenas de instâncias EC2 gigantes para simular grandes volumes de acessos (ex: Black Friday) e permanecem ativos após a conclusão dos testes.'
+    },
+    {
+        titulo: 'Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ)',
+        descricao: 'Instâncias instaladas em zonas diferentes (us-east-1a e us-east-1b) comunicando-se intensamente entre si sem passar por rotas locais, gerando cobranças massivas por transferência de dados dentro da mesma VPC.'
+    },
+    {
+        titulo: 'Snapshots de Disco sem Política de Retenção (EBS Snapshots)',
+        descricao: 'Criar backups diários de discos EC2 para conformidade auditável de bancos, mas sem aplicar regras de expiração (como Data Lifecycle Manager), acumulando anos de fotos de discos inutilizadas.'
+    }
+];
+const topicosPorServico = Object.assign(window.finSlashTopicos, {
+    'Amazon EC2': { titulo: 'EC2', topicos: topicosEC2 }
+});
 const quantidadeIconesServico = 48;
 const chaveArmazenamentoAplicacao = 'finslash:preferencias';
 
@@ -109,6 +194,17 @@ const botaoVoltarSelecionado = document.getElementById('botao-voltar-selecionado
 const telaInicial = document.getElementById('tela-inicial');
 const telaServicos = document.getElementById('tela-servicos');
 const gridServicos = document.getElementById('grid-servicos');
+const conteudoServicos = document.querySelector('#tela-servicos > .servicos-container');
+const telaTopicosServico = document.getElementById('tela-topicos-servico');
+const tituloTelaTopicosServico = document.getElementById('titulo-tela-topicos-servico');
+const gridTopicosServico = document.getElementById('grid-topicos-servico');
+const popupTopicoServico = document.getElementById('popup-topico-servico');
+const tituloPopupTopicoServico = document.getElementById('titulo-popup-topico-servico');
+const descricaoPopupTopicoServico = document.getElementById('descricao-popup-topico-servico');
+const botaoFecharPopupTopicoServico = document.getElementById('fechar-popup-topico-servico');
+const botaoVoltarTopicoServico = document.getElementById('botao-voltar-topico-servico');
+const botaoVoltarTelaTopicos = document.getElementById('botao-voltar-tela-topicos');
+let servicoTopicosAtual = null;
 const canvasOnda = document.getElementById('canvas-onda');
 const imagemPersonagemHeader = document.getElementById('imagem-personagem-header');
 const buscaServicos = document.getElementById('busca-servicos');
@@ -448,12 +544,18 @@ function renderizarTelaHistorico(estado) {
     popupPersonagens.classList.add('hidden');
     popupPersonagemSelecionado.classList.add('hidden');
     ocultarPopupCartaoServico();
+    popupTopicoServico.classList.add('hidden');
     popupConteudoSelecionado.style.background = '#ffffff';
 
-    const mostrarServicos = tela === 'servicos' || tela === 'cartao-servico';
+    const mostrarServicos = ['servicos', 'cartao-servico', 'topicos-servico', 'topico-servico'].includes(tela);
     telaServicos.classList.toggle('hidden', !mostrarServicos);
     telaInicial.classList.toggle('hidden', mostrarServicos);
     navegacaoApp.classList.toggle('hidden', tela === 'inicio');
+    const mostrarTelaTopicos = tela === 'topicos-servico' || tela === 'topico-servico';
+    conteudoServicos.classList.toggle('hidden', mostrarTelaTopicos);
+    telaTopicosServico.classList.toggle('hidden', !mostrarTelaTopicos);
+    servicoTopicosAtual = topicosPorServico[estado?.servicoTopicos] || null;
+    tituloTelaTopicosServico.textContent = servicoTopicosAtual?.titulo || '';
     atualizarDisponibilidadePesquisaNavegacao();
 
     if (mostrarServicos) {
@@ -472,6 +574,12 @@ function renderizarTelaHistorico(estado) {
         }
         if (tela === 'cartao-servico' && Number.isInteger(estado.indiceServico)) {
             abrirPopupCartaoServicoVisual(estado.indiceServico);
+        }
+        if (mostrarTelaTopicos && servicoTopicosAtual && !gridTopicosServico.children.length) {
+            gerarCartoesTopicosServico();
+        }
+        if (tela === 'topico-servico' && Number.isInteger(estado.indiceTopico)) {
+            abrirPopupTopicoServicoVisual(estado.indiceTopico);
         }
         return;
     }
@@ -1037,11 +1145,30 @@ function gerarCartoesServicos() {
         cartao.appendChild(nome);
         cartoes.appendChild(cartao);
         
-        // Adiciona evento de clique para selecionar servico
-        cartao.addEventListener('click', () => selecionarServico(servico));
+        cartao.addEventListener('click', () => abrirPopupCartaoServico(index));
     });
 
     gridServicos.replaceChildren(cartoes);
+}
+
+function gerarCartoesTopicosServico() {
+    if (!servicoTopicosAtual) {
+        console.error('Nao foi possivel gerar os topicos sem um servico selecionado.');
+        return;
+    }
+    const cartoes = document.createDocumentFragment();
+
+    servicoTopicosAtual.topicos.forEach((topico, index) => {
+        const cartao = document.createElement('button');
+        cartao.className = 'cartao-servico cartao-topico-servico';
+        cartao.type = 'button';
+        cartao.dataset.index = index;
+        cartao.textContent = topico.titulo;
+        cartao.addEventListener('click', () => abrirPopupTopicoServico(index));
+        cartoes.appendChild(cartao);
+    });
+
+    gridTopicosServico.replaceChildren(cartoes);
 }
 
 function criarIconeServico(servico, index) {
@@ -1546,6 +1673,10 @@ function abrirPopupCartaoServicoVisual(index) {
     cartaoAmpliado.setAttribute('tabindex', '0');
     cartaoAmpliado.setAttribute('aria-label', `Selecionar ${servico.nome}`);
     cartaoAmpliado.addEventListener('click', () => {
+        if (topicosPorServico[servico.nome]) {
+            abrirTelaTopicosServico(servico.nome);
+            return;
+        }
         fecharPopupCartaoServico();
         selecionarServico(servico);
     });
@@ -1560,6 +1691,69 @@ function abrirPopupCartaoServicoVisual(index) {
     popupCartaoServico.classList.remove('hidden');
     iniciarAnimacaoOndaPopupServico();
     botaoFecharPopupCartaoServico.focus();
+}
+
+function abrirTelaTopicosServico(nomeServico) {
+    const dadosServico = topicosPorServico[nomeServico];
+    if (!dadosServico) {
+        console.error(`Nao ha topicos cadastrados para ${nomeServico}.`);
+        return;
+    }
+    const indicePersonagem = personagens.indexOf(personagemSelecionado);
+    servicoTopicosAtual = dadosServico;
+    tituloTelaTopicosServico.textContent = dadosServico.titulo;
+    atualizarHistoricoAplicacao('topicos-servico', {
+        indicePersonagem,
+        servicoTopicos: nomeServico
+    }, true);
+    ocultarPopupCartaoServico();
+    conteudoServicos.classList.add('hidden');
+    telaTopicosServico.classList.remove('hidden');
+    gerarCartoesTopicosServico();
+}
+
+function abrirPopupTopicoServico(index) {
+    const topico = servicoTopicosAtual?.topicos[index];
+    if (!topico) {
+        console.error(`Topico invalido para o servico ${servicoTopicosAtual?.titulo || 'desconhecido'}.`);
+        return;
+    }
+    atualizarHistoricoAplicacao('topico-servico', {
+        indicePersonagem: personagens.indexOf(personagemSelecionado),
+        servicoTopicos: servicosAWS.find(servico => topicosPorServico[servico.nome] === servicoTopicosAtual)?.nome
+            || Object.keys(topicosPorServico).find(nome => topicosPorServico[nome] === servicoTopicosAtual),
+        indiceTopico: index
+    });
+    abrirPopupTopicoServicoVisual(index);
+}
+
+function abrirPopupTopicoServicoVisual(index) {
+    const topico = servicoTopicosAtual?.topicos[index];
+    if (!topico) {
+        console.error(`Topico invalido para o indice ${index}.`);
+        return;
+    }
+    tituloPopupTopicoServico.textContent = topico.titulo;
+    descricaoPopupTopicoServico.textContent = topico.descricao;
+    popupTopicoServico.classList.remove('hidden');
+    botaoFecharPopupTopicoServico.focus();
+}
+
+function fecharPopupTopicoServico() {
+    if (window.history.state?.app === 'FinSlash' && window.history.state.tela === 'topico-servico') {
+        window.history.back();
+        return;
+    }
+    popupTopicoServico.classList.add('hidden');
+}
+
+function voltarParaTelaServicos() {
+    atualizarHistoricoAplicacao('servicos', {
+        indicePersonagem: personagens.indexOf(personagemSelecionado)
+    }, true);
+    popupTopicoServico.classList.add('hidden');
+    telaTopicosServico.classList.add('hidden');
+    conteudoServicos.classList.remove('hidden');
 }
 
 function fecharPopupCartaoServico() {
@@ -1668,6 +1862,9 @@ function irParaJornada() {
     
     // Exibe a tela de servicos
     popupAnimacao.classList.add('hidden');
+    conteudoServicos.classList.remove('hidden');
+    telaTopicosServico.classList.add('hidden');
+    popupTopicoServico.classList.add('hidden');
     telaServicos.classList.remove('hidden');
     atualizarDisponibilidadePesquisaNavegacao();
     
@@ -1771,6 +1968,14 @@ popupCartaoServico.addEventListener('click', (event) => {
         fecharPopupCartaoServico();
     }
 });
+botaoFecharPopupTopicoServico.addEventListener('click', fecharPopupTopicoServico);
+botaoVoltarTopicoServico.addEventListener('click', fecharPopupTopicoServico);
+botaoVoltarTelaTopicos.addEventListener('click', voltarParaTelaServicos);
+popupTopicoServico.addEventListener('click', (event) => {
+    if (event.target === popupTopicoServico) {
+        fecharPopupTopicoServico();
+    }
+});
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !popupPerfil.classList.contains('hidden')) {
@@ -1783,6 +1988,10 @@ document.addEventListener('keydown', (event) => {
     }
     if (event.key === 'Escape' && !popupCartaoServico.classList.contains('hidden')) {
         fecharPopupCartaoServico();
+        return;
+    }
+    if (event.key === 'Escape' && !popupTopicoServico.classList.contains('hidden')) {
+        fecharPopupTopicoServico();
     }
 });
 

@@ -887,6 +887,17 @@ body.tela-servicos-ativa > .canvas-onda {
     background-color: rgba(255, 255, 255, 0.82);
 }
 
+#popup-busca-voz.mostrando-sugestoes-voz .conteudo-popup-busca-voz {
+    min-height: 0;
+    max-height: min(90vh, 760px);
+    overflow-y: auto;
+    justify-content: flex-start;
+}
+
+#popup-busca-voz.mostrando-sugestoes-voz .indicador-microfone-voz {
+    display: none;
+}
+
 #popup-busca-voz .visualizador-onda-voz {
     position: absolute;
     top: 50%;
@@ -1008,6 +1019,77 @@ body.tela-servicos-ativa > .canvas-onda {
     margin-top: 8px;
     color: #64748b;
     font-size: 0.92rem;
+}
+
+.sugestoes-busca-voz {
+    display: none;
+}
+
+#popup-busca-voz.mostrando-sugestoes-voz .sugestoes-busca-voz {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+    margin-top: 14px;
+    text-align: left;
+}
+
+.titulo-sugestoes-busca-voz {
+    color: #1e3a8a;
+    font-weight: 700;
+    text-align: center;
+}
+
+.opcao-sugestao-busca-voz {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    width: 100%;
+    min-height: 58px;
+    padding: 12px 14px;
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #1e293b;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.opcao-sugestao-busca-voz:hover,
+.opcao-sugestao-busca-voz:focus-visible {
+    outline: none;
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.opcao-sugestao-busca-voz:active {
+    transform: scale(0.99);
+}
+
+.opcao-sugestao-principal-busca-voz {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff, #ffffff);
+}
+
+.titulo-opcao-sugestao-busca-voz {
+    font-weight: 650;
+    line-height: 1.35;
+}
+
+.servico-opcao-sugestao-busca-voz {
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.selo-sugestao-busca-voz {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    font-size: 0.72rem;
+    font-weight: 700;
 }
 
 .tentar-novamente-busca-voz {

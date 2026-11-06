@@ -225,6 +225,7 @@ const botaoFecharPopupBuscaVoz = document.getElementById('fechar-popup-busca-voz
 const statusBuscaVoz = document.getElementById('status-busca-voz');
 const transcricaoBuscaVoz = document.getElementById('transcricao-busca-voz');
 const botaoTentarNovamenteBuscaVoz = document.getElementById('tentar-novamente-busca-voz');
+const sugestoesBuscaVoz = document.getElementById('sugestoes-busca-voz');
 const navegacaoApp = document.getElementById('navegacao-app');
 const botaoMenuApp = document.getElementById('botao-menu-app');
 const botaoPesquisaApp = document.getElementById('botao-pesquisa-app');
@@ -525,6 +526,7 @@ let nivelAudioVoz = 0;
 let nivelAlvoOndaVoz = 0;
 let reconhecimentoVoz = null;
 let indiceBuscaVozServicos = null;
+let indiceBuscaVozTopicos = null;
 
 function atualizarHistoricoAplicacao(tela, dados = {}, substituir = false) {
     const estado = { app: 'FinSlash', tela, ...dados };
@@ -1311,9 +1313,308 @@ function normalizarPronunciaServico(texto) {
 
 const palavrasIgnoradasBuscaVoz = new Set([
     'a', 'abra', 'acessar', 'amazon', 'aws', 'da', 'das', 'de', 'do', 'dos',
-    'eu', 'favor', 'me', 'mostra', 'mostrar', 'o', 'por', 'quero', 'servico',
-    'servicos', 'um', 'uma'
+    'e', 'em', 'eu', 'favor', 'me', 'mostra', 'mostrar', 'na', 'nas', 'no',
+    'nos', 'o', 'os', 'para', 'por', 'quero', 'servico', 'servicos', 'um', 'uma'
 ]);
+
+function prepararIndiceBuscaVozTopicos() {
+    if (indiceBuscaVozTopicos) {
+        return;
+    }
+
+    indiceBuscaVozTopicos = Object.entries(topicosPorServico).flatMap(([nomeServico, dadosServico]) =>
+        dadosServico.topicos.map((topico, indiceTopico) => {
+            const titulo = normalizarPronunciaServico(topico.titulo)
+                .replace(/[^a-z0-9]+/g, ' ')
+                .trim();
+            const palavras = titulo.split(/\s+/).filter(palavra =>
+                palavra && !palavrasIgnoradasBuscaVoz.has(palavra)
+            );
+
+            return {
+                nomeServico,
+                indiceTopico,
+                titulo,
+                palavras,
+                tituloBusca: palavras.join(' ')
+            };
+        })
+    );
+}
+
+function similaridadePalavraBuscaVoz(palavraFalado, palavraTitulo) {
+    if (palavraFalado === palavraTitulo) {
+        return 1;
+    }
+
+    const reduzirPlural = palavra => {
+        if (palavra.length <= 4) {
+            return palavra;
+        }
+        if (palavra.endsWith('ns')) {
+            return `${palavra.slice(0, -2)}m`;
+        }
+        if (palavra.endsWith('ões')) {
+            return `${palavra.slice(0, -3)}ão`;
+        }
+        return palavra.replace(/(?:es|s)$/u, '');
+    };
+    if (reduzirPlural(palavraFalado) === reduzirPlural(palavraTitulo)) {
+        return 0.94;
+    }
+    if (Math.min(palavraFalado.length, palavraTitulo.length) < 4
+        || Math.abs(palavraFalado.length - palavraTitulo.length) > 2) {
+        return 0;
+    }
+
+    let anterior = Array.from({ length: palavraTitulo.length + 1 }, (_, indice) => indice);
+    for (let indiceFalado = 1; indiceFalado <= palavraFalado.length; indiceFalado += 1) {
+        const atual = [indiceFalado];
+        for (let indiceTitulo = 1; indiceTitulo <= palavraTitulo.length; indiceTitulo += 1) {
+            atual[indiceTitulo] = Math.min(
+                atual[indiceTitulo - 1] + 1,
+                anterior[indiceTitulo] + 1,
+                anterior[indiceTitulo - 1]
+                    + (palavraFalado[indiceFalado - 1] === palavraTitulo[indiceTitulo - 1] ? 0 : 1)
+            );
+        }
+        anterior = atual;
+    }
+
+    const distancia = anterior[palavraTitulo.length];
+    return distancia <= 2
+        ? 1 - distancia / Math.max(palavraFalado.length, palavraTitulo.length)
+        : 0;
+}
+
+function localizarTopicoPorVoz(texto) {
+    const palavrasFaladas = normalizarPronunciaServico(texto)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(palavra => palavra && !palavrasIgnoradasBuscaVoz.has(palavra));
+
+    if (palavrasFaladas.length === 0) {
+        return { certeza: false, sugestoes: [] };
+    }
+
+    prepararIndiceBuscaVozTopicos();
+    const consulta = palavrasFaladas.join(' ');
+    const correspondencias = [];
+
+    indiceBuscaVozTopicos.forEach(topico => {
+        let pontuacao = 0;
+        let palavrasCorrespondentes = [];
+        if (topico.tituloBusca.includes(consulta)) {
+            pontuacao = 1.1 + (consulta.length / topico.tituloBusca.length) * 0.5;
+        } else if (palavrasFaladas.length >= 2) {
+            const pontuacoesPalavras = palavrasFaladas.map(palavraFalado =>
+                Math.max(0, ...topico.palavras.map(palavraTitulo =>
+                    similaridadePalavraBuscaVoz(palavraFalado, palavraTitulo)
+                ))
+            );
+            palavrasCorrespondentes = pontuacoesPalavras.filter(pontuacaoPalavra =>
+                pontuacaoPalavra >= 0.72
+            );
+            if (palavrasCorrespondentes.length === palavrasFaladas.length) {
+                pontuacao = palavrasCorrespondentes.reduce((total, valor) => total + valor, 0)
+                    / palavrasCorrespondentes.length;
+                for (let inicio = 0; inicio <= topico.palavras.length - palavrasFaladas.length; inicio += 1) {
+                    const trecho = palavrasFaladas.map((palavra, indice) =>
+                        similaridadePalavraBuscaVoz(palavra, topico.palavras[inicio + indice])
+                    );
+                    if (trecho.every(similaridade => similaridade >= 0.72)) {
+                        pontuacao = Math.min(
+                            pontuacao + trecho.reduce((total, valor) => total + valor, 0)
+                                / trecho.length * 0.08,
+                            1
+                        );
+                        break;
+                    }
+                }
+            }
+        } else if (palavrasFaladas[0].length >= 5) {
+            pontuacao = Math.max(0, ...topico.palavras.map(palavraTitulo =>
+                similaridadePalavraBuscaVoz(palavrasFaladas[0], palavraTitulo)
+            )) * 0.82;
+        }
+
+        if (pontuacao > 0) {
+            correspondencias.push({
+                topico,
+                pontuacao,
+                correspondenciaExata: topico.tituloBusca.includes(consulta)
+            });
+        }
+    });
+
+    correspondencias.sort((a, b) => b.pontuacao - a.pontuacao);
+    if (correspondencias.length === 0) {
+        return { certeza: false, sugestoes: [] };
+    }
+
+    const primeira = correspondencias[0];
+    const segunda = correspondencias[1];
+    const margem = segunda ? primeira.pontuacao - segunda.pontuacao : 1;
+    const certeza = primeira.pontuacao >= 0.92
+        && margem >= 0.12
+        && ((primeira.correspondenciaExata && palavrasFaladas.length >= 2)
+            || palavrasFaladas.length >= 3);
+    const limiteSugestao = Math.max(0.5, primeira.pontuacao - 0.18);
+    const sugestoes = correspondencias
+        .filter(correspondencia => correspondencia.pontuacao >= limiteSugestao)
+        .slice(0, 8)
+        .map(correspondencia => ({
+            ...correspondencia.topico,
+            pontuacao: correspondencia.pontuacao,
+            tipo: 'topico'
+        }));
+
+    return {
+        certeza,
+        sugestoes: certeza ? [] : sugestoes,
+        topico: certeza ? primeira.topico : null
+    };
+}
+
+function localizarServicosSemelhantesPorVoz(texto) {
+    if (!indiceBuscaVozServicos) {
+        localizarServicoPorVoz(texto);
+    }
+
+    const palavrasFaladas = normalizarPronunciaServico(texto)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(palavra => palavra && !palavrasIgnoradasBuscaVoz.has(palavra));
+
+    if (palavrasFaladas.length === 0) {
+        return [];
+    }
+
+    const correspondencias = indiceBuscaVozServicos
+        .map(({ index, palavrasServico }) => {
+            const pontuacoes = palavrasFaladas.map(palavraFalado =>
+                Math.max(0, ...palavrasServico.map(palavraServico =>
+                    similaridadePalavraBuscaVoz(palavraFalado, palavraServico)
+                ))
+            );
+            if (pontuacoes.some(pontuacao => pontuacao < 0.72)) {
+                return null;
+            }
+
+            return {
+                nomeServico: servicosAWS[index].nome,
+                pontuacao: pontuacoes.reduce((total, valor) => total + valor, 0) / pontuacoes.length
+            };
+        })
+        .filter(correspondencia => correspondencia && correspondencia.pontuacao >= 0.72)
+        .sort((a, b) => b.pontuacao - a.pontuacao);
+
+    if (correspondencias.length < 2) {
+        return [];
+    }
+
+    const limiteSugestao = correspondencias[0].pontuacao - 0.2;
+    return correspondencias
+        .filter(correspondencia => correspondencia.pontuacao >= limiteSugestao)
+        .slice(0, 5)
+        .map(correspondencia => ({
+            tipo: 'servico',
+            nomeServico: correspondencia.nomeServico,
+            pontuacao: correspondencia.pontuacao
+        }));
+}
+
+function localizarServicoExatoPorVoz(texto) {
+    if (!indiceBuscaVozServicos) {
+        localizarServicoPorVoz(texto);
+    }
+
+    const palavrasFaladas = normalizarPronunciaServico(texto)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(palavra => palavra && !palavrasIgnoradasBuscaVoz.has(palavra));
+    if (palavrasFaladas.length === 0) {
+        return -1;
+    }
+
+    const formaFalado = palavrasFaladas.join('');
+
+    const correspondencias = [];
+    indiceBuscaVozServicos.forEach(({ index, formas }) => {
+        if (formas.includes(formaFalado)) {
+            correspondencias.push({ index, tamanho: formaFalado.length });
+        }
+    });
+    correspondencias.sort((a, b) => b.tamanho - a.tamanho);
+
+    if (!correspondencias.length
+        || (correspondencias[1] && correspondencias[0].tamanho === correspondencias[1].tamanho)) {
+        return -1;
+    }
+    return correspondencias[0].index;
+}
+
+function mostrarSugestoesBuscaVoz(sugestoes) {
+    sugestoesBuscaVoz.replaceChildren();
+    const sugestaoPrincipal = sugestoes.length === 1
+        || (typeof sugestoes[0]?.pontuacao === 'number'
+            && typeof sugestoes[1]?.pontuacao === 'number'
+            && sugestoes[0].pontuacao - sugestoes[1].pontuacao >= 0.08);
+    const titulo = document.createElement('p');
+    titulo.className = 'titulo-sugestoes-busca-voz';
+    titulo.textContent = 'Talvez você esteja procurando por:';
+    sugestoesBuscaVoz.appendChild(titulo);
+
+    sugestoes.forEach((sugestao, indice) => {
+        const servico = servicosAWS.find(item => item.nome === sugestao.nomeServico);
+        const topico = sugestao.tipo === 'topico'
+            ? topicosPorServico[sugestao.nomeServico]?.topicos[sugestao.indiceTopico]
+            : null;
+        if (!servico || (sugestao.tipo === 'topico' && !topico)) {
+            console.error(`Sugestao de voz invalida para o servico ${sugestao.nomeServico}.`);
+            return;
+        }
+
+        const opcao = document.createElement('button');
+        opcao.className = 'opcao-sugestao-busca-voz';
+        opcao.type = 'button';
+        opcao.dataset.servico = sugestao.nomeServico;
+        if (topico) {
+            opcao.dataset.indiceTopico = sugestao.indiceTopico;
+        }
+        if (indice === 0 && sugestaoPrincipal) {
+            opcao.classList.add('opcao-sugestao-principal-busca-voz');
+        }
+
+        const tituloTopico = document.createElement('span');
+        tituloTopico.className = 'titulo-opcao-sugestao-busca-voz';
+        tituloTopico.textContent = topico ? topico.titulo : servico.nome;
+        const nomeServico = document.createElement('span');
+        nomeServico.className = 'servico-opcao-sugestao-busca-voz';
+        nomeServico.textContent = topico ? servico.nome : 'Serviço AWS';
+        opcao.append(tituloTopico, nomeServico);
+        if (indice === 0 && sugestaoPrincipal) {
+            const selo = document.createElement('span');
+            selo.className = 'selo-sugestao-busca-voz';
+            selo.textContent = 'Mais provável';
+            opcao.appendChild(selo);
+        }
+        sugestoesBuscaVoz.appendChild(opcao);
+    });
+
+    popupBuscaVoz.classList.add('mostrando-sugestoes-voz');
+    definirAtividadeBuscaVoz(false);
+    definirStatusBuscaVoz(
+        sugestoes.length
+            ? 'Não escolhi um resultado automaticamente. Toque em uma opção para abrir:'
+            : 'Não encontrei correspondências próximas. Tente dizer mais palavras do título.',
+        !sugestoes.length
+    );
+    botaoFecharPopupBuscaVoz.focus();
+}
 
 function localizarServicoPorVoz(texto) {
     const palavrasFaladas = normalizarPronunciaServico(texto)
@@ -1550,6 +1851,9 @@ function iniciarReconhecimentoVoz() {
         definirAtividadeBuscaVoz(true);
         let textoFinal = '';
         let indiceServico = -1;
+        let topicoCorrespondente = null;
+        let sugestoesServicosCorrespondentes = [];
+        let sugestoesCorrespondentes = [];
         for (let indice = event.resultIndex; indice < event.results.length; indice += 1) {
             const resultado = event.results[indice];
             const texto = resultado[0].transcript.trim();
@@ -1561,9 +1865,36 @@ function iniciarReconhecimentoVoz() {
             textoFinal = texto;
             for (let alternativa = 0; alternativa < resultado.length; alternativa += 1) {
                 const textoAlternativo = resultado[alternativa].transcript.trim();
-                const correspondencia = localizarServicoPorVoz(textoAlternativo);
-                if (correspondencia !== -1) {
-                    indiceServico = correspondencia;
+                const indiceServicoExato = localizarServicoExatoPorVoz(textoAlternativo);
+                if (indiceServicoExato !== -1) {
+                    indiceServico = indiceServicoExato;
+                    textoFinal = textoAlternativo;
+                    break;
+                }
+
+                const correspondencia = localizarTopicoPorVoz(textoAlternativo);
+                if (correspondencia.certeza) {
+                    topicoCorrespondente = correspondencia.topico;
+                    textoFinal = textoAlternativo;
+                    break;
+                }
+
+                const sugestoesServicos = localizarServicosSemelhantesPorVoz(textoAlternativo);
+                if (sugestoesServicos.length) {
+                    sugestoesServicosCorrespondentes = sugestoesServicos;
+                    textoFinal = textoAlternativo;
+                    break;
+                }
+
+                if (correspondencia.sugestoes.length) {
+                    sugestoesCorrespondentes = correspondencia.sugestoes;
+                    textoFinal = textoAlternativo;
+                    break;
+                }
+
+                const indiceServicoCorrespondente = localizarServicoPorVoz(textoAlternativo);
+                if (indiceServicoCorrespondente !== -1) {
+                    indiceServico = indiceServicoCorrespondente;
                     textoFinal = textoAlternativo;
                     break;
                 }
@@ -1576,8 +1907,20 @@ function iniciarReconhecimentoVoz() {
 
         definirAtividadeBuscaVoz(false);
         transcricaoBuscaVoz.textContent = textoFinal;
-        if (indiceServico === -1) {
-            definirStatusBuscaVoz('Não encontrei esse serviço ou seus tópicos. Tente novamente.', true);
+        if (sugestoesServicosCorrespondentes.length) {
+            mostrarSugestoesBuscaVoz(sugestoesServicosCorrespondentes);
+            return;
+        }
+        if (topicoCorrespondente) {
+            indiceServico = servicosAWS.findIndex(servico =>
+                servico.nome === topicoCorrespondente.nomeServico
+            );
+        } else if (indiceServico === -1) {
+            if (sugestoesCorrespondentes.length) {
+                mostrarSugestoesBuscaVoz(sugestoesCorrespondentes);
+            } else {
+                definirStatusBuscaVoz('Não encontrei correspondências próximas. Tente novamente.', true);
+            }
             return;
         }
 
@@ -1589,6 +1932,9 @@ function iniciarReconhecimentoVoz() {
         campoBuscaServicos.setAttribute('aria-expanded', 'false');
         if (topicosPorServico[servico.nome]) {
             abrirTelaTopicosServico(servico.nome);
+            if (topicoCorrespondente) {
+                abrirPopupTopicoServico(topicoCorrespondente.indiceTopico);
+            }
             return;
         }
         abrirPopupCartaoServico(indiceServico);
@@ -1644,6 +1990,8 @@ function iniciarReconhecimentoVoz() {
 function abrirPopupBuscaVoz() {
     resultadosBuscaServicos.classList.add('hidden');
     campoBuscaServicos.setAttribute('aria-expanded', 'false');
+    sugestoesBuscaVoz.replaceChildren();
+    popupBuscaVoz.classList.remove('mostrando-sugestoes-voz');
     popupBuscaVoz.classList.remove('hidden');
     iniciarAnimacaoOndaVoz();
     iniciarReconhecimentoVoz();
@@ -2051,6 +2399,33 @@ document.querySelectorAll('[data-aba-perfil]').forEach(botao => {
 botaoBuscaVoz.addEventListener('click', abrirPopupBuscaVoz);
 botaoFecharPopupBuscaVoz.addEventListener('click', () => fecharPopupBuscaVoz());
 botaoTentarNovamenteBuscaVoz.addEventListener('click', iniciarReconhecimentoVoz);
+sugestoesBuscaVoz.addEventListener('click', event => {
+    const opcao = event.target.closest('.opcao-sugestao-busca-voz');
+    if (!opcao || !sugestoesBuscaVoz.contains(opcao)) {
+        return;
+    }
+
+    const servico = servicosAWS.find(item => item.nome === opcao.dataset.servico);
+    if (!servico) {
+        console.error(`Servico invalido na sugestao de voz: ${opcao.dataset.servico}.`);
+        return;
+    }
+
+    fecharPopupBuscaVoz(false);
+    campoBuscaServicos.value = servico.nome;
+    registrarBuscaRecente(servico.nome);
+    if (opcao.dataset.indiceTopico !== undefined) {
+        const indiceTopico = Number(opcao.dataset.indiceTopico);
+        abrirTelaTopicosServico(servico.nome);
+        abrirPopupTopicoServico(indiceTopico);
+        return;
+    }
+    if (topicosPorServico[servico.nome]) {
+        abrirTelaTopicosServico(servico.nome);
+        return;
+    }
+    abrirPopupCartaoServico(servicosAWS.indexOf(servico));
+});
 popupBuscaVoz.addEventListener('click', (event) => {
     if (event.target === popupBuscaVoz) {
         fecharPopupBuscaVoz();

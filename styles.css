@@ -883,8 +883,9 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 #popup-busca-voz {
+    z-index: 1500;
     overflow: hidden;
-    background-color: rgba(255, 255, 255, 0.82);
+    background-color: #ffffff;
 }
 
 #popup-busca-voz.mostrando-sugestoes-voz .conteudo-popup-busca-voz {
@@ -920,7 +921,7 @@ body.tela-servicos-ativa > .canvas-onda {
     padding: 48px 28px 32px;
     border: 1px solid rgba(59, 130, 246, 0.18);
     border-radius: 24px;
-    background-color: rgba(255, 255, 255, 0.86);
+    background-color: #ffffff;
     box-shadow: 0 20px 60px rgba(30, 64, 175, 0.2);
     text-align: center;
 }
@@ -930,6 +931,7 @@ body.tela-servicos-ativa > .canvas-onda {
     font-family: 'Varela Round', 'Segoe UI', sans-serif;
     font-size: 1.4rem;
     font-weight: 600;
+    flex-shrink: 0;
 }
 
 .fechar-popup-busca-voz {
@@ -1012,6 +1014,7 @@ body.tela-servicos-ativa > .canvas-onda {
     min-height: 1.5em;
     color: #1e293b;
     font-size: 1rem;
+    flex-shrink: 0;
 }
 
 .transcricao-busca-voz {
@@ -1019,6 +1022,7 @@ body.tela-servicos-ativa > .canvas-onda {
     margin-top: 8px;
     color: #64748b;
     font-size: 0.92rem;
+    flex-shrink: 0;
 }
 
 .sugestoes-busca-voz {

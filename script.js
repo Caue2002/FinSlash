@@ -554,6 +554,7 @@ function renderizarTelaHistorico(estado) {
     const mostrarTelaTopicos = tela === 'topicos-servico' || tela === 'topico-servico';
     conteudoServicos.classList.toggle('hidden', mostrarTelaTopicos);
     telaTopicosServico.classList.toggle('hidden', !mostrarTelaTopicos);
+    botaoVoltarTelaTopicos.classList.toggle('hidden', !mostrarTelaTopicos);
     servicoTopicosAtual = topicosPorServico[estado?.servicoTopicos] || null;
     tituloTelaTopicosServico.textContent = servicoTopicosAtual?.titulo || '';
     atualizarDisponibilidadePesquisaNavegacao();
@@ -1709,6 +1710,7 @@ function abrirTelaTopicosServico(nomeServico) {
     ocultarPopupCartaoServico();
     conteudoServicos.classList.add('hidden');
     telaTopicosServico.classList.remove('hidden');
+    botaoVoltarTelaTopicos.classList.remove('hidden');
     gerarCartoesTopicosServico();
 }
 
@@ -1753,6 +1755,7 @@ function voltarParaTelaServicos() {
     }, true);
     popupTopicoServico.classList.add('hidden');
     telaTopicosServico.classList.add('hidden');
+    botaoVoltarTelaTopicos.classList.add('hidden');
     conteudoServicos.classList.remove('hidden');
 }
 
@@ -1864,6 +1867,7 @@ function irParaJornada() {
     popupAnimacao.classList.add('hidden');
     conteudoServicos.classList.remove('hidden');
     telaTopicosServico.classList.add('hidden');
+    botaoVoltarTelaTopicos.classList.add('hidden');
     popupTopicoServico.classList.add('hidden');
     telaServicos.classList.remove('hidden');
     atualizarDisponibilidadePesquisaNavegacao();

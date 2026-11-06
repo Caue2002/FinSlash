@@ -1387,7 +1387,7 @@ function similaridadePalavraBuscaVoz(palavraFalado, palavraTitulo) {
         : 0;
 }
 
-function localizarTopicoPorVoz(texto) {
+function localizarTopicoPorVoz(texto, nomeServicoRestrito = null) {
     const palavrasFaladas = normalizarPronunciaServico(texto)
         .replace(/[^a-z0-9]+/g, ' ')
         .trim()
@@ -1403,6 +1403,10 @@ function localizarTopicoPorVoz(texto) {
     const correspondencias = [];
 
     indiceBuscaVozTopicos.forEach(topico => {
+        if (nomeServicoRestrito && topico.nomeServico !== nomeServicoRestrito) {
+            return;
+        }
+
         let pontuacao = 0;
         let palavrasCorrespondentes = [];
         if (topico.tituloBusca.includes(consulta)) {
@@ -1849,6 +1853,12 @@ function iniciarReconhecimentoVoz() {
         }
 
         definirAtividadeBuscaVoz(true);
+        const nomeServicoRestrito = !telaTopicosServico.classList.contains('hidden')
+            && servicoTopicosAtual
+            ? Object.keys(topicosPorServico).find(nome =>
+                topicosPorServico[nome] === servicoTopicosAtual
+            )
+            : null;
         let textoFinal = '';
         let indiceServico = -1;
         let topicoCorrespondente = null;
@@ -1865,6 +1875,24 @@ function iniciarReconhecimentoVoz() {
             textoFinal = texto;
             for (let alternativa = 0; alternativa < resultado.length; alternativa += 1) {
                 const textoAlternativo = resultado[alternativa].transcript.trim();
+                if (nomeServicoRestrito) {
+                    const correspondencia = localizarTopicoPorVoz(
+                        textoAlternativo,
+                        nomeServicoRestrito
+                    );
+                    if (correspondencia.certeza) {
+                        topicoCorrespondente = correspondencia.topico;
+                        textoFinal = textoAlternativo;
+                        break;
+                    }
+                    if (correspondencia.sugestoes.length) {
+                        sugestoesCorrespondentes = correspondencia.sugestoes;
+                        textoFinal = textoAlternativo;
+                        break;
+                    }
+                    continue;
+                }
+
                 const indiceServicoExato = localizarServicoExatoPorVoz(textoAlternativo);
                 if (indiceServicoExato !== -1) {
                     indiceServico = indiceServicoExato;
@@ -1907,6 +1935,18 @@ function iniciarReconhecimentoVoz() {
 
         definirAtividadeBuscaVoz(false);
         transcricaoBuscaVoz.textContent = textoFinal;
+        if (nomeServicoRestrito && !topicoCorrespondente) {
+            if (sugestoesCorrespondentes.length) {
+                mostrarSugestoesBuscaVoz(sugestoesCorrespondentes);
+            } else {
+                definirStatusBuscaVoz(
+                    `Não encontrei tópicos de ${servicoTopicosAtual.titulo} próximos da fala. Tente novamente.`,
+                    true
+                );
+            }
+            return;
+        }
+
         if (sugestoesServicosCorrespondentes.length) {
             mostrarSugestoesBuscaVoz(sugestoesServicosCorrespondentes);
             return;
@@ -1961,7 +2001,13 @@ function iniciarReconhecimentoVoz() {
     reconhecimento.onnomatch = () => {
         if (reconhecimentoVoz === reconhecimento) {
             definirAtividadeBuscaVoz(false);
-            definirStatusBuscaVoz('Não identifiquei um serviço. Tente novamente.', true);
+            const estaNaTelaDeTopicos = !telaTopicosServico.classList.contains('hidden');
+            definirStatusBuscaVoz(
+                estaNaTelaDeTopicos
+                    ? 'Não identifiquei um tópico deste serviço. Tente novamente.'
+                    : 'Não identifiquei um serviço. Tente novamente.',
+                true
+            );
         }
     };
     reconhecimento.onend = () => {

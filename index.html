@@ -32,7 +32,7 @@
             </div>
         </div>
         <div class="popup-conteudo">
-            <h2 class="titulo-popup">ESCOLHA O SEU PERSONAGEM</h2>
+            <h2 class="titulo-popup">ESCOLHA SEU PERSONAGEM</h2>
             <div class="grid-personagens" id="grid-personagens">
                 <!-- Os cartoes de personagens serao gerados via JavaScript -->
             </div>
@@ -111,6 +111,11 @@
                 <!-- Os cartoes de servicos serao gerados via JavaScript -->
             </div>
         </div>
+        <main class="servicos-container tela-topicos-servico hidden" id="tela-topicos-servico">
+            <button class="botao botao-voltar-selecionado botao-voltar-tela-topicos" id="botao-voltar-tela-topicos" type="button">Voltar</button>
+            <h2 class="titulo-servicos" id="titulo-tela-topicos-servico"></h2>
+            <div class="grid-servicos grid-topicos-servico" id="grid-topicos-servico"></div>
+        </main>
         <div
             class="popup popup-cartao-servico hidden"
             id="popup-cartao-servico"
@@ -122,6 +127,25 @@
                 <canvas class="canvas-onda" id="canvas-onda-popup-servico" aria-hidden="true"></canvas>
                 <button class="fechar-popup-cartao-servico" id="fechar-popup-cartao-servico" type="button" aria-label="Fechar">×</button>
                 <div id="cartao-ampliado-servico"></div>
+            </div>
+        </div>
+        <div
+            class="popup popup-topico-servico hidden"
+            id="popup-topico-servico"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-popup-topico-servico"
+            aria-describedby="descricao-popup-topico-servico"
+        >
+            <div class="conteudo-popup-topico-servico">
+                <button class="fechar-popup-topico-servico" id="fechar-popup-topico-servico" type="button" aria-label="Fechar">×</button>
+                <h2 class="titulo-popup-topico-servico" id="titulo-popup-topico-servico"></h2>
+                <p class="descricao-popup-topico-servico" id="descricao-popup-topico-servico"></p>
+                <div class="botoes-navegacao-selecionado botoes-navegacao-topico-servico">
+                    <button class="botao botao-voltar-selecionado" id="botao-voltar-topico-servico" type="button">Voltar</button>
+                    <button class="botao botao-seguir" id="botao-seguir-topico-servico" type="button">Seguir</button>
+                </div>
+                <p class="aviso-seguir-topico-servico">Clique em Seguir para verificar os erros e as soluções.</p>
             </div>
         </div>
         <div
@@ -262,6 +286,15 @@
         </form>
     </div>
 
+    <script src="banco-de-dados/topicos-servicos.js"></script>
+    <script src="banco-de-dados/topicos-servicos-dados.js"></script>
+    <script src="banco-de-dados/topicos-servicos-armazenamento-e-ia.js"></script>
+    <script src="banco-de-dados/topicos-servicos-analytics.js"></script>
+    <script src="banco-de-dados/topicos-servicos-ml-streaming.js"></script>
+    <script src="banco-de-dados/topicos-servicos-rede.js"></script>
+    <script src="banco-de-dados/topicos-servicos-governanca-integracao.js"></script>
+    <script src="banco-de-dados/topicos-servicos-computacao.js"></script>
+    <script src="banco-de-dados/topicos-servicos-identidade-rede.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

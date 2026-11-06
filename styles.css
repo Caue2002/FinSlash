@@ -666,6 +666,28 @@ body::-webkit-scrollbar,
     background-color: #f8fafc;
 }
 
+body.tela-servicos-ativa {
+    background-color: #f8fafc;
+}
+
+body.tela-servicos-ativa > .canvas-onda {
+    position: fixed;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100lvh;
+}
+
+#tela-servicos {
+    background-color: transparent;
+}
+
+#tela-servicos > .header-pagina,
+#tela-servicos > .servicos-container {
+    position: relative;
+    z-index: 1;
+}
+
 #tela-servicos.tela-com-navegacao {
     padding-bottom: calc(112px + env(safe-area-inset-bottom));
 }

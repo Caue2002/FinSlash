@@ -475,6 +475,7 @@ function mostrarMenuPersonagens() {
     popupAnimacao.classList.add('hidden');
     popupPersonagemSelecionado.classList.add('hidden');
     ocultarPopupCartaoServico();
+    document.body.classList.remove('tela-servicos-ativa');
     popupPersonagens.appendChild(canvasOnda);
     popupPersonagens.classList.remove('hidden');
     telaInicial.classList.add('hidden');
@@ -552,6 +553,7 @@ function renderizarTelaHistorico(estado) {
     popupConteudoSelecionado.style.background = '#ffffff';
 
     const mostrarServicos = ['servicos', 'cartao-servico', 'topicos-servico', 'topico-servico'].includes(tela);
+    document.body.classList.toggle('tela-servicos-ativa', mostrarServicos);
     telaServicos.classList.toggle('hidden', !mostrarServicos);
     telaInicial.classList.toggle('hidden', mostrarServicos);
     navegacaoApp.classList.toggle('hidden', tela === 'inicio');
@@ -565,6 +567,8 @@ function renderizarTelaHistorico(estado) {
 
     if (mostrarServicos) {
         fecharPopup();
+        document.body.appendChild(canvasOnda);
+        inicializarCanvasOnda();
         const indicePersonagem = Number.isInteger(estado?.indicePersonagem)
             ? estado.indicePersonagem
             : dadosPersistidos.indicePersonagem;
@@ -616,6 +620,8 @@ function renderizarTelaHistorico(estado) {
 
     fecharPopup();
     personagemSelecionado = null;
+    document.body.classList.remove('tela-servicos-ativa');
+    telaInicial.appendChild(canvasOnda);
     inicializarCanvasOnda();
 }
 
@@ -699,24 +705,40 @@ class Onda {
 // Funcao para inicializar o canvas de onda azul
 function inicializarCanvasOnda() {
     if (animacaoOnda) {
+        redimensionarCanvasOnda?.();
         return;
     }
 
     const ctx = canvasOnda.getContext('2d');
-    
+
     redimensionarCanvasOnda = () => {
-        canvasOnda.width = window.innerWidth;
-        canvasOnda.height = window.innerHeight;
+        const largura = canvasOnda.clientWidth;
+        const altura = canvasOnda.clientHeight;
+        if (!largura || !altura) {
+            return;
+        }
+
+        if (document.body.classList.contains('tela-servicos-ativa')
+            && canvasOnda.width === largura) {
+            return;
+        }
+
+        const dimensoesMudaram = canvasOnda.width !== largura || canvasOnda.height !== altura;
+        if (!dimensoesMudaram && ondas.length > 0) {
+            return;
+        }
+
+        if (dimensoesMudaram) {
+            canvasOnda.width = largura;
+            canvasOnda.height = altura;
+        }
+        ondas = Array.from({ length: 5 }, () => new Onda(canvasOnda));
+        desenharOndasCanvasOnda(ctx);
     };
-    
+
     redimensionarCanvasOnda();
     window.addEventListener('resize', redimensionarCanvasOnda);
-    
-    // Cria varias ondas
-    for (let i = 0; i < 5; i++) {
-        ondas.push(new Onda(canvasOnda));
-    }
-    
+
     // Funcao de animacao
     let ultimoDesenho = 0;
     function animar(tempoAtual) {
@@ -727,12 +749,8 @@ function inicializarCanvasOnda() {
 
         if (tempoAtual - ultimoDesenho >= 1000 / 30) {
             ultimoDesenho = tempoAtual;
-            ctx.clearRect(0, 0, canvasOnda.width, canvasOnda.height);
             tempo += 1;
-
-            ondas.forEach(onda => {
-                onda.desenhar(ctx, tempo, 1, 8);
-            });
+            desenharOndasCanvasOnda(ctx);
         }
 
         animacaoOnda = requestAnimationFrame(animar);
@@ -740,6 +758,11 @@ function inicializarCanvasOnda() {
     
     // Inicia a animacao
     animar();
+}
+
+function desenharOndasCanvasOnda(ctx) {
+    ctx.clearRect(0, 0, canvasOnda.width, canvasOnda.height);
+    ondas.forEach(onda => onda.desenhar(ctx, tempo, 1, 8));
 }
 
 // Funcao para parar a animacao de onda
@@ -1024,6 +1047,7 @@ function fecharPopupPersonagemSelecionado() {
 // Funcao para abrir o popup de personagens
 function abrirPopup() {
     atualizarHistoricoAplicacao('personagens');
+    document.body.classList.remove('tela-servicos-ativa');
     navegacaoApp.classList.remove('hidden');
     popupPersonagens.appendChild(canvasOnda);
     popupPersonagens.classList.remove('hidden');
@@ -1944,6 +1968,9 @@ function irParaJornada() {
     botaoVoltarTelaTopicos.classList.add('hidden');
     popupTopicoServico.classList.add('hidden');
     telaServicos.classList.remove('hidden');
+    document.body.classList.add('tela-servicos-ativa');
+    document.body.appendChild(canvasOnda);
+    inicializarCanvasOnda();
     atualizarDisponibilidadePesquisaNavegacao();
     
     console.log('Tela de servicos deve estar visivel agora');

@@ -1975,6 +1975,17 @@ popupCartaoServico.addEventListener('click', (event) => {
 botaoFecharPopupTopicoServico.addEventListener('click', fecharPopupTopicoServico);
 botaoVoltarTopicoServico.addEventListener('click', fecharPopupTopicoServico);
 botaoVoltarTelaTopicos.addEventListener('click', voltarParaTelaServicos);
+const fixarBotaoVoltarTelaTopicos = () => {
+    const telaCompacta = window.matchMedia('(max-width: 768px)').matches;
+    const margem = telaCompacta ? '12px' : '19px';
+    const distanciaDireita = telaCompacta ? '12px' : '16px';
+    botaoVoltarTelaTopicos.style.setProperty('position', 'fixed', 'important');
+    botaoVoltarTelaTopicos.style.setProperty('top', margem, 'important');
+    botaoVoltarTelaTopicos.style.setProperty('right', distanciaDireita, 'important');
+};
+window.addEventListener('scroll', fixarBotaoVoltarTelaTopicos, { passive: true });
+window.addEventListener('resize', fixarBotaoVoltarTelaTopicos);
+fixarBotaoVoltarTelaTopicos();
 popupTopicoServico.addEventListener('click', (event) => {
     if (event.target === popupTopicoServico) {
         fecharPopupTopicoServico();

@@ -159,6 +159,10 @@ const topicosEC2 = [
     {
         titulo: 'Snapshots de Disco sem Política de Retenção (EBS Snapshots)',
         descricao: 'Criar backups diários de discos EC2 para conformidade auditável de bancos, mas sem aplicar regras de expiração (como Data Lifecycle Manager), acumulando anos de fotos de discos inutilizadas.'
+    },
+    {
+        titulo: 'Falta de Adesão a Planos de Savings Plans ou Instâncias Reservadas',
+        descricao: 'Manter a frota principal de servidores de aplicação produtivos rodando 24/7 na modalidade On-Demand por anos, ignorando os descontos de até 72% oferecidos por compromissos de longo prazo da AWS.'
     }
 ];
 const topicosPorServico = Object.assign(window.finSlashTopicos, {
@@ -1975,17 +1979,6 @@ popupCartaoServico.addEventListener('click', (event) => {
 botaoFecharPopupTopicoServico.addEventListener('click', fecharPopupTopicoServico);
 botaoVoltarTopicoServico.addEventListener('click', fecharPopupTopicoServico);
 botaoVoltarTelaTopicos.addEventListener('click', voltarParaTelaServicos);
-const fixarBotaoVoltarTelaTopicos = () => {
-    const telaCompacta = window.matchMedia('(max-width: 768px)').matches;
-    const margem = telaCompacta ? '12px' : '19px';
-    const distanciaDireita = telaCompacta ? '12px' : '16px';
-    botaoVoltarTelaTopicos.style.setProperty('position', 'fixed', 'important');
-    botaoVoltarTelaTopicos.style.setProperty('top', margem, 'important');
-    botaoVoltarTelaTopicos.style.setProperty('right', distanciaDireita, 'important');
-};
-window.addEventListener('scroll', fixarBotaoVoltarTelaTopicos, { passive: true });
-window.addEventListener('resize', fixarBotaoVoltarTelaTopicos);
-fixarBotaoVoltarTelaTopicos();
 popupTopicoServico.addEventListener('click', (event) => {
     if (event.target === popupTopicoServico) {
         fecharPopupTopicoServico();

@@ -203,6 +203,7 @@
                 <circle cx="12" cy="8" r="4"></circle>
                 <path d="M4 21a8 8 0 0 1 16 0"></path>
             </svg>
+            <span class="insignia-conquista-perfil hidden" id="insignia-conquista-perfil" aria-label="Conquista Guardião AWS" title="Conquista Guardião AWS">🏆</span>
         </button>
     </nav>
 
@@ -241,6 +242,7 @@
             </section>
             <section class="conteudo-aba-perfil hidden" id="conteudo-medalhas-perfil" role="tabpanel" aria-labelledby="aba-medalhas-perfil" hidden>
                 <h3>Suas conquistas</h3>
+                <p class="resumo-medalhas-perfil" id="resumo-medalhas-perfil" aria-live="polite"></p>
                 <div class="lista-medalhas-perfil" id="lista-medalhas-perfil"></div>
             </section>
             <section class="conteudo-aba-perfil hidden" id="conteudo-feedback-perfil" role="tabpanel" aria-labelledby="aba-feedback-perfil" hidden>
@@ -259,6 +261,33 @@
             </section>
             <footer class="rodape-perfil">Desenvolvido por Caue Ribeiro Ferreira · 2026</footer>
         </aside>
+    </div>
+
+    <div
+        class="popup popup-conquista-final hidden"
+        id="popup-conquista-final"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-conquista-final"
+        aria-describedby="descricao-conquista-final"
+    >
+        <div class="fogos-conquista" aria-hidden="true">
+            <span class="explosao-fogos explosao-fogos-esquerda"></span>
+            <span class="explosao-fogos explosao-fogos-direita"></span>
+            <span class="explosao-fogos explosao-fogos-centro"></span>
+        </div>
+        <section class="cartao-conquista-final">
+            <button class="fechar-conquista-final" id="fechar-conquista-final" type="button" aria-label="Fechar comemoração">×</button>
+            <div class="trofeu-conquista-final" aria-hidden="true">🏆</div>
+            <p class="etiqueta-conquista-final">Conquista lendária desbloqueada</p>
+            <h2 id="titulo-conquista-final">Parabéns, Guardião AWS!</h2>
+            <p id="descricao-conquista-final">Você explorou todos os serviços AWS e completou todos os desafios. Esta nuvem agora é sua!</p>
+            <div class="selo-conquista-final" aria-label="Insígnia Guardião AWS">
+                <span aria-hidden="true">🏆</span>
+                <strong>Guardião AWS</strong>
+            </div>
+            <button class="botao-continuar-conquista" id="botao-continuar-conquista" type="button">Continuar explorando</button>
+        </section>
     </div>
 
     <div

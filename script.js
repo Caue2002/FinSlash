@@ -1351,6 +1351,15 @@ function similaridadePalavraBuscaVoz(palavraFalado, palavraTitulo) {
         if (palavra.length <= 4) {
             return palavra;
         }
+        if (palavra.endsWith('oes') || palavra.endsWith('aes')) {
+            return `${palavra.slice(0, -3)}ao`;
+        }
+        if (palavra.endsWith('eis')) {
+            return `${palavra.slice(0, -3)}el`;
+        }
+        if (palavra.endsWith('ois')) {
+            return `${palavra.slice(0, -3)}ol`;
+        }
         if (palavra.endsWith('ns')) {
             return `${palavra.slice(0, -2)}m`;
         }

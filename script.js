@@ -234,6 +234,10 @@ const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
 const iconePerfilApp = document.getElementById('icone-perfil-app');
 const popupPerfil = document.getElementById('popup-perfil');
 const botaoFecharPerfil = document.getElementById('fechar-perfil');
+const popupConquistaFinal = document.getElementById('popup-conquista-final');
+const botaoFecharConquistaFinal = document.getElementById('fechar-conquista-final');
+const botaoContinuarConquista = document.getElementById('botao-continuar-conquista');
+const insigniaConquistaPerfil = document.getElementById('insignia-conquista-perfil');
 const avatarPerfil = document.getElementById('avatar-perfil');
 const tituloPerfil = document.getElementById('titulo-perfil');
 const botaoEditarTituloPerfil = document.getElementById('editar-titulo-perfil');
@@ -245,6 +249,7 @@ const botaoCancelarEdicaoNomePerfil = document.getElementById('cancelar-edicao-n
 const nomePersonagemPerfil = document.getElementById('nome-personagem-perfil');
 const listaHistoricoPerfil = document.getElementById('lista-historico-perfil');
 const listaMedalhasPerfil = document.getElementById('lista-medalhas-perfil');
+const resumoMedalhasPerfil = document.getElementById('resumo-medalhas-perfil');
 const secoesPerfil = {
     historico: document.getElementById('conteudo-historico-perfil'),
     medalhas: document.getElementById('conteudo-medalhas-perfil'),
@@ -255,7 +260,13 @@ function carregarDadosPersistidos() {
     try {
         const armazenado = window.localStorage.getItem(chaveArmazenamentoAplicacao);
         if (!armazenado) {
-            return { indicePersonagem: null, buscasRecentes: [], historicoServicos: [], nomePerfil: 'Meu perfil' };
+            return {
+                indicePersonagem: null,
+                buscasRecentes: [],
+                historicoServicos: [],
+                servicosExplorados: [],
+                nomePerfil: 'Meu perfil'
+            };
         }
 
         const dados = JSON.parse(armazenado);
@@ -278,14 +289,29 @@ function carregarDadosPersistidos() {
                     && Number.isFinite(new Date(item.data).getTime()))
                 .slice(0, 50)
             : [];
+        const servicosExploradosSalvos = Array.isArray(dados.servicosExplorados)
+            ? dados.servicosExplorados.filter(nome =>
+                typeof nome === 'string' && servicosAWS.some(servico => servico.nome === nome)
+            )
+            : [];
+        const servicosExplorados = [...new Set([
+            ...servicosExploradosSalvos,
+            ...historicoServicos.map(item => item.nome)
+        ])];
         const nomePerfil = typeof dados.nomePerfil === 'string' && dados.nomePerfil.trim()
             ? dados.nomePerfil.trim().slice(0, 40)
             : 'Meu perfil';
 
-        return { indicePersonagem, buscasRecentes, historicoServicos, nomePerfil };
+        return { indicePersonagem, buscasRecentes, historicoServicos, servicosExplorados, nomePerfil };
     } catch (error) {
         console.error('Nao foi possivel carregar as preferencias salvas do FinSlash.', error);
-        return { indicePersonagem: null, buscasRecentes: [], historicoServicos: [], nomePerfil: 'Meu perfil' };
+        return {
+            indicePersonagem: null,
+            buscasRecentes: [],
+            historicoServicos: [],
+            servicosExplorados: [],
+            nomePerfil: 'Meu perfil'
+        };
     }
 }
 
@@ -319,14 +345,28 @@ function registrarBuscaRecente(busca) {
 }
 
 function registrarServicoNoHistorico(servico) {
+    const novoServicoExplorado = !dadosPersistidos.servicosExplorados.includes(servico.nome);
+    if (novoServicoExplorado) {
+        dadosPersistidos.servicosExplorados.push(servico.nome);
+    }
     dadosPersistidos.historicoServicos = [
         { nome: servico.nome, data: Date.now() },
         ...dadosPersistidos.historicoServicos
     ].slice(0, 50);
     salvarDadosPersistidos();
+    atualizarAvatarNavegacao();
+    if (novoServicoExplorado && dadosPersistidos.servicosExplorados.length >= servicosAWS.length) {
+        abrirPopupConquistaFinal();
+    }
 }
 
 function atualizarAvatarNavegacao() {
+    const conquistaFinalDesbloqueada = dadosPersistidos.servicosExplorados.length >= servicosAWS.length;
+    insigniaConquistaPerfil.classList.toggle('hidden', !conquistaFinalDesbloqueada);
+    botaoPerfilApp.setAttribute(
+        'aria-label',
+        conquistaFinalDesbloqueada ? 'Abrir perfil. Conquista Guardião AWS desbloqueada' : 'Abrir perfil'
+    );
     const personagem = personagens[dadosPersistidos.indicePersonagem];
     if (!personagem) {
         avatarNavegacaoApp.classList.add('hidden');
@@ -385,29 +425,50 @@ function renderizarHistoricoPerfil() {
 }
 
 function renderizarMedalhasPerfil() {
-    const total = new Set(dadosPersistidos.historicoServicos.map(item => item.nome)).size;
+    const total = dadosPersistidos.servicosExplorados.length;
     const conquistas = [
-        { limite: 1, nome: 'Primeiro passo', descricao: 'Explore seu primeiro serviço AWS.' },
-        { limite: 5, nome: 'Curioso', descricao: 'Explore 5 serviços AWS diferentes.' },
-        { limite: 10, nome: 'Explorador', descricao: 'Explore 10 serviços AWS diferentes.' }
+        { limite: 1, nome: 'Primeiro passo', descricao: 'Explore seu primeiro serviço AWS.', icone: '🌱' },
+        { limite: 5, nome: 'Curioso', descricao: 'Explore 5 serviços AWS diferentes.', icone: '🧭' },
+        { limite: 10, nome: 'Explorador', descricao: 'Explore 10 serviços AWS diferentes.', icone: '🥉' },
+        { limite: 15, nome: 'Colecionador de serviços', descricao: 'Conheça 15 serviços AWS diferentes.', icone: '🥈' },
+        { limite: 20, nome: 'Arquiteto da nuvem', descricao: 'Explore 20 serviços AWS diferentes.', icone: '🥇' },
+        { limite: 30, nome: 'Mestre da nuvem', descricao: 'Descubra 30 serviços AWS diferentes.', icone: '🏆' },
+        { limite: 40, nome: 'Lenda FinSlash', descricao: 'Explore 40 serviços AWS diferentes.', icone: '💎' },
+        { limite: servicosAWS.length, nome: 'Guardião AWS', descricao: 'Explore todos os serviços AWS disponíveis.', icone: '👑' }
     ];
     listaMedalhasPerfil.replaceChildren();
+    resumoMedalhasPerfil.textContent = `${conquistas.filter(conquista =>
+        total >= conquista.limite
+    ).length} de ${conquistas.length} conquistas desbloqueadas`;
 
-    conquistas.forEach(conquista => {
+    conquistas.forEach((conquista, indice) => {
+        const conquistada = total >= conquista.limite;
         const item = document.createElement('div');
-        item.className = `item-medalha-perfil${total >= conquista.limite ? ' conquistada' : ''}`;
+        item.className = `item-medalha-perfil${conquistada ? ' conquistada' : ''}`;
+        item.style.setProperty('--indice-conquista', indice);
         const icone = document.createElement('span');
         icone.className = 'icone-medalha-perfil';
         icone.setAttribute('aria-hidden', 'true');
-        icone.textContent = total >= conquista.limite ? '🏅' : '🔒';
+        icone.textContent = conquistada ? conquista.icone : '🔒';
         const detalhes = document.createElement('div');
         const nome = document.createElement('strong');
         nome.textContent = conquista.nome;
         const descricao = document.createElement('p');
         descricao.textContent = conquista.descricao;
         const estado = document.createElement('span');
-        estado.textContent = total >= conquista.limite ? 'Conquistada' : 'Ainda não conquistada';
-        detalhes.append(nome, descricao, estado);
+        estado.className = 'estado-medalha-perfil';
+        estado.textContent = conquistada ? 'Conquistada' : `${total} de ${conquista.limite} serviços`;
+        const progresso = document.createElement('div');
+        progresso.className = 'progresso-medalha-perfil';
+        progresso.setAttribute('role', 'progressbar');
+        progresso.setAttribute('aria-label', `Progresso: ${conquista.nome}`);
+        progresso.setAttribute('aria-valuemin', '0');
+        progresso.setAttribute('aria-valuemax', String(conquista.limite));
+        progresso.setAttribute('aria-valuenow', String(Math.min(total, conquista.limite)));
+        const barra = document.createElement('span');
+        barra.style.width = `${Math.min(total / conquista.limite, 1) * 100}%`;
+        progresso.appendChild(barra);
+        detalhes.append(nome, descricao, estado, progresso);
         item.append(icone, detalhes);
         listaMedalhasPerfil.appendChild(item);
     });
@@ -466,6 +527,18 @@ function salvarNomePerfil(event) {
 
 function fecharPerfil() {
     popupPerfil.classList.add('hidden');
+}
+
+function abrirPopupConquistaFinal() {
+    popupConquistaFinal.classList.remove('hidden');
+    botaoFecharConquistaFinal.focus();
+}
+
+function fecharPopupConquistaFinal() {
+    popupConquistaFinal.classList.add('hidden');
+    if (!botaoPerfilApp.closest('.hidden')) {
+        botaoPerfilApp.focus();
+    }
 }
 
 function mostrarMenuPersonagens() {
@@ -2205,6 +2278,10 @@ function abrirTelaTopicosServico(nomeServico) {
         console.error(`Nao ha topicos cadastrados para ${nomeServico}.`);
         return;
     }
+    const servico = servicosAWS.find(item => item.nome === nomeServico);
+    if (servico && !dadosPersistidos.servicosExplorados.includes(nomeServico)) {
+        registrarServicoNoHistorico(servico);
+    }
     const indicePersonagem = personagens.indexOf(personagemSelecionado);
     servicoTopicosAtual = dadosServico;
     tituloTelaTopicosServico.textContent = dadosServico.titulo;
@@ -2424,6 +2501,8 @@ botaoContinuarMenu.addEventListener('click', irParaJornada);
 botaoVoltarSelecionado.addEventListener('click', voltarPelaNavegacao);
 botaoPerfilApp.addEventListener('click', abrirPerfil);
 botaoFecharPerfil.addEventListener('click', fecharPerfil);
+botaoFecharConquistaFinal.addEventListener('click', fecharPopupConquistaFinal);
+botaoContinuarConquista.addEventListener('click', fecharPopupConquistaFinal);
 botaoEditarTituloPerfil.addEventListener('click', editarNomePerfil);
 formularioEditarNomePerfil.addEventListener('submit', salvarNomePerfil);
 botaoCancelarEdicaoNomePerfil.addEventListener('click', fecharEdicaoNomePerfil);
@@ -2446,6 +2525,11 @@ document.addEventListener('keydown', event => {
 popupPerfil.addEventListener('click', event => {
     if (event.target === popupPerfil) {
         fecharPerfil();
+    }
+});
+popupConquistaFinal.addEventListener('click', event => {
+    if (event.target === popupConquistaFinal) {
+        fecharPopupConquistaFinal();
     }
 });
 document.querySelectorAll('[data-aba-perfil]').forEach(botao => {
@@ -2519,6 +2603,10 @@ popupTopicoServico.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !popupConquistaFinal.classList.contains('hidden')) {
+        fecharPopupConquistaFinal();
+        return;
+    }
     if (event.key === 'Escape' && !popupPerfil.classList.contains('hidden')) {
         fecharPerfil();
         return;

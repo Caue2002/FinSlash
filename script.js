@@ -1,4 +1,4 @@
-// Dados dos 18 personagens com cores imagens e gifs
+// Dados dos personagens com cores imagens e gifs
 const personagens = [
     { nome: 'Killua', cor: '#9ca3af', imagem: 'imagens/personagem1.webp', gif: 'imagens/gif1.gif' },
     { nome: 'Gon', cor: '#22c55e', imagem: 'imagens/personagem2.webp', gif: 'imagens/gif2.gif' },
@@ -17,7 +17,10 @@ const personagens = [
     { nome: 'Finn', cores: ['#2563eb', '#ffffff'], imagem: 'imagens/personagem15.webp', gif: 'imagens/gif15.gif' },
     { nome: 'Nezuko', cor: '#f9a8d4', imagem: 'imagens/personagem16.webp', gif: 'imagens/gif16.gif' },
     { nome: 'Kakashi', cor: '#3949ab', imagem: 'imagens/personagem17.webp', gif: 'imagens/gif17.gif' },
-    { nome: 'Vegeta', cores: ['#111827', '#2563eb'], imagem: 'imagens/personagem18.webp', gif: 'imagens/gif18.gif' }
+    { nome: 'Vegeta', cores: ['#111827', '#2563eb'], imagem: 'imagens/personagem18.webp', gif: 'imagens/gif18.gif' },
+    { nome: 'Creeper', cor: '#90ee90', imagem: 'imagens/personagem19.png', gif: 'imagens/gif19.gif' },
+    { nome: 'Ryu', cores: ['#ffffff', '#ef4444'], imagem: 'imagens/personagem20.jpg', gif: 'imagens/gif20.gif' },
+    { nome: 'Chun-Li', cor: '#87ceeb', imagem: 'imagens/personagem21.jpg', gif: 'imagens/gif21.gif' }
 ];
 
 // Dados dos servicos AWS
@@ -985,11 +988,66 @@ function definirAtividadeBuscaVoz(ativa) {
     popupBuscaVoz.classList.toggle('ouvindo-voz', ativa);
 }
 
+function obterOrdemAleatoriaPersonagens() {
+    const restantes = personagens.map((_, index) => index);
+    const ordem = [];
+
+    function compartilhamCor(indiceA, indiceB) {
+        const coresA = personagens[indiceA].cores || [personagens[indiceA].cor];
+        const coresB = personagens[indiceB].cores || [personagens[indiceB].cor];
+        return coresA.some(corA => coresB.some(corB => corA.toLowerCase() === corB.toLowerCase()));
+    }
+
+    function buscarOrdem() {
+        if (ordem.length === personagens.length) {
+            return true;
+        }
+
+        const posicao = ordem.length;
+        const vizinhos = [];
+        if (posicao % 3 > 0) {
+            vizinhos.push(ordem[posicao - 1]);
+        }
+        if (posicao >= 3) {
+            vizinhos.push(ordem[posicao - 3]);
+        }
+
+        const candidatos = [...restantes];
+        for (let indice = candidatos.length - 1; indice > 0; indice--) {
+            const aleatorio = Math.floor(Math.random() * (indice + 1));
+            [candidatos[indice], candidatos[aleatorio]] = [candidatos[aleatorio], candidatos[indice]];
+        }
+
+        for (const candidato of candidatos) {
+            if (vizinhos.some(vizinho => compartilhamCor(candidato, vizinho))) {
+                continue;
+            }
+
+            const indiceRestante = restantes.indexOf(candidato);
+            restantes.splice(indiceRestante, 1);
+            ordem.push(candidato);
+            if (buscarOrdem()) {
+                return true;
+            }
+            ordem.pop();
+            restantes.splice(indiceRestante, 0, candidato);
+        }
+
+        return false;
+    }
+
+    if (!buscarOrdem()) {
+        throw new Error('Nao foi possivel organizar os personagens sem cores repetidas lado a lado.');
+    }
+    return ordem;
+}
+
 // Funcao para gerar os cartoes de personagens no grid
 function gerarCartoesPersonagens() {
     const cartoes = document.createDocumentFragment();
     
-    personagens.forEach((personagem, index) => {
+    obterOrdemAleatoriaPersonagens().forEach(index => {
+        const personagem = personagens[index];
         const cartao = document.createElement('div');
         cartao.className = 'cartao-personagem';
         cartao.setAttribute('aria-label', `Selecionar ${personagem.nome}`);
@@ -1160,8 +1218,10 @@ function iniciarAnimacaoCelebracao() {
     // Define o GIF do personagem selecionado
     gifCelebracao.src = personagemTemp.gif;
     const cores = personagemTemp.cores || [personagemTemp.cor];
-    gifCelebracao.style.setProperty('--cor-brilho-celebracao', cores[0]);
-    gifCelebracao.style.setProperty('--cor-brilho-celebracao-secundaria', cores[1] || cores[0]);
+    const corBrilhoCelebracao = personagemTemp.gif === 'imagens/gif20.gif' ? '#ef4444' : cores[0];
+    const corBrilhoCelebracaoSecundaria = personagemTemp.gif === 'imagens/gif20.gif' ? '#b91c1c' : cores[1] || cores[0];
+    gifCelebracao.style.setProperty('--cor-brilho-celebracao', corBrilhoCelebracao);
+    gifCelebracao.style.setProperty('--cor-brilho-celebracao-secundaria', corBrilhoCelebracaoSecundaria);
     
     // Abre o popup de animacao
     popupAnimacao.classList.remove('hidden');
@@ -1171,6 +1231,14 @@ function iniciarAnimacaoCelebracao() {
     const gifsMaiores = ['imagens/gif5.gif', 'imagens/gif11.gif'];
     const tamanhoFinal = personagemTemp.gif === 'imagens/gif18.gif'
         ? 4
+        : personagemTemp.gif === 'imagens/gif19.gif'
+            ? 2.4
+        : personagemTemp.gif === 'imagens/gif20.gif'
+            ? 2.1
+        : personagemTemp.gif === 'imagens/gif21.gif'
+            ? 2.1
+        : ['imagens/gif8.gif', 'imagens/gif10.gif'].includes(personagemTemp.gif)
+            ? 1.1
         : personagemTemp.gif === 'imagens/gif13.gif'
             ? 1.3
         : personagemTemp.gif === 'imagens/gif16.gif'
@@ -1190,16 +1258,24 @@ function iniciarAnimacaoCelebracao() {
                 : 1.5;
     const deslocamentoVertical = personagemTemp.gif === 'imagens/gif18.gif'
         ? -120
+        : personagemTemp.gif === 'imagens/gif19.gif'
+            ? -150
+        : personagemTemp.gif === 'imagens/gif20.gif'
+            ? -100
+        : personagemTemp.gif === 'imagens/gif21.gif'
+            ? -75
         : personagemTemp.gif === 'imagens/gif5.gif'
             ? 30
             : 0;
     const deslocamentoHorizontal = personagemTemp.gif === 'imagens/gif13.gif' ? -25 : 0;
     gifCelebracao.style.transform = `translate(${deslocamentoHorizontal}px, ${deslocamentoVertical}px) scale(0.5)`;
-    const tempoExibicaoFinal = personagemTemp.gif === 'imagens/gif12.gif'
-        ? 1000
-        : ['imagens/gif10.gif', 'imagens/gif11.gif'].includes(personagemTemp.gif)
-            ? 5000
-            : 2000;
+    const tempoExibicaoFinal = ['imagens/gif19.gif', 'imagens/gif20.gif', 'imagens/gif21.gif'].includes(personagemTemp.gif)
+        ? 4000
+        : ['imagens/gif12.gif', 'imagens/gif13.gif'].includes(personagemTemp.gif)
+            ? 1000
+            : ['imagens/gif10.gif', 'imagens/gif11.gif'].includes(personagemTemp.gif)
+                ? 5000
+                : 2000;
     let inicioAnimacao;
 
     const animar = (tempoAtual) => {
@@ -1217,7 +1293,7 @@ function iniciarAnimacaoCelebracao() {
         if (progresso < 1) {
             requestAnimationFrame(animar);
         } else {
-            // Mantem os GIFs 10 e 11 por cinco segundos; os demais, por dois.
+            // Mantem os GIFs 10 e 11 por cinco segundos, os novos por quatro e 12 e 13 por um.
             timeoutCelebracao = window.setTimeout(() => {
                 if (idCelebracao !== celebracaoAtiva) {
                     return;

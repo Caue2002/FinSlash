@@ -361,4 +361,170 @@ ON CONFLICT (scenario_id, url) DO UPDATE
 SET title = EXCLUDED.title,
     reviewed_at = CURRENT_DATE;
 
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'versionamento-ativado-sem-expiracao-de-versoes-antigas-noncurrent-versions',
+        'Versionamento Ativado Sem Expiração de Versões Antigas (Noncurrent Versions)',
+        'Versões S3 são cobradas como objetos armazenados; avalie regras de ciclo de vida para versões não atuais sem violar a retenção exigida.'),
+    ('amazon-ebs', 'snapshots-manuais-antigos-sem-politica-de-expiracao-orphaned-snapshots',
+        'Snapshots Manuais Antigos sem Política de Expiração (Orphaned Snapshots)',
+        'Revise idade, uso e dependências dos snapshots EBS antes de excluir ou automatizar sua retenção.'),
+    ('amazon-cloudwatch', 'ingestao-excessiva-de-logs-de-aplicacao-sem-filtro-de-severidade',
+        'Ingestão Excessiva de Logs de Aplicação sem Filtro de Severidade',
+        'Meça o volume e a necessidade operacional de cada nível de log antes de reduzir a ingestão ou mudar a classe de log.'),
+    ('aws-lambda', 'retencao-prolongada-e-indefinida-de-logs-no-cloudwatch-log-groups',
+        'Retenção Prolongada e Indefinida de Logs no CloudWatch (Log Groups)',
+        'Defina retenção dos logs da função Lambda conforme as necessidades de diagnóstico, auditoria e conformidade.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'versionamento-ativado-sem-expiracao-de-versoes-antigas-noncurrent-versions', 'check', 1,
+        'Meça versões acumuladas', 'Use S3 Inventory ou ferramentas de listagem para identificar versões não atuais, tamanho, idade e prefixos responsáveis pelo armazenamento.'),
+    ('amazon-s3', 'versionamento-ativado-sem-expiracao-de-versoes-antigas-noncurrent-versions', 'check', 2,
+        'Confirme retenção e recuperação', 'Verifique requisitos legais, necessidade de restauração e dependências de replicação antes de escolher um prazo.'),
+    ('amazon-s3', 'versionamento-ativado-sem-expiracao-de-versoes-antigas-noncurrent-versions', 'action', 1,
+        'Avalie uma regra Lifecycle', 'Teste uma regra para versões não atuais em prefixo controlado e revise a simulação/escopo antes de aplicá-la ao bucket.'),
+    ('amazon-s3', 'versionamento-ativado-sem-expiracao-de-versoes-antigas-noncurrent-versions', 'caution', 1,
+        'Não confunda expiração da versão atual e das antigas', 'Excluir versões não atuais reduz opções de recuperação; retenção e Object Lock podem impedir a exclusão ou exigir tratamento especial.'),
+
+    ('amazon-ebs', 'snapshots-manuais-antigos-sem-politica-de-expiracao-orphaned-snapshots', 'check', 1,
+        'Identifique snapshots e dependências', 'Revise região, volume de origem, tags, idade, política de backup e necessidade de recuperação junto à equipe responsável.'),
+    ('amazon-ebs', 'snapshots-manuais-antigos-sem-politica-de-expiracao-orphaned-snapshots', 'check', 2,
+        'Entenda o armazenamento incremental', 'Snapshots EBS são incrementais; excluir um snapshot isolado pode não reduzir o armazenamento faturável como esperado.'),
+    ('amazon-ebs', 'snapshots-manuais-antigos-sem-politica-de-expiracao-orphaned-snapshots', 'action', 1,
+        'Automatize somente a retenção aprovada', 'Depois da validação de backup e recuperação, use uma política de ciclo de vida compatível ou exclua apenas snapshots confirmados como descartáveis.'),
+    ('amazon-ebs', 'snapshots-manuais-antigos-sem-politica-de-expiracao-orphaned-snapshots', 'caution', 1,
+        'Preserve a capacidade de restauração', 'Não remova backups exigidos por auditoria, recuperação de desastre ou políticas internas; valide restaurações antes de alterar retenção.'),
+
+    ('amazon-cloudwatch', 'ingestao-excessiva-de-logs-de-aplicacao-sem-filtro-de-severidade', 'check', 1,
+        'Meça ingestão por grupo', 'Compare bytes ingeridos, armazenamento, nível de severidade e origem por log group em períodos representativos.'),
+    ('amazon-cloudwatch', 'ingestao-excessiva-de-logs-de-aplicacao-sem-filtro-de-severidade', 'check', 2,
+        'Identifique logs necessários', 'Confirme com operação, segurança e auditoria quais eventos são necessários para alertas, investigação e requisitos de retenção.'),
+    ('amazon-cloudwatch', 'ingestao-excessiva-de-logs-de-aplicacao-sem-filtro-de-severidade', 'action', 1,
+        'Reduza ruído de forma controlada', 'Ajuste níveis de debug/verbose em ambientes e componentes selecionados; monitore falhas e confirme que os eventos operacionais continuam disponíveis.'),
+    ('amazon-cloudwatch', 'ingestao-excessiva-de-logs-de-aplicacao-sem-filtro-de-severidade', 'caution', 1,
+        'Não descarte sinais de segurança', 'Filtragem excessiva pode remover evidências de incidentes ou eventos de auditoria; aprove a mudança com as equipes responsáveis.'),
+
+    ('aws-lambda', 'retencao-prolongada-e-indefinida-de-logs-no-cloudwatch-log-groups', 'check', 1,
+        'Localize grupos e prazos atuais', 'Liste os log groups da função, retenção configurada, volume armazenado e requisitos de investigação e auditoria.'),
+    ('aws-lambda', 'retencao-prolongada-e-indefinida-de-logs-no-cloudwatch-log-groups', 'check', 2,
+        'Defina prazos por ambiente', 'Confirme com segurança, operação e compliance os prazos necessários para produção, homologação e desenvolvimento.'),
+    ('aws-lambda', 'retencao-prolongada-e-indefinida-de-logs-no-cloudwatch-log-groups', 'action', 1,
+        'Configure retenção por log group', 'Defina um prazo adequado no CloudWatch Logs e valide políticas em nível de conta que possam substituir a configuração individual.'),
+    ('aws-lambda', 'retencao-prolongada-e-indefinida-de-logs-no-cloudwatch-log-groups', 'caution', 1,
+        'Considere o efeito da expiração', 'Eventos que atingem a retenção são marcados para exclusão; não reduza o prazo antes de confirmar obrigações regulatórias e de resposta a incidentes.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'versionamento-ativado-sem-expiracao-de-versoes-antigas-noncurrent-versions',
+        'S3 Versioning and lifecycle management', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html'),
+    ('amazon-s3', 'versionamento-ativado-sem-expiracao-de-versoes-antigas-noncurrent-versions',
+        'Managing the lifecycle of objects', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html'),
+    ('amazon-ebs', 'snapshots-manuais-antigos-sem-politica-de-expiracao-orphaned-snapshots',
+        'Amazon EBS snapshots and incremental storage', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html'),
+    ('amazon-ebs', 'snapshots-manuais-antigos-sem-politica-de-expiracao-orphaned-snapshots',
+        'Automate backups with Amazon Data Lifecycle Manager', 'https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html'),
+    ('amazon-cloudwatch', 'ingestao-excessiva-de-logs-de-aplicacao-sem-filtro-de-severidade',
+        'What is Amazon CloudWatch Logs?', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html'),
+    ('aws-lambda', 'retencao-prolongada-e-indefinida-de-logs-no-cloudwatch-log-groups',
+        'Set retention for log groups', 'https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_PutRetentionPolicy.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'ambientes-de-staging-hml-rodando-24-7',
+        'Ambientes de Staging/HML Rodando 24/7',
+        'Avalie janelas seguras de parada para ambientes não produtivos e confira quais recursos continuam gerando custos quando as instâncias estão paradas.'),
+    ('amazon-ec2', 'discos-ebs-nao-excluidos-ao-terminar-a-instancia',
+        'Discos EBS Não Excluídos ao Terminar a Instância',
+        'Verifique o atributo de exclusão ao terminar e identifique volumes persistentes antes de qualquer limpeza.'),
+    ('amazon-ebs', 'manutencao-de-discos-no-tipo-legado-gp2-em-vez-do-gp3',
+        'Manutenção de Discos no Tipo Legado gp2 em Vez do gp3',
+        'Compare desempenho observado e requisitos com gp3 antes de migrar volumes; escolha a configuração pelo perfil da carga.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'ambientes-de-staging-hml-rodando-24-7', 'check', 1,
+        'Confirme se pode parar', 'Verifique proprietários, dependências, janelas de teste, estado local e requisitos de disponibilidade antes de programar paradas.'),
+    ('amazon-ec2', 'ambientes-de-staging-hml-rodando-24-7', 'check', 2,
+        'Liste custos que permanecem', 'Instâncias EBS-backed paradas não são excluídas: volumes EBS, snapshots e outros recursos associados podem continuar gerando cobranças.'),
+    ('amazon-ec2', 'ambientes-de-staging-hml-rodando-24-7', 'action', 1,
+        'Agende e monitore', 'Para instâncias elegíveis, automatize Stop/Start em janela aprovada e confirme que aplicações e serviços dependentes voltam corretamente.'),
+    ('amazon-ec2', 'ambientes-de-staging-hml-rodando-24-7', 'caution', 1,
+        'Não confunda parar com terminar', 'Terminar é irreversível e pode excluir volumes marcados para exclusão; faça backup aprovado antes de qualquer encerramento definitivo.'),
+
+    ('amazon-ec2', 'discos-ebs-nao-excluidos-ao-terminar-a-instancia', 'check', 1,
+        'Revise volumes e atributo de término', 'Inspecione cada volume anexado e o atributo DeleteOnTermination; confirme tags, snapshots, dependências e equipe proprietária.'),
+    ('amazon-ec2', 'discos-ebs-nao-excluidos-ao-terminar-a-instancia', 'check', 2,
+        'Calcule o custo residual', 'Após o término da instância, verifique volumes EBS ainda existentes e outros recursos associados na região.'),
+    ('amazon-ec2', 'discos-ebs-nao-excluidos-ao-terminar-a-instancia', 'action', 1,
+        'Limpe somente volumes aprovados', 'Depois da confirmação do responsável e de preservar dados exigidos, exclua volumes comprovadamente sem uso e revise a configuração para novas instâncias.'),
+    ('amazon-ec2', 'discos-ebs-nao-excluidos-ao-terminar-a-instancia', 'caution', 1,
+        'A exclusão remove dados', 'Um volume apagado não pode ser anexado novamente; faça e valide o backup quando a política exigir antes de excluir.'),
+
+    ('amazon-ebs', 'manutencao-de-discos-no-tipo-legado-gp2-em-vez-do-gp3', 'check', 1,
+        'Compare o perfil do volume', 'Meça IOPS, throughput, latência e capacidade usada durante picos; confira também a instância EC2 e os limites de performance envolvidos.'),
+    ('amazon-ebs', 'manutencao-de-discos-no-tipo-legado-gp2-em-vez-do-gp3', 'check', 2,
+        'Compare custo e desempenho atuais', 'Confira os preços vigentes na região e as características de gp2 e gp3; gp3 permite configurar performance independentemente do tamanho do volume.'),
+    ('amazon-ebs', 'manutencao-de-discos-no-tipo-legado-gp2-em-vez-do-gp3', 'action', 1,
+        'Teste a migração de forma controlada', 'Para um volume elegível, planeje a modificação, valide a performance da aplicação e monitore métricas e custos após a mudança.'),
+    ('amazon-ebs', 'manutencao-de-discos-no-tipo-legado-gp2-em-vez-do-gp3', 'caution', 1,
+        'Não reduza performance por padrão', 'gp3 pode atender muitos usos, mas cargas com requisitos específicos podem precisar de outro tipo ou de IOPS/throughput provisionados; confirme antes de alterar.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'ambientes-de-staging-hml-rodando-24-7',
+        'Stop and start Amazon EC2 instances', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html'),
+    ('amazon-ec2', 'discos-ebs-nao-excluidos-ao-terminar-a-instancia',
+        'Terminate Amazon EC2 instances and preserve data', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/terminating-instances.html'),
+    ('amazon-ebs', 'manutencao-de-discos-no-tipo-legado-gp2-em-vez-do-gp3',
+        'Amazon EBS General Purpose SSD volumes', 'https://docs.aws.amazon.com/ebs/latest/userguide/general-purpose.html'),
+    ('amazon-ebs', 'manutencao-de-discos-no-tipo-legado-gp2-em-vez-do-gp3',
+        'Amazon EBS volume types and characteristics', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
 COMMIT;

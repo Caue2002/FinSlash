@@ -3887,4 +3887,1984 @@ DELETE FROM cost_scenarios
 WHERE slug = 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms'
     AND service_id = (SELECT id FROM aws_services WHERE slug = 'amazon-ebs');
 
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudwatch', 'ausencia-de-alarmes-compostos-composite-alarms',
+        'Ausência de Alarmes Compostos (Composite Alarms)',
+        'Avalie o uso de alarmes compostos para correlacionar múltiplos alarmes simples e reduzir notificações redundantes durante incidentes únicos.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudwatch', 'ausencia-de-alarmes-compostos-composite-alarms', 'check', 1,
+        'Meça o volume de notificações', 'Conte alarmes disparados por incidente e identifique grupos de alarmes que sempre acionam juntos, gerando enxurrada de mensagens para a equipe de plantão.'),
+    ('amazon-cloudwatch', 'ausencia-de-alarmes-compostos-composite-alarms', 'check', 2,
+        'Mapeie dependências entre recursos', 'Identifique relações causais, como uma falha de rede que dispara alarmes de EC2, RDS e Lambda simultaneamente, que poderiam ser representadas por um único alarme composto.'),
+    ('amazon-cloudwatch', 'ausencia-de-alarmes-compostos-composite-alarms', 'action', 1,
+        'Crie alarmes compostos para correlações estáveis', 'Combine alarmes simples com regras booleanas em alarmes compostos, mantendo os alarmes individuais para métricas e usando o composto apenas para a notificação consolidada.'),
+    ('amazon-cloudwatch', 'ausencia-de-alarmes-compostos-composite-alarms', 'caution', 1,
+        'Alarme composto depende dos alarmes de origem', 'Se um alarme simples for excluído ou renomeado, o composto pode falhar; documente as dependências e revise os compostos a cada mudança de arquitetura.'),
+    ('amazon-cloudwatch', 'ausencia-de-alarmes-compostos-composite-alarms', 'caution', 2,
+        'Não esconda sinais independentes', 'Use compostos para ruído correlacionado, mas mantenha alarmes separados para falhas que exigem ação distinta; agrupar demais pode atrasar a resposta a incidentes reais.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudwatch', 'ausencia-de-alarmes-compostos-composite-alarms',
+        'Composite alarms', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CompositeAlarms.html'),
+    ('amazon-cloudwatch', 'ausencia-de-alarmes-compostos-composite-alarms',
+        'Alarms on metrics', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Alarm-On-Metric-Alarm-Name.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance',
+        'Falta de Ativação do S3 Object Lock para Arquivos de Compliance',
+        'Avalie a proteção WORM (Write Once, Read Many) para comprovantes e registros regulatórios que não podem ser alterados ou excluídos durante o período de retenção exigido.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance', 'check', 1,
+        'Identifique dados sujeitos a retenção', 'Localize comprovantes, logs regulatórios e evidências que exigem imutabilidade por compliance ou auditoria, e verifique se o bucket já possui Object Lock habilitado.'),
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance', 'check', 2,
+        'Confirme requisitos de modo e prazo', 'Determine se a necessidade é modo Compliance ou Governance e qual o período de retenção legal; o modo Compliance impede até exclusão por administradores durante o prazo.'),
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance', 'action', 1,
+        'Habilite Object Lock em novo bucket dedicado', 'Object Lock só pode ser ativado na criação do bucket; provisione um bucket dedicado com Object Lock, defina a retenção padrão e migre os objetos com as configurações adequadas.'),
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance', 'caution', 1,
+        'Retenção não pode ser encurtada no modo Compliance', 'Uma vez definido o retain until date em modo Compliance, nem o root pode apagar o objeto antes do prazo; erros de configuração podem prender dados por anos.'),
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance', 'caution', 2,
+        'Avalie a sobrecarga operacional', 'Object Lock exige planejamento de versionamento, retenção legal e procedimentos de eliminação após o prazo; valide o fluxo completo em homologação antes de produção.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance',
+        'Using S3 Object Lock', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html'),
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance',
+        'S3 Object Lock overview', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html'),
+    ('amazon-s3', 'falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance',
+        'Security best practices for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx',
+        'Erros de Aplicação Gerando Loops Infinitos de Requisições HTTP (4xx/5xx)',
+        'Detecte laços de retry da aplicação contra o S3 que geram milhares de requisições com erro por segundo e inflem custos de API sem entregar valor.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx', 'check', 1,
+        'Identifique picos de 4xx e 5xx', 'Use métricas de request do bucket e logs de acesso para localizar horários com volume anormal de erros, especialmente 404, 403 e 500 repetidos para as mesmas chaves.'),
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx', 'check', 2,
+        'Correlacione com logs da aplicação', 'Cruze os horários dos erros com deploys, jobs e retries da aplicação; loops costumam aparecer como requisições espaçadas de forma regular para a mesma chave inexistente.'),
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx', 'action', 1,
+        'Corrija o laço de retry na origem', 'Ajuste a aplicação para parar de tentar após erros definitivos, implemente backoff exponencial com jitter e cache de resultados negativos quando aplicável.'),
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx', 'caution', 1,
+        'Erros 4xx também são cobrados', 'Requisições com erro ainda contam para o custo de API; não assuma que falhas são gratuitas e monitore o volume total, não apenas o tráfego bem-sucedido.'),
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx', 'caution', 2,
+        'Não confunda com ataque ou scraping', 'Picos de 403 podem indicar tentativa de acesso indevido; investigue também a origem das requisições e o estado do Block Public Access antes de assumir falha interna.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx',
+        'Monitoring metrics with Amazon S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudwatch-metrics.html'),
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx',
+        'Request metrics for S3 buckets', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/request-metrics-s3.html'),
+    ('amazon-s3', 'erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx',
+        'Performance guidelines for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste',
+        'Réplica de Buckets Cross-Region (CRR) Desnecessária em Ambientes de Teste',
+        'Revise regras de replicação entre regiões em buckets de homologação e desenvolvimento que duplicam armazenamento e transferência sem requisito real de recuperação.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste', 'check', 1,
+        'Inventarie regras de replicação', 'Liste buckets com replicação configurada, identifique origem e destino, e classifique quais sustentam requisitos reais de continuidade versus simples redundância de teste.'),
+    ('amazon-s3', 'replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste', 'check', 2,
+        'Meça custo da replicação', 'Compare armazenamento duplicado, requisições de replicação e tráfego inter-região gerado; dados de teste recriáveis raramente justificam o custo.'),
+    ('amazon-s3', 'replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste', 'action', 1,
+        'Desative a replicação onde não houver requisito', 'Remova a regra de replicação em buckets de teste aprovados, confirme que os dados de destino podem ser recriados e monitore a redução de custos.'),
+    ('amazon-s3', 'replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste', 'caution', 1,
+        'Objetos já replicados permanecem no destino', 'Desativar a regra não apaga os objetos existentes no bucket de destino; planeje a remoção ou expiração separadamente.'),
+    ('amazon-s3', 'replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste', 'caution', 2,
+        'Verifique dependências antes de remover', 'Consumidores podem ler do bucket replicado; valide aplicações, relatórios e procedimentos de DR antes de encerrar a replicação.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste',
+        'Replicating objects', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html'),
+    ('amazon-s3', 'replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste',
+        'Cost optimization for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive',
+        'Ausência de Transição para Glacier Instant Retrieval ou Deep Archive',
+        'Avalie a ausência de regras de ciclo de vida que movem dados antigos para classes de arquivo de menor custo, mantendo volumes quentes em classes de acesso frequente.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive', 'check', 1,
+        'Identifique dados frios em classes quentes', 'Analise o padrão de acesso por prefixo e idade dos objetos para encontrar dados lidos raramente que permanecem em Standard ou Intelligent-Tiering.'),
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive', 'check', 2,
+        'Defina o prazo de acesso aceitável', 'Determine quanto tempo os dados precisam ficar imediatamente disponíveis; isso define se a classe adequada é Glacier Instant Retrieval ou as classes com restauração.'),
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive', 'action', 1,
+        'Configure transições de ciclo de vida', 'Crie regras de lifecycle movendo objetos para a classe de arquivo adequada após o prazo definido, com filtros por prefixo e validação do custo de transição por objeto.'),
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive', 'caution', 1,
+        'Classes de arquivo têm custos de resgate', 'Mover dados para Glacier Instant Retrieval ou Deep Archive pode reduzir o armazenamento, mas leituras passam a ter taxa de recuperação; valide o padrão real de acesso.'),
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive', 'caution', 2,
+        'Respeite o período mínimo de armazenamento', 'Objetos removidos ou migrados antes do prazo mínimo da classe geram cobrança proporcional; planeje a retenção antes de configurar expirações.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive',
+        'Transitioning objects using lifecycle configuration', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html'),
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive',
+        'Amazon S3 storage classes', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html'),
+    ('amazon-s3', 'ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive',
+        'Managing object lifecycle', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'buckets-de-backups-e-snapshots-sem-regras-de-limpeza',
+        'Buckets de Backups e Snapshots sem Regras de Limpeza',
+        'Identifique buckets de backup sem expiração ou transição de ciclo de vida, onde cópias acumulam armazenamento por anos além do prazo de retenção necessário.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'buckets-de-backups-e-snapshots-sem-regras-de-limpeza', 'check', 1,
+        'Inventarie buckets de backup', 'Liste buckets que recebem snapshots, dumps ou cópias de recuperação e verifique se possuem regras de lifecycle ou expiração configuradas.'),
+    ('amazon-s3', 'buckets-de-backups-e-snapshots-sem-regras-de-limpeza', 'check', 2,
+        'Defina a retenção exigida', 'Confirme com os responsáveis o prazo legal e operacional de cada tipo de backup; retenções diferentes por ambiente e criticidade devem gerar regras distintas.'),
+    ('amazon-s3', 'buckets-de-backups-e-snapshots-sem-regras-de-limpeza', 'action', 1,
+        'Aplique expiração e transição por regra', 'Configure o lifecycle para expirar ou mover objetos após o prazo definido, priorizando regras de expiração de multipart uploads e transição para classes frias.'),
+    ('amazon-s3', 'buckets-de-backups-e-snapshots-sem-regras-de-limpeza', 'caution', 1,
+        'Expiração é irreversível', 'Uma vez expirados, os objetos não podem ser recuperados; teste as regras em bucket de homologação e confirme que o último ponto de restauração válido é preservado.'),
+    ('amazon-s3', 'buckets-de-backups-e-snapshots-sem-regras-de-limpeza', 'caution', 2,
+        'Delete markers e versões antigas', 'Com versionamento ativo, a expiração cria delete markers e versões não correntes continuam cobradas; configure regras para ambos os casos.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'buckets-de-backups-e-snapshots-sem-regras-de-limpeza',
+        'Managing object lifecycle', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html'),
+    ('amazon-s3', 'buckets-de-backups-e-snapshots-sem-regras-de-limpeza',
+        'Transitioning objects using lifecycle configuration', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos',
+        'Ativação de S3 Request Metrics e CloudWatch Logging Excessivos',
+        'Avalie métricas de requisição e logs de acesso ativados em buckets de alto volume, onde a coleta detalhada pode custar mais que o benefício operacional.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos', 'check', 1,
+        'Verifique o que está habilitado', 'Confirme se request metrics por filtro e logs de acesso do servidor estão ativos e em quais buckets, especialmente nos de maior volume de requisições.'),
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos', 'check', 2,
+        'Avalie o uso real das métricas', 'Verifique se alguém consulta essas métricas em dashboards ou alarmes; métricas habilitadas sem consumo geram custo sem retorno.'),
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos', 'action', 1,
+        'Restrinja a coleta ao necessário', 'Desative métricas e logs em buckets sem uso analítico, mantendo-os apenas onde sustentam troubleshooting ou conformidade, e defina retenção curta nos logs de acesso.'),
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos', 'caution', 1,
+        'Request metrics cobram por série temporal', 'Cada filtro de métrica gera uma série cobrada no CloudWatch; muitos filtros em buckets grandes multiplicam o custo de monitoramento.'),
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos', 'caution', 2,
+        'Logs de acesso registram cada requisição', 'Em buckets com bilhões de requisições, os logs de acesso geram armazenamento massivo; avalie amostragem ou desativação antes de manter indefinidamente.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos',
+        'Request metrics for S3 buckets', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/request-metrics-s3.html'),
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos',
+        'Monitoring metrics with Amazon S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudwatch-metrics.html'),
+    ('amazon-s3', 'ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos',
+        'Logging requests with server access logging', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront',
+        'Download Direto de Imagens e Estáticos sem CDN (CloudFront)',
+        'Avalie a entrega de conteúdo estático diretamente do S3, onde a ausência de cache de borda aumenta custos de saída e latência para usuários distantes.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront', 'check', 1,
+        'Identifique conteúdo servido direto do S3', 'Localize imagens, CSS, JS e comprovantes acessados diretamente por URL do bucket ou site estático do S3, com alto volume de downloads repetidos.'),
+    ('amazon-s3', 'download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront', 'check', 2,
+        'Meça o padrão de acesso', 'Compare requisições únicas versus repetidas e a distribuição geográfica dos usuários; conteúdo popular e global se beneficia fortemente de cache de borda.'),
+    ('amazon-s3', 'download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront', 'action', 1,
+        'Coloque o CloudFront como camada de entrega', 'Crie uma distribuição com o bucket como origem, ajuste TTLs de cache e políticas de cabeçalho, e valide hit ratio e redução de requisições à origem.'),
+    ('amazon-s3', 'download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront', 'caution', 1,
+        'Cache pode servir conteúdo desatualizado', 'Após atualizações, objetos podem permanecer em cache até expirar o TTL; configure invalidações para caminhos críticos ou versionamento por nome de arquivo.'),
+    ('amazon-s3', 'download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront', 'caution', 2,
+        'CloudFront adiciona custo próprio', 'Para tráfego muito baixo ou regional, a distribuição pode não compensar; compare o custo de saída do S3 com o do CloudFront antes de migrar tudo.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront',
+        'Serving static website content from Amazon S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html'),
+    ('amazon-s3', 'download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront',
+        'Cost optimization for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching',
+        'Sobrecarga de Requisições por Falta de S3 Express One Zone ou Caching',
+        'Avalie buckets de acesso intensivo a objetos pequenos que geram excesso de requisições, considerando S3 Express One Zone ou camadas de cache adequadas.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching', 'check', 1,
+        'Meça a taxa de requisições por objeto', 'Identifique buckets com milhares de GETs por segundo em objetos pequenos, onde o custo de requisição supera o de armazenamento.'),
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching', 'check', 2,
+        'Avalie o perfil de latência exigido', 'Determine se a aplicação precisa de latência de milissegundos únicos e alta taxa de requisições, requisitos que justificam classes de diretório ou cache dedicado.'),
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching', 'action', 1,
+        'Considere S3 Express One Zone ou cache', 'Para cargas de acesso intenso e latência crítica, avalie directory buckets do S3 Express One Zone ou uma camada de cache; valide custo por GB e por requisição no seu perfil.'),
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching', 'caution', 1,
+        'S3 Express One Zone tem escopo limitado', 'A classe é restrita a uma zona de disponibilidade e não replica automaticamente; avalie o requisito de durabilidade antes de migrar dados críticos.'),
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching', 'caution', 2,
+        'Cache adiciona invalidação e custo', 'Uma camada de cache exige estratégia de invalidação e pode servir dados defasados; confirme que a consistência aceita pela aplicação permite essa abordagem.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching',
+        'S3 Express One Zone', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-express-one-zone.html'),
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching',
+        'Directory buckets', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/directory-buckets-overview.html'),
+    ('amazon-s3', 'sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching',
+        'Cost optimization for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido',
+        'Desativação do Block Public Access e Custos por Tráfego Indevido',
+        'Revise buckets com Block Public Access desativado ou políticas públicas permissivas, onde downloads indevidos podem gerar grandes custos de transferência de saída.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido', 'check', 1,
+        'Verifique a configuração de acesso público', 'Confirme o estado do Block Public Access em nível de conta e de bucket e revise políticas que concedam acesso anônimo, mesmo que não intencional.'),
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido', 'check', 2,
+        'Meça requisições de origens inesperadas', 'Analise logs de acesso e métricas para identificar downloads de IPs ou regiões incomuns, indicativos de conteúdo sendo baixado por terceiros.'),
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido', 'action', 1,
+        'Reative o Block Public Access e restrinja políticas', 'Habilite o bloqueio em todos os níveis suportados e revise bucket policies, ACLs e acesso público via website; valide que aplicações legítimas continuam funcionando.'),
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido', 'caution', 1,
+        'Buckets de website estático precisam de exceção', 'Sites hospedados no S3 exigem leitura pública; nesse caso, avalie CloudFront com OAC em vez de abrir o bucket diretamente à internet.'),
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido', 'caution', 2,
+        'Tráfego de saída não tem teto automático', 'Sem bloqueio ou cotas, downloads abusivos podem gerar faturas elevadas; considere monitoramento de custo e alertas de anomalia de tráfego.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido',
+        'Blocking public access to your S3 storage', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html'),
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido',
+        'Security best practices for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html'),
+    ('amazon-s3', 'desativacao-do-block-public-access-e-custos-por-trafego-indevido',
+        'Bucket policies examples', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-managing-acl.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti',
+        'Duplicação de Buckets para Diferentes Equipes de TI',
+        'Identifique cópias do mesmo conjunto de dados em múltiplos buckets por equipe, onde compartilhamento controlado de acesso eliminaria armazenamento duplicado.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti', 'check', 1,
+        'Detecte objetos duplicados entre buckets', 'Compare nomes, tamanhos e checksums de objetos em buckets de equipes diferentes para confirmar que armazenam os mesmos dados.'),
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti', 'check', 2,
+        'Mapeie os requisitos de acesso de cada equipe', 'Verifique quem precisa ler ou escrever, com quais permissões e de qual região; isso define se um bucket compartilhado com políticas granulares atende todos.'),
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti', 'action', 1,
+        'Consolide em bucket único com acesso compartilhado', 'Migre os dados para um bucket central e conceda acesso por IAM, bucket policies ou ACLs conforme o caso; desative a escrita nas cópias após a validação.'),
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti', 'caution', 1,
+        'Compartilhar não é sinônimo de permissão ampla', 'Políticas mal configuradas podem expor dados entre equipes; use condições, prefixos e menor privilégio em vez de liberar o bucket inteiro.'),
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti', 'caution', 2,
+        'Cópias podem ter divergido', 'Buckets criados por replicação manual podem conter versões diferentes; faça diff de integridade antes de apagar qualquer cópia.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti',
+        'Access control best practices', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-managing-acl.html'),
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti',
+        'Cost optimization for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html'),
+    ('amazon-s3', 'duplicacao-de-buckets-para-diferentes-equipes-de-ti',
+        'Security best practices for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao',
+        'Faltas de Regras de Expiração para Arquivos Temporários de Importação',
+        'Identifique arquivos temporários de importação mantidos após o processamento, onde regras de expiração evitariam armazenamento residual indefinido.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao', 'check', 1,
+        'Localize prefixos temporários', 'Identifique buckets e prefixos usados para uploads intermediários, staging de importação ou arquivos que deveriam ser apagados após o processamento.'),
+    ('amazon-s3', 'faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao', 'check', 2,
+        'Verifique a idade dos objetos', 'Liste objetos nesses prefixos e compare data de criação com a data do processamento correspondente para confirmar que permaneceram além do necessário.'),
+    ('amazon-s3', 'faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao', 'action', 1,
+        'Configure expiração por ciclo de vida', 'Crie regra de lifecycle expirando objetos do prefixo temporário após o prazo de segurança acordado, incluindo limpeza de multipart uploads incompletos.'),
+    ('amazon-s3', 'faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao', 'caution', 1,
+        'Não expire antes do reprocessamento', 'Se houver chance de reexecução ou auditoria do arquivo original, defina prazo que cubra esse cenário; expiração prematura pode impedir recuperação de falhas.'),
+    ('amazon-s3', 'faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao', 'caution', 2,
+        'Arquivos temporários podem conter dados sensíveis', 'Dados de importação podem incluir PII; além do custo, a retenção indefinida amplia a superfície de exposição — avalie criptografia e acesso.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao',
+        'Managing object lifecycle', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html'),
+    ('amazon-s3', 'faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao',
+        'Security best practices for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto',
+        'Transições de Ciclo de Vida Ineficientes com Custos de Taxa por Objeto',
+        'Avalie regras de transição aplicadas a milhões de objetos pequenos, onde a taxa por objeto pode tornar a economia de classe de armazenamento negativa.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto', 'check', 1,
+        'Estime o custo de transição', 'Calcule o número de objetos afetados pela regra e o tamanho médio; cada objeto transicionado gera uma taxa que precisa ser comparada com a economia de armazenamento.'),
+    ('amazon-s3', 'transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto', 'check', 2,
+        'Verifique filtros e prazos das regras', 'Confirme se as regras atingem apenas os prefixos pretendidos e se os prazos evitam transições repetidas ou desnecessárias entre classes.'),
+    ('amazon-s3', 'transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto', 'action', 1,
+        'Otimize regras para objetos pequenos', 'Para objetos minúsculos, avalie se a economia de classe compensa a taxa de transição; em caso negativo, restrinja as regras a objetos maiores ou remova-as.'),
+    ('amazon-s3', 'transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto', 'caution', 1,
+        'Transições não são retroativas nem instantâneas', 'O lifecycle avalia objetos periodicamente e a transição consome tempo; mudanças de regra não afetam objetos já movidos automaticamente.'),
+    ('amazon-s3', 'transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto', 'caution', 2,
+        'Cuidado com loops de classe', 'Regras mal configuradas podem mover objetos entre classes sem ganho; revise a cadeia de transições e os custos de ida e volta antes de aprovar.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto',
+        'Transitioning objects using lifecycle configuration', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html'),
+    ('amazon-s3', 'transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto',
+        'Cost optimization for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala',
+        'Uso de Criptografia KMS (SSE-KMS) sem Bucket Keys em Alta Escala',
+        'Avalie buckets com SSE-KMS sem Bucket Keys em operações de alta escala, onde chamadas ao KMS por objeto podem gerar custos significativos de requisições.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala', 'check', 1,
+        'Verifique a configuração de criptografia', 'Confirme se os buckets usam SSE-KMS e se Bucket Keys estão habilitadas; sem elas, cada operação em objetos pode gerar uma chamada ao KMS.'),
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala', 'check', 2,
+        'Meça o volume de operações', 'Estime PUTs, GETs e cópias por segundo no bucket; operações massivas como migrações e replicação multiplicam as chamadas KMS.'),
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala', 'action', 1,
+        'Habilite Bucket Keys nos buckets aplicáveis', 'Ative Bucket Keys para reduzir chamadas ao KMS em operações de objetos, mantendo o controle de acesso via políticas IAM e validando a compatibilidade com seus requisitos.'),
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala', 'caution', 1,
+        'Bucket Keys alteram o modelo de autorização', 'Com Bucket Keys, o S3 usa uma chave de bucket derivada; revise políticas que dependem de condições por objeto ou por chave KMS antes de ativar.'),
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala', 'caution', 2,
+        'KMS tem limites de requisição', 'Mesmo com Bucket Keys, picos extremos podem atingir limites do KMS; monitore throttling e avalie quotas antes de operações em massa.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala',
+        'Using encryption with AWS KMS', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html'),
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala',
+        'Bucket keys', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-keys.html'),
+    ('amazon-s3', 'uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala',
+        'Cost optimization for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand',
+        'Rodando Cargas Contínuas no Preço On-Demand',
+        'Avalie instâncias EC2 com uso estável rodando 24/7 em preço On-Demand, onde Savings Plans ou Reserved Instances podem reduzir o custo de forma previsível.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand', 'check', 1,
+        'Identifique uso estável e contínuo', 'Use métricas de CPU, rede e disco por 14 a 30 dias para confirmar quais instâncias rodam o tempo todo com padrão previsível, sem picos que justifiquem On-Demand.'),
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand', 'check', 2,
+        'Meça o custo atual versus coberto', 'Compare o gasto On-Demand dessas instâncias com o que seria coberto por Savings Plans ou Reserved Instances; quantifique a diferença antes de assumir economia.'),
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand', 'action', 1,
+        'Avalie Compute Optimizer e compromissos', 'Consulte as recomendações do Compute Optimizer para sizing e use Savings Plans ou Reserved Instances para a base estável, começando por um compromisso menor e validando cobertura.'),
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand', 'caution', 1,
+        'Compromissos exigem previsão de uso', 'Savings Plans e Reserved Instances têm prazo de 1 a 3 anos; só comprometa a capacidade que a medição mostrar como estável, sob pena de pagar por uso que não ocorre.'),
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand', 'caution', 2,
+        'Rightsize antes de comprar desconto', 'Comprar compromisso para instância superdimensionada consolida desperdício; valide primeiro o tamanho real necessário com métricas e recomendações.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand',
+        'What is AWS Compute Optimizer?', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html'),
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand',
+        'EC2 recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/ec2-recommendations.html'),
+    ('amazon-ec2', 'rodando-cargas-continuas-no-preco-on-demand',
+        'Savings plan types', 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/savings-plan-types.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'execucao-de-banco-de-dados-relacional-em-ec2',
+        'Execução de Banco de Dados Relacional em EC2',
+        'Avalie bancos de dados auto-hospedados em instâncias EC2 frente a serviços gerenciados, considerando custo operacional, backups, patching e dimensionamento de IOPS.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'execucao-de-banco-de-dados-relacional-em-ec2', 'check', 1,
+        'Identifique bancos auto-hospedados', 'Localize instâncias EC2 que executam MySQL, PostgreSQL ou outros bancos relacional, e meça CPU, IOPS e esforço operacional gasto em manutenção.'),
+    ('amazon-ec2', 'execucao-de-banco-de-dados-relacional-em-ec2', 'check', 2,
+        'Compare custo total de propriedade', 'Some instância, EBS, backups manuais, licenças e horas de operação versus o custo estimado de um serviço gerenciado equivalente, incluindo backups e patching inclusos.'),
+    ('amazon-ec2', 'execucao-de-banco-de-dados-relacional-em-ec2', 'action', 1,
+        'Planeje migração para serviço gerenciado', 'Avalie RDS ou Aurora para o workload, use AWS DMS para replicação quando aplicável e execute cutover controlado preservando rollback durante a janela de validação.'),
+    ('amazon-ec2', 'execucao-de-banco-de-dados-relacional-em-ec2', 'caution', 1,
+        'Migração não é trivial para todos os casos', 'Bancos com extensões exóticas, tuning pesado ou integrações específicas podem não migrar direto; valide compatibilidade antes de prometer economia.'),
+    ('amazon-ec2', 'execucao-de-banco-de-dados-relacional-em-ec2', 'caution', 2,
+        'Não desative a origem antes do cutover', 'Mantenha a instância original disponível até validar dados, performance e rollback; desligar cedo demais pode causar indisponibilidade e perda de janela de recuperação.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'execucao-de-banco-de-dados-relacional-em-ec2',
+        'Amazon RDS overview', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html'),
+    ('amazon-ec2', 'execucao-de-banco-de-dados-relacional-em-ec2',
+        'EC2 instance types', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'ignorar-familias-de-instancias-da-nova-geracao',
+        'Ignorar Famílias de Instâncias da Nova Geração',
+        'Avalie instâncias de gerações antigas mantidas por inércia, comparando custo e desempenho com as famílias atuais, incluindo arquiteturas Graviton.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'ignorar-familias-de-instancias-da-nova-geracao', 'check', 1,
+        'Inventarie famílias em uso', 'Liste as instâncias por família e geração, identificando as que estão em fim de vida ou em gerações antigas como t2, m4 ou anteriores.'),
+    ('amazon-ec2', 'ignorar-familias-de-instancias-da-nova-geracao', 'check', 2,
+        'Compare custo por desempenho', 'Use o Compute Optimizer para medir se a instância atual está superdimensionada e quanto uma família atual equivalente custaria com desempenho igual ou superior.'),
+    ('amazon-ec2', 'ignorar-familias-de-instancias-da-nova-geracao', 'action', 1,
+        'Planeje migração para família atual', 'Teste a aplicação em uma instância da nova família em homologação, valide desempenho e compatibilidade de AMI e drivers antes de migrar produção por etapas.'),
+    ('amazon-ec2', 'ignorar-familias-de-instancias-da-nova-geracao', 'caution', 1,
+        'Famílias antigas podem ter fim de vida', 'Instâncias de gerações antigas podem ter interrupção programada; adiar a migração aumenta o risco operacional e pode forçar mudança urgente depois.'),
+    ('amazon-ec2', 'ignorar-familias-de-instancias-da-nova-geracao', 'caution', 2,
+        'Migração exige validação de software', 'Drivers, bibliotecas e sistemas operacionais podem ter requisitos específicos; teste workloads legados antes de assumir que a troca é transparente.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'ignorar-familias-de-instancias-da-nova-geracao',
+        'Instance types', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html'),
+    ('amazon-ec2', 'ignorar-familias-de-instancias-da-nova-geracao',
+        'EC2 recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/ec2-recommendations.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'processamento-de-lotes-batch-em-instancias-dedicadas',
+        'Processamento de Lotes (Batch) em Instâncias Dedicadas',
+        'Avalie cargas de lote executadas em instâncias On-Demand fixas, considerando Spot Instances ou AWS Batch para reduzir custo de processamento transitório.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'processamento-de-lotes-batch-em-instancias-dedicadas', 'check', 1,
+        'Identifique cargas de lote em instâncias fixas', 'Mapeie jobs noturnos, fechamentos e relatórios que rodam em instâncias dedicadas On-Demand e meça seu tempo de utilização real.'),
+    ('amazon-ec2', 'processamento-de-lotes-batch-em-instancias-dedicadas', 'check', 2,
+        'Avalie tolerância a interrupção', 'Determine se as tarefas podem ser retomadas ou toleram interrupção; workloads idempotentes e checkpointados são candidatos a Spot ou Batch.'),
+    ('amazon-ec2', 'processamento-de-lotes-batch-em-instancias-dedicadas', 'action', 1,
+        'Migre para Spot ou AWS Batch', 'Para cargas tolerantes a falha, use Spot Instances com diversificação de tipos ou AWS Batch com compute environment Spot; para tolerância zero, avalie On-Demand com agendamento.'),
+    ('amazon-ec2', 'processamento-de-lotes-batch-em-instancias-dedicadas', 'caution', 1,
+        'Spot pode ser interrompida', 'Instâncias Spot podem ser interrompidas com aviso; implemente checkpointing e retry para não perder progresso de lotes longos ou críticos.'),
+    ('amazon-ec2', 'processamento-de-lotes-batch-em-instancias-dedicadas', 'caution', 2,
+        'Janela de processamento é restrição', 'Se o lote precisa terminar em horário fixo, a capacidade Spot pode não estar disponível; valide capacidade e tempo máximo de execução antes de migrar.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'processamento-de-lotes-batch-em-instancias-dedicadas',
+        'Spot Instances', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html'),
+    ('amazon-ec2', 'processamento-de-lotes-batch-em-instancias-dedicadas',
+        'What is AWS Batch?', 'https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in',
+        'Subutilização por Falta de Auto Scaling de Redução (Scale-In)',
+        'Avalie grupos de Auto Scaling configurados para crescer em picos mas sem política de redução, deixando instâncias ociosas após a demanda cair.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in', 'check', 1,
+        'Meça instâncias ociosas fora de pico', 'Compare a contagem de instâncias em grupos de Auto Scaling ao longo do dia com a demanda real; instâncias que permanecem após o pico indicam falta de scale-in.'),
+    ('amazon-ec2', 'subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in', 'check', 2,
+        'Revise políticas de término', 'Verifique se o grupo possui política de scale-in configurada e qual critério de término usa; ausência de política pode manter instâncias novas indefinidamente.'),
+    ('amazon-ec2', 'subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in', 'action', 1,
+        'Configure redução com critérios adequados', 'Defina políticas de scale-in baseadas em CPU, requisições ou métricas customizadas com cooldown adequado, e teste o comportamento em janela de baixo tráfego.'),
+    ('amazon-ec2', 'subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in', 'caution', 1,
+        'Scale-in mal calibrado causa indisponibilidade', 'Reduzir cedo demais durante picos secundários derruba o serviço; ajuste os limiares com base na sazonalidade real e em testes de carga.'),
+    ('amazon-ec2', 'subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in', 'caution', 2,
+        'Instâncias protegidas não são encerradas', 'Se instâncias estiverem com scale-in protection ativa, o grupo não as remove; revise proteções manuais antes de culpar a política de redução.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in',
+        'Auto Scaling termination policies', 'https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-termination.html'),
+    ('amazon-ec2', 'subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in',
+        'EC2 recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/ec2-recommendations.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'arquivos-de-log-armazenados-em-discos-locais-ebs',
+        'Arquivos de Log Armazenados em Discos Locais (EBS)',
+        'Avalie logs de aplicação gravados diretamente no disco EBS em vez de serviços de logging centralizados, forçando expansão de volume e dificultando análise.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'arquivos-de-log-armazenados-em-discos-locais-ebs', 'check', 1,
+        'Identifique logs em disco local', 'Verifique se aplicações gravam logs em arquivos no volume EBS, especialmente logs de debug verbosos sem rotação, e meça o crescimento do uso de disco.'),
+    ('amazon-ec2', 'arquivos-de-log-armazenados-em-discos-locais-ebs', 'check', 2,
+        'Avalie a necessidade de retenção local', 'Determine se os logs precisam estar acessíveis na instância ou se podem ser centralizados; isso define a migração para CloudWatch ou S3.'),
+    ('amazon-ec2', 'arquivos-de-log-armazenados-em-discos-locais-ebs', 'action', 1,
+        'Centralize logs e libere o disco', 'Configure envio para CloudWatch Logs ou S3 via agente ou aplicação, defina retenção adequada e remova arquivos antigos do volume após a migração.'),
+    ('amazon-ec2', 'arquivos-de-log-armazenados-em-discos-locais-ebs', 'caution', 1,
+        'Logs podem conter dados sensíveis', 'Logs de aplicação podem registrar dados pessoais ou credenciais; revise o conteúdo antes de enviar para serviços centralizados e aplique mascaramento.'),
+    ('amazon-ec2', 'arquivos-de-log-armazenados-em-discos-locais-ebs', 'caution', 2,
+        'Não apague logs antes da validação', 'Confirme que o pipeline de logging está funcionando e os dados estão acessíveis antes de limpar os arquivos locais; mantenha período de sobreposição.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'arquivos-de-log-armazenados-em-discos-locais-ebs',
+        'Install the CloudWatch agent', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html'),
+    ('amazon-ec2', 'arquivos-de-log-armazenados-em-discos-locais-ebs',
+        'Monitor EBS volumes', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-volume-status.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton',
+        'Uso do Processador x86 em Vez de Arquitetura ARM (Graviton)',
+        'Avalie workloads em instâncias x86 que poderiam migrar para Graviton, comparando custo e desempenho entre arquiteturas.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton', 'check', 1,
+        'Identifique workloads candidatos', 'Liste instâncias x86 com uso moderado a alto e workloads portáteis, como aplicações em containers ou runtimes que suportam ARM.'),
+    ('amazon-ec2', 'uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton', 'check', 2,
+        'Verifique compatibilidade de software', 'Confirme se dependências, bibliotecas nativas e imagens de container têm versão ARM64; softwares compilados apenas para x86 não migram diretamente.'),
+    ('amazon-ec2', 'uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton', 'action', 1,
+        'Teste em instância Graviton', 'Suba uma instância Graviton equivalente em homologação, execute testes de carga e compare latência, custo e estabilidade antes de planejar a migração gradual.'),
+    ('amazon-ec2', 'uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton', 'caution', 1,
+        'Não assuma economia sem medir', 'O custo menor por vCPU não garante economia se a aplicação exigir mais instâncias ou tiver gargalo de I/O; meça o custo total da migração.'),
+    ('amazon-ec2', 'uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton', 'caution', 2,
+        'Arquitetura afeta AMIs e imagens', 'AMIs e imagens Docker precisam ter versão ARM; mantenha pipelines de build multiplataforma para não bloquear a migração.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton',
+        'Amazon EC2 Graviton processors', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/arm-graviton.html'),
+    ('amazon-ec2', 'uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton',
+        'Instance types', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'instancias-zumbis-orphaned-instances',
+        'Instâncias "Zumbis" (Orphaned Instances)',
+        'Identifique instâncias rodando sem dono ou propósito há semanas ou meses, que acumulam custo sem entregar valor.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'instancias-zumbis-orphaned-instances', 'check', 1,
+        'Liste instâncias sem tags de dono', 'Use a visão de recursos ou consultas por tag para encontrar instâncias sem responsável, projeto ou data de criação recente.'),
+    ('amazon-ec2', 'instancias-zumbis-orphaned-instances', 'check', 2,
+        'Meça utilização real', 'Verifique CPU, rede e disco das candidatas por 14 dias; instâncias com uso próximo de zero por longos períodos são prováveis zumbis.'),
+    ('amazon-ec2', 'instancias-zumbis-orphaned-instances', 'action', 1,
+        'Confirme com o time e encerre ou pare', 'Antes de agir, confirme com o responsável se a instância é necessária; para descartadas, prefira parar a instância e aguardar prazo antes de terminar.'),
+    ('amazon-ec2', 'instancias-zumbis-orphaned-instances', 'caution', 1,
+        'Dados podem estar apenas no disco', 'Instâncias paradas mantêm EBS e dados; verifique se há informações necessárias antes de terminar, pois o encerramento pode ser irreversível.'),
+    ('amazon-ec2', 'instancias-zumbis-orphaned-instances', 'caution', 2,
+        'Terminar não apaga o EBS automaticamente', 'Sem DeleteOnTerminate, o volume continua cobrado; lembre de verificar e remover volumes órfãos junto com a instância.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'instancias-zumbis-orphaned-instances',
+        'Idle EC2 instance recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/ec2-idle-recommendations.html'),
+    ('amazon-ec2', 'instancias-zumbis-orphaned-instances',
+        'What is AWS Compute Optimizer?', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'enderecos-de-ip-publico-elastic-ip-nao-associados',
+        'Endereços de IP Público (Elastic IP) Não Associados',
+        'Identifique Elastic IPs alocados mas não associados a instâncias, que geram cobrança por hora sem uso.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'enderecos-de-ip-publico-elastic-ip-nao-associados', 'check', 1,
+        'Liste Elastic IPs e sua associação', 'Consulte a lista de Elastic IPs e verifique quais estão associados a instâncias ou outros recursos e quais estão apenas alocados.'),
+    ('amazon-ec2', 'enderecos-de-ip-publico-elastic-ip-nao-associados', 'check', 2,
+        'Meça o tempo de ociosidade', 'Para IPs não associados, verifique há quanto tempo estão nesse estado; Elastic IPs não associados há mais de tempo limite geram cobrança.'),
+    ('amazon-ec2', 'enderecos-de-ip-publico-elastic-ip-nao-associados', 'action', 1,
+        'Libere IPs sem uso ou associe-os', 'Para IPs que não são mais necessários, execute release; para os que devem ser mantidos, associe-os a um recurso ativo ou documente a necessidade.'),
+    ('amazon-ec2', 'enderecos-de-ip-publico-elastic-ip-nao-associados', 'caution', 1,
+        'Liberar muda o endereço', 'Uma vez liberado, o IP pode ser assumido por outro cliente; se o IP for crítico para DNS ou parceiros, avalie o impacto antes de liberar.'),
+    ('amazon-ec2', 'enderecos-de-ip-publico-elastic-ip-nao-associados', 'caution', 2,
+        'IPs associados também têm custo', 'Elastic IP associado a instância parada continua sendo cobrado; verifique se a instância precisa mesmo do IP público estático.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'enderecos-de-ip-publico-elastic-ip-nao-associados',
+        'Elastic IP addresses', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html'),
+    ('amazon-ec2', 'enderecos-de-ip-publico-elastic-ip-nao-associados',
+        'EC2 resource limits', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'agendamento-de-trabalhos-cronjobs-em-servidores-permanentes',
+        'Agendamento de Trabalhos (Cronjobs) em Servidores Permanentes',
+        'Avalie instâncias EC2 dedicadas apenas para executar tarefas agendadas curtas, onde Lambda ou EventBridge Scheduler reduziriam drasticamente o custo.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'agendamento-de-trabalhos-cronjobs-em-servidores-permanentes', 'check', 1,
+        'Identifique instâncias de agendamento', 'Localize instâncias que rodam apenas cron jobs ou scripts agendados e meça a frequência e duração real de cada execução.'),
+    ('amazon-ec2', 'agendamento-de-trabalhos-cronjobs-em-servidores-permanentes', 'check', 2,
+        'Avalie a natureza da tarefa', 'Determine se o job é uma chamada de API, script curto ou processo que exige ambiente específico; isso define se Lambda ou EventBridge Scheduler atendem.'),
+    ('amazon-ec2', 'agendamento-de-trabalhos-cronjobs-em-servidores-permanentes', 'action', 1,
+        'Migre para Lambda ou EventBridge Scheduler', 'Para tarefas curtas e stateless, converta para Lambda acionada por EventBridge Scheduler; para processos mais longos, avalie ECS Fargate ou manter a instância com agendamento de start/stop.'),
+    ('amazon-ec2', 'agendamento-de-trabalhos-cronjobs-em-servidores-permanentes', 'caution', 1,
+        'Lambda tem limites de tempo', 'Tarefas que excedem o tempo máximo de execução do Lambda não podem migrar diretamente; avalie alternativas como Step Functions ou processamento em batch.'),
+    ('amazon-ec2', 'agendamento-de-trabalhos-cronjobs-em-servidores-permanentes', 'caution', 2,
+        'Cron na instância pode ter dependências', 'Scripts podem depender de bibliotecas, arquivos ou estado local da instância; valide todas as dependências antes de migrar para execução serverless.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'agendamento-de-trabalhos-cronjobs-em-servidores-permanentes',
+        'Amazon EventBridge Scheduler', 'https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule.html'),
+    ('amazon-ec2', 'agendamento-de-trabalhos-cronjobs-em-servidores-permanentes',
+        'AWS Lambda', 'https://docs.aws.amazon.com/lambda/latest/dg/welcome.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'hospedagem-de-front-end-websites-estaticos-em-ec2',
+        'Hospedagem de Front-end/Websites Estáticos em EC2',
+        'Avalie sites e front-ends estáticos servidos por instâncias EC2, onde S3 com CloudFront oferece entrega de menor custo e maior escalabilidade.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'hospedagem-de-front-end-websites-estaticos-em-ec2', 'check', 1,
+        'Identifique sites estáticos em EC2', 'Localize instâncias rodando Nginx ou Apache servindo apenas arquivos HTML, CSS, JS e imagens, sem lógica de backend relevante.'),
+    ('amazon-ec2', 'hospedagem-de-front-end-websites-estaticos-em-ec2', 'check', 2,
+        'Meça tráfego e conteúdo dinâmico', 'Verifique se há chamadas de API ou processamento server-side; conteúdo puramente estático é candidato ideal para S3 + CloudFront.'),
+    ('amazon-ec2', 'hospedagem-de-front-end-websites-estaticos-em-ec2', 'action', 1,
+        'Migre para S3 e CloudFront', 'Copie os arquivos para um bucket S3, ative website hosting ou use CloudFront com OAC, configure DNS e valide o desempenho e custo após a migração.'),
+    ('amazon-ec2', 'hospedagem-de-front-end-websites-estaticos-em-ec2', 'caution', 1,
+        'Funcionalidades dinâmicas podem quebrar', 'Se o site usa SSI, rewrites complexos ou proxy reverso, a migração para estático pode exigir refatoração; mapeie todas as dependências antes.'),
+    ('amazon-ec2', 'hospedagem-de-front-end-websites-estaticos-em-ec2', 'caution', 2,
+        'Certificados e domínios precisam migração', 'SSL/TLS e DNS devem ser reconfigurados no CloudFront; planeje a transição com baixo tempo de indisponibilidade e valide o certificado antes do cutover.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'hospedagem-de-front-end-websites-estaticos-em-ec2',
+        'Hosting a static website on Amazon S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html'),
+    ('amazon-ec2', 'hospedagem-de-front-end-websites-estaticos-em-ec2',
+        'Getting started with CloudFront', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/GettingStarted.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3',
+        'Tipo de Armazenamento de Disco Desatualizado (gp2 vs gp3)',
+        'Avalie volumes EBS em gp2 que poderiam migrar para gp3, com custo menor por GB e IOPS/throughput configuráveis independentemente do tamanho.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3', 'check', 1,
+        'Identifique volumes gp2', 'Liste todos os volumes EBS e filtre por tipo gp2; verifique tamanho, IOPS provisionados e se o desempenho atual atende à carga.'),
+    ('amazon-ec2', 'tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3', 'check', 2,
+        'Compare custo e performance', 'Calcule o custo mensal do gp2 versus gp3 para o mesmo tamanho e IOPS; o gp3 permite configurar IOPS e throughput sem aumentar o volume.'),
+    ('amazon-ec2', 'tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3', 'action', 1,
+        'Migre volumes para gp3', 'Use a modificação de volume para alterar o tipo para gp3; a operação é online e permite ajustar IOPS e throughput conforme a necessidade da aplicação.'),
+    ('amazon-ec2', 'tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3', 'caution', 1,
+        'Migração afeta performance temporariamente', 'A mudança de tipo pode causar impacto temporário de IOPS; planeje em janela de baixo uso e monitore métricas de disco durante a operação.'),
+    ('amazon-ec2', 'tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3', 'caution', 2,
+        'Verifique compatibilidade da instância', 'Algumas instâncias antigas podem não suportar gp3; confirme a compatibilidade antes de migrar volumes de produção.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3',
+        'Amazon EBS volume types', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html'),
+    ('amazon-ec2', 'tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3',
+        'Monitor EBS volumes', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-volume-status.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'excesso-de-discos-provisionados-com-iops-altos-io1-io2',
+        'Excesso de Discos Provisionados com IOPS Altos (io1/io2)',
+        'Avalie volumes io1/io2 com IOPS provisionados no máximo para cargas que não exigem essa performance, onde gp3 ajustado reduziria custo.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'excesso-de-discos-provisionados-com-iops-altos-io1-io2', 'check', 1,
+        'Identifique volumes io1/io2', 'Liste volumes desses tipos e verifique IOPS provisionados versus consumidos reais nas métricas de disco.'),
+    ('amazon-ec2', 'excesso-de-discos-provisionados-com-iops-altos-io1-io2', 'check', 2,
+        'Avalie se gp3 atende', 'Compare o IOPS e throughput necessários com o que gp3 oferece; a maioria das cargas não exige a consistência de IOPS dos tipos provisionados.'),
+    ('amazon-ec2', 'excesso-de-discos-provisionados-com-iops-altos-io1-io2', 'action', 1,
+        'Reduza IOPS ou migre para gp3', 'Se o volume pode usar gp3, migre; caso contrário, reduza o IOPS provisionado para o nível realmente necessário, monitorando a latência após a mudança.'),
+    ('amazon-ec2', 'excesso-de-discos-provisionados-com-iops-altos-io1-io2', 'caution', 1,
+        'IOPS provisionados são pagas 24/7', 'Diferente de gp3, io1/io2 cobram por IOPS provisionado independente do uso; provisionar no máximo sem necessidade gera custo fixo elevado.'),
+    ('amazon-ec2', 'excesso-de-discos-provisionados-com-iops-altos-io1-io2', 'caution', 2,
+        'Algumas cargas exigem io2', 'Workloads como bancos de dados com latência extrema ou aplicações que exigem IOPS consistentes podem precisar de io2; não migre sem validar o SLA de performance.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'excesso-de-discos-provisionados-com-iops-altos-io1-io2',
+        'Amazon EBS volume types', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html'),
+    ('amazon-ec2', 'excesso-de-discos-provisionados-com-iops-altos-io1-io2',
+        'Monitor EBS volumes', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-volume-status.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'falta-de-restricao-em-testes-de-load-testing',
+        'Falta de Restrição em Testes de Load Testing',
+        'Avalie ambientes de teste de carga que sobem muitas instâncias sem limites de tempo ou custo, onde testes esquecidos podem gerar faturas inesperadas.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'falta-de-restricao-em-testes-de-load-testing', 'check', 1,
+        'Identifique recursos de teste de carga', 'Procure instâncias, Auto Scaling groups e clusters criados para simulações de pico, verificando se permanecem ativos após o fim do teste.'),
+    ('amazon-ec2', 'falta-de-restricao-em-testes-de-load-testing', 'check', 2,
+        'Verifique limites e alertas', 'Confirme se existem quotas de conta, budgets ou alarmes que interromperiam um teste descontrolado; a ausência de limites é o principal risco.'),
+    ('amazon-ec2', 'falta-de-restricao-em-testes-de-load-testing', 'action', 1,
+        'Defina limites e encerramento automático', 'Configure Auto Scaling com max size controlado, tags de expiração e scripts de teardown; use EventBridge ou Lambda para desligar recursos ao fim da janela de teste.'),
+    ('amazon-ec2', 'falta-de-restricao-em-testes-de-load-testing', 'caution', 1,
+        'Testes esquecidos escalam a fatura', 'Sem limite de tempo ou instâncias máximas, um teste mal configurado pode rodar por dias; documente duração máxima e responsável por cada execução.'),
+    ('amazon-ec2', 'falta-de-restricao-em-testes-de-load-testing', 'caution', 2,
+        'Evite testar em produção', 'Testes de carga devem rodar em ambiente isolado ou com throttling; impactar produção durante a simulação pode causar indisponibilidade real.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'falta-de-restricao-em-testes-de-load-testing',
+        'EC2 resource limits', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html'),
+    ('amazon-ec2', 'falta-de-restricao-em-testes-de-load-testing',
+        'EC2 concepts', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az',
+        'Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ)',
+        'Avalie comunicação intensa entre instâncias em zonas diferentes, onde o tráfego cross-AZ gera cobrança por GB e pode ser otimizado com topologia adequada.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az', 'check', 1,
+        'Identifique pares de instâncias em AZs diferentes', 'Mapeie quais serviços se comunicam e em quais zonas estão; comunicação intensa entre AZs diferentes gera custo de transferência.'),
+    ('amazon-ec2', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az', 'check', 2,
+        'Meça o volume de tráfego', 'Use métricas de rede para estimar GB transferidos entre AZs; volumes altos indicam necessidade de revisão de arquitetura.'),
+    ('amazon-ec2', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az', 'action', 1,
+        'Ajuste a topologia de rede', 'Coloque serviços que se comunicam intensamente na mesma AZ quando possível, use subnet groups adequados e revise rotas para minimizar tráfego cross-AZ desnecessário.'),
+    ('amazon-ec2', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az', 'caution', 1,
+        'HA pode exigir multi-AZ', 'Distribuir instâncias em múltiplas AZs é necessário para alta disponibilidade; não concentre tudo em uma zona só para economizar tráfego.'),
+    ('amazon-ec2', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az', 'caution', 2,
+        'Traffic mirroring e logs aumentam volume', 'Recursos como VPC Traffic Mirroring ou logs verbosos podem multiplicar o tráfego cross-AZ; revise o que está sendo transmitido.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az',
+        'Regions and Availability Zones', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html'),
+    ('amazon-ec2', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az',
+        'VPC network pricing', 'https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-pricing.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots',
+        'Snapshots de Disco sem Política de Retenção (EBS Snapshots)',
+        'Identifique snapshots EBS acumulados sem política de expiração, onde backups diários sem lifecycle geram armazenamento crescente por anos.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots', 'check', 1,
+        'Inventarie snapshots e sua idade', 'Liste todos os snapshots EBS, verifique data de criação, volume de origem e se a instância ou volume original ainda existe.'),
+    ('amazon-ec2', 'snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots', 'check', 2,
+        'Defina a retenção necessária', 'Confirme com os responsáveis o prazo de recuperação exigido por ambiente; backups de teste podem ter retenção menor que produção.'),
+    ('amazon-ec2', 'snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots', 'action', 1,
+        'Aplique Data Lifecycle Manager', 'Configure políticas DLM para criar snapshots com retenção automática por ambiente e tipo de volume, substituindo processos manuais sem expiração.'),
+    ('amazon-ec2', 'snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots', 'caution', 1,
+        'Snapshots incrementais acumulam custo', 'Snapshots EBS são incrementais, mas alterações constantes podem aumentar o tamanho total; revise também a frequência de snapshot em volumes muito voláteis.'),
+    ('amazon-ec2', 'snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots', 'caution', 2,
+        'Exclusão de snapshot é irreversível', 'Uma vez expirados, os snapshots não podem ser recuperados; garanta que o ponto de restauração mais recente necessário seja preservado antes de aplicar retenção agressiva.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots',
+        'Amazon EBS snapshots', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSSnapshots.html'),
+    ('amazon-ec2', 'snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots',
+        'Snapshot lifecycle policies', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas',
+        'Falta de Adesão a Planos de Savings Plans ou Instâncias Reservadas',
+        'Avalie frota EC2 estável pagando On-Demand por longos períodos, onde Savings Plans ou Reserved Instances ofereceriam descontos significativos.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas', 'check', 1,
+        'Quantifique o uso On-Demand estável', 'Some o custo das instâncias que rodam continuamente e identifique quais teriam uso previsível suficiente para um compromisso de 1 a 3 anos.'),
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas', 'check', 2,
+        'Compare Savings Plans versus Reserved Instances', 'Avalie flexibilidade versus desconto: Savings Plans cobrem mais tipos de uso, Reserved Instances são mais específicas; escolha conforme a previsibilidade da frota.'),
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas', 'action', 1,
+        'Contrate cobertura incremental', 'Comece com um compromisso cobrindo a base estável comprovada por métricas, monitore a utilização e amplie gradualmente conforme a confiança no padrão de uso.'),
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas', 'caution', 1,
+        'Subutilização de compromisso gera desperdício', 'Se a frota diminuir, o compromisso continua sendo cobrado; não comprometa capacidade acima do uso mínimo histórico comprovado.'),
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas', 'caution', 2,
+        'Reserved Instances podem ter escopo regional', 'RI pode ser regional ou zonal; escolha o escopo adequado à sua estratégia de disponibilidade antes de contratar.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas',
+        'Savings plan types', 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/savings-plan-types.html'),
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas',
+        'Reserved Instances', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances.html'),
+    ('amazon-ec2', 'falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas',
+        'What is AWS Compute Optimizer?', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda',
+        'Ausência de Cabeçalhos de Segurança Essenciais na Borda',
+        'Avalie a ausência de cabeçalhos de segurança como HSTS, CSP e X-Frame-Options entregues pelo CloudFront, expondo aplicações a riscos evitáveis.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda', 'check', 1,
+        'Inspecione os cabeçalhos entregues', 'Use curl ou ferramentas de análise para verificar quais cabeçalhos de segurança a distribuição retorna hoje e compare com os exigidos pela política da organização.'),
+    ('amazon-cloudfront', 'ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda', 'check', 2,
+        'Identifique o ponto de injeção', 'Determine se os cabeçalhos devem vir da origem ou ser adicionados na borda; políticas de resposta do CloudFront centralizam a configuração para todas as origens.'),
+    ('amazon-cloudfront', 'ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda', 'action', 1,
+        'Crie e associe uma response headers policy', 'Defina uma política com os cabeçalhos necessários (HSTS, CSP, X-Content-Type-Options, X-Frame-Options), associe à distribuição ou cache behavior e valide as respostas.'),
+    ('amazon-cloudfront', 'ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda', 'caution', 1,
+        'CSP mal configurada quebra a aplicação', 'Uma Content-Security-Policy restritiva demais pode bloquear scripts e estilos legítimos; comece em modo de relatório antes de impor bloqueio.'),
+    ('amazon-cloudfront', 'ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda', 'caution', 2,
+        'HSTS exige HTTPS estável', 'Ativar HSTS com includeSubDomains em domínios que ainda usam HTTP pode causar problemas; confirme que todo o tráfego já é HTTPS antes de aplicar.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda',
+        'Adding security headers with response headers policies', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-response-headers-policies.html'),
+    ('amazon-cloudfront', 'ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda',
+        'Security best practices for CloudFront', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/security-best-practices.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade',
+        'Uso da Classe de Preço Padrão (Price Class All) sem Necessidade',
+        'Avalie distribuições usando Price Class All quando a audiência é regional, onde restringir a classe de preço reduziria o custo de entrega.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade', 'check', 1,
+        'Mapeie a distribuição geográfica dos usuários', 'Analise métricas de requisições por país ou região para identificar se a audiência está concentrada em poucos países ou se é verdadeiramente global.'),
+    ('amazon-cloudfront', 'uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade', 'check', 2,
+        'Verifique a classe de preço atual', 'Confirme se a distribuição usa Price Class All e se a origem e os usuários se beneficiariam de uma classe mais restrita.'),
+    ('amazon-cloudfront', 'uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade', 'action', 1,
+        'Ajuste a classe de preço', 'Para audiências concentradas, configure Price Class 100 (América do Norte e Europa) ou 200 (inclui Ásia) conforme o alcance real; valide latência e custo após a mudança.'),
+    ('amazon-cloudfront', 'uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade', 'caution', 1,
+        'Restringir classe afeta latência', 'Usuários fora da cobertura da classe escolhida serão roteados para pontos mais distantes, aumentando latência; confirme que a economia compensa.'),
+    ('amazon-cloudfront', 'uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade', 'caution', 2,
+        'Conteúdo global pode exigir All', 'Aplicações com usuários em todos os continentes ou compliance que exige edge locations específicas podem precisar manter Price Class All.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade',
+        'Price classes', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-price-class.html'),
+    ('amazon-cloudfront', 'uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade',
+        'Controlling CloudFront costs', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'invalidacoes-de-cache-em-massa-em-alta-frequencia',
+        'Invalidações de Cache em Massa (*) em Alta Frequência',
+        'Avalie o uso frequente de invalidações de cache com wildcard ou em massa, que geram custo por requisição e podem indicar problema de versionamento.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'invalidacoes-de-cache-em-massa-em-alta-frequencia', 'check', 1,
+        'Meça a frequência de invalidações', 'Verifique quantas invalidações são criadas por dia e quantas usam wildcard (*); padrões altos indicam estratégia inadequada de atualização de conteúdo.'),
+    ('amazon-cloudfront', 'invalidacoes-de-cache-em-massa-em-alta-frequencia', 'check', 2,
+        'Identifique a causa raiz', 'Determine se as invalidações são necessárias por atualizações frequentes de conteúdo ou se decorrem de ausência de versionamento por nome de arquivo.'),
+    ('amazon-cloudfront', 'invalidacoes-de-cache-em-massa-em-alta-frequencia', 'action', 1,
+        'Adote versionamento de assets', 'Implemente nomes versionados ou hashes para arquivos estáticos, eliminando a necessidade de invalidação a cada deploy; reserve invalidações para casos excepcionais.'),
+    ('amazon-cloudfront', 'invalidacoes-de-cache-em-massa-em-alta-frequencia', 'caution', 1,
+        'Invalidação wildcard tem custo por requisição', 'Cada caminho invalidado conta como uma requisição de invalidação; wildcards amplos em alta frequência podem gerar custo relevante.'),
+    ('amazon-cloudfront', 'invalidacoes-de-cache-em-massa-em-alta-frequencia', 'caution', 2,
+        'Invalidação não é instantânea globalmente', 'Mesmo após criar a invalidação, a propagação leva tempo; para conteúdo crítico, planeje TTLs curtos ou versionamento em vez de depender de invalidação.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'invalidacoes-de-cache-em-massa-em-alta-frequencia',
+        'Invalidating files', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html'),
+    ('amazon-cloudfront', 'invalidacoes-de-cache-em-massa-em-alta-frequencia',
+        'Cache expiration settings', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'respostas-dinamicas-de-api-sem-cache-de-curta-duracao',
+        'Respostas Dinâmicas de API sem Cache de Curta Duração',
+        'Avalie APIs servidas via CloudFront sem cache de curta duração, onde dados semi-estáticos poderiam reduzir carga na origem e melhorar latência.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'respostas-dinamicas-de-api-sem-cache-de-curta-duracao', 'check', 1,
+        'Identifique respostas cacheáveis', 'Analise quais endpoints de API retornam dados que mudam pouco ou podem aceitar alguns segundos de defasagem, como catálogos e configurações.'),
+    ('amazon-cloudfront', 'respostas-dinamicas-de-api-sem-cache-de-curta-duracao', 'check', 2,
+        'Verifique headers de cache atuais', 'Confirme se as respostas incluem Cache-Control e se a distribuição respeita ou sobrescreve esses headers para definir TTL efetivo.'),
+    ('amazon-cloudfront', 'respostas-dinamicas-de-api-sem-cache-de-curta-duracao', 'action', 1,
+        'Configure TTL curto para dados semi-estáticos', 'Para endpoints adequados, defina cache TTL de segundos ou minutos no comportamento de cache, garantindo que a defasagem seja aceitável para o negócio.'),
+    ('amazon-cloudfront', 'respostas-dinamicas-de-api-sem-cache-de-curta-duracao', 'caution', 1,
+        'Dados personalizados não devem ser cacheados', 'Respostas com dados de usuário, autenticação ou informações sensíveis não podem usar cache compartilhado; restrinja o cache a conteúdo público ou semi-público.'),
+    ('amazon-cloudfront', 'respostas-dinamicas-de-api-sem-cache-de-curta-duracao', 'caution', 2,
+        'Cache pode atrasar propagação de mudanças', 'Mesmo com TTL curto, atualizações podem demorar para refletir; para dados que exigem consistência imediata, mantenha bypass de cache.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'respostas-dinamicas-de-api-sem-cache-de-curta-duracao',
+        'Cache expiration settings', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html'),
+    ('amazon-cloudfront', 'respostas-dinamicas-de-api-sem-cache-de-curta-duracao',
+        'Controlling the cache key', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/header-caching.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'repasses-ineficientes-de-headers-query-strings-e-cookies',
+        'Repasses Ineficientes de Headers, Query Strings e Cookies',
+        'Avalie distribuições que repassam todos os headers, cookies e query strings à origem, reduzindo o hit ratio do cache e aumentando custos.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'repasses-ineficientes-de-headers-query-strings-e-cookies', 'check', 1,
+        'Verifique a política de cache atual', 'Confirme se a distribuição encaminha todos os headers, cookies e query strings ou se usa allowlist; repasse total fragmenta o cache.'),
+    ('amazon-cloudfront', 'repasses-ineficientes-de-headers-query-strings-e-cookies', 'check', 2,
+        'Meça o hit ratio', 'Compare a taxa de acerto de cache antes e depois de ajustes; hit ratio baixo indica que a chave de cache está fragmentada por elementos desnecessários.'),
+    ('amazon-cloudfront', 'repasses-ineficientes-de-headers-query-strings-e-cookies', 'action', 1,
+        'Restrinja o que entra na chave de cache', 'Configure allowlists para encaminhar apenas headers, cookies e query strings realmente necessários à origem, mantendo o restante fora da chave de cache.'),
+    ('amazon-cloudfront', 'repasses-ineficientes-de-headers-query-strings-e-cookies', 'caution', 1,
+        'Remover da chave pode servir conteúdo errado', 'Se um header ou cookie diferencia conteúdo, removê-lo da chave pode servir resposta incorreta; valide cada elemento antes de excluir.'),
+    ('amazon-cloudfront', 'repasses-ineficientes-de-headers-query-strings-e-cookies', 'caution', 2,
+        'Cookies de sessão quebram cache', 'Cookies de autenticação ou sessão não devem fazer parte da chave de cache para conteúdo público; use cache behaviors separados para áreas autenticadas.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'repasses-ineficientes-de-headers-query-strings-e-cookies',
+        'Controlling the cache key', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/header-caching.html'),
+    ('amazon-cloudfront', 'repasses-ineficientes-de-headers-query-strings-e-cookies',
+        'Cache expiration settings', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'entregando-midias-e-comprovantes-sem-compressao-automatica',
+        'Entregando Mídias e Comprovantes sem Compressão Automática',
+        'Avalie a entrega de imagens, vídeos e documentos sem compressão ou otimização na borda, aumentando transferência e latência.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'entregando-midias-e-comprovantes-sem-compressao-automatica', 'check', 1,
+        'Identifique formatos e tamanhos', 'Verifique se imagens são servidas em PNG/JPEG sem conversão para WebP/AVIF e se documentos ou vídeos são entregues sem compressão adequada.'),
+    ('amazon-cloudfront', 'entregando-midias-e-comprovantes-sem-compressao-automatica', 'check', 2,
+        'Meça o impacto na transferência', 'Estime o volume de dados transferidos para mídias e compare com o que seria necessário após compressão ou conversão de formato.'),
+    ('amazon-cloudfront', 'entregando-midias-e-comprovantes-sem-compressao-automatica', 'action', 1,
+        'Ative compressão e otimização', 'Habilite a compressão de objetos no CloudFront para formatos suportados e avalie Lambda@Edge ou CloudFront Functions para conversão de imagem quando necessário.'),
+    ('amazon-cloudfront', 'entregando-midias-e-comprovantes-sem-compressao-automatica', 'caution', 1,
+        'Compressão não se aplica a todos os formatos', 'PDFs, vídeos e arquivos já compactados não se beneficiam; foque em imagens, CSS e JS que respondem bem à compressão.'),
+    ('amazon-cloudfront', 'entregando-midias-e-comprovantes-sem-compressao-automatica', 'caution', 2,
+        'Conversão de formato pode quebrar compatibilidade', 'WebP/AVIF não são suportados por todos os clientes; implemente fallback ou detecção de suporte antes de servir formatos modernos.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'entregando-midias-e-comprovantes-sem-compressao-automatica',
+        'Serving compressed files', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html'),
+    ('amazon-cloudfront', 'entregando-midias-e-comprovantes-sem-compressao-automatica',
+        'Lambda@Edge', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples',
+        'Ausência de Uso de CloudFront Functions / Edge@Lambda para Tarefas Simples',
+        'Avalie tarefas simples de borda como rewrites, headers e geoblocking executadas em infraestrutura mais cara, onde CloudFront Functions seriam mais adequadas.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples', 'check', 1,
+        'Identifique tarefas executadas na origem', 'Verifique se a origem executa tarefas simples como redirect de URL, injeção de headers ou bloqueio geográfico que poderiam rodar na borda.'),
+    ('amazon-cloudfront', 'ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples', 'check', 2,
+        'Avalie latência e custo atual', 'Meça o tempo de resposta dessas tarefas e o custo de execução na origem; mover para a borda reduz latência e carga no backend.'),
+    ('amazon-cloudfront', 'ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples', 'action', 1,
+        'Implemente CloudFront Functions', 'Para tarefas leves de viewer request/response, crie CloudFront Functions associadas ao cache behavior; para lógica mais complexa, avalie Lambda@Edge.'),
+    ('amazon-cloudfront', 'ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples', 'caution', 1,
+        'CloudFront Functions tem limites', 'A função roda em JavaScript limitado e não acessa a rede; tarefas que precisam de I/O ou tempo de execução maior exigem Lambda@Edge.'),
+    ('amazon-cloudfront', 'ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples', 'caution', 2,
+        'Testes na borda são complexos', 'Funções de borda têm ambiente restrito e versionamento próprio; teste em distribuição de homologação antes de aplicar em produção.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples',
+        'CloudFront Functions', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html'),
+    ('amazon-cloudfront', 'ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples',
+        'Lambda@Edge', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions',
+        'Uso de Lambda@Edge para Lógicas Simples em Vez de CloudFront Functions',
+        'Avalie o uso de Lambda@Edge para tarefas que CloudFront Functions executariam com menor latência e custo, onde a escolha inadequada aumenta complexidade e preço.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions', 'check', 1,
+        'Identifique funções Lambda@Edge simples', 'Liste as funções Lambda@Edge associadas e avalie se executam apenas manipulação de headers, rewrites ou lógica que CloudFront Functions suportaria.'),
+    ('amazon-cloudfront', 'uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions', 'check', 2,
+        'Compare custo e latência', 'Estime o custo por requisição do Lambda@Edge versus CloudFront Functions e a diferença de tempo de execução; funções simples se beneficiam da opção mais leve.'),
+    ('amazon-cloudfront', 'uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions', 'action', 1,
+        'Migre funções elegíveis para CloudFront Functions', 'Para funções que não precisam de acesso à rede ou tempo de execução estendido, reescreva em CloudFront Functions e associe ao comportamento de cache.'),
+    ('amazon-cloudfront', 'uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions', 'caution', 1,
+        'Lambda@Edge tem casos de uso legítimos', 'Funções que fazem chamadas a APIs, processamento de dados ou lógica complexa devem permanecer em Lambda@Edge; não migre o que exige recursos além do JavaScript básico.'),
+    ('amazon-cloudfront', 'uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions', 'caution', 2,
+        'Versões e propagação diferem', 'CloudFront Functions e Lambda@Edge têm modelos de versionamento e propagação diferentes; planeje a transição com testes e período de validação.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions',
+        'CloudFront Functions', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html'),
+    ('amazon-cloudfront', 'uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions',
+        'Lambda@Edge', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudfront', 'falta-de-configuracao-do-origin-shield',
+        'Falta de Configuração do Origin Shield',
+        'Avalie a ausência de Origin Shield em distribuições com múltiplas edge locations, onde requisições repetidas à origem aumentam latência e custo.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudfront', 'falta-de-configuracao-do-origin-shield', 'check', 1,
+        'Verifique o tráfego à origem', 'Meça quantas requisições chegam à origem por região; altos volumes indicam que múltiplas edge locations estão buscando o mesmo conteúdo repetidamente.'),
+    ('amazon-cloudfront', 'falta-de-configuracao-do-origin-shield', 'check', 2,
+        'Avalie a topologia da origem', 'Confirme se a origem está em uma única região e se a distribuição atende usuários em múltiplas regiões, cenário onde Origin Shield agrega valor.'),
+    ('amazon-cloudfront', 'falta-de-configuracao-do-origin-shield', 'action', 1,
+        'Habilite Origin Shield', 'Configure Origin Shield na região da origem para agregar requisições de edge locations próximas, reduzindo a carga na origem e melhorando hit ratio.'),
+    ('amazon-cloudfront', 'falta-de-configuracao-do-origin-shield', 'caution', 1,
+        'Origin Shield adiciona um salto', 'A requisição passa por um ponto intermediário antes de chegar à origem, o que pode adicionar latência mínima; avalie se o ganho de cache compensa.'),
+    ('amazon-cloudfront', 'falta-de-configuracao-do-origin-shield', 'caution', 2,
+        'Benefício varia com o padrão de acesso', 'Para origens já rápidas ou tráfego com baixa repetição regional, o Origin Shield pode não justificar o custo; meça antes de habilitar em larga escala.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudfront', 'falta-de-configuracao-do-origin-shield',
+        'Origin Shield', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/origin-shield.html'),
+    ('amazon-cloudfront', 'falta-de-configuracao-do-origin-shield',
+        'Controlling CloudFront costs', 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
 COMMIT;

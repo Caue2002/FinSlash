@@ -1,5 +1,6 @@
 -- Execute como proprietario do banco, depois de criar as tabelas e o login finslash_api.
 -- Conceda somente leitura nos roteiros, envio de feedback e manutenção do rate limit.
+SET client_encoding TO 'UTF8';
 DO $$
 BEGIN
     EXECUTE format('GRANT CONNECT ON DATABASE %I TO finslash_api', current_database());

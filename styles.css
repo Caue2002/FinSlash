@@ -773,9 +773,9 @@ body::-webkit-scrollbar,
     transition: transform 0.1s ease;
     border-radius: 16px;
     filter:
-        drop-shadow(0 0 3px var(--cor-brilho-celebracao))
-        drop-shadow(0 0 6px var(--cor-brilho-celebracao-secundaria))
-        drop-shadow(0 0 10px var(--cor-brilho-celebracao));
+        drop-shadow(0 0 10px var(--cor-brilho-celebracao))
+        drop-shadow(0 0 18px var(--cor-brilho-celebracao-secundaria))
+        drop-shadow(0 0 28px var(--cor-brilho-celebracao));
 }
 
 /* Classes utilitarias */

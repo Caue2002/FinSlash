@@ -27,7 +27,7 @@ function obterPoolBanco() {
             idleTimeoutMillis: 10000,
             query_timeout: 7000,
             statement_timeout: 5000,
-            ssl: { rejectUnauthorized: true }
+            ssl: { rejectUnauthorized: false }
         });
     }
     return pool;

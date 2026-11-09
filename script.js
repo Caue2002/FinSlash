@@ -210,8 +210,13 @@ const tituloPopupTopicoServico = document.getElementById('titulo-popup-topico-se
 const descricaoPopupTopicoServico = document.getElementById('descricao-popup-topico-servico');
 const botaoFecharPopupTopicoServico = document.getElementById('fechar-popup-topico-servico');
 const botaoVoltarTopicoServico = document.getElementById('botao-voltar-topico-servico');
+const botaoSeguirTopicoServico = document.getElementById('botao-seguir-topico-servico');
+const painelDiagnosticoTopico = document.getElementById('diagnostico-topico-servico');
+const statusDiagnosticoTopico = document.getElementById('status-diagnostico-topico');
+const conteudoDiagnosticoTopico = document.getElementById('conteudo-diagnostico-topico');
 const botaoVoltarTelaTopicos = document.getElementById('botao-voltar-tela-topicos');
 let servicoTopicosAtual = null;
+let requisicaoDiagnosticoAtual = 0;
 const canvasOnda = document.getElementById('canvas-onda');
 const imagemPersonagemHeader = document.getElementById('imagem-personagem-header');
 const buscaServicos = document.getElementById('busca-servicos');
@@ -253,6 +258,11 @@ const nomePersonagemPerfil = document.getElementById('nome-personagem-perfil');
 const listaHistoricoPerfil = document.getElementById('lista-historico-perfil');
 const listaMedalhasPerfil = document.getElementById('lista-medalhas-perfil');
 const resumoMedalhasPerfil = document.getElementById('resumo-medalhas-perfil');
+const campoFeedbackPerfil = document.getElementById('campo-feedback-perfil');
+const categoriaFeedbackPerfil = document.getElementById('categoria-feedback-perfil');
+const botaoEnviarFeedback = document.getElementById('botao-enviar-feedback');
+const statusFeedbackPerfil = document.getElementById('status-feedback-perfil');
+let enviandoFeedback = false;
 const secoesPerfil = {
     historico: document.getElementById('conteudo-historico-perfil'),
     medalhas: document.getElementById('conteudo-medalhas-perfil'),
@@ -588,6 +598,57 @@ function atualizarConteudoAbaPerfil(abaAtiva) {
     });
 }
 
+// Envia somente categoria e mensagem, sem nome, e-mail ou identificador de perfil.
+async function enviarFeedbackPerfil() {
+    const mensagem = campoFeedbackPerfil.value.trim();
+    const categoria = categoriaFeedbackPerfil.value;
+    const apiBase = window.FINSLASH_API_BASE_URL?.trim().replace(/\/+$/u, '');
+
+    statusFeedbackPerfil.textContent = '';
+    if (!apiBase) {
+        console.warn('Feedback ainda indisponível: configure FINSLASH_API_BASE_URL para ativar o envio.');
+        return;
+    }
+    if (Array.from(mensagem).length < 10 || Array.from(mensagem).length > 1000) {
+        statusFeedbackPerfil.textContent = 'Escreva uma mensagem entre 10 e 1000 caracteres.';
+        campoFeedbackPerfil.focus();
+        return;
+    }
+    if (!['suggestion', 'issue', 'content'].includes(categoria)) {
+        statusFeedbackPerfil.textContent = 'Selecione uma categoria válida.';
+        return;
+    }
+    if (enviandoFeedback) {
+        return;
+    }
+
+    enviandoFeedback = true;
+    botaoEnviarFeedback.disabled = true;
+    botaoEnviarFeedback.textContent = 'Enviando...';
+    try {
+        const resposta = await fetch(`${apiBase}/api/v1/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ category: categoria, message: mensagem })
+        });
+        const resultado = await resposta.json();
+        if (!resposta.ok) {
+            throw new Error(resultado.error || `A API respondeu com o status ${resposta.status}.`);
+        }
+        campoFeedbackPerfil.value = '';
+        statusFeedbackPerfil.textContent = resultado.message || 'Feedback enviado. Obrigado por ajudar a melhorar o FinSlash!';
+    } catch (error) {
+        console.error('Falha ao enviar feedback:', error);
+        statusFeedbackPerfil.textContent = error instanceof Error
+            ? error.message
+            : 'Não foi possível enviar agora. Tente novamente mais tarde.';
+    } finally {
+        enviandoFeedback = false;
+        botaoEnviarFeedback.disabled = false;
+        botaoEnviarFeedback.textContent = 'Enviar feedback';
+    }
+}
+
 // Variaveis para sistema de onda azul
 let ondas = [];
 let animacaoOnda = null;
@@ -654,6 +715,7 @@ function renderizarTelaHistorico(estado) {
         if (personagens[indicePersonagem]) {
             personagemSelecionado = personagens[indicePersonagem];
             imagemPersonagemHeader.src = personagemSelecionado.imagem;
+            imagemPersonagemHeader.alt = personagemSelecionado.nome;
         }
         atualizarDisponibilidadePesquisaNavegacao();
         atualizarAvatarNavegacao();
@@ -1345,78 +1407,15 @@ function gerarCartoesTopicosServico() {
         cartao.className = 'cartao-servico cartao-topico-servico';
         cartao.type = 'button';
         cartao.dataset.index = index;
-        adicionarTituloTopico(cartao, topico.titulo);
+        cartao.appendChild(adicionarTextoDiagnostico('span', 'categoria-topico-servico', 'Diagnóstico de custos'));
+        cartao.appendChild(adicionarTextoDiagnostico('span', 'titulo-cartao-topico-servico', topico.titulo));
+        cartao.appendChild(adicionarTextoDiagnostico('span', 'resumo-cartao-topico-servico', topico.descricao));
+        cartao.appendChild(adicionarTextoDiagnostico('span', 'acao-cartao-topico-servico', 'Abrir tópico'));
         cartao.addEventListener('click', () => abrirPopupTopicoServico(index));
         cartoes.appendChild(cartao);
     });
 
     gridTopicosServico.replaceChildren(cartoes);
-    ajustarPalavrasLongasTopicos();
-}
-
-function adicionarTituloTopico(cartao, titulo) {
-    const conteudoTitulo = document.createElement('span');
-    conteudoTitulo.className = 'conteudo-titulo-topico';
-    const segmentos = titulo.split(/(\([^)]*\))/g);
-
-    segmentos.forEach(segmento => {
-        const dentroDeParenteses = segmento.startsWith('(') && segmento.endsWith(')');
-        segmento.split(/(\s+)/u).forEach(parte => {
-            if (/^\s+$/u.test(parte)) {
-                conteudoTitulo.appendChild(document.createTextNode(parte));
-                return;
-            }
-
-            const padraoPalavra = /[\p{L}\p{N}]+(?:[-/][\p{L}\p{N}]+)*/gu;
-            let posicao = 0;
-            let correspondencia;
-
-            while ((correspondencia = padraoPalavra.exec(parte)) !== null) {
-                conteudoTitulo.appendChild(
-                    document.createTextNode(parte.slice(posicao, correspondencia.index))
-                );
-                const palavra = document.createElement('span');
-                palavra.className = 'palavra-titulo-topico';
-                if (dentroDeParenteses && correspondencia[0].includes('-')) {
-                    palavra.classList.add('palavra-hifen-topico');
-                }
-                palavra.textContent = correspondencia[0];
-                conteudoTitulo.appendChild(palavra);
-                posicao = correspondencia.index + correspondencia[0].length;
-            }
-
-            conteudoTitulo.appendChild(document.createTextNode(parte.slice(posicao)));
-        });
-    });
-
-    cartao.appendChild(conteudoTitulo);
-}
-
-function ajustarPalavrasLongasTopicos() {
-    const palavras = gridTopicosServico.querySelectorAll('.palavra-titulo-topico');
-    palavras.forEach(palavra => {
-        palavra.style.removeProperty('font-size');
-        palavra.classList.remove('palavra-quebra-topico');
-    });
-
-    gridTopicosServico.querySelectorAll('.cartao-topico-servico').forEach(cartao => {
-        const estiloCartao = getComputedStyle(cartao);
-        const larguraDisponivel = cartao.clientWidth
-            - parseFloat(estiloCartao.paddingLeft)
-            - parseFloat(estiloCartao.paddingRight);
-        const tamanhoFonteBase = parseFloat(estiloCartao.fontSize);
-
-        cartao.querySelectorAll('.palavra-titulo-topico').forEach(palavra => {
-            const larguraPalavra = palavra.getBoundingClientRect().width;
-            if (larguraPalavra > larguraDisponivel) {
-                if (palavra.classList.contains('palavra-hifen-topico')) {
-                    palavra.style.fontSize = `${tamanhoFonteBase * (larguraDisponivel - 1) / larguraPalavra}px`;
-                } else {
-                    palavra.classList.add('palavra-quebra-topico');
-                }
-            }
-        });
-    });
 }
 
 function criarIconeServico(servico, index) {
@@ -1473,19 +1472,30 @@ function prepararIndiceBuscaVozTopicos() {
 
     indiceBuscaVozTopicos = Object.entries(topicosPorServico).flatMap(([nomeServico, dadosServico]) =>
         dadosServico.topicos.map((topico, indiceTopico) => {
-            const titulo = normalizarPronunciaServico(topico.titulo)
-                .replace(/[^a-z0-9]+/g, ' ')
-                .trim();
-            const palavras = titulo.split(/\s+/).filter(palavra =>
-                palavra && !palavrasIgnoradasBuscaVoz.has(palavra)
-            );
+            const variacoesTitulo = [
+                topico.titulo,
+                topico.titulo.replace(/\s*\([^)]*\)/gu, ''),
+                ...Array.from(topico.titulo.matchAll(/\(([^)]*)\)/gu), correspondencia => correspondencia[1])
+            ];
+            const formasTitulo = [...new Set(variacoesTitulo.map(variacao =>
+                normalizarPronunciaServico(variacao)
+                    .replace(/[^a-z0-9]+/g, ' ')
+                    .trim()
+            ).filter(Boolean))];
+            const variacoes = [...new Set(formasTitulo.flatMap(variacao =>
+                [variacao, variacao.replace(/\s+/gu, '')]
+            ))];
+            const palavras = [...new Set(formasTitulo.flatMap(variacao =>
+                variacao.split(/\s+/).filter(palavra =>
+                    palavra && !palavrasIgnoradasBuscaVoz.has(palavra)
+                )
+            ))];
 
             return {
                 nomeServico,
                 indiceTopico,
-                titulo,
+                variacoes,
                 palavras,
-                tituloBusca: palavras.join(' ')
             };
         })
     );
@@ -1567,8 +1577,11 @@ function localizarTopicoPorVoz(texto, nomeServicoRestrito = null) {
 
         let pontuacao = 0;
         let palavrasCorrespondentes = [];
-        if (topico.tituloBusca.includes(consulta)) {
-            pontuacao = 1.1 + (consulta.length / topico.tituloBusca.length) * 0.5;
+        const variacaoCorrespondente = topico.variacoes
+            .filter(variacao => variacao.includes(consulta))
+            .sort((a, b) => a.length - b.length)[0];
+        if (variacaoCorrespondente) {
+            pontuacao = 1.1 + (consulta.length / variacaoCorrespondente.length) * 0.5;
         } else if (palavrasFaladas.length >= 2) {
             const pontuacoesPalavras = palavrasFaladas.map(palavraFalado =>
                 Math.max(0, ...topico.palavras.map(palavraTitulo =>
@@ -1605,7 +1618,7 @@ function localizarTopicoPorVoz(texto, nomeServicoRestrito = null) {
             correspondencias.push({
                 topico,
                 pontuacao,
-                correspondenciaExata: topico.tituloBusca.includes(consulta)
+                correspondenciaExata: Boolean(variacaoCorrespondente)
             });
         }
     });
@@ -1620,7 +1633,8 @@ function localizarTopicoPorVoz(texto, nomeServicoRestrito = null) {
     const margem = segunda ? primeira.pontuacao - segunda.pontuacao : 1;
     const certeza = primeira.pontuacao >= 0.92
         && margem >= 0.12
-        && ((primeira.correspondenciaExata && palavrasFaladas.length >= 2)
+        && ((primeira.correspondenciaExata
+                && (palavrasFaladas.length >= 2 || consulta.length >= 6))
             || palavrasFaladas.length >= 3);
     const limiteSugestao = Math.max(0.5, primeira.pontuacao - 0.18);
     const sugestoes = correspondencias
@@ -2394,10 +2408,163 @@ function abrirPopupTopicoServicoVisual(index) {
         console.error(`Topico invalido para o indice ${index}.`);
         return;
     }
+    requisicaoDiagnosticoAtual += 1;
+    painelDiagnosticoTopico.classList.add('hidden');
+    painelDiagnosticoTopico.setAttribute('aria-busy', 'false');
+    statusDiagnosticoTopico.textContent = '';
+    conteudoDiagnosticoTopico.replaceChildren();
+    botaoSeguirTopicoServico.disabled = false;
     tituloPopupTopicoServico.textContent = topico.titulo;
     descricaoPopupTopicoServico.textContent = topico.descricao;
     popupTopicoServico.classList.remove('hidden');
     botaoFecharPopupTopicoServico.focus();
+}
+
+// Converte nomes e títulos em identificadores compatíveis com as rotas da API.
+function gerarSlugDiagnostico(valor) {
+    return valor
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
+function adicionarTextoDiagnostico(tag, classe, texto) {
+    const elemento = document.createElement(tag);
+    elemento.className = classe;
+    elemento.textContent = texto;
+    return elemento;
+}
+
+function renderizarDiagnosticoTopico(diagnostico) {
+    const resumo = adicionarTextoDiagnostico('p', 'resumo-diagnostico-topico', diagnostico.summary);
+    const etapas = document.createDocumentFragment();
+    const rotulos = {
+        check: 'O que conferir',
+        action: 'Próxima ação',
+        caution: 'Atenção'
+    };
+
+    etapas.appendChild(resumo);
+
+    diagnostico.steps.forEach((etapa) => {
+        const bloco = document.createElement('section');
+        bloco.className = `etapa-diagnostico-topico etapa-${etapa.type}`;
+        bloco.appendChild(adicionarTextoDiagnostico('span', 'rotulo-etapa-diagnostico', rotulos[etapa.type]));
+        bloco.appendChild(adicionarTextoDiagnostico('h3', 'titulo-etapa-diagnostico', etapa.title));
+        bloco.appendChild(adicionarTextoDiagnostico('p', 'texto-etapa-diagnostico', etapa.content));
+        etapas.appendChild(bloco);
+    });
+
+    if (diagnostico.sources.length) {
+        const fontes = document.createElement('section');
+        fontes.className = 'fontes-diagnostico-topico';
+        fontes.appendChild(adicionarTextoDiagnostico('h3', 'titulo-fontes-diagnostico', 'Fontes oficiais da AWS'));
+
+        diagnostico.sources.forEach((fonte) => {
+            const link = document.createElement('a');
+            let url;
+            try {
+                url = new URL(fonte.url);
+            } catch (error) {
+                console.error('URL inválida em uma fonte do diagnóstico:', error);
+                return;
+            }
+            if (
+                url.protocol !== 'https:'
+                || !['docs.aws.amazon.com', 'aws.amazon.com'].includes(url.hostname)
+            ) {
+                console.error('Fonte ignorada por não ser documentação oficial da AWS:', fonte.url);
+                return;
+            }
+            link.href = url.href;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = fonte.title;
+            fontes.appendChild(link);
+        });
+
+        if (fontes.querySelector('a')) {
+            etapas.appendChild(fontes);
+        }
+    }
+
+    conteudoDiagnosticoTopico.replaceChildren(etapas);
+}
+
+async function carregarDiagnosticoTopicoServico() {
+    const topico = servicoTopicosAtual?.topicos.find(
+        (item) => item.titulo === tituloPopupTopicoServico.textContent
+    );
+    const nomeServico = Object.keys(topicosPorServico).find(
+        (nome) => topicosPorServico[nome] === servicoTopicosAtual
+    );
+    const apiBase = window.FINSLASH_API_BASE_URL?.trim().replace(/\/+$/u, '');
+    const requisicao = ++requisicaoDiagnosticoAtual;
+
+    painelDiagnosticoTopico.classList.remove('hidden');
+    conteudoDiagnosticoTopico.replaceChildren();
+    if (!apiBase) {
+        painelDiagnosticoTopico.setAttribute('aria-busy', 'false');
+        painelDiagnosticoTopico.classList.add('hidden');
+        console.warn('Diagnóstico ainda indisponível: configure FINSLASH_API_BASE_URL para carregar os roteiros.');
+        return;
+    }
+    if (!topico || !nomeServico) {
+        painelDiagnosticoTopico.setAttribute('aria-busy', 'false');
+        statusDiagnosticoTopico.textContent = 'Não foi possível identificar este serviço e tópico.';
+        console.error('Não foi possível identificar o tópico atual para consultar o diagnóstico.');
+        return;
+    }
+
+    painelDiagnosticoTopico.setAttribute('aria-busy', 'true');
+    botaoSeguirTopicoServico.disabled = true;
+    statusDiagnosticoTopico.textContent = 'Buscando roteiro de verificação...';
+
+    try {
+        const url = `${apiBase}/api/v1/services/${gerarSlugDiagnostico(nomeServico)}` +
+            `/scenarios/${gerarSlugDiagnostico(topico.titulo)}`;
+        const resposta = await fetch(url, { headers: { Accept: 'application/json' } });
+        const diagnostico = await resposta.json();
+        if (!resposta.ok) {
+            throw new Error(diagnostico.error || `A API respondeu com o status ${resposta.status}.`);
+        }
+        if (
+            typeof diagnostico.summary !== 'string'
+            || !Array.isArray(diagnostico.steps)
+            || !Array.isArray(diagnostico.sources)
+            || !diagnostico.steps.every((etapa) =>
+                ['check', 'action', 'caution'].includes(etapa.type)
+                && typeof etapa.title === 'string'
+                && typeof etapa.content === 'string'
+            )
+            || !diagnostico.sources.every((fonte) =>
+                typeof fonte.title === 'string'
+                && typeof fonte.url === 'string'
+            )
+        ) {
+            throw new Error('A API retornou um formato de diagnóstico inválido.');
+        }
+        if (requisicao !== requisicaoDiagnosticoAtual) {
+            return;
+        }
+        renderizarDiagnosticoTopico(diagnostico);
+        statusDiagnosticoTopico.textContent = '';
+    } catch (error) {
+        if (requisicao !== requisicaoDiagnosticoAtual) {
+            return;
+        }
+        console.error('Falha ao carregar o diagnóstico do tópico:', error);
+        statusDiagnosticoTopico.textContent = error instanceof Error
+            ? error.message
+            : 'Não foi possível carregar o diagnóstico agora.';
+    } finally {
+        if (requisicao === requisicaoDiagnosticoAtual) {
+            painelDiagnosticoTopico.setAttribute('aria-busy', 'false');
+            botaoSeguirTopicoServico.disabled = false;
+        }
+    }
 }
 
 function fecharPopupTopicoServico() {
@@ -2465,27 +2632,6 @@ function selecionarServico(servico) {
         renderizarHistoricoPerfil();
         renderizarMedalhasPerfil();
     }
-    // AQUI: Implementar funil de diagnostico de reducao de custos
-    console.log('Servico selecionado:', servico.nome);
-    console.log('Preparado para integracao com API Java Spring Boot para diagnostico');
-    
-    // AQUI: Implementar chamada a API Java Spring Boot para diagnostico
-    /*
-    fetch('/api/diagnostico/' + servico.nome, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Renderizar diagnostico de reducao de custos
-        renderizarDiagnostico(data);
-    })
-    .catch(error => {
-        console.error('Erro ao carregar diagnostico:', error);
-    });
-    */
 }
 
 // Funcao para transicionar para a tela de servicos AWS
@@ -2518,6 +2664,7 @@ function irParaJornada() {
     
     // Define a imagem do personagem no header da tela de servicos
     imagemPersonagemHeader.src = personagemTemp.imagem;
+    imagemPersonagemHeader.alt = personagemTemp.nome;
     
     // Restaura a referencia ao personagem
     personagemSelecionado = personagemTemp;
@@ -2542,7 +2689,6 @@ function irParaJornada() {
     }
     
     console.log('Personagem selecionado:', personagemSelecionado.imagem);
-    console.log('Preparado para integracao com API Java Spring Boot');
 }
 
 // Event Listeners
@@ -2611,6 +2757,7 @@ popupConquistaFinal.addEventListener('click', event => {
 document.querySelectorAll('[data-aba-perfil]').forEach(botao => {
     botao.addEventListener('click', () => atualizarConteudoAbaPerfil(botao.dataset.abaPerfil));
 });
+botaoEnviarFeedback.addEventListener('click', enviarFeedbackPerfil);
 botaoBuscaVoz.addEventListener('click', abrirPopupBuscaVoz);
 botaoFecharPopupBuscaVoz.addEventListener('click', () => fecharPopupBuscaVoz());
 botaoTentarNovamenteBuscaVoz.addEventListener('click', iniciarReconhecimentoVoz);
@@ -2670,8 +2817,8 @@ popupCartaoServico.addEventListener('click', (event) => {
 });
 botaoFecharPopupTopicoServico.addEventListener('click', fecharPopupTopicoServico);
 botaoVoltarTopicoServico.addEventListener('click', fecharPopupTopicoServico);
+botaoSeguirTopicoServico.addEventListener('click', carregarDiagnosticoTopicoServico);
 botaoVoltarTelaTopicos.addEventListener('click', voltarParaTelaServicos);
-window.addEventListener('resize', ajustarPalavrasLongasTopicos);
 popupTopicoServico.addEventListener('click', (event) => {
     if (event.target === popupTopicoServico) {
         fecharPopupTopicoServico();

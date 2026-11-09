@@ -74,9 +74,9 @@
                     <input
                         id="campo-busca-servicos"
                         type="search"
-                        placeholder="Pesquise um serviço"
+                        placeholder="Pesquise um serviço..."
                         autocomplete="off"
-                        aria-label="Pesquise um serviço"
+                        aria-label="Pesquise um serviço..."
                         aria-controls="resultados-busca-servicos"
                         aria-expanded="false"
                     />
@@ -140,11 +140,15 @@
                 <button class="fechar-popup-topico-servico" id="fechar-popup-topico-servico" type="button" aria-label="Fechar">×</button>
                 <h2 class="titulo-popup-topico-servico" id="titulo-popup-topico-servico"></h2>
                 <p class="descricao-popup-topico-servico" id="descricao-popup-topico-servico"></p>
+                <section class="diagnostico-topico hidden" id="diagnostico-topico-servico" aria-live="polite" aria-busy="false">
+                    <p class="status-diagnostico-topico" id="status-diagnostico-topico"></p>
+                    <div class="conteudo-diagnostico-topico" id="conteudo-diagnostico-topico"></div>
+                </section>
                 <div class="botoes-navegacao-selecionado botoes-navegacao-topico-servico">
                     <button class="botao botao-voltar-selecionado" id="botao-voltar-topico-servico" type="button">Voltar</button>
-                    <button class="botao botao-seguir" id="botao-seguir-topico-servico" type="button">Seguir</button>
+                    <button class="botao botao-seguir" id="botao-seguir-topico-servico" type="button">Ver diagnóstico</button>
                 </div>
-                <p class="aviso-seguir-topico-servico">Clique em Seguir para verificar os erros e as soluções.</p>
+                <p class="aviso-seguir-topico-servico">Passos de verificação, ações seguras e fontes AWS oficiais.</p>
             </div>
         </div>
         <div
@@ -247,9 +251,17 @@
             </section>
             <section class="conteudo-aba-perfil hidden" id="conteudo-feedback-perfil" role="tabpanel" aria-labelledby="aba-feedback-perfil" hidden>
                 <h3>Compartilhe uma ideia</h3>
-                <p class="texto-feedback-perfil">O envio de feedback estará disponível quando a API e o banco de dados do FinSlash forem implementados.</p>
-                <textarea id="campo-feedback-perfil" maxlength="1000" placeholder="Envio disponível em breve" disabled></textarea>
-                <button class="botao-enviar-feedback" id="botao-enviar-feedback" type="button" disabled>Indisponível no momento</button>
+                <p class="texto-feedback-perfil">Não pedimos login, nome ou e-mail. Evite incluir dados pessoais, de clientes, bancários, credenciais ou logs. A mensagem fica armazenada para análise. Um HMAC do IP é usado para limitar spam e removido automaticamente depois que a janela expira.</p>
+                <label class="rotulo-feedback-perfil" for="categoria-feedback-perfil">Sobre o que é o feedback?</label>
+                <select id="categoria-feedback-perfil">
+                    <option value="suggestion">Sugestão</option>
+                    <option value="issue">Problema no site</option>
+                    <option value="content">Correção ou sugestão de conteúdo AWS</option>
+                </select>
+                <label class="rotulo-feedback-perfil" for="campo-feedback-perfil">Sua mensagem (10 a 1000 caracteres)</label>
+                <textarea id="campo-feedback-perfil" maxlength="1000" minlength="10" placeholder="O que podemos melhorar?"></textarea>
+                <button class="botao-enviar-feedback" id="botao-enviar-feedback" type="button">Enviar feedback</button>
+                <p class="status-feedback-perfil" id="status-feedback-perfil" role="status" aria-live="polite"></p>
                 <div class="ideias-perfil">
                     <h4>Ideias para o perfil</h4>
                     <ul>
@@ -327,6 +339,7 @@
     <script src="banco-de-dados/topicos-servicos-computacao.js"></script>
     <script src="banco-de-dados/topicos-servicos-identidade-rede.js"></script>
     <script src="banco-de-dados/topicos-servicos-adicionais.js"></script>
+    <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

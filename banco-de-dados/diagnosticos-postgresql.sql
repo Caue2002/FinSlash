@@ -1,4 +1,5 @@
 -- Estrutura e primeiros diagnósticos AWS com referências oficiais revisadas.
+SET client_encoding TO 'UTF8';
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS aws_services (
@@ -6791,9 +6792,7 @@ INSERT INTO scenario_sources (scenario_id, title, url)
 SELECT scenario.id, source.title, source.url
 FROM (VALUES
     ('nat-gateway', 'falta-de-monitoramento-das-metricas-bytesoutfromdestination-e-bytesouttosource',
-        'NAT gateway CloudWatch metrics', 'https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-cloudwatch.html'),
-    ('nat-gateway', 'falta-de-monitoramento-das-metricas-bytesoutfromdestination-e-bytesouttosource',
-        'CloudWatch metrics', 'https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-cloudwatch.html')
+        'NAT gateway CloudWatch metrics', 'https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-cloudwatch.html')
 ) AS source(service_slug, scenario_slug, title, url)
 JOIN aws_services AS service ON service.slug = source.service_slug
 JOIN cost_scenarios AS scenario

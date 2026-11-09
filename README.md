@@ -58,8 +58,8 @@ A estrutura separa o código do handler em `api/` dos scripts SQL em `banco-de-d
 
 ## Observações
 
-- Os nomes e ícones dos serviços são usados para fins de navegação e demonstração. A interface atualmente mostra 21 tópicos para cada um dos 48 serviços (1.008 tópicos); vinte e dois diagnósticos com referências oficiais estão cadastrados no PostgreSQL e são servidos pelo endpoint Node.js.
-- A tela de diagnóstico aparece dentro dos detalhes dos tópicos. Para os outros 986 tópicos sem roteiro no banco, a API responde com HTTP 404; o conteúdo não é substituído por recomendações genéricas. Portanto, a cobertura diagnóstica ainda não está completa para publicação como catálogo abrangente.
+- Os nomes e ícones dos serviços são usados para fins de navegação e demonstração. A interface tem 48 serviços com 21 tópicos cada (1.008 tópicos); cento e sessenta diagnósticos com referências oficiais estão cadastrados no PostgreSQL e são servidos pelo endpoint Node.js.
+- A tela de diagnóstico aparece dentro dos detalhes dos tópicos. Para os outros 848 tópicos sem roteiro no banco, a API responde com HTTP 404; o conteúdo não é substituído por recomendações genéricas. Portanto, a cobertura diagnóstica ainda não está completa para publicação como catálogo abrangente.
 - `banco-de-dados/diagnosticos-postgresql.sql` cria as tabelas normalizadas e insere os roteiros iniciais. Execute o arquivo no PostgreSQL antes de publicar a API. Os dados incluem verificações, ações, cuidados e URLs oficiais da AWS.
 - A API é `GET /api/v1/services/:serviceSlug/scenarios/:scenarioSlug`. A resposta contém `summary`, `steps` (`check`, `action` ou `caution`) e `sources`. A consulta usa parâmetros SQL e retorna apenas roteiros publicados.
 - O feedback é enviado por `POST /api/v1/feedback` com apenas `category` (`suggestion`, `issue` ou `content`) e `message` (10 a 1000 caracteres). Ele não pede login, nome ou e-mail e não oferece uma rota pública para ler as mensagens. Para revisar, use o painel privado do PostgreSQL, por exemplo: `SELECT category, message, submitted_at FROM feedback_entries ORDER BY submitted_at DESC LIMIT 50;`.

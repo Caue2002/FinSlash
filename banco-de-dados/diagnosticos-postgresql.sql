@@ -527,4 +527,3364 @@ ON CONFLICT (scenario_id, url) DO UPDATE
 SET title = EXCLUDED.title,
     reviewed_at = CURRENT_DATE;
 
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudwatch', 'criacao-de-milhoes-de-metricas-customizadas-sem-governanca',
+        'Criação de Milhões de Métricas Customizadas sem Governança',
+        'Revise dimensões e combinações de métricas publicadas para identificar séries temporais desnecessariamente distintas.'),
+    ('amazon-cloudwatch', 'uso-de-continous-metric-streams-sem-ajuste-de-amostragem',
+        'Uso de Continous Metric Streams sem Ajuste de Amostragem',
+        'Compare as métricas e estatísticas enviadas pelo Metric Streams com as necessidades do destino e os custos observados.'),
+    ('amazon-cloudwatch', 'consultas-de-logs-pesadas-e-ineficientes-no-cloudwatch-logs-insights',
+        'Consultas de Logs Pesadas e Ineficientes no CloudWatch Logs Insights',
+        'Reduza o escopo dos grupos e do intervalo de tempo das consultas após estimar os dados que serão varridos.'),
+    ('amazon-cloudwatch', 'falta-de-limpeza-de-log-groups-orfaos-de-recursos-descontinuados',
+        'Falta de Limpeza de Log Groups Órfãos de Recursos Descontinuados',
+        'Confirme propriedade, origem, retenção e necessidade de auditoria antes de remover grupos de logs sem uso aparente.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudwatch', 'criacao-de-milhoes-de-metricas-customizadas-sem-governanca', 'check', 1,
+        'Inspecione dimensões publicadas', 'Identifique dimensões com valores variáveis por requisição, como IDs de transação, clientes ou endereços IP, e conte as combinações distintas por métrica.'),
+    ('amazon-cloudwatch', 'criacao-de-milhoes-de-metricas-customizadas-sem-governanca', 'check', 2,
+        'Confira a necessidade de cada série', 'Verifique quais dimensões são usadas por alarmes, painéis e investigações; cada combinação única de dimensões representa uma métrica distinta.'),
+    ('amazon-cloudwatch', 'criacao-de-milhoes-de-metricas-customizadas-sem-governanca', 'action', 1,
+        'Agregue antes de publicar', 'Quando a análise permitir, publique métricas agregadas com dimensões estáveis, preservando identificadores de alta cardinalidade nos logs ou no sistema analítico apropriado.'),
+    ('amazon-cloudwatch', 'criacao-de-milhoes-de-metricas-customizadas-sem-governanca', 'caution', 1,
+        'Preserve sinais operacionais', 'Remover dimensões pode impedir consultas e alarmes que dependem delas; valide consumidores e requisitos de investigação antes de alterar a instrumentação.'),
+
+    ('amazon-cloudwatch', 'uso-de-continous-metric-streams-sem-ajuste-de-amostragem', 'check', 1,
+        'Revise o escopo do fluxo', 'Compare namespaces e métricas incluídos com os dados efetivamente consumidos pelo destino e identifique séries que não apoiam monitoramento ou análise.'),
+    ('amazon-cloudwatch', 'uso-de-continous-metric-streams-sem-ajuste-de-amostragem', 'check', 2,
+        'Inclua custos de entrega', 'Confira atualizações de métricas, estatísticas adicionais selecionadas e cobranças associadas ao Firehose, quando usado.'),
+    ('amazon-cloudwatch', 'uso-de-continous-metric-streams-sem-ajuste-de-amostragem', 'action', 1,
+        'Aplique filtros compatíveis', 'Use filtros de inclusão ou exclusão para limitar namespaces e métricas ao necessário e monitore o conteúdo recebido após a mudança.'),
+    ('amazon-cloudwatch', 'uso-de-continous-metric-streams-sem-ajuste-de-amostragem', 'caution', 1,
+        'Revise a cobertura futura', 'Um fluxo aceita filtros de inclusão ou de exclusão, não ambos; métricas novas que corresponderem aos filtros podem entrar automaticamente no fluxo.'),
+
+    ('amazon-cloudwatch', 'consultas-de-logs-pesadas-e-ineficientes-no-cloudwatch-logs-insights', 'check', 1,
+        'Estime o volume da consulta', 'Antes de executar, use a estimativa de bytes e confirme os grupos de logs selecionados e o intervalo de tempo.'),
+    ('amazon-cloudwatch', 'consultas-de-logs-pesadas-e-ineficientes-no-cloudwatch-logs-insights', 'check', 2,
+        'Revise consultas recorrentes', 'Inspecione painéis e atualizações automáticas para encontrar intervalos amplos, muitos grupos ou frequência maior que a necessidade operacional.'),
+    ('amazon-cloudwatch', 'consultas-de-logs-pesadas-e-ineficientes-no-cloudwatch-logs-insights', 'action', 1,
+        'Restrinja o escopo', 'Selecione apenas os grupos necessários, use o menor intervalo de tempo útil e refine a consulta antes de executá-la em períodos maiores.'),
+    ('amazon-cloudwatch', 'consultas-de-logs-pesadas-e-ineficientes-no-cloudwatch-logs-insights', 'caution', 1,
+        'Encerre consultas desnecessárias', 'Consultas continuam até terminar mesmo se a página do console for fechada; cancele execuções em andamento e evite painéis com atualização excessivamente frequente.'),
+
+    ('amazon-cloudwatch', 'falta-de-limpeza-de-log-groups-orfaos-de-recursos-descontinuados', 'check', 1,
+        'Confirme a origem do grupo', 'Revise nome, tags, streams recentes, recurso de origem, equipe proprietária e dependências de alarmes, assinaturas ou consultas.'),
+    ('amazon-cloudwatch', 'falta-de-limpeza-de-log-groups-orfaos-de-recursos-descontinuados', 'check', 2,
+        'Valide retenção e auditoria', 'Confirme se os eventos precisam ser preservados por investigação, segurança, auditoria ou requisito regulatório, e identifique exportações ou cópias aprovadas.'),
+    ('amazon-cloudwatch', 'falta-de-limpeza-de-log-groups-orfaos-de-recursos-descontinuados', 'action', 1,
+        'Remova somente após aprovação', 'Após confirmação do responsável e do prazo de retenção, exclua grupos comprovadamente sem uso e monitore erros de produtores ou consumidores dependentes.'),
+    ('amazon-cloudwatch', 'falta-de-limpeza-de-log-groups-orfaos-de-recursos-descontinuados', 'caution', 1,
+        'Trate exclusão como perda de dados', 'A remoção do grupo pode eliminar eventos necessários e não deve ser inferida apenas pela ausência de atividade recente; proteja grupos críticos contra exclusão acidental.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudwatch', 'criacao-de-milhoes-de-metricas-customizadas-sem-governanca',
+        'CloudWatch metrics and dimensions concepts', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html'),
+    ('amazon-cloudwatch', 'uso-de-continous-metric-streams-sem-ajuste-de-amostragem',
+        'Use CloudWatch metric streams', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html'),
+    ('amazon-cloudwatch', 'consultas-de-logs-pesadas-e-ineficientes-no-cloudwatch-logs-insights',
+        'CloudWatch Logs Insights query syntax and best practices', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html'),
+    ('amazon-cloudwatch', 'falta-de-limpeza-de-log-groups-orfaos-de-recursos-descontinuados',
+        'Working with log groups and log streams', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudwatch', 'alarmes-do-cloudwatch-com-periodos-de-avaliacao-excessivamente-curtos',
+        'Alarmes do CloudWatch com Períodos de Avaliação Excessivamente Curtos',
+        'Compare o período dos alarmes com a resolução das métricas e com o tempo de resposta operacional necessário.'),
+    ('amazon-cloudwatch', 'uso-de-synthetics-canaries-em-frequencia-excessiva',
+        'Uso de Synthetics Canaries em Frequência Excessiva',
+        'Avalie a frequência, o tempo de execução e as localizações dos canaries em relação aos objetivos de detecção e ao custo observado.'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-aws-systems-manager-agent-para-coleta-unificada',
+        'Falta de Uso de AWS Systems Manager Agent para Coleta Unificada',
+        'Verifique se o CloudWatch Agent pode ser gerenciado pelo Systems Manager para coleta consistente, sem confundir os papéis dos dois agentes.'),
+    ('amazon-cloudwatch', 'retencao-prolongada-de-exportacoes-para-o-s3-sem-ciclo-de-vida',
+        'Retenção Prolongada de Exportações para o S3 Sem Ciclo de Vida',
+        'Revise exportações recorrentes, retenção obrigatória e regras S3 Lifecycle para arquivos históricos de logs.'),
+    ('amazon-cloudwatch', 'logs-de-acesso-de-balanceadores-alb-sem-retencao-curta',
+        'Logs de Acesso de Balanceadores (ALB) sem Retenção Curta',
+        'Meça o volume dos logs de acesso armazenados no S3 e defina retenção alinhada às necessidades operacionais e de auditoria.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudwatch', 'alarmes-do-cloudwatch-com-periodos-de-avaliacao-excessivamente-curtos', 'check', 1,
+        'Compare resolução e período', 'Confirme a resolução da métrica e use um período de avaliação que não seja menor que a granularidade disponível.'),
+    ('amazon-cloudwatch', 'alarmes-do-cloudwatch-com-periodos-de-avaliacao-excessivamente-curtos', 'check', 2,
+        'Revise latência e ruído', 'Compare atraso de publicação, tempo necessário para detectar a condição e histórico de transições ou notificações irrelevantes.'),
+    ('amazon-cloudwatch', 'alarmes-do-cloudwatch-com-periodos-de-avaliacao-excessivamente-curtos', 'action', 1,
+        'Ajuste ao sinal monitorado', 'Use períodos alinhados à métrica e ao objetivo de resposta; adote alta resolução somente quando a detecção subminuto for necessária.'),
+    ('amazon-cloudwatch', 'alarmes-do-cloudwatch-com-periodos-de-avaliacao-excessivamente-curtos', 'caution', 1,
+        'Considere cobrança e dados ausentes', 'Alarmes de alta resolução com períodos de 10 ou 30 segundos têm cobrança superior; períodos curtos também não criam dados mais frequentes que a métrica fornece.'),
+
+    ('amazon-cloudwatch', 'uso-de-synthetics-canaries-em-frequencia-excessiva', 'check', 1,
+        'Meça necessidade de detecção', 'Compare agenda do canary, objetivo de nível de serviço, criticidade do endpoint e tempo real entre execuções, incluindo testes em múltiplas localizações.'),
+    ('amazon-cloudwatch', 'uso-de-synthetics-canaries-em-frequencia-excessiva', 'check', 2,
+        'Revise o custo por execução', 'Inclua duração e recursos da função Lambda associada, métricas e artefatos produzidos, além da frequência configurada.'),
+    ('amazon-cloudwatch', 'uso-de-synthetics-canaries-em-frequencia-excessiva', 'action', 1,
+        'Dimensione a agenda por serviço', 'Ajuste a frequência somente quando o intervalo atual exceder o objetivo de detecção e teste a nova agenda contra os requisitos de disponibilidade.'),
+    ('amazon-cloudwatch', 'uso-de-synthetics-canaries-em-frequencia-excessiva', 'caution', 1,
+        'Não trate um minuto como excesso por padrão', 'Canaries podem executar a cada minuto; aumentar o intervalo pode atrasar a descoberta de falhas em serviços críticos.'),
+
+    ('amazon-cloudwatch', 'falta-de-uso-de-aws-systems-manager-agent-para-coleta-unificada', 'check', 1,
+        'Separe os papéis dos agentes', 'Confirme que o CloudWatch Agent coleta os logs e métricas desejados e que o SSM Agent permite operações de gerenciamento Systems Manager.'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-aws-systems-manager-agent-para-coleta-unificada', 'check', 2,
+        'Verifique configuração e permissões', 'Revise estado e versão dos agentes, configuração de coleta, perfil IAM e conectividade necessária antes de consolidar a gestão.'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-aws-systems-manager-agent-para-coleta-unificada', 'action', 1,
+        'Gerencie o CloudWatch Agent pelo Systems Manager', 'Quando compatível com a operação, distribua e atualize o CloudWatch Agent usando Systems Manager e mantenha uma configuração de coleta revisada.'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-aws-systems-manager-agent-para-coleta-unificada', 'caution', 1,
+        'SSM Agent não substitui coleta de telemetria', 'Instalar apenas o SSM Agent não envia automaticamente métricas e logs ao CloudWatch; valide políticas IAM, configuração e custos das métricas publicadas.'),
+
+    ('amazon-cloudwatch', 'retencao-prolongada-de-exportacoes-para-o-s3-sem-ciclo-de-vida', 'check', 1,
+        'Identifique exportações e retenção', 'Liste buckets e prefixos de destino, volume e idade dos objetos exportados, além dos requisitos de auditoria e recuperação.'),
+    ('amazon-cloudwatch', 'retencao-prolongada-de-exportacoes-para-o-s3-sem-ciclo-de-vida', 'check', 2,
+        'Confirme se exportação periódica é adequada', 'Para arquivamento contínuo, compare export tasks com subscriptions do CloudWatch Logs, conforme o uso e o atraso de entrega tolerados.'),
+    ('amazon-cloudwatch', 'retencao-prolongada-de-exportacoes-para-o-s3-sem-ciclo-de-vida', 'action', 1,
+        'Aplique Lifecycle ao prefixo aprovado', 'Configure transição ou expiração somente após definir o prazo de retenção e testar o escopo dos objetos exportados.'),
+    ('amazon-cloudwatch', 'retencao-prolongada-de-exportacoes-para-o-s3-sem-ciclo-de-vida', 'caution', 1,
+        'Preserve retenção legal', 'Object Lock e obrigações de auditoria podem impedir exclusões; export tasks também não são recomendadas pela AWS como mecanismo de arquivamento contínuo.'),
+
+    ('amazon-cloudwatch', 'logs-de-acesso-de-balanceadores-alb-sem-retencao-curta', 'check', 1,
+        'Meça dados armazenados', 'Revise buckets, prefixos, volume, idade dos objetos e configuração de logs de acesso dos Application Load Balancers.'),
+    ('amazon-cloudwatch', 'logs-de-acesso-de-balanceadores-alb-sem-retencao-curta', 'check', 2,
+        'Defina retenção por requisito', 'Confirme com as equipes responsáveis se os registros são necessários para investigação, segurança, auditoria ou requisitos regulatórios.'),
+    ('amazon-cloudwatch', 'logs-de-acesso-de-balanceadores-alb-sem-retencao-curta', 'action', 1,
+        'Configure Lifecycle no prefixo de logs', 'Depois da aprovação do prazo, aplique regra S3 Lifecycle ao prefixo correspondente e monitore as transições e expirações.'),
+    ('amazon-cloudwatch', 'logs-de-acesso-de-balanceadores-alb-sem-retencao-curta', 'caution', 1,
+        'Não use logs como contabilidade completa', 'A entrega de access logs é best-effort; não os trate como registro exaustivo de solicitações e não remova dados sujeitos a retenção obrigatória.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudwatch', 'alarmes-do-cloudwatch-com-periodos-de-avaliacao-excessivamente-curtos',
+        'CloudWatch metrics concepts: periods and high-resolution alarms', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html'),
+    ('amazon-cloudwatch', 'alarmes-do-cloudwatch-com-periodos-de-avaliacao-excessivamente-curtos',
+        'Using Amazon CloudWatch alarms', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Alarms.html'),
+    ('amazon-cloudwatch', 'uso-de-synthetics-canaries-em-frequencia-excessiva',
+        'Synthetic monitoring with CloudWatch Synthetics', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries.html'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-aws-systems-manager-agent-para-coleta-unificada',
+        'Collect metrics, logs, and traces using the CloudWatch agent', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-aws-systems-manager-agent-para-coleta-unificada',
+        'Working with SSM Agent', 'https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html'),
+    ('amazon-cloudwatch', 'retencao-prolongada-de-exportacoes-para-o-s3-sem-ciclo-de-vida',
+        'Exporting log data to Amazon S3', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/S3Export.html'),
+    ('amazon-cloudwatch', 'retencao-prolongada-de-exportacoes-para-o-s3-sem-ciclo-de-vida',
+        'Managing the lifecycle of objects', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html'),
+    ('amazon-cloudwatch', 'logs-de-acesso-de-balanceadores-alb-sem-retencao-curta',
+        'Access logs for an Application Load Balancer', 'https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html'),
+    ('amazon-cloudwatch', 'logs-de-acesso-de-balanceadores-alb-sem-retencao-curta',
+        'Managing the lifecycle of objects', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudwatch', 'configuracao-incorreta-de-alvos-de-notificacao-de-alarme-sns-topics-orfaos',
+        'Configuração Incorreta de Alvos de Notificação de Alarme (SNS Topics Órfãos)',
+        'Confirme se cada ação de alarme aponta para um tópico SNS existente com assinaturas ativas e confirmadas.'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-contributor-insights-para-identificar-gargalos-de-rede',
+        'Falta de Uso de Contributor Insights para Identificar Gargalos de Rede',
+        'Avalie regras Contributor Insights sobre logs de fluxo quando for necessário identificar os maiores contribuidores de tráfego.'),
+    ('amazon-cloudwatch', 'alarmes-de-custos-desconfigurados-no-aws-budgets-cloudwatch-cost-anomaly',
+        'Alarmes de Custos Desconfigurados no AWS Budgets / CloudWatch Cost Anomaly',
+        'Revise escopo, limites, monitores e destinos das notificações de custos para detectar desvios relevantes.'),
+    ('amazon-cloudwatch', 'ausencia-de-alerta-para-o-custo-acumulado-diario-do-cloudwatch',
+        'Ausência de Alerta para o Custo Acumulado Diário do CloudWatch',
+        'Avalie um orçamento de custo filtrado para CloudWatch, considerando o atraso de atualização dos dados de cobrança.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudwatch', 'configuracao-incorreta-de-alvos-de-notificacao-de-alarme-sns-topics-orfaos', 'check', 1,
+        'Revise ações e tópicos configurados', 'Compare as ações de cada alarme com os ARNs dos tópicos SNS e verifique se os tópicos ainda existem.'),
+    ('amazon-cloudwatch', 'configuracao-incorreta-de-alvos-de-notificacao-de-alarme-sns-topics-orfaos', 'check', 2,
+        'Confirme assinaturas e entrega', 'Confira assinaturas ativas, confirmações pendentes, políticas do tópico e o histórico de estado do alarme.'),
+    ('amazon-cloudwatch', 'configuracao-incorreta-de-alvos-de-notificacao-de-alarme-sns-topics-orfaos', 'action', 1,
+        'Teste o caminho de notificação', 'Envie uma mensagem controlada ao tópico e confirme o recebimento no endpoint esperado; corrija a ação do alarme somente após validar o destino.'),
+    ('amazon-cloudwatch', 'configuracao-incorreta-de-alvos-de-notificacao-de-alarme-sns-topics-orfaos', 'caution', 1,
+        'Não presuma que o alarme valida ações', 'O CloudWatch não testa nem valida o destino configurado nem detecta falhas SNS decorrentes de ações inexistentes.'),
+
+    ('amazon-cloudwatch', 'falta-de-uso-de-contributor-insights-para-identificar-gargalos-de-rede', 'check', 1,
+        'Verifique os dados disponíveis', 'Confirme que os VPC Flow Logs incluem campos adequados, como endereços, portas e bytes, e que o log group recebe eventos recentes.'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-contributor-insights-para-identificar-gargalos-de-rede', 'check', 2,
+        'Defina a pergunta operacional', 'Determine se é necessário identificar os principais IPs, portas ou outros contribuidores antes de selecionar campos e filtros da regra.'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-contributor-insights-para-identificar-gargalos-de-rede', 'action', 1,
+        'Teste uma regra com escopo limitado', 'Use uma regra de exemplo ou uma regra revisada sobre o log group necessário e compare os principais contribuidores com as métricas de rede.'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-contributor-insights-para-identificar-gargalos-de-rede', 'caution', 1,
+        'Considere cobrança e limites do sinal', 'Contributor Insights cobra por evento que corresponde à regra; a análise ajuda a localizar contribuidores, mas não reduz o tráfego de rede por si só.'),
+
+    ('amazon-cloudwatch', 'alarmes-de-custos-desconfigurados-no-aws-budgets-cloudwatch-cost-anomaly', 'check', 1,
+        'Revise escopo e limites', 'Confira filtros por conta, serviço, região ou tags, valores de orçamento, limites reais ou previstos e monitores de anomalia ativos.'),
+    ('amazon-cloudwatch', 'alarmes-de-custos-desconfigurados-no-aws-budgets-cloudwatch-cost-anomaly', 'check', 2,
+        'Teste quem recebe os avisos', 'Verifique tópicos SNS, assinaturas confirmadas e responsáveis que recebem alertas de orçamento ou relatórios de anomalia.'),
+    ('amazon-cloudwatch', 'alarmes-de-custos-desconfigurados-no-aws-budgets-cloudwatch-cost-anomaly', 'action', 1,
+        'Ajuste o mecanismo ao objetivo', 'Use AWS Budgets para limites de custo e notificações e Cost Anomaly Detection para padrões atípicos; valide filtros e destinatários com um teste controlado.'),
+    ('amazon-cloudwatch', 'alarmes-de-custos-desconfigurados-no-aws-budgets-cloudwatch-cost-anomaly', 'caution', 1,
+        'Trate alertas como sinais atrasados', 'AWS Budgets atualiza dados até três vezes ao dia e a detecção de anomalias pode levar até 24 horas; notificações podem chegar após o gasto ocorrer.'),
+
+    ('amazon-cloudwatch', 'ausencia-de-alerta-para-o-custo-acumulado-diario-do-cloudwatch', 'check', 1,
+        'Isole custos do serviço', 'No AWS Budgets ou Cost Explorer, filtre o serviço CloudWatch e confira período, custos considerados, descontos e contas incluídas.'),
+    ('amazon-cloudwatch', 'ausencia-de-alerta-para-o-custo-acumulado-diario-do-cloudwatch', 'check', 2,
+        'Defina limites e destinatários', 'Determine os valores de aviso compatíveis com o orçamento e confirme o recebimento por e-mail ou tópico SNS.'),
+    ('amazon-cloudwatch', 'ausencia-de-alerta-para-o-custo-acumulado-diario-do-cloudwatch', 'action', 1,
+        'Configure notificações de orçamento', 'Crie um orçamento com filtro de serviço CloudWatch e limiares aprovados, e monitore os dados de custo para validar o escopo do alerta.'),
+    ('amazon-cloudwatch', 'ausencia-de-alerta-para-o-custo-acumulado-diario-do-cloudwatch', 'caution', 1,
+        'Não prometa alerta diário em tempo real', 'Dados de AWS Budgets podem ter atraso de 8 a 12 horas entre atualizações; use o aviso como acompanhamento financeiro, não como bloqueio imediato de consumo.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudwatch', 'configuracao-incorreta-de-alvos-de-notificacao-de-alarme-sns-topics-orfaos',
+        'Using Amazon CloudWatch alarms', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Alarms.html'),
+    ('amazon-cloudwatch', 'configuracao-incorreta-de-alvos-de-notificacao-de-alarme-sns-topics-orfaos',
+        'Creating a subscription to an Amazon SNS topic', 'https://docs.aws.amazon.com/sns/latest/dg/sns-create-subscribe-endpoint-to-topic.html'),
+    ('amazon-cloudwatch', 'falta-de-uso-de-contributor-insights-para-identificar-gargalos-de-rede',
+        'Use Contributor Insights to analyze high-cardinality data', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContributorInsights.html'),
+    ('amazon-cloudwatch', 'alarmes-de-custos-desconfigurados-no-aws-budgets-cloudwatch-cost-anomaly',
+        'Managing your costs with AWS Budgets', 'https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html'),
+    ('amazon-cloudwatch', 'alarmes-de-custos-desconfigurados-no-aws-budgets-cloudwatch-cost-anomaly',
+        'Detecting unusual spend with AWS Cost Anomaly Detection', 'https://docs.aws.amazon.com/cost-management/latest/userguide/manage-ad.html'),
+    ('amazon-cloudwatch', 'ausencia-de-alerta-para-o-custo-acumulado-diario-do-cloudwatch',
+        'Managing your costs with AWS Budgets', 'https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-cloudwatch', 'monitoramento-de-conteineres-com-container-insights-habilitado-desnecessariamente',
+        'Monitoramento de Contêineres com Container Insights Habilitado Desnecessariamente',
+        'Revise clusters cobertos, modo de observabilidade, métricas e logs coletados antes de alterar o monitoramento.'),
+    ('amazon-cloudwatch', 'duplicacao-de-coleta-de-metricas-entre-promoters-e-cloudwatch',
+        'Duplicação de Coleta de Métricas entre Promoters e CloudWatch',
+        'Compare séries, dimensões e consumidores para distinguir métricas realmente duplicadas de sinais com finalidades diferentes.'),
+    ('amazon-cloudwatch', 'criacao-manual-de-dashboards-redundantes-por-equipes',
+        'Criação Manual de Dashboards Redundantes por Equipes',
+        'Identifique painéis e widgets repetidos e avalie compartilhamento ou templates sem remover visões operacionais necessárias.'),
+    ('amazon-cloudwatch', 'falta-de-agrupamento-de-logs-por-aplicacao-log-streams-desestruturados',
+        'Falta de Agrupamento de Logs por Aplicação (Log Streams Desestruturados)',
+        'Organize grupos e streams de acordo com origem, aplicação, acesso e retenção, e restrinja consultas aos dados necessários.'),
+    ('amazon-cloudwatch', 'alarmes-sem-acoes-automatizadas-apenas-notificacoes-por-e-mail',
+        'Alarmes Sem Ações Automatizadas (Apenas Notificações por E-mail)',
+        'Avalie se alarmes devem acionar operações documentadas além da notificação, considerando risco e reversibilidade da resposta.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-cloudwatch', 'monitoramento-de-conteineres-com-container-insights-habilitado-desnecessariamente', 'check', 1,
+        'Confirme cobertura e necessidade', 'Liste clusters, serviços e ambientes monitorados e identifique quais métricas, eventos e alarmes dependem do Container Insights.'),
+    ('amazon-cloudwatch', 'monitoramento-de-conteineres-com-container-insights-habilitado-desnecessariamente', 'check', 2,
+        'Identifique o modo e os dados publicados', 'Verifique plataforma, configuração de observabilidade, grupos de logs, métricas e granularidade habilitados para cada cluster.'),
+    ('amazon-cloudwatch', 'monitoramento-de-conteineres-com-container-insights-habilitado-desnecessariamente', 'action', 1,
+        'Ajuste somente escopo comprovadamente ocioso', 'Em ambientes não produtivos, reduza a coleta apenas quando métricas e logs não forem necessários e uma alternativa aprovada cobrir os requisitos.'),
+    ('amazon-cloudwatch', 'monitoramento-de-conteineres-com-container-insights-habilitado-desnecessariamente', 'caution', 1,
+        'Compare o modelo de cobrança vigente', 'A versão original e a observabilidade aprimorada para EKS têm modelos de cobrança diferentes; não estime economia sem identificar o modo implantado e os dados gerados.'),
+
+    ('amazon-cloudwatch', 'duplicacao-de-coleta-de-metricas-entre-promoters-e-cloudwatch', 'check', 1,
+        'Compare métricas equivalentes', 'Mapeie nome, namespace, dimensões ou labels, resolução e origem das séries publicadas no CloudWatch e no sistema Prometheus.'),
+    ('amazon-cloudwatch', 'duplicacao-de-coleta-de-metricas-entre-promoters-e-cloudwatch', 'check', 2,
+        'Localize consumidores das séries', 'Verifique alarmes, painéis, consultas e retenção que dependem de cada fonte antes de classificar duas séries como duplicadas.'),
+    ('amazon-cloudwatch', 'duplicacao-de-coleta-de-metricas-entre-promoters-e-cloudwatch', 'action', 1,
+        'Remova coleta redundante com controle', 'Se os sinais forem equivalentes e os consumidores estiverem mapeados, desative uma coleta por vez e valide alarmes, consultas e monitoramento após a mudança.'),
+    ('amazon-cloudwatch', 'duplicacao-de-coleta-de-metricas-entre-promoters-e-cloudwatch', 'caution', 1,
+        'Não compare apenas nomes', 'O mesmo nome pode representar dimensões, resolução ou semântica diferentes; Container Insights também publica conjuntos próprios de métricas.'),
+
+    ('amazon-cloudwatch', 'criacao-manual-de-dashboards-redundantes-por-equipes', 'check', 1,
+        'Compare painéis e proprietários', 'Identifique dashboards com widgets e intervalos semelhantes, equipes responsáveis, público atendido e frequência de atualização.'),
+    ('amazon-cloudwatch', 'criacao-manual-de-dashboards-redundantes-por-equipes', 'check', 2,
+        'Inspecione widgets de consulta', 'Verifique se painéis repetidos executam consultas de Logs Insights ou atualizações frequentes que não são necessárias para a operação.'),
+    ('amazon-cloudwatch', 'criacao-manual-de-dashboards-redundantes-por-equipes', 'action', 1,
+        'Padronize ou compartilhe quando adequado', 'Use a definição JSON de um dashboard como template e compartilhe uma visão comum quando os requisitos e as permissões forem compatíveis.'),
+    ('amazon-cloudwatch', 'criacao-manual-de-dashboards-redundantes-por-equipes', 'caution', 1,
+        'Não consolide só pela aparência', 'Painéis semelhantes podem servir equipes, contas ou incidentes diferentes; confirme acesso, alarmes e custos de widgets antes de remover qualquer dashboard.'),
+
+    ('amazon-cloudwatch', 'falta-de-agrupamento-de-logs-por-aplicacao-log-streams-desestruturados', 'check', 1,
+        'Mapeie origem e finalidade', 'Revise nomes de log groups e streams, fontes de eventos, aplicação, ambiente, proprietário, permissões e retenção necessária.'),
+    ('amazon-cloudwatch', 'falta-de-agrupamento-de-logs-por-aplicacao-log-streams-desestruturados', 'check', 2,
+        'Encontre consultas com escopo amplo', 'Confira se Logs Insights seleciona grupos e intervalos de tempo além do necessário para a pergunta operacional.'),
+    ('amazon-cloudwatch', 'falta-de-agrupamento-de-logs-por-aplicacao-log-streams-desestruturados', 'action', 1,
+        'Organize grupos por limites operacionais', 'Padronize log groups por aplicação e ambiente quando isso permitir definir acesso e retenção adequados; use streams para separar origens dentro do grupo.'),
+    ('amazon-cloudwatch', 'falta-de-agrupamento-de-logs-por-aplicacao-log-streams-desestruturados', 'caution', 1,
+        'Agrupamento não reduz varredura automaticamente', 'A estrutura facilita seleção e governança, mas o custo de uma consulta depende dos dados varridos; limitar grupos e intervalo é o controle direto da consulta.'),
+
+    ('amazon-cloudwatch', 'alarmes-sem-acoes-automatizadas-apenas-notificacoes-por-e-mail', 'check', 1,
+        'Revise ações por estado', 'Confira ações configuradas para ALARM, OK e INSUFFICIENT_DATA, se estão habilitadas e se o alerta é atendido por uma equipe ou processo definido.'),
+    ('amazon-cloudwatch', 'alarmes-sem-acoes-automatizadas-apenas-notificacoes-por-e-mail', 'check', 2,
+        'Identifique respostas adequadas', 'Determine se o caso pede somente notificação, criação de OpsItem ou incidente, ou uma ação suportada de EC2 ou Auto Scaling.'),
+    ('amazon-cloudwatch', 'alarmes-sem-acoes-automatizadas-apenas-notificacoes-por-e-mail', 'action', 1,
+        'Automatize apenas respostas seguras', 'Para falhas bem compreendidas, teste primeiro uma ação documentada e reversível ou um fluxo de resposta com responsável definido.'),
+    ('amazon-cloudwatch', 'alarmes-sem-acoes-automatizadas-apenas-notificacoes-por-e-mail', 'caution', 1,
+        'Valide destino e efeito da ação', 'O CloudWatch não valida ações configuradas; automação inadequada pode interromper serviços ou escalar recursos sem necessidade.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-cloudwatch', 'monitoramento-de-conteineres-com-container-insights-habilitado-desnecessariamente',
+        'Container Insights', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html'),
+    ('amazon-cloudwatch', 'duplicacao-de-coleta-de-metricas-entre-promoters-e-cloudwatch',
+        'Amazon EKS and Kubernetes Container Insights metrics', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-metrics-EKS.html'),
+    ('amazon-cloudwatch', 'criacao-manual-de-dashboards-redundantes-por-equipes',
+        'Using Amazon CloudWatch dashboards', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html'),
+    ('amazon-cloudwatch', 'criacao-manual-de-dashboards-redundantes-por-equipes',
+        'CloudWatch Logs Insights query syntax and best practices', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html'),
+    ('amazon-cloudwatch', 'falta-de-agrupamento-de-logs-por-aplicacao-log-streams-desestruturados',
+        'Working with log groups and log streams', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html'),
+    ('amazon-cloudwatch', 'falta-de-agrupamento-de-logs-por-aplicacao-log-streams-desestruturados',
+        'CloudWatch Logs Insights query syntax and best practices', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html'),
+    ('amazon-cloudwatch', 'alarmes-sem-acoes-automatizadas-apenas-notificacoes-por-e-mail',
+        'Using Amazon CloudWatch alarms', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Alarms.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-rds', 'instancias-de-banco-de-dados-superdimensionadas-over-provisioning',
+        'Instâncias de Banco de Dados Superdimensionadas (Over-provisioning)',
+        'Compare métricas representativas e recomendações do Compute Optimizer antes de alterar a classe da instância RDS.'),
+    ('amazon-rds', 'frotas-estaveis-pagando-preco-on-demand-sem-instancias-reservadas',
+        'Frotas Estáveis Pagando Preço On-Demand sem Instâncias Reservadas',
+        'Avalie compromissos de Reserved DB Instances somente após confirmar a demanda compatível e o prazo de uso esperado.'),
+    ('amazon-rds', 'provisionamento-excessivo-de-iops-alocado-io1-io2',
+        'Provisionamento Excessivo de IOPS alocado (io1/io2)',
+        'Meça IOPS, throughput, latência e fila de disco antes de redimensionar o armazenamento Provisioned IOPS.'),
+    ('amazon-rds', 'replicacao-multi-az-ativada-em-ambientes-nao-criticos',
+        'Replicação Multi-AZ Ativada em Ambientes Não Críticos',
+        'Revise objetivos de recuperação e a função da implantação Multi-AZ antes de alterar a disponibilidade do banco.'),
+    ('amazon-rds', 'snapshots-manuais-de-banco-de-dados-acumulados-orphaned-snapshots',
+        'Snapshots Manuais de Banco de Dados Acumulados (Orphaned Snapshots)',
+        'Identifique snapshots manuais antigos e confirme propriedade, restauração e retenção obrigatória antes de removê-los.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-rds', 'instancias-de-banco-de-dados-superdimensionadas-over-provisioning', 'check', 1,
+        'Meça carga e capacidade', 'Compare CPU, conexões, memória disponível, rede e métricas de I/O durante picos, fechamentos e períodos de baixa atividade.'),
+    ('amazon-rds', 'instancias-de-banco-de-dados-superdimensionadas-over-provisioning', 'check', 2,
+        'Revise recomendação e risco', 'Confira findings, risco de performance e gráficos do Compute Optimizer; recomendações RDS exigem métricas suficientes e são atualizadas periodicamente.'),
+    ('amazon-rds', 'instancias-de-banco-de-dados-superdimensionadas-over-provisioning', 'action', 1,
+        'Teste a classe recomendada', 'Valide a mudança com carga representativa em ambiente controlado e monitore latência, conexões, erros e recuperação após a modificação.'),
+    ('amazon-rds', 'instancias-de-banco-de-dados-superdimensionadas-over-provisioning', 'caution', 1,
+        'Preserve picos e requisitos do banco', 'Uso médio baixo não prova excesso de capacidade; classe, memória, engine, licenças, janelas de manutenção e failover podem limitar a mudança.'),
+
+    ('amazon-rds', 'frotas-estaveis-pagando-preco-on-demand-sem-instancias-reservadas', 'check', 1,
+        'Confirme uso contínuo compatível', 'Revise horas de execução, região, engine, classe, tamanho, edição e licença das instâncias que poderiam receber o benefício.'),
+    ('amazon-rds', 'frotas-estaveis-pagando-preco-on-demand-sem-instancias-reservadas', 'check', 2,
+        'Calcule cobertura e prazo', 'Compare recomendações de compra e uso histórico após rightsizing; Reserved DB Instances têm compromisso de um ou três anos.'),
+    ('amazon-rds', 'frotas-estaveis-pagando-preco-on-demand-sem-instancias-reservadas', 'action', 1,
+        'Compre apenas para demanda previsível', 'Depois de estabilizar a frota, escolha quantidade e modalidade compatíveis com o uso esperado e confirme regras de flexibilidade de tamanho do engine.'),
+    ('amazon-rds', 'frotas-estaveis-pagando-preco-on-demand-sem-instancias-reservadas', 'caution', 1,
+        'Considere o compromisso e itens não cobertos', 'O compromisso não é cancelável e pode continuar sendo cobrado sem uso; o desconto de instância não cobre armazenamento, backups e I/O.'),
+
+    ('amazon-rds', 'provisionamento-excessivo-de-iops-alocado-io1-io2', 'check', 1,
+        'Compare IOPS provisionados e usados', 'Analise ReadIOPS, WriteIOPS, latência, throughput e DiskQueueDepth durante períodos representativos e de pico.'),
+    ('amazon-rds', 'provisionamento-excessivo-de-iops-alocado-io1-io2', 'check', 2,
+        'Confira alternativas e limites', 'Compare io1, io2 e gp3 conforme engine, classe, tamanho, limites de IOPS e throughput da instância e recomendação do Compute Optimizer.'),
+    ('amazon-rds', 'provisionamento-excessivo-de-iops-alocado-io1-io2', 'action', 1,
+        'Ajuste com teste de carga', 'Se as medições mostrarem folga sustentada, teste uma configuração menor ou um tipo de armazenamento elegível e monitore latência e filas.'),
+    ('amazon-rds', 'provisionamento-excessivo-de-iops-alocado-io1-io2', 'caution', 1,
+        'Não reduza capacidade exigida por OLTP', 'Provisioned IOPS é apropriado para cargas que precisam de I/O consistente; recursos provisionados são cobrados mesmo quando não utilizados.'),
+
+    ('amazon-rds', 'replicacao-multi-az-ativada-em-ambientes-nao-criticos', 'check', 1,
+        'Identifique o tipo de implantação', 'Diferencie Multi-AZ DB instance deployment, com standby que não atende leituras, de Multi-AZ DB cluster, cujos standbys podem atender tráfego de leitura.'),
+    ('amazon-rds', 'replicacao-multi-az-ativada-em-ambientes-nao-criticos', 'check', 2,
+        'Revise objetivos de recuperação', 'Confirme RTO, RPO, failover, disponibilidade exigida, janelas de manutenção e se o ambiente pode tolerar recuperação manual.'),
+    ('amazon-rds', 'replicacao-multi-az-ativada-em-ambientes-nao-criticos', 'action', 1,
+        'Altere apenas após aprovação', 'Se Single-AZ atender aos requisitos aprovados do ambiente, planeje a alteração, valide backups e teste recuperação antes de aplicá-la.'),
+    ('amazon-rds', 'replicacao-multi-az-ativada-em-ambientes-nao-criticos', 'caution', 1,
+        'Não trate standby como réplica de leitura', 'Em uma implantação Multi-AZ DB instance, o standby é para failover e não serve leituras; desativar Multi-AZ reduz a resiliência e pode afetar recuperação.'),
+
+    ('amazon-rds', 'snapshots-manuais-de-banco-de-dados-acumulados-orphaned-snapshots', 'check', 1,
+        'Localize snapshots e responsáveis', 'Revise idade, instância de origem, tags, cópias em outras regiões ou contas, uso em migrações e necessidade de restauração.'),
+    ('amazon-rds', 'snapshots-manuais-de-banco-de-dados-acumulados-orphaned-snapshots', 'check', 2,
+        'Confirme retenção e compatibilidade', 'Snapshots manuais não expiram com a retenção de backups automáticos; verifique exigências de auditoria e suporte do engine antes de definir prazo.'),
+    ('amazon-rds', 'snapshots-manuais-de-banco-de-dados-acumulados-orphaned-snapshots', 'action', 1,
+        'Remova somente após validar recuperação', 'Após aprovação do responsável, preserve ou exporte dados quando necessário e exclua apenas snapshots confirmados como dispensáveis.'),
+    ('amazon-rds', 'snapshots-manuais-de-banco-de-dados-acumulados-orphaned-snapshots', 'caution', 1,
+        'Proteja pontos de restauração necessários', 'Excluir um snapshot remove uma opção de recuperação; snapshots abrangem o volume da instância e podem não restaurar engines fora de suporte.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-rds', 'instancias-de-banco-de-dados-superdimensionadas-over-provisioning',
+        'Viewing Aurora and RDS database recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-rds-recommendations.html'),
+    ('amazon-rds', 'frotas-estaveis-pagando-preco-on-demand-sem-instancias-reservadas',
+        'Reserved DB instances for Amazon RDS', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html'),
+    ('amazon-rds', 'provisionamento-excessivo-de-iops-alocado-io1-io2',
+        'Amazon RDS DB instance storage', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html'),
+    ('amazon-rds', 'provisionamento-excessivo-de-iops-alocado-io1-io2',
+        'Viewing Aurora and RDS database recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-rds-recommendations.html'),
+    ('amazon-rds', 'replicacao-multi-az-ativada-em-ambientes-nao-criticos',
+        'Configuring and managing a Multi-AZ deployment for Amazon RDS', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html'),
+    ('amazon-rds', 'snapshots-manuais-de-banco-de-dados-acumulados-orphaned-snapshots',
+        'Creating a DB snapshot for a Single-AZ DB instance', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-rds', 'manutencao-de-discos-no-padrao-antigo-gp2-em-vez-do-gp3',
+        'Manutenção de Discos no Padrão Antigo gp2 em Vez do gp3',
+        'Compare perfil de I/O, engine e limites da instância antes de migrar o armazenamento RDS de gp2 para gp3.'),
+    ('amazon-rds', 'falta-de-uso-do-rds-proxy-para-conexoes-de-microsservicos-e-lambda',
+        'Falta de Uso do RDS Proxy para Conexões de Microsserviços e Lambda',
+        'Investigue criação frequente de conexões e saturação do banco antes de avaliar o pooling do RDS Proxy.'),
+    ('amazon-rds', 'instancias-orfas-criadas-para-projetos-descontinuados',
+        'Instâncias Órfãs Criadas para Projetos Descontinuados',
+        'Confirme propriedade, dependências, réplicas e opções de recuperação antes de encerrar instâncias aparentemente sem uso.'),
+    ('amazon-rds', 'escrita-e-leitura-nao-separadas-falta-de-read-replicas',
+        'Escrita e Leitura Não Separadas (Falta de Read Replicas)',
+        'Avalie réplicas de leitura somente quando consultas de leitura pressionarem a primária e puderem tolerar replicação assíncrona.'),
+    ('amazon-rds', 'instancias-de-replica-de-leitura-read-replicas-superdimensionadas',
+        'Instâncias de Réplica de Leitura (Read Replicas) Superdimensionadas',
+        'Dimensione cada réplica pelo tráfego de leitura, atraso de replicação e requisitos de recuperação observados.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-rds', 'manutencao-de-discos-no-padrao-antigo-gp2-em-vez-do-gp3', 'check', 1,
+        'Meça o perfil do armazenamento', 'Compare IOPS, throughput, latência, fila de disco e capacidade durante picos, e identifique o engine e a classe da instância.'),
+    ('amazon-rds', 'manutencao-de-discos-no-padrao-antigo-gp2-em-vez-do-gp3', 'check', 2,
+        'Verifique opções e limites', 'Compare baseline e performance provisionável de gp2 e gp3 para o engine, tamanho e classe específicos; confirme limites de I/O da instância.'),
+    ('amazon-rds', 'manutencao-de-discos-no-padrao-antigo-gp2-em-vez-do-gp3', 'action', 1,
+        'Teste a modificação de armazenamento', 'Se gp3 atender aos requisitos, planeje a alteração em janela aprovada e monitore estado da modificação, latência e desempenho após a operação.'),
+    ('amazon-rds', 'manutencao-de-discos-no-padrao-antigo-gp2-em-vez-do-gp3', 'caution', 1,
+        'Não presuma equivalência de desempenho', 'gp3 permite configurar performance independentemente da capacidade, mas parâmetros disponíveis variam por engine e tamanho; modificações podem afetar I/O enquanto otimizam.'),
+
+    ('amazon-rds', 'falta-de-uso-do-rds-proxy-para-conexoes-de-microsservicos-e-lambda', 'check', 1,
+        'Meça pressão de conexões', 'Observe conexões simultâneas, frequência de abertura, erros de limite e comportamento durante picos de invocações ou escalabilidade dos serviços.'),
+    ('amazon-rds', 'falta-de-uso-do-rds-proxy-para-conexoes-de-microsservicos-e-lambda', 'check', 2,
+        'Confirme compatibilidade e pinning', 'Verifique engine, versão, região, autenticação e padrões de sessão que podem fixar conexões e reduzir a multiplexação.'),
+    ('amazon-rds', 'falta-de-uso-do-rds-proxy-para-conexoes-de-microsservicos-e-lambda', 'action', 1,
+        'Avalie pooling com teste representativo', 'Compare uma configuração do RDS Proxy com o pool atual e monitore conexões ao banco, latência, rejeições, uso de CPU e custo total.'),
+    ('amazon-rds', 'falta-de-uso-do-rds-proxy-para-conexoes-de-microsservicos-e-lambda', 'caution', 1,
+        'Proxy não substitui capacidade ou compatibilidade', 'O proxy pode enfileirar ou rejeitar conexões acima dos limites definidos e tem restrições por engine; valide suporte e custo antes da adoção.'),
+
+    ('amazon-rds', 'instancias-orfas-criadas-para-projetos-descontinuados', 'check', 1,
+        'Confirme propriedade e atividade', 'Revise tags, responsável, conexões, métricas, aplicações, rotinas, integrações e réplicas antes de classificar uma instância como abandonada.'),
+    ('amazon-rds', 'instancias-orfas-criadas-para-projetos-descontinuados', 'check', 2,
+        'Planeje dependências e recuperação', 'Verifique proteção contra exclusão, snapshots, backups automáticos, cópias em outras regiões e instâncias que dependem desta base.'),
+    ('amazon-rds', 'instancias-orfas-criadas-para-projetos-descontinuados', 'action', 1,
+        'Encerre com aprovação e backup', 'Após confirmação do proprietário, escolha conscientemente snapshot final e retenção de backups, então monitore réplicas e recursos relacionados.'),
+    ('amazon-rds', 'instancias-orfas-criadas-para-projetos-descontinuados', 'caution', 1,
+        'Exclusão afeta dados e réplicas', 'Sem snapshot final ou backups retidos, a recuperação pode ser impossível; réplicas na mesma região podem ser promovidas a instâncias independentes.'),
+
+    ('amazon-rds', 'escrita-e-leitura-nao-separadas-falta-de-read-replicas', 'check', 1,
+        'Identifique carga de leitura na primária', 'Use métricas, performance insights e análise de consultas para confirmar que relatórios ou leituras concorrentes contribuem para a pressão observada.'),
+    ('amazon-rds', 'escrita-e-leitura-nao-separadas-falta-de-read-replicas', 'check', 2,
+        'Avalie consistência e suporte', 'Confirme se as consultas toleram replicação assíncrona, quais operações podem ser roteadas e se o engine suporta o padrão necessário.'),
+    ('amazon-rds', 'escrita-e-leitura-nao-separadas-falta-de-read-replicas', 'action', 1,
+        'Teste roteamento de consultas elegíveis', 'Se a leitura for o gargalo, avalie uma réplica e mova apenas consultas compatíveis com o modelo de consistência da aplicação.'),
+    ('amazon-rds', 'escrita-e-leitura-nao-separadas-falta-de-read-replicas', 'caution', 1,
+        'Inclua custos e atraso de replicação', 'Réplicas são instâncias cobradas separadamente e podem ficar defasadas; elas não aumentam capacidade de escrita nem substituem alta disponibilidade.'),
+
+    ('amazon-rds', 'instancias-de-replica-de-leitura-read-replicas-superdimensionadas', 'check', 1,
+        'Meça carga e atraso por réplica', 'Compare CPU, conexões, IOPS, throughput, consultas atendidas, filas e atraso de replicação durante picos de relatórios.'),
+    ('amazon-rds', 'instancias-de-replica-de-leitura-read-replicas-superdimensionadas', 'check', 2,
+        'Revise classe e armazenamento separadamente', 'Confira se a classe, IOPS e throughput da réplica correspondem à carga de leitura e ao requisito de recuperação.'),
+    ('amazon-rds', 'instancias-de-replica-de-leitura-read-replicas-superdimensionadas', 'action', 1,
+        'Teste redução gradual', 'Altere uma réplica por vez, valide consultas e acompanhe atraso, latência e capacidade antes de aplicar o mesmo ajuste às demais.'),
+    ('amazon-rds', 'instancias-de-replica-de-leitura-read-replicas-superdimensionadas', 'caution', 1,
+        'Preserve picos e contingência', 'Réplicas também podem apoiar recuperação ou tráfego durante manutenção; redução excessiva pode elevar atraso ou comprometer a capacidade de leitura.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-rds', 'manutencao-de-discos-no-padrao-antigo-gp2-em-vez-do-gp3',
+        'Working with storage for Amazon RDS DB instances', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.StorageTypes.html'),
+    ('amazon-rds', 'manutencao-de-discos-no-padrao-antigo-gp2-em-vez-do-gp3',
+        'Amazon RDS DB instance storage', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html'),
+    ('amazon-rds', 'falta-de-uso-do-rds-proxy-para-conexoes-de-microsservicos-e-lambda',
+        'Amazon RDS Proxy', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html'),
+    ('amazon-rds', 'instancias-orfas-criadas-para-projetos-descontinuados',
+        'Deleting a DB instance', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html'),
+    ('amazon-rds', 'instancias-orfas-criadas-para-projetos-descontinuados',
+        'Introduction to backups', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html'),
+    ('amazon-rds', 'escrita-e-leitura-nao-separadas-falta-de-read-replicas',
+        'Working with DB instance read replicas', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html'),
+    ('amazon-rds', 'instancias-de-replica-de-leitura-read-replicas-superdimensionadas',
+        'Working with DB instance read replicas', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-rds', 'janelas-de-manutencao-automatica-maintenance-windows-mal-agendadas',
+        'Janelas de Manutenção Automática (Maintenance Windows) Mal Agendadas',
+        'Alinhe a janela semanal de manutenção à menor atividade e aos requisitos de disponibilidade e atualização do banco.'),
+    ('amazon-rds', 'prazos-de-retencao-de-backups-automaticos-exagerados-em-ambientes-de-teste',
+        'Prazos de Retenção de Backups Automáticos Exagerados em Ambientes de Teste',
+        'Defina retenção dos backups automáticos conforme recuperação pontual, auditoria e necessidades do ambiente.'),
+    ('amazon-rds', 'crescimento-descontrolado-do-disco-por-falta-de-storage-auto-scaling-limite',
+        'Crescimento Descontrolado do Disco por Falta de Storage Auto-Scaling Limite',
+        'Revise o máximo permitido para storage autoscaling e os limites de crescimento, espaço livre e recuperação do banco.'),
+    ('amazon-rds', 'logs-de-ingestao-de-auditoria-e-queries-lentas-enviados-sem-filtro',
+        'Logs de Ingestão de Auditoria e Queries Lentas Enviados sem Filtro',
+        'Selecione os tipos de logs RDS necessários e configure retenção e acesso adequados nos grupos do CloudWatch Logs.'),
+    ('amazon-rds', 'uso-de-familias-de-instancias-antigas-ex-db-m4-ou-db-r4',
+        'Uso de Famílias de Instâncias Antigas (ex: db.m4 ou db.r4)',
+        'Compare a geração atual com opções suportadas pelo engine, licença e perfil de desempenho antes de planejar uma migração.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-rds', 'janelas-de-manutencao-automatica-maintenance-windows-mal-agendadas', 'check', 1,
+        'Revise o período e operações pendentes', 'Confira janela em UTC, atividades previstas, modificações adiadas e padrões de carga do serviço durante toda a semana.'),
+    ('amazon-rds', 'janelas-de-manutencao-automatica-maintenance-windows-mal-agendadas', 'check', 2,
+        'Verifique janela de backup e obrigatoriedades', 'Confirme que as janelas de backup e manutenção não se sobrepõem e identifique atualizações obrigatórias com data limite.'),
+    ('amazon-rds', 'janelas-de-manutencao-automatica-maintenance-windows-mal-agendadas', 'action', 1,
+        'Agende um período de baixa atividade', 'Ajuste a janela e comunique as equipes; planeje monitoramento e contingência para alterações que possam exigir indisponibilidade.'),
+    ('amazon-rds', 'janelas-de-manutencao-automatica-maintenance-windows-mal-agendadas', 'caution', 1,
+        'Janela define início, não duração', 'Manutenção pode ultrapassar o período selecionado, e atualizações obrigatórias não podem ser adiadas indefinidamente.'),
+
+    ('amazon-rds', 'prazos-de-retencao-de-backups-automaticos-exagerados-em-ambientes-de-teste', 'check', 1,
+        'Confirme recuperação e retenção exigidas', 'Determine o período necessário para restauração point-in-time, testes de recuperação, auditoria e políticas internas em cada ambiente.'),
+    ('amazon-rds', 'prazos-de-retencao-de-backups-automaticos-exagerados-em-ambientes-de-teste', 'check', 2,
+        'Separe backups automáticos e snapshots manuais', 'Verifique o período configurado e se snapshots manuais independentes são usados para retenção de longo prazo.'),
+    ('amazon-rds', 'prazos-de-retencao-de-backups-automaticos-exagerados-em-ambientes-de-teste', 'action', 1,
+        'Ajuste o prazo com o responsável', 'Reduza retenção apenas quando a janela de recuperação aprovada continuar atendida e valide o comportamento de restauração.'),
+    ('amazon-rds', 'prazos-de-retencao-de-backups-automaticos-exagerados-em-ambientes-de-teste', 'caution', 1,
+        'Não reduza backups por ser ambiente de teste', 'Uma retenção menor limita o período de recuperação point-in-time; exigências de auditoria e investigações podem se aplicar também a ambientes não produtivos.'),
+
+    ('amazon-rds', 'crescimento-descontrolado-do-disco-por-falta-de-storage-auto-scaling-limite', 'check', 1,
+        'Confira armazenamento e expansão', 'Revise espaço livre, tendência de crescimento, eventos de autoscaling e limite máximo configurado para cada volume aplicável.'),
+    ('amazon-rds', 'crescimento-descontrolado-do-disco-por-falta-de-storage-auto-scaling-limite', 'check', 2,
+        'Verifique limites e suporte', 'Confirme suporte do engine e da classe, máximo permitido, razão entre IOPS e limite quando aplicável e modificações recentes.'),
+    ('amazon-rds', 'crescimento-descontrolado-do-disco-por-falta-de-storage-auto-scaling-limite', 'action', 1,
+        'Defina um limite aprovado', 'Escolha o máximo a partir do crescimento observado, necessidade operacional e orçamento, e configure alertas para espaço livre e aproximação do limite.'),
+    ('amazon-rds', 'crescimento-descontrolado-do-disco-por-falta-de-storage-auto-scaling-limite', 'caution', 1,
+        'Storage alocado não reduz automaticamente', 'Autoscaling só aumenta armazenamento e a capacidade alocada não pode ser reduzida diretamente; um limite baixo demais também pode levar a storage-full.'),
+
+    ('amazon-rds', 'logs-de-ingestao-de-auditoria-e-queries-lentas-enviados-sem-filtro', 'check', 1,
+        'Revise tipos e volume de logs', 'Confira quais logs de engine são exportados, seus grupos de destino, ingestão, retenção e finalidade de auditoria ou diagnóstico.'),
+    ('amazon-rds', 'logs-de-ingestao-de-auditoria-e-queries-lentas-enviados-sem-filtro', 'check', 2,
+        'Valide dados e acesso', 'Confirme requisitos de auditoria, informações sensíveis que podem aparecer nos registros e equipes com acesso aos grupos.'),
+    ('amazon-rds', 'logs-de-ingestao-de-auditoria-e-queries-lentas-enviados-sem-filtro', 'action', 1,
+        'Exporte somente o necessário', 'Desative tipos de log não exigidos após aprovação, configure retenção por grupo no CloudWatch Logs e monitore investigação e alertas.'),
+    ('amazon-rds', 'logs-de-ingestao-de-auditoria-e-queries-lentas-enviados-sem-filtro', 'caution', 1,
+        'Preserve evidências e conformidade', 'Filtragem ou expiração prematura pode remover registros usados em auditoria e resposta a incidentes; restrinja acesso conforme a política de dados.'),
+
+    ('amazon-rds', 'uso-de-familias-de-instancias-antigas-ex-db-m4-ou-db-r4', 'check', 1,
+        'Identifique opções atuais compatíveis', 'Confira recomendações do Compute Optimizer, engine e versão, arquitetura de CPU, região, licença e classes disponíveis para a instância.'),
+    ('amazon-rds', 'uso-de-familias-de-instancias-antigas-ex-db-m4-ou-db-r4', 'check', 2,
+        'Compare desempenho e custo vigentes', 'Avalie CPU, memória, rede, IOPS, banco de dados e requisitos de licenciamento na classe atual e nas alternativas.'),
+    ('amazon-rds', 'uso-de-familias-de-instancias-antigas-ex-db-m4-ou-db-r4', 'action', 1,
+        'Planeje uma migração compatível', 'Teste engine e classe atuais em homologação, valide extensões e licenças e escolha uma janela de mudança com plano de retorno.'),
+    ('amazon-rds', 'uso-de-familias-de-instancias-antigas-ex-db-m4-ou-db-r4', 'caution', 1,
+        'Geração nova não garante substituição direta', 'Mudanças de arquitetura, suporte do engine, licença ou desempenho podem exigir migração e testes; não use somente a idade da família como critério.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-rds', 'janelas-de-manutencao-automatica-maintenance-windows-mal-agendadas',
+        'Maintaining a DB instance', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html'),
+    ('amazon-rds', 'prazos-de-retencao-de-backups-automaticos-exagerados-em-ambientes-de-teste',
+        'Introduction to backups', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html'),
+    ('amazon-rds', 'crescimento-descontrolado-do-disco-por-falta-de-storage-auto-scaling-limite',
+        'Managing capacity automatically with Amazon RDS storage autoscaling', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html'),
+    ('amazon-rds', 'logs-de-ingestao-de-auditoria-e-queries-lentas-enviados-sem-filtro',
+        'Monitoring Amazon RDS log files', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.html'),
+    ('amazon-rds', 'uso-de-familias-de-instancias-antigas-ex-db-m4-ou-db-r4',
+        'Viewing Aurora and RDS database recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-rds-recommendations.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-rds', 'armazenamento-de-historico-e-logs-antigos-sem-purge-ou-arquivamento',
+        'Armazenamento de Histórico e Logs Antigos sem Purge ou Arquivamento',
+        'Revise retenção e padrões de consulta de dados históricos antes de arquivá-los ou removê-los do banco ativo.'),
+    ('amazon-rds', 'consultas-analiticas-ineficientes-sem-indices-adequados',
+        'Consultas Analíticas Ineficientes sem Índices Adequados',
+        'Use Database Insights e planos de execução para localizar consultas de alto custo antes de decidir entre otimizar SQL ou índices.'),
+    ('amazon-rds', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer',
+        'Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ Data Transfer)',
+        'Meça tráfego e cobranças entre zonas e avalie a topologia junto com requisitos de failover e disponibilidade.'),
+    ('amazon-rds', 'retencao-prolongada-de-bancos-convertidos-de-migracao-dms',
+        'Retenção Prolongada de Bancos Convertidos de Migração (DMS)',
+        'Confirme cutover, validação e dependências da origem antes de desativar instâncias RDS mantidas após migração.'),
+    ('amazon-rds', 'configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas',
+        'Configurações de Parâmetros de Memória (Buffer Pool) Desajustadas',
+        'Avalie parâmetros de buffer pool apenas para engines e versões compatíveis, relacionando-os a memória, carga e leituras observadas.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-rds', 'armazenamento-de-historico-e-logs-antigos-sem-purge-ou-arquivamento', 'check', 1,
+        'Mapeie tabelas e retenção', 'Identifique tabelas históricas, logs de engine, volume por período, frequência de consulta e requisitos legais ou operacionais de retenção.'),
+    ('amazon-rds', 'armazenamento-de-historico-e-logs-antigos-sem-purge-ou-arquivamento', 'check', 2,
+        'Escolha o tipo de arquivo adequado', 'Diferencie dados que precisam continuar em consultas transacionais, logs operacionais e cópias analíticas de longo prazo.'),
+    ('amazon-rds', 'armazenamento-de-historico-e-logs-antigos-sem-purge-ou-arquivamento', 'action', 1,
+        'Arquive com retenção e acesso definidos', 'Para análise histórica, avalie exportação de snapshot para S3 ou um processo de extração compatível; aplique retenção ao destino e teste consultas e restauração separadamente.'),
+    ('amazon-rds', 'armazenamento-de-historico-e-logs-antigos-sem-purge-ou-arquivamento', 'caution', 1,
+        'Export de snapshot não é backup restaurável do RDS', 'Dados exportados de snapshot para S3 podem ser analisados, mas não restaurados diretamente como uma instância RDS; preserve backups recuperáveis exigidos.'),
+
+    ('amazon-rds', 'consultas-analiticas-ineficientes-sem-indices-adequados', 'check', 1,
+        'Identifique consultas que concentram DB load', 'Use Database Insights para comparar Top SQL, sessões ativas e eventos de espera nos períodos de lentidão.'),
+    ('amazon-rds', 'consultas-analiticas-ineficientes-sem-indices-adequados', 'check', 2,
+        'Examine plano e seletividade', 'Para consultas representativas, revise o plano de execução, filtros, joins, linhas examinadas e índices existentes no engine utilizado.'),
+    ('amazon-rds', 'consultas-analiticas-ineficientes-sem-indices-adequados', 'action', 1,
+        'Otimize com teste controlado', 'Ajuste a consulta ou avalie um índice com base no plano e na seletividade; compare latência, leituras e impacto das gravações em homologação.'),
+    ('amazon-rds', 'consultas-analiticas-ineficientes-sem-indices-adequados', 'caution', 1,
+        'Índice adicional também tem custo', 'Índices ocupam armazenamento e aumentam trabalho de escrita; DB load alto pode vir de CPU, locks ou outros waits, não necessariamente da falta de índice.'),
+
+    ('amazon-rds', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer', 'check', 1,
+        'Meça tráfego e cobrança', 'Correlacione uso de rede e linhas de transferência entre AZs no Cost Explorer ou CUR com os clientes e as instâncias que geram o tráfego.'),
+    ('amazon-rds', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer', 'check', 2,
+        'Revise topologia e finalidade', 'Verifique AZs dos clientes e do RDS, tráfego entre aplicações, réplicas, nós Multi-AZ e padrões durante failover.'),
+    ('amazon-rds', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer', 'action', 1,
+        'Otimize posicionamento sem perder resiliência', 'Se medições mostrarem tráfego evitável, avalie afinidade de clientes e réplicas com a AZ apropriada e confirme o comportamento em failover.'),
+    ('amazon-rds', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer', 'caution', 1,
+        'Não force uma única AZ para eliminar tráfego', 'Colocar aplicação e banco numa única zona pode reduzir disponibilidade; custos dependem da topologia e das tarifas vigentes, que devem ser confirmadas na conta.'),
+
+    ('amazon-rds', 'retencao-prolongada-de-bancos-convertidos-de-migracao-dms', 'check', 1,
+        'Confirme o cutover da migração', 'Verifique validação de dados, destino em produção, DNS ou endpoints, credenciais, aplicações, integrações e última escrita na origem.'),
+    ('amazon-rds', 'retencao-prolongada-de-bancos-convertidos-de-migracao-dms', 'check', 2,
+        'Localize tarefas e dependências residuais', 'Confirme estado das tarefas DMS, consumidores de leitura, rotinas agendadas, réplicas, backups e janela aprovada para retorno.'),
+    ('amazon-rds', 'retencao-prolongada-de-bancos-convertidos-de-migracao-dms', 'action', 1,
+        'Desative a origem em etapas', 'Após aceite formal e período de observação, interrompa workloads da origem, preserve snapshot ou backup aprovado e exclua a instância somente após confirmação dos responsáveis.'),
+    ('amazon-rds', 'retencao-prolongada-de-bancos-convertidos-de-migracao-dms', 'caution', 1,
+        'Preserve retorno e evidências', 'Excluir a origem pode encerrar opções de rollback; snapshots e backups retidos continuam gerando armazenamento e réplicas podem virar instâncias independentes.'),
+
+    ('amazon-rds', 'configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas', 'check', 1,
+        'Confirme engine e parâmetro efetivo', 'Este roteiro se aplica ao buffer pool InnoDB do RDS for MySQL; revise engine, versão, parameter group, valor aplicado e tipo de aplicação do parâmetro.'),
+    ('amazon-rds', 'configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas', 'check', 2,
+        'Correlacione memória e I/O', 'Compare memória livre, conexões, leituras do banco, DB load, waits de I/O e padrões de acesso antes de atribuir lentidão ao tamanho do buffer pool.'),
+    ('amazon-rds', 'configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas', 'action', 1,
+        'Teste uma alteração compatível', 'Altere o parameter group apenas após revisar valores permitidos e necessidade de reboot, então monitore memória, leituras, latência e estabilidade.'),
+    ('amazon-rds', 'configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas', 'caution', 1,
+        'Evite proporção universal de memória', 'O buffer pool compete com conexões e processos do sistema; valores inadequados podem causar pressão de memória e parâmetros estáticos podem exigir reinicialização.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-rds', 'armazenamento-de-historico-e-logs-antigos-sem-purge-ou-arquivamento',
+        'Exporting DB snapshot data to Amazon S3 for Amazon RDS', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ExportSnapshot.html'),
+    ('amazon-rds', 'armazenamento-de-historico-e-logs-antigos-sem-purge-ou-arquivamento',
+        'Managing the lifecycle of objects', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html'),
+    ('amazon-rds', 'consultas-analiticas-ineficientes-sem-indices-adequados',
+        'Database load, Top SQL, wait events, and plans', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.ActiveSessions.html'),
+    ('amazon-rds', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer',
+        'Amazon RDS pricing', 'https://aws.amazon.com/rds/pricing/'),
+    ('amazon-rds', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer',
+        'Amazon VPC pricing', 'https://aws.amazon.com/vpc/pricing/'),
+    ('amazon-rds', 'trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer',
+        'Working with a DB instance in a VPC', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html'),
+    ('amazon-rds', 'retencao-prolongada-de-bancos-convertidos-de-migracao-dms',
+        'Best practices for AWS Database Migration Service', 'https://docs.aws.amazon.com/dms/latest/userguide/CHAP_BestPractices.html'),
+    ('amazon-rds', 'retencao-prolongada-de-bancos-convertidos-de-migracao-dms',
+        'Deleting a DB instance', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html'),
+    ('amazon-rds', 'configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas',
+        'Parameters for MySQL', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.MySQL.Parameters.html'),
+    ('amazon-rds', 'configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas',
+        'Monitoring Amazon RDS DB instances', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MonitoringOverview.html'),
+    ('amazon-rds', 'configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas',
+        'Parameter groups for Amazon RDS', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('aws-lambda', 'falta-de-configuracao-de-limites-de-concorrencia-reserved-concurrency',
+        'Falta de Configuração de Limites de Concorrência (Reserved Concurrency)',
+        'Meça picos de invocações e limites dos serviços downstream antes de reservar ou limitar concorrência por função.'),
+    ('aws-lambda', 'erros-de-inicializacao-a-frio-cold-starts-em-rotas-criticas-de-baixa-latencia',
+        'Erros de Inicialização a Frio (Cold Starts) em Rotas Críticas de Baixa Latência',
+        'Meça latência de inicialização e otimize dependências e código de init antes de escolher uma estratégia de redução de cold starts.'),
+    ('aws-lambda', 'falta-de-uso-de-provisioned-concurrency-para-funcoes-criticas-de-banco',
+        'Falta de Uso de Provisioned Concurrency para Funções Críticas de Banco',
+        'Avalie Provisioned Concurrency para funções interativas com requisito comprovado de latência previsível e picos mensuráveis.'),
+    ('aws-lambda', 'uso-de-lambdas-para-tarefas-de-longa-duracao-15-minutos',
+        'Uso de Lambdas para Tarefas de Longa Duração (> 15 minutos)',
+        'Identifique o tipo de função e sua duração real antes de migrar processamento para uma arquitetura de execução mais longa.'),
+    ('aws-lambda', 'falta-de-tratamento-de-retentativas-assincronas-e-ausencia-de-dlq',
+        'Falta de Tratamento de Retentativas Assíncronas e Ausência de DLQ',
+        'Revise política de retries, idade máxima e destino de eventos descartados para invocações assíncronas da função.'),
+    ('aws-lambda', 'conexoes-de-banco-de-dados-nao-pooladas-abertas-a-cada-execucao',
+        'Conexões de Banco de Dados Não Pooladas Abertas a Cada Execução',
+        'Meça conexões simultâneas e frequência de abertura antes de ajustar o reaproveitamento da conexão ou adotar RDS Proxy.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('aws-lambda', 'falta-de-configuracao-de-limites-de-concorrencia-reserved-concurrency', 'check', 1,
+        'Meça concorrência e picos', 'Compare ConcurrentExecutions, duração e padrões de pico por função; inclua tráfego provisionado e concorrência não reservada da conta.'),
+    ('aws-lambda', 'falta-de-configuracao-de-limites-de-concorrencia-reserved-concurrency', 'check', 2,
+        'Confira limites downstream', 'Identifique capacidade de banco, APIs e filas que a função chama e calcule uma concorrência que esses destinos possam sustentar.'),
+    ('aws-lambda', 'falta-de-configuracao-de-limites-de-concorrencia-reserved-concurrency', 'action', 1,
+        'Defina reserva ou limite com evidência', 'Use reserved concurrency para reservar capacidade crítica ou limitar pressão sobre dependências e monitore throttling após a alteração.'),
+    ('aws-lambda', 'falta-de-configuracao-de-limites-de-concorrencia-reserved-concurrency', 'caution', 1,
+        'Reserva também reduz a capacidade compartilhada', 'Concorrência reservada reduz o pool disponível às outras funções; valor zero interrompe invocações e pode direcionar eventos assíncronos a destinos de falha.'),
+
+    ('aws-lambda', 'erros-de-inicializacao-a-frio-cold-starts-em-rotas-criticas-de-baixa-latencia', 'check', 1,
+        'Meça inicialização e latência', 'Correlacione Init Duration, latência observada, runtime, tamanho do pacote e frequência de ambientes novos com o objetivo de latência da rota.'),
+    ('aws-lambda', 'erros-de-inicializacao-a-frio-cold-starts-em-rotas-criticas-de-baixa-latencia', 'check', 2,
+        'Revise código executado no init', 'Identifique imports pesados, inicialização de clientes e conexões não usados em todas as invocações; avalie X-Ray ou métricas de plataforma para localizar atrasos.'),
+    ('aws-lambda', 'erros-de-inicializacao-a-frio-cold-starts-em-rotas-criticas-de-baixa-latencia', 'action', 1,
+        'Reduza trabalho de inicialização', 'Carregue somente dependências necessárias, mova inicialização cara para uso sob demanda quando adequado e teste latência com tráfego representativo.'),
+    ('aws-lambda', 'erros-de-inicializacao-a-frio-cold-starts-em-rotas-criticas-de-baixa-latencia', 'caution', 1,
+        'Não aplique Provisioned Concurrency automaticamente', 'Cold starts variam por função e tráfego; provisionamento contínuo tem cobrança própria e não se justifica sem requisito de latência medido.'),
+
+    ('aws-lambda', 'falta-de-uso-de-provisioned-concurrency-para-funcoes-criticas-de-banco', 'check', 1,
+        'Confirme requisito de latência', 'Meça duração, init, distribuição de tráfego e concorrência nos períodos críticos e identifique o impacto das primeiras invocações.'),
+    ('aws-lambda', 'falta-de-uso-de-provisioned-concurrency-para-funcoes-criticas-de-banco', 'check', 2,
+        'Verifique alias e capacidade da conta', 'Provisioned Concurrency deve ser configurada em versão publicada ou alias; confira concorrência reservada, capacidade não reservada e tráfego apontado ao qualificador correto.'),
+    ('aws-lambda', 'falta-de-uso-de-provisioned-concurrency-para-funcoes-criticas-de-banco', 'action', 1,
+        'Teste capacidade provisionada medida', 'Se necessária para o SLA, dimensione pela métrica ConcurrentExecutions, configure a versão ou alias correto e valide latência e custo durante o pico.'),
+    ('aws-lambda', 'falta-de-uso-de-provisioned-concurrency-para-funcoes-criticas-de-banco', 'caution', 1,
+        'Considere cobrança mesmo sem invocações', 'Provisioned Concurrency permanece alocada e tem cobrança própria; alocação excessiva também reduz a concorrência disponível para outras funções.'),
+
+    ('aws-lambda', 'uso-de-lambdas-para-tarefas-de-longa-duracao-15-minutos', 'check', 1,
+        'Identifique modalidade e limite aplicável', 'Meça duração máxima, etapas, checkpoints e requisitos de retomada; funções padrão têm timeout máximo de 900 segundos.'),
+    ('aws-lambda', 'uso-de-lambdas-para-tarefas-de-longa-duracao-15-minutos', 'check', 2,
+        'Avalie opções para o fluxo', 'Verifique se o processamento cabe em tarefas menores, Step Functions, AWS Batch, ECS ou Durable Functions, considerando integrações e suporte.'),
+    ('aws-lambda', 'uso-de-lambdas-para-tarefas-de-longa-duracao-15-minutos', 'action', 1,
+        'Escolha o executor pelo perfil', 'Para funções padrão que excedem o limite, divida o trabalho ou use serviço compatível com a duração e o estado exigidos; teste retomada e falhas.'),
+    ('aws-lambda', 'uso-de-lambdas-para-tarefas-de-longa-duracao-15-minutos', 'caution', 1,
+        'O limite depende do tipo de função', 'Durable Functions e alguns cenários de Lambda Managed Instances têm limites diferentes da função padrão; confirme elegibilidade, tipo de invocação e comportamento antes de migrar.'),
+
+    ('aws-lambda', 'falta-de-tratamento-de-retentativas-assincronas-e-ausencia-de-dlq', 'check', 1,
+        'Revise retries e idade máxima', 'Para invocação assíncrona, confira número de tentativas, maximum event age, erros de função, throttling e eventos descartados.'),
+    ('aws-lambda', 'falta-de-tratamento-de-retentativas-assincronas-e-ausencia-de-dlq', 'check', 2,
+        'Verifique idempotência e destino', 'Confirme se handlers toleram eventos duplicados e se DLQ ou destino on-failure existe, tem permissões e está sendo monitorado.'),
+    ('aws-lambda', 'falta-de-tratamento-de-retentativas-assincronas-e-ausencia-de-dlq', 'action', 1,
+        'Configure retenção e reprocessamento', 'Defina retries compatíveis com o processamento, envie falhas para fila ou destino e teste leitura, triagem e reprocessamento dos eventos.'),
+    ('aws-lambda', 'falta-de-tratamento-de-retentativas-assincronas-e-ausencia-de-dlq', 'caution', 1,
+        'Diferencie invocação assíncrona de event source mapping', 'SQS, Kinesis e DynamoDB Streams têm mecanismos de retry e destino na fonte; configure a política no componente correto e monitore falhas de entrega.'),
+
+    ('aws-lambda', 'conexoes-de-banco-de-dados-nao-pooladas-abertas-a-cada-execucao', 'check', 1,
+        'Meça churn e simultaneidade', 'Compare conexões ativas, novas conexões por invocação, picos de ConcurrentExecutions, erros de conexão e limites do banco.'),
+    ('aws-lambda', 'conexoes-de-banco-de-dados-nao-pooladas-abertas-a-cada-execucao', 'check', 2,
+        'Confira reaproveitamento e configuração', 'Revise se o cliente reutiliza conexão no ambiente da função e se lida com conexões expiradas após congelamento, escala ou failover.'),
+    ('aws-lambda', 'conexoes-de-banco-de-dados-nao-pooladas-abertas-a-cada-execucao', 'action', 1,
+        'Teste pooling ou RDS Proxy', 'Para conexões curtas e frequentes, avalie RDS Proxy ou um pool compatível e teste concorrência, latência, autenticação e erros de conexão.'),
+    ('aws-lambda', 'conexoes-de-banco-de-dados-nao-pooladas-abertas-a-cada-execucao', 'caution', 1,
+        'Reutilização local não garante conexão permanente', 'Ambientes Lambda podem ser reciclados; valide reconexão, TLS e custo horário do proxy, e não mantenha conexões abertas sem limite.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('aws-lambda', 'falta-de-configuracao-de-limites-de-concorrencia-reserved-concurrency',
+        'Configuring reserved concurrency for a Lambda function', 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html'),
+    ('aws-lambda', 'erros-de-inicializacao-a-frio-cold-starts-em-rotas-criticas-de-baixa-latencia',
+        'Understanding the Lambda execution environment lifecycle', 'https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html'),
+    ('aws-lambda', 'falta-de-uso-de-provisioned-concurrency-para-funcoes-criticas-de-banco',
+        'Configuring provisioned concurrency for a Lambda function', 'https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html'),
+    ('aws-lambda', 'falta-de-uso-de-provisioned-concurrency-para-funcoes-criticas-de-banco',
+        'Understanding the Lambda execution environment lifecycle', 'https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html'),
+    ('aws-lambda', 'uso-de-lambdas-para-tarefas-de-longa-duracao-15-minutos',
+        'Configure Lambda function timeout', 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html'),
+    ('aws-lambda', 'uso-de-lambdas-para-tarefas-de-longa-duracao-15-minutos',
+        'Understanding the Lambda execution environment lifecycle', 'https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html'),
+    ('aws-lambda', 'falta-de-tratamento-de-retentativas-assincronas-e-ausencia-de-dlq',
+        'How Lambda handles errors and retries with asynchronous invocation', 'https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html'),
+    ('aws-lambda', 'falta-de-tratamento-de-retentativas-assincronas-e-ausencia-de-dlq',
+        'Capturing records of Lambda asynchronous invocations', 'https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html'),
+    ('aws-lambda', 'conexoes-de-banco-de-dados-nao-pooladas-abertas-a-cada-execucao',
+        'Using AWS Lambda with Amazon RDS', 'https://docs.aws.amazon.com/lambda/latest/dg/services-rds.html'),
+    ('aws-lambda', 'conexoes-de-banco-de-dados-nao-pooladas-abertas-a-cada-execucao',
+        'Amazon RDS Proxy', 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('aws-lambda', 'trafego-de-rede-roteado-ineficientemente-via-nat-gateway',
+        'Tráfego de Rede Roteado Ineficientemente via NAT Gateway',
+        'Mapeie destinos de rede da função conectada à VPC e avalie rotas e endpoints adequados sem presumir que todo tráfego possa evitar NAT.'),
+    ('aws-lambda', 'inclusao-de-dados-sensiveis-pii-diretamente-nos-logs-de-execucao',
+        'Inclusão de Dados Sensíveis (PII) Diretamente nos Logs de Execução',
+        'Revise os campos registrados pela função e aplique minimização e controles de acesso para impedir exposição desnecessária de dados sensíveis.'),
+    ('aws-lambda', 'falta-de-otimizacao-do-pacote-de-deployment-deployment-package-bloat',
+        'Falta de Otimização do Pacote de Deployment (Deployment Package Bloat)',
+        'Identifique dependências e código não usados no pacote e avalie impacto mensurável no tamanho, inicialização e operação.'),
+    ('aws-lambda', 'uso-de-versoes-desatualizadas-de-runtimes-node-js-python-java',
+        'Uso de Versões Desatualizadas de Runtimes (Node.js, Python, Java)',
+        'Compare cada runtime ou imagem base com o cronograma de suporte vigente da AWS e planeje atualizações compatíveis.'),
+    ('aws-lambda', 'falta-de-monitoramento-de-falhas-e-erros-invocationsfailed-errors',
+        'Falta de Monitoramento de Falhas e Erros (InvocationsFailed / Errors)',
+        'Monitore erros, throttles, idade de eventos e descartes conforme o tipo de invocação e o objetivo operacional da função.'),
+    ('aws-lambda', 'duplicacao-de-funcoes-lambda-para-logicas-semelhantes',
+        'Duplicação de Funções Lambda para Lógicas Semelhantes',
+        'Mapeie código e configuração repetidos antes de compartilhar componentes ou consolidar funções com requisitos compatíveis.'),
+    ('aws-lambda', 'uso-de-lambda-para-processamento-continuo-24-7-de-fila-polling-continuo',
+        'Uso de Lambda para Processamento Contínuo 24/7 de Fila (Polling Contínuo)',
+        'Verifique se o processamento de filas usa event source mappings gerenciados ou loops de polling implementados dentro da função.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('aws-lambda', 'trafego-de-rede-roteado-ineficientemente-via-nat-gateway', 'check', 1,
+        'Identifique destinos e rotas', 'Liste chamadas externas e serviços AWS por função, sub-rede e região; examine tabelas de rotas, NAT bytes e dependências de rede.'),
+    ('aws-lambda', 'trafego-de-rede-roteado-ineficientemente-via-nat-gateway', 'check', 2,
+        'Verifique endpoints aplicáveis', 'Avalie gateway endpoints para S3 ou DynamoDB e interface endpoints para serviços compatíveis, conferindo DNS, políticas e requisitos de conectividade.'),
+    ('aws-lambda', 'trafego-de-rede-roteado-ineficientemente-via-nat-gateway', 'action', 1,
+        'Altere rotas com teste controlado', 'Se o caminho for evitável e suportado, teste o endpoint e as políticas em uma sub-rede antes de ampliar a mudança e compare tráfego e cobranças.'),
+    ('aws-lambda', 'trafego-de-rede-roteado-ineficientemente-via-nat-gateway', 'caution', 1,
+        'VPC endpoint não atende qualquer destino', 'Acesso público ainda pode exigir NAT ou outra saída; endpoints de interface também podem ter cobranças e exigem revisão de segurança.'),
+
+    ('aws-lambda', 'inclusao-de-dados-sensiveis-pii-diretamente-nos-logs-de-execucao', 'check', 1,
+        'Inspecione fontes e campos de log', 'Revise logs de aplicação, eventos, exceções, traces e campos serializados para localizar identificadores pessoais, financeiros ou credenciais.'),
+    ('aws-lambda', 'inclusao-de-dados-sensiveis-pii-diretamente-nos-logs-de-execucao', 'check', 2,
+        'Confirme acesso e retenção', 'Verifique permissões dos log groups, destinos de exportação, retenção e políticas de dados aplicáveis aos registros existentes.'),
+    ('aws-lambda', 'inclusao-de-dados-sensiveis-pii-diretamente-nos-logs-de-execucao', 'action', 1,
+        'Minimize e masque campos', 'Remova payloads integrais, registre apenas atributos necessários e aplique mascaramento aprovado antes de enviar logs ou traces.'),
+    ('aws-lambda', 'inclusao-de-dados-sensiveis-pii-diretamente-nos-logs-de-execucao', 'caution', 1,
+        'Não apague evidências sem processo', 'Logs existentes podem estar sujeitos a investigação ou retenção; restrinja acesso e siga o procedimento de privacidade e resposta a incidentes.'),
+
+    ('aws-lambda', 'falta-de-otimizacao-do-pacote-de-deployment-deployment-package-bloat', 'check', 1,
+        'Meça o pacote implantado', 'Compare tamanho compactado e descompactado, camadas, dependências carregadas e duração do init entre versões representativas.'),
+    ('aws-lambda', 'falta-de-otimizacao-do-pacote-de-deployment-deployment-package-bloat', 'check', 2,
+        'Localize dependências não utilizadas', 'Revise arquivos de build, imports, SDKs e bibliotecas nativas e confirme arquitetura e compatibilidade de runtime.'),
+    ('aws-lambda', 'falta-de-otimizacao-do-pacote-de-deployment-deployment-package-bloat', 'action', 1,
+        'Reduza e teste o artefato', 'Inclua apenas dependências usadas, avalie layers ou container image quando adequados e compare tempo de inicialização e testes funcionais.'),
+    ('aws-lambda', 'falta-de-otimizacao-do-pacote-de-deployment-deployment-package-bloat', 'caution', 1,
+        'Tamanho não prova custo excessivo', 'Pacotes compactados e descompactados têm limites diferentes; uma imagem maior pode ser adequada e otimização só deve ser priorizada se houver impacto medido.'),
+
+    ('aws-lambda', 'uso-de-versoes-desatualizadas-de-runtimes-node-js-python-java', 'check', 1,
+        'Inventarie runtimes e imagens', 'Liste versões de runtime, arquitetura e imagem base por função, incluindo versões publicadas e funções que ainda usam $LATEST.'),
+    ('aws-lambda', 'uso-de-versoes-desatualizadas-de-runtimes-node-js-python-java', 'check', 2,
+        'Consulte a política e o cronograma', 'Compare cada versão com a lista atual de runtimes suportados, datas de depreciação e bloqueios de criação ou atualização da AWS.'),
+    ('aws-lambda', 'uso-de-versoes-desatualizadas-de-runtimes-node-js-python-java', 'action', 1,
+        'Atualize com teste e rollback', 'Migre para runtime suportado em versão ou alias de teste, valide dependências e comportamento e publique gradualmente com plano de reversão.'),
+    ('aws-lambda', 'uso-de-versoes-desatualizadas-de-runtimes-node-js-python-java', 'caution', 1,
+        'Runtime gerenciado e container têm responsabilidades distintas', 'A AWS atualiza runtimes gerenciados conforme os controles configurados; imagens de container e dependências da aplicação exigem reconstrução e manutenção do responsável.'),
+
+    ('aws-lambda', 'falta-de-monitoramento-de-falhas-e-erros-invocationsfailed-errors', 'check', 1,
+        'Separe erros de throttles', 'Revise Errors, Invocations e Throttles; erros de função e pedidos limitados são métricas distintas e exigem diagnósticos diferentes.'),
+    ('aws-lambda', 'falta-de-monitoramento-de-falhas-e-erros-invocationsfailed-errors', 'check', 2,
+        'Inclua filas e destinos assíncronos', 'Para invocações assíncronas, acompanhe AsyncEventAge, AsyncEventsDropped, DeadLetterErrors e DestinationDeliveryFailures.'),
+    ('aws-lambda', 'falta-de-monitoramento-de-falhas-e-erros-invocationsfailed-errors', 'action', 1,
+        'Alarme por taxa e impacto', 'Crie alarmes alinhados ao volume e ao SLO da função, com ações de notificação testadas e limiares que evitem ruído operacional.'),
+    ('aws-lambda', 'falta-de-monitoramento-de-falhas-e-erros-invocationsfailed-errors', 'caution', 1,
+        'Errors não inclui todas as falhas de invocação', 'Throttles e outros erros de invocação não entram nas métricas Errors ou Invocations; combine métricas e valide dimensões e estatísticas.'),
+
+    ('aws-lambda', 'duplicacao-de-funcoes-lambda-para-logicas-semelhantes', 'check', 1,
+        'Compare código e ciclo de vida', 'Identifique lógica repetida, diferenças de gatilho, permissões, runtime, variáveis, latência e frequência de deploy entre funções.'),
+    ('aws-lambda', 'duplicacao-de-funcoes-lambda-para-logicas-semelhantes', 'check', 2,
+        'Confirme requisitos de isolamento', 'Verifique se funções separadas precisam de papéis IAM, limites de concorrência, versões ou escalabilidade independentes.'),
+    ('aws-lambda', 'duplicacao-de-funcoes-lambda-para-logicas-semelhantes', 'action', 1,
+        'Compartilhe componentes quando fizer sentido', 'Se ciclo de vida e dependências forem compatíveis, extraia bibliotecas ou layers compartilhados; padronize configurações sem fundir funções automaticamente.'),
+    ('aws-lambda', 'duplicacao-de-funcoes-lambda-para-logicas-semelhantes', 'caution', 1,
+        'Consolidação pode ampliar acoplamento', 'Uma função parametrizada pode aumentar pacote, cold start e superfície de permissões e reduzir isolamento; valide desempenho e segurança antes da mudança.'),
+
+    ('aws-lambda', 'uso-de-lambda-para-processamento-continuo-24-7-de-fila-polling-continuo', 'check', 1,
+        'Diferencie loop próprio de event source mapping', 'Verifique se código invocado fica consultando a fila em loop ou se um event source mapping gerenciado lê mensagens e invoca a função em lotes.'),
+    ('aws-lambda', 'uso-de-lambda-para-processamento-continuo-24-7-de-fila-polling-continuo', 'check', 2,
+        'Meça backlog e taxa de processamento', 'Compare eventos recebidos, invocações, duração, concorrência, tamanho de lote, idade da fila e requisitos de latência.'),
+    ('aws-lambda', 'uso-de-lambda-para-processamento-continuo-24-7-de-fila-polling-continuo', 'action', 1,
+        'Use o mecanismo gerenciado adequado', 'Para SQS, Kinesis ou DynamoDB Streams, configure event source mapping, lote e janela de batching conforme o volume e o tempo de resposta requerido.'),
+    ('aws-lambda', 'uso-de-lambda-para-processamento-continuo-24-7-de-fila-polling-continuo', 'caution', 1,
+        'Polling gerenciado não é uma função ociosa em loop', 'Event source mappings fazem polling gerenciado; provisioned mode tem cobrança própria e não deve ser ativado sem requisito de throughput ou latência.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('aws-lambda', 'trafego-de-rede-roteado-ineficientemente-via-nat-gateway',
+        'Enable internet access for VPC-connected Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc-internet.html'),
+    ('aws-lambda', 'inclusao-de-dados-sensiveis-pii-diretamente-nos-logs-de-execucao',
+        'Best practices for working with AWS Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html'),
+    ('aws-lambda', 'falta-de-otimizacao-do-pacote-de-deployment-deployment-package-bloat',
+        'Deploying Lambda functions as .zip file archives', 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-function-zip.html'),
+    ('aws-lambda', 'uso-de-versoes-desatualizadas-de-runtimes-node-js-python-java',
+        'Lambda function runtimes and runtime support policy', 'https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html'),
+    ('aws-lambda', 'falta-de-monitoramento-de-falhas-e-erros-invocationsfailed-errors',
+        'Types of metrics for Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics-types.html'),
+    ('aws-lambda', 'falta-de-monitoramento-de-falhas-e-erros-invocationsfailed-errors',
+        'Best practices for working with AWS Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html'),
+    ('aws-lambda', 'duplicacao-de-funcoes-lambda-para-logicas-semelhantes',
+        'Best practices for working with AWS Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html'),
+    ('aws-lambda', 'uso-de-lambda-para-processamento-continuo-24-7-de-fila-polling-continuo',
+        'How Lambda processes records from stream and queue-based event sources', 'https://docs.aws.amazon.com/lambda/latest/dg/invocation-eventsourcemapping.html'),
+    ('aws-lambda', 'uso-de-lambda-para-processamento-continuo-24-7-de-fila-polling-continuo',
+        'Best practices for working with AWS Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('aws-lambda', 'falta-de-alertas-de-custo-para-execucoes-descontroladas-invocation-storms',
+        'Falta de Alertas de Custo para Execuções Descontroladas (Invocation Storms)',
+        'Combine sinais operacionais de invocação e concorrência com monitoramento de custo e uma resposta definida para anomalias.'),
+    ('aws-lambda', 'criacao-de-variaveis-de-ambiente-com-segredos-em-texto-plano',
+        'Criação de Variáveis de Ambiente com Segredos em Texto Plano',
+        'Revise credenciais configuradas como variáveis de ambiente e avalie AWS Secrets Manager com permissões mínimas e rotação.'),
+    ('aws-lambda', 'falta-de-configuracao-de-arquitetura-de-processador-otimizada-x86-em-vez-de-arm-graviton',
+        'Falta de Configuração de Arquitetura de Processador Otimizada (x86 em vez de ARM Graviton)',
+        'Compare arm64 e x86_64 para o workload e suas dependências antes de selecionar uma arquitetura para produção.'),
+    ('aws-lambda', 'execucao-de-consultas-pesadas-de-athena-s3-sincronas-bloqueantes',
+        'Execução de Consultas pesadas de Athena/S3 Síncronas Bloqueantes',
+        'Avalie consultas Athena longas iniciadas por Lambda e separe submissão, acompanhamento e processamento do resultado.'),
+    ('aws-lambda', 'falta-de-testes-de-carga-de-concorrencia-em-ambientes-isolados',
+        'Falta de Testes de Carga de Concorrência em Ambientes Isolados',
+        'Valide escalabilidade e limites da função em ambiente controlado com carga representativa e dependências protegidas.'),
+    ('aws-lambda', 'falta-de-observabilidade-distribuida-com-aws-x-ray',
+        'Falta de Observabilidade Distribuída com AWS X-Ray',
+        'Avalie traces amostrados para localizar latência e falhas entre funções Lambda e dependências de uma solicitação.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('aws-lambda', 'falta-de-alertas-de-custo-para-execucoes-descontroladas-invocation-storms', 'check', 1,
+        'Meça invocações e concorrência', 'Acompanhe Invocations, ConcurrentExecutions, Throttles, duração e RecursiveInvocationsDropped para identificar loops ou aumentos anormais.'),
+    ('aws-lambda', 'falta-de-alertas-de-custo-para-execucoes-descontroladas-invocation-storms', 'check', 2,
+        'Revise orçamento e atraso', 'Confira orçamento filtrado para Lambda, destinatários e ações operacionais; considere o atraso das atualizações de custo e de Cost Anomaly Detection.'),
+    ('aws-lambda', 'falta-de-alertas-de-custo-para-execucoes-descontroladas-invocation-storms', 'action', 1,
+        'Configure sinais e resposta graduada', 'Crie alertas de custo e alarmes operacionais com responsável definido; documente como limitar concorrência ou interromper uma função recursiva.'),
+    ('aws-lambda', 'falta-de-alertas-de-custo-para-execucoes-descontroladas-invocation-storms', 'caution', 1,
+        'Orçamentos não são corte em tempo real', 'Dados de cobrança podem atrasar; reserved concurrency igual a zero interrompe execuções e pode enviar eventos assíncronos ao destino de falha.'),
+
+    ('aws-lambda', 'criacao-de-variaveis-de-ambiente-com-segredos-em-texto-plano', 'check', 1,
+        'Localize valores sensíveis', 'Inspecione configuração, templates, permissões e logs para encontrar senhas, tokens e chaves armazenadas diretamente em variáveis ou código.'),
+    ('aws-lambda', 'criacao-de-variaveis-de-ambiente-com-segredos-em-texto-plano', 'check', 2,
+        'Revise acesso e rotação', 'Confirme quem pode ler a configuração da função, política KMS, papel de execução e requisitos de rotação de cada credencial.'),
+    ('aws-lambda', 'criacao-de-variaveis-de-ambiente-com-segredos-em-texto-plano', 'action', 1,
+        'Busque segredos em um cofre gerenciado', 'Armazene credenciais no Secrets Manager, conceda secretsmanager:GetSecretValue apenas ao recurso necessário e use a extensão ou cache apropriado.'),
+    ('aws-lambda', 'criacao-de-variaveis-de-ambiente-com-segredos-em-texto-plano', 'caution', 1,
+        'Criptografia em repouso não substitui gestão de segredo', 'Lambda criptografa variáveis de ambiente em repouso, mas a AWS recomenda Secrets Manager para credenciais e chaves; não registre valores recuperados em logs.'),
+
+    ('aws-lambda', 'falta-de-configuracao-de-arquitetura-de-processador-otimizada-x86-em-vez-de-arm-graviton', 'check', 1,
+        'Inventarie compatibilidade', 'Verifique dependências nativas, layers, extensões, bibliotecas e imagens de container quanto a suporte para arm64.'),
+    ('aws-lambda', 'falta-de-configuracao-de-arquitetura-de-processador-otimizada-x86-em-vez-de-arm-graviton', 'check', 2,
+        'Meça custo e desempenho atuais', 'Compare duração, memória, latência e perfil de invocação na arquitetura x86_64 antes de estimar o efeito de uma migração.'),
+    ('aws-lambda', 'falta-de-configuracao-de-arquitetura-de-processador-otimizada-x86-em-vez-de-arm-graviton', 'action', 1,
+        'Teste arm64 com tráfego controlado', 'Crie artefato compatível, valide testes funcionais e performance e use aliases ou roteamento gradual para comparar os resultados.'),
+    ('aws-lambda', 'falta-de-configuracao-de-arquitetura-de-processador-otimizada-x86-em-vez-de-arm-graviton', 'caution', 1,
+        'Não presuma redução fixa de custo', 'Benefícios dependem do workload, região, dependências e desempenho; algumas bibliotecas, layers ou imagens precisam ser recompiladas ou substituídas.'),
+
+    ('aws-lambda', 'execucao-de-consultas-pesadas-de-athena-s3-sincronas-bloqueantes', 'check', 1,
+        'Inspecione duração e custo da consulta', 'Revise ExecutionTime, dados varridos, filtros, workgroup e configuração do resultado no S3 para consultas iniciadas pela função.'),
+    ('aws-lambda', 'execucao-de-consultas-pesadas-de-athena-s3-sincronas-bloqueantes', 'check', 2,
+        'Confirme se há espera ocupada', 'Verifique se o handler aguarda em loop o estado da query ou mantém uma invocação aberta enquanto o processamento continua no Athena.'),
+    ('aws-lambda', 'execucao-de-consultas-pesadas-de-athena-s3-sincronas-bloqueantes', 'action', 1,
+        'Separe submissão e conclusão', 'Use StartQueryExecution para obter o QueryExecutionId e acompanhe o estado com GetQueryExecution por orquestração assíncrona, como Step Functions ou evento agendado.'),
+    ('aws-lambda', 'execucao-de-consultas-pesadas-de-athena-s3-sincronas-bloqueantes', 'caution', 1,
+        'Consulta assíncrona ainda gera custo', 'Athena processa a query independentemente da invocação Lambda; controle concorrência, dados varridos, cancelamento e acesso aos resultados no S3.'),
+
+    ('aws-lambda', 'falta-de-testes-de-carga-de-concorrencia-em-ambientes-isolados', 'check', 1,
+        'Defina cenário e limites seguros', 'Estabeleça volume, ramp-up, duração e critérios de falha sem ultrapassar quotas compartilhadas ou pressionar dependências de produção.'),
+    ('aws-lambda', 'falta-de-testes-de-carga-de-concorrencia-em-ambientes-isolados', 'check', 2,
+        'Prepare isolamento e telemetria', 'Use conta ou ambiente separado quando possível, dados sintéticos, limites de concorrência e métricas de Throttles, Duration, Errors e saturação downstream.'),
+    ('aws-lambda', 'falta-de-testes-de-carga-de-concorrencia-em-ambientes-isolados', 'action', 1,
+        'Execute teste gradual e reproduzível', 'Aumente carga em etapas, registre versões e configuração, compare resultados com o SLO e interrompa se quotas ou serviços dependentes se aproximarem de limites.'),
+    ('aws-lambda', 'falta-de-testes-de-carga-de-concorrencia-em-ambientes-isolados', 'caution', 1,
+        'Ambiente de teste ainda compartilha quotas', 'Outra função pode consumir a concorrência regional; teste com limites aprovados e evite usar credenciais, dados ou destinos reais de clientes.'),
+
+    ('aws-lambda', 'falta-de-observabilidade-distribuida-com-aws-x-ray', 'check', 1,
+        'Mapeie o caminho da solicitação', 'Identifique funções, serviços downstream e trechos sem correlação; determine se rastreamento ativo e instrumentação são compatíveis com o runtime.'),
+    ('aws-lambda', 'falta-de-observabilidade-distribuida-com-aws-x-ray', 'check', 2,
+        'Verifique permissões e cobertura amostrada', 'Confirme tracing mode, permissões de envio e propagação de contexto entre serviços e funções encadeadas.'),
+    ('aws-lambda', 'falta-de-observabilidade-distribuida-com-aws-x-ray', 'action', 1,
+        'Habilite traces onde agregam diagnóstico', 'Ative Active tracing e instrumente chamadas downstream para analisar mapas de serviço, segmentos e gargalos de solicitações representativas.'),
+    ('aws-lambda', 'falta-de-observabilidade-distribuida-com-aws-x-ray', 'caution', 1,
+        'Tracing não é registro completo de cada requisição', 'X-Ray amostra solicitações e pode não mostrar todas; valide volume, permissões e dados sensíveis antes de habilitar instrumentação em produção.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('aws-lambda', 'falta-de-alertas-de-custo-para-execucoes-descontroladas-invocation-storms',
+        'Managing your costs with AWS Budgets', 'https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html'),
+    ('aws-lambda', 'falta-de-alertas-de-custo-para-execucoes-descontroladas-invocation-storms',
+        'Types of metrics for Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics-types.html'),
+    ('aws-lambda', 'criacao-de-variaveis-de-ambiente-com-segredos-em-texto-plano',
+        'Working with Lambda environment variables', 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html'),
+    ('aws-lambda', 'criacao-de-variaveis-de-ambiente-com-segredos-em-texto-plano',
+        'Use Secrets Manager secrets in Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/with-secrets-manager.html'),
+    ('aws-lambda', 'falta-de-configuracao-de-arquitetura-de-processador-otimizada-x86-em-vez-de-arm-graviton',
+        'Selecting and configuring an instruction set architecture for your Lambda function', 'https://docs.aws.amazon.com/lambda/latest/dg/foundation-arch.html'),
+    ('aws-lambda', 'execucao-de-consultas-pesadas-de-athena-s3-sincronas-bloqueantes',
+        'StartQueryExecution API reference', 'https://docs.aws.amazon.com/athena/latest/APIReference/API_StartQueryExecution.html'),
+    ('aws-lambda', 'execucao-de-consultas-pesadas-de-athena-s3-sincronas-bloqueantes',
+        'GetQueryExecution API reference', 'https://docs.aws.amazon.com/athena/latest/APIReference/API_GetQueryExecution.html'),
+    ('aws-lambda', 'falta-de-testes-de-carga-de-concorrencia-em-ambientes-isolados',
+        'Best practices for working with AWS Lambda functions', 'https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html'),
+    ('aws-lambda', 'falta-de-testes-de-carga-de-concorrencia-em-ambientes-isolados',
+        'Configuring reserved concurrency for a Lambda function', 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html'),
+    ('aws-lambda', 'falta-de-observabilidade-distribuida-com-aws-x-ray',
+        'Visualize Lambda function invocations using AWS X-Ray', 'https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ecs', 'manutencao-de-ambientes-de-ecs-fargate-ativos-24-7-sem-escala-automatica',
+        'Manutenção de Ambientes de ECS Fargate Ativos 24/7 sem Escala Automática',
+        'Avalie padrões previsíveis de atividade, capacidade mínima e dependências antes de agendar alterações na contagem de tarefas Fargate.'),
+    ('amazon-ecs', 'falta-de-uso-de-fargate-spot-para-cargas-tolerantes-a-falhas',
+        'Falta de Uso de Fargate Spot para Cargas Tolerantes a Falhas',
+        'Considere Fargate Spot apenas para tarefas que toleram interrupções e podem recuperar trabalho com segurança.'),
+    ('amazon-ecs', 'falta-de-configuracao-de-auto-scaling-baseado-em-metricas-reais-target-tracking-scaling',
+        'Falta de Configuração de Auto Scaling Baseado em Métricas Reais (Target Tracking Scaling)',
+        'Escolha métrica de scaling correlacionada com demanda e capacidade após medir comportamento sob carga.'),
+    ('amazon-ecs', 'uso-de-instancias-ec2-em-modo-managed-instances-sem-otimizacao-de-empacotamento-bin-packing',
+        'Uso de Instâncias EC2 em Modo Managed Instances sem Otimização de Empacotamento (Bin Packing)',
+        'Avalie utilização e estratégia de colocação conforme o tipo de capacidade EC2 e os requisitos de disponibilidade das tarefas.'),
+    ('amazon-ecs', 'falta-de-configuracao-de-limites-de-recursos-resource-limits-nas-definicoes-de-tarefa',
+        'Falta de Configuração de Limites de Recursos (Resource Limits) nas Definições de Tarefa',
+        'Revise reservas e limites de CPU e memória por tarefa e container de acordo com capacidade observada e modo de execução.'),
+    ('amazon-ecs', 'imagens-docker-gigantes-e-nao-otimizadas',
+        'Imagens Docker Gigantes e Não Otimizadas',
+        'Meça tamanho, tempo de pull e consumo de armazenamento antes de remover conteúdo ou aplicar retenção às imagens.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ecs', 'manutencao-de-ambientes-de-ecs-fargate-ativos-24-7-sem-escala-automatica', 'check', 1,
+        'Meça demanda por horário', 'Compare DesiredCount e RunningCount, CPU, memória, requisições e backlog ao longo de dias úteis, noites e fins de semana.'),
+    ('amazon-ecs', 'manutencao-de-ambientes-de-ecs-fargate-ativos-24-7-sem-escala-automatica', 'check', 2,
+        'Revise mínimo e dependências', 'Confirme min/max capacity, tarefas de suporte, jobs agendados, alarmes, integrações e requisitos de recuperação do ambiente.'),
+    ('amazon-ecs', 'manutencao-de-ambientes-de-ecs-fargate-ativos-24-7-sem-escala-automatica', 'action', 1,
+        'Agende escala compatível com uso', 'Para ambiente não produtivo, avalie ações agendadas ou scaling até zero em período ocioso e valide o retorno do serviço antes do próximo horário de uso.'),
+    ('amazon-ecs', 'manutencao-de-ambientes-de-ecs-fargate-ativos-24-7-sem-escala-automatica', 'caution', 1,
+        'Não escale a zero sem validar inicialização', 'Inicialização de tarefas, health checks e dependências podem atrasar a disponibilidade; métricas ausentes em zero capacity também podem atrasar target tracking.'),
+
+    ('amazon-ecs', 'falta-de-uso-de-fargate-spot-para-cargas-tolerantes-a-falhas', 'check', 1,
+        'Classifique tolerância a interrupção', 'Verifique se o processamento é idempotente, retomável, desacoplado de estado local e capaz de lidar com término durante a execução.'),
+    ('amazon-ecs', 'falta-de-uso-de-fargate-spot-para-cargas-tolerantes-a-falhas', 'check', 2,
+        'Confira capacidade e cobertura', 'Revise distribuição de tarefas entre Fargate e Fargate Spot, capacidade disponível, DesiredCount e estratégia de substituição.'),
+    ('amazon-ecs', 'falta-de-uso-de-fargate-spot-para-cargas-tolerantes-a-falhas', 'action', 1,
+        'Teste Spot em tarefas recuperáveis', 'Avalie uma capacity provider strategy com capacidade base apropriada e implemente tratamento de SIGTERM, checkpoints e reprocessamento.'),
+    ('amazon-ecs', 'falta-de-uso-de-fargate-spot-para-cargas-tolerantes-a-falhas', 'caution', 1,
+        'Spot pode interromper capacidade', 'Fargate Spot pode ficar indisponível e tarefas interrompidas recebem aviso de dois minutos; o ECS não substitui automaticamente essa capacidade por On-Demand.'),
+
+    ('amazon-ecs', 'falta-de-configuracao-de-auto-scaling-baseado-em-metricas-reais-target-tracking-scaling', 'check', 1,
+        'Escolha métrica que represente demanda', 'Compare CPU, memória, taxa de requisições, concorrência ou backlog com tráfego e latência durante testes de carga.'),
+    ('amazon-ecs', 'falta-de-configuracao-de-auto-scaling-baseado-em-metricas-reais-target-tracking-scaling', 'check', 2,
+        'Revise faixa e tempos de reação', 'Confira min/max capacity, cooldown, alarmes gerenciados pelo autoscaling, disponibilidade de dados e capacidade do cluster ou Fargate.'),
+    ('amazon-ecs', 'falta-de-configuracao-de-auto-scaling-baseado-em-metricas-reais-target-tracking-scaling', 'action', 1,
+        'Ative target tracking após teste', 'Defina target para métrica proporcional à capacidade, valide escala-out e escala-in em homologação e acompanhe SLOs após a publicação.'),
+    ('amazon-ecs', 'falta-de-configuracao-de-auto-scaling-baseado-em-metricas-reais-target-tracking-scaling', 'caution', 1,
+        'Target tracking não age sem dados suficientes', 'Scaling é conservador e escala-in é pausado durante deployments; uma métrica inadequada ou ausente pode impedir a resposta esperada.'),
+
+    ('amazon-ecs', 'uso-de-instancias-ec2-em-modo-managed-instances-sem-otimizacao-de-empacotamento-bin-packing', 'check', 1,
+        'Identifique o modelo de capacidade', 'Diferencie Fargate, ECS Managed Instances e instâncias EC2 em Auto Scaling groups; revise CPU, memória, tarefas pendentes e recursos não alocados.'),
+    ('amazon-ecs', 'uso-de-instancias-ec2-em-modo-managed-instances-sem-otimizacao-de-empacotamento-bin-packing', 'check', 2,
+        'Revise colocação e disponibilidade', 'Para capacidade EC2 compatível com task placement strategies, avalie binpack por CPU ou memória e distribuição por AZ conforme a tolerância a falhas.'),
+    ('amazon-ecs', 'uso-de-instancias-ec2-em-modo-managed-instances-sem-otimizacao-de-empacotamento-bin-packing', 'action', 1,
+        'Teste estratégia e capacidade', 'Compare ocupação e número de instâncias em um ambiente controlado; mantenha limites e capacidade para deployments e falhas de instância.'),
+    ('amazon-ecs', 'uso-de-instancias-ec2-em-modo-managed-instances-sem-otimizacao-de-empacotamento-bin-packing', 'caution', 1,
+        'Binpack pode concentrar falhas', 'Empacotar reduz espaço ocioso, mas pode concentrar tarefas num host ou AZ; confirme suporte do modo gerenciado usado e preserve a distribuição exigida.'),
+
+    ('amazon-ecs', 'falta-de-configuracao-de-limites-de-recursos-resource-limits-nas-definicoes-de-tarefa', 'check', 1,
+        'Compare recursos definidos e consumidos', 'Revise CPU e memória em nível de tarefa e container, métricas de utilização, reinicializações e eventos de OOM durante picos.'),
+    ('amazon-ecs', 'falta-de-configuracao-de-limites-de-recursos-resource-limits-nas-definicoes-de-tarefa', 'check', 2,
+        'Confirme compatibilidade e sobrecarga', 'Valide combinações permitidas de CPU/memória para Fargate e recursos reservados para agente, sidecars e buffers de logging em ECS sobre EC2.'),
+    ('amazon-ecs', 'falta-de-configuracao-de-limites-de-recursos-resource-limits-nas-definicoes-de-tarefa', 'action', 1,
+        'Defina reservas e limites testados', 'Ajuste recursos por serviço com base em telemetria e testes representativos; valide comportamento de escalonamento, throttling e encerramento por memória.'),
+    ('amazon-ecs', 'falta-de-configuracao-de-limites-de-recursos-resource-limits-nas-definicoes-de-tarefa', 'caution', 1,
+        'Limite rígido pode encerrar containers', 'Containers que excedem limite de memória podem ser mortos; limites de CPU e memória têm semânticas distintas entre Fargate, Linux EC2 e Windows.'),
+
+    ('amazon-ecs', 'imagens-docker-gigantes-e-nao-otimizadas', 'check', 1,
+        'Meça pull e armazenamento', 'Compare tamanho comprimido e descomprimido das imagens, tempo de pull por tarefa, camadas reutilizadas e armazenamento por repositório ECR.'),
+    ('amazon-ecs', 'imagens-docker-gigantes-e-nao-otimizadas', 'check', 2,
+        'Localize conteúdo de build desnecessário', 'Revise camadas, dependências de desenvolvimento, artefatos temporários e imagens base; confirme que cada pacote removido não é exigido em runtime.'),
+    ('amazon-ecs', 'imagens-docker-gigantes-e-nao-otimizadas', 'action', 1,
+        'Otimize e valide o artefato', 'Use build multi-stage ou uma imagem base adequada quando compatível, teste funcionamento e compare tempo de pull e deploy.'),
+    ('amazon-ecs', 'imagens-docker-gigantes-e-nao-otimizadas', 'caution', 1,
+        'Não apague imagens implantadas sem plano de rollback', 'Políticas ECR devem preservar imagens referenciadas por deployments, auditoria e rollback; execute preview e valide as regras antes de aplicá-las.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ecs', 'manutencao-de-ambientes-de-ecs-fargate-ativos-24-7-sem-escala-automatica',
+        'Use scheduled actions to scale Amazon ECS services', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-autoscaling-schedulescaling.html'),
+    ('amazon-ecs', 'manutencao-de-ambientes-de-ecs-fargate-ativos-24-7-sem-escala-automatica',
+        'Automatically scale your Amazon ECS service', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html'),
+    ('amazon-ecs', 'falta-de-uso-de-fargate-spot-para-cargas-tolerantes-a-falhas',
+        'Amazon ECS clusters for Fargate capacity providers', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html'),
+    ('amazon-ecs', 'falta-de-configuracao-de-auto-scaling-baseado-em-metricas-reais-target-tracking-scaling',
+        'Use a target metric to scale Amazon ECS services', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-autoscaling-targettracking.html'),
+    ('amazon-ecs', 'falta-de-configuracao-de-auto-scaling-baseado-em-metricas-reais-target-tracking-scaling',
+        'Optimizing Amazon ECS service auto scaling', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-autoscaling-best-practice.html'),
+    ('amazon-ecs', 'uso-de-instancias-ec2-em-modo-managed-instances-sem-otimizacao-de-empacotamento-bin-packing',
+        'Use strategies to define Amazon ECS task placement', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-strategies.html'),
+    ('amazon-ecs', 'uso-de-instancias-ec2-em-modo-managed-instances-sem-otimizacao-de-empacotamento-bin-packing',
+        'Instance selection best practices for Amazon ECS Managed Instances', 'https://docs.aws.amazon.com/AmazonECS/latest/bestpracticesguide/managed-instances-instance-selection-best-practices.html'),
+    ('amazon-ecs', 'falta-de-configuracao-de-limites-de-recursos-resource-limits-nas-definicoes-de-tarefa',
+        'Amazon ECS task definition parameters for Fargate', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html'),
+    ('amazon-ecs', 'imagens-docker-gigantes-e-nao-otimizadas',
+        'Best practices for Amazon ECS container images', 'https://docs.aws.amazon.com/AmazonECS/latest/bestpracticesguide/container-considerations.html'),
+    ('amazon-ecs', 'imagens-docker-gigantes-e-nao-otimizadas',
+        'Automate the cleanup of images by using lifecycle policies in Amazon ECR', 'https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ecs', 'trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-task-placement',
+        'Tráfego de Rede Cruzado entre Zonas de Disponibilidade (Cross-AZ Task Placement)',
+        'Meça tráfego entre AZs e revise a colocação atual antes de alterar distribuição, preservando disponibilidade e failover.'),
+    ('amazon-ecs', 'retencao-descontrolada-de-logs-de-containers-no-cloudwatch',
+        'Retenção Descontrolada de Logs de Containers no CloudWatch',
+        'Revise volume, níveis de log e retenção dos grupos usados pelos containers conforme requisitos operacionais e de auditoria.'),
+    ('amazon-ecs', 'falta-de-health-checks-adequados-configurados-no-application-load-balancer-alb',
+        'Falta de Health Checks Adequados Configurados no Application Load Balancer (ALB)',
+        'Compare health checks do container e do target group com inicialização, comportamento real da aplicação e objetivo de disponibilidade.'),
+    ('amazon-ecs', 'falta-de-criptografia-e-gerenciamento-seguro-de-variaveis-de-ambiente',
+        'Falta de Criptografia e Gerenciamento Seguro de Variáveis de Ambiente',
+        'Localize valores sensíveis em task definitions e mova credenciais para Secrets Manager ou Parameter Store com acesso mínimo.'),
+    ('amazon-ecs', 'uso-de-armazenamento-ebs-ou-efs-em-conflito-com-a-filosofia-efemera-de-containers',
+        'Uso de Armazenamento EBS ou EFS em Conflito com a Filosofia Efêmera de Containers',
+        'Escolha armazenamento de tarefa, EBS ou EFS conforme ciclo de vida, compartilhamento, persistência e requisitos de recuperação dos dados.'),
+    ('amazon-ecs', 'falta-de-monitoramento-de-utilizacao-de-cpu-e-memoria-dos-servicos-ecs',
+        'Falta de Monitoramento de Utilização de CPU e Memória dos Serviços ECS',
+        'Use métricas de utilização por serviço e tarefa junto com sinais de aplicação para detectar saturação e orientar capacidade.'),
+    ('amazon-ecs', 'uso-de-registros-de-imagens-ecr-sem-politicas-de-ciclo-de-vida-lifecycle-policies',
+        'Uso de Registros de Imagens ECR sem Políticas de Ciclo de Vida (Lifecycle Policies)',
+        'Avalie imagens antigas por tags, digest, pulls e dependências antes de aplicar regras de expiração ou arquivamento no ECR.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ecs', 'trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-task-placement', 'check', 1,
+        'Meça origem e destino do tráfego', 'Correlacione transferências entre AZs no CUR ou Cost Explorer com os serviços ECS, bancos, balanceadores e padrões de requisição.'),
+    ('amazon-ecs', 'trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-task-placement', 'check', 2,
+        'Revise estratégia real de colocação', 'Confira capacity provider, sub-redes, AZs e placement constraints; serviços ECS usam spread por AZ como estratégia padrão, mas configurações podem variar.'),
+    ('amazon-ecs', 'trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-task-placement', 'action', 1,
+        'Otimize após teste de resiliência', 'Se houver tráfego evitável, avalie placement e topologia com teste de failover e compare custos e latência antes e depois.'),
+    ('amazon-ecs', 'trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-task-placement', 'caution', 1,
+        'Não concentre tarefas em uma única AZ por padrão', 'Distribuição entre AZs protege disponibilidade; custo de transferência depende da arquitetura e das tarifas regionais vigentes.'),
+
+    ('amazon-ecs', 'retencao-descontrolada-de-logs-de-containers-no-cloudwatch', 'check', 1,
+        'Identifique grupos e volume', 'Mapeie log groups por cluster, serviço e ambiente; compare ingestão, armazenamento, nível de severidade e retenção configurada.'),
+    ('amazon-ecs', 'retencao-descontrolada-de-logs-de-containers-no-cloudwatch', 'check', 2,
+        'Confirme retenção e políticas de conta', 'Revise exigências de auditoria e incidentes e verifique se uma account-level retention policy sobrepõe a configuração individual.'),
+    ('amazon-ecs', 'retencao-descontrolada-de-logs-de-containers-no-cloudwatch', 'action', 1,
+        'Reduza ruído e defina prazo por grupo', 'Ajuste debug/verbose com aprovação e configure retenção adequada nos log groups; use filtros de ingestão apenas quando compatíveis com o diagnóstico.'),
+    ('amazon-ecs', 'retencao-descontrolada-de-logs-de-containers-no-cloudwatch', 'caution', 1,
+        'Preserve evidências necessárias', 'Eventos expirados são excluídos; confirme obrigações legais e de resposta a incidentes e não aplique políticas amplas sem avaliar grupos abrangidos.'),
+
+    ('amazon-ecs', 'falta-de-health-checks-adequados-configurados-no-application-load-balancer-alb', 'check', 1,
+        'Separe verificações de container e ALB', 'Compare os health checks declarados na task definition com protocolo, caminho, códigos esperados, timeout e limiares do target group.'),
+    ('amazon-ecs', 'falta-de-health-checks-adequados-configurados-no-application-load-balancer-alb', 'check', 2,
+        'Meça startup e resposta da aplicação', 'Revise tempo de inicialização, grace period do serviço, logs de health check e métricas HealthyHostCount/UnHealthyHostCount.'),
+    ('amazon-ecs', 'falta-de-health-checks-adequados-configurados-no-application-load-balancer-alb', 'action', 1,
+        'Ajuste endpoint e limiares com teste', 'Use endpoint leve que represente prontidão real e defina intervalos, timeout e número de falhas conforme testes de inicialização e latência.'),
+    ('amazon-ecs', 'falta-de-health-checks-adequados-configurados-no-application-load-balancer-alb', 'caution', 1,
+        'Falhas consecutivas podem retirar targets', 'Verificações agressivas podem reduzir capacidade durante inicialização lenta; quando todos os targets ficam unhealthy, o ALB pode falhar aberto e enviar tráfego a todos.'),
+
+    ('amazon-ecs', 'falta-de-criptografia-e-gerenciamento-seguro-de-variaveis-de-ambiente', 'check', 1,
+        'Localize credenciais nas definições', 'Inspecione environment, task definitions, templates e permissões para identificar senhas, tokens e chaves que não deveriam ser valores literais.'),
+    ('amazon-ecs', 'falta-de-criptografia-e-gerenciamento-seguro-de-variaveis-de-ambiente', 'check', 2,
+        'Verifique papel e rotação', 'Confirme task execution role, escopo de leitura do segredo, política KMS e processo de rotação para cada serviço.'),
+    ('amazon-ecs', 'falta-de-criptografia-e-gerenciamento-seguro-de-variaveis-de-ambiente', 'action', 1,
+        'Injete segredos de cofre gerenciado', 'Use secrets em task definition com Secrets Manager ou Parameter Store e inicie novo deployment após alterar o valor do segredo.'),
+    ('amazon-ecs', 'falta-de-criptografia-e-gerenciamento-seguro-de-variaveis-de-ambiente', 'caution', 1,
+        'Proteja configuração e logs', 'Valores de environment podem aparecer em ferramentas de inspeção; não registre segredos e confirme permissões e rotação antes de revogar credenciais antigas.'),
+
+    ('amazon-ecs', 'uso-de-armazenamento-ebs-ou-efs-em-conflito-com-a-filosofia-efemera-de-containers', 'check', 1,
+        'Classifique dados e ciclo de vida', 'Determine se os dados são cache temporário, arquivos compartilhados, estado de banco ou saída que precisa sobreviver à substituição de tarefas.'),
+    ('amazon-ecs', 'uso-de-armazenamento-ebs-ou-efs-em-conflito-com-a-filosofia-efemera-de-containers', 'check', 2,
+        'Confirme semântica do volume', 'Verifique se bind mount é efêmero, se EBS é anexado a tarefa ou serviço e se EFS deve persistir e ser compartilhado entre tarefas.'),
+    ('amazon-ecs', 'uso-de-armazenamento-ebs-ou-efs-em-conflito-com-a-filosofia-efemera-de-containers', 'action', 1,
+        'Escolha volume pelo requisito', 'Mantenha dados descartáveis em armazenamento de tarefa e use EBS ou EFS quando persistência, performance ou compartilhamento forem necessários; teste restauração.'),
+    ('amazon-ecs', 'uso-de-armazenamento-ebs-ou-efs-em-conflito-com-a-filosofia-efemera-de-containers', 'caution', 1,
+        'Persistent storage não é sempre inadequado', 'Persistência e cobrança dependem do serviço e do ciclo de vida do volume; confira snapshots, retenção e volumes que sobrevivem ao encerramento de tarefas.'),
+
+    ('amazon-ecs', 'falta-de-monitoramento-de-utilizacao-de-cpu-e-memoria-dos-servicos-ecs', 'check', 1,
+        'Compare média e extremos', 'Revise CPUUtilization e MemoryUtilization por serviço e tarefa usando Average, Maximum e períodos que incluam picos e deployments.'),
+    ('amazon-ecs', 'falta-de-monitoramento-de-utilizacao-de-cpu-e-memoria-dos-servicos-ecs', 'check', 2,
+        'Correlacione com saúde e demanda', 'Compare utilização com RunningTaskCount, erros, latência, reinicializações e backlog; confirme cobertura e resolução das métricas disponíveis.'),
+    ('amazon-ecs', 'falta-de-monitoramento-de-utilizacao-de-cpu-e-memoria-dos-servicos-ecs', 'action', 1,
+        'Alarme por objetivo e sintoma', 'Configure alarmes para saturação sustentada ou capacidade insuficiente e valide limiares com teste de carga antes de automatizar escala.'),
+    ('amazon-ecs', 'falta-de-monitoramento-de-utilizacao-de-cpu-e-memoria-dos-servicos-ecs', 'caution', 1,
+        'Não use percentual fixo sem contexto', 'Métricas médias podem ocultar uma tarefa saturada; memória acima de 100% pode ocorrer em ECS sobre EC2 com CPU reservada, conforme a definição.'),
+
+    ('amazon-ecs', 'uso-de-registros-de-imagens-ecr-sem-politicas-de-ciclo-de-vida-lifecycle-policies', 'check', 1,
+        'Mapeie tags, digest e pulls', 'Identifique imagens por data, tags imutáveis, digests usados em task definitions, frequência de pull e necessidade de rollback ou auditoria.'),
+    ('amazon-ecs', 'uso-de-registros-de-imagens-ecr-sem-politicas-de-ciclo-de-vida-lifecycle-policies', 'check', 2,
+        'Revise dependências entre imagens', 'Confirme manifest lists, tags de produção e imagens compartilhadas antes de definir regras para imagens tagged ou untagged.'),
+    ('amazon-ecs', 'uso-de-registros-de-imagens-ecr-sem-politicas-de-ciclo-de-vida-lifecycle-policies', 'action', 1,
+        'Teste lifecycle policy em preview', 'Crie regras por tag ou idade, revise exatamente os digests afetados no preview e aplique a política somente após aprovação.'),
+    ('amazon-ecs', 'uso-de-registros-de-imagens-ecr-sem-politicas-de-ciclo-de-vida-lifecycle-policies', 'caution', 1,
+        'Preserve rollback e imagens referenciadas', 'Imagens podem ser necessárias para task definitions e recuperação; ECR aplica expiração em até 24 horas após critério e referência por manifest list altera a ordem de exclusão.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ecs', 'trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-task-placement',
+        'Use strategies to define Amazon ECS task placement', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-strategies.html'),
+    ('amazon-ecs', 'trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-task-placement',
+        'Amazon VPC pricing', 'https://aws.amazon.com/vpc/pricing/'),
+    ('amazon-ecs', 'retencao-descontrolada-de-logs-de-containers-no-cloudwatch',
+        'Send Amazon ECS logs to CloudWatch', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html'),
+    ('amazon-ecs', 'retencao-descontrolada-de-logs-de-containers-no-cloudwatch',
+        'Working with log groups and log streams', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html'),
+    ('amazon-ecs', 'falta-de-health-checks-adequados-configurados-no-application-load-balancer-alb',
+        'Determine Amazon ECS task health using container health checks', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/healthcheck.html'),
+    ('amazon-ecs', 'falta-de-health-checks-adequados-configurados-no-application-load-balancer-alb',
+        'Health checks for Application Load Balancer target groups', 'https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html'),
+    ('amazon-ecs', 'falta-de-criptografia-e-gerenciamento-seguro-de-variaveis-de-ambiente',
+        'Pass sensitive data to an Amazon ECS container', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data.html'),
+    ('amazon-ecs', 'uso-de-armazenamento-ebs-ou-efs-em-conflito-com-a-filosofia-efemera-de-containers',
+        'Storage options for Amazon ECS tasks', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html'),
+    ('amazon-ecs', 'falta-de-monitoramento-de-utilizacao-de-cpu-e-memoria-dos-servicos-ecs',
+        'Amazon ECS service utilization metrics', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service_utilization.html'),
+    ('amazon-ecs', 'uso-de-registros-de-imagens-ecr-sem-politicas-de-ciclo-de-vida-lifecycle-policies',
+        'Automate the cleanup of images by using lifecycle policies in Amazon ECR', 'https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ecs', 'trafego-de-entrada-saida-roteado-via-nat-gateway-sem-endpoints',
+        'Tráfego de Entrada/Saída Roteado via NAT Gateway sem Endpoints',
+        'Identifique chamadas de tarefas a serviços AWS que atravessam NAT e avalie endpoints compatíveis com o destino e a rede.'),
+    ('amazon-ecs', 'falta-de-atualizacao-de-agentes-e-runtimes-do-ecs-nas-instancias-ec2',
+        'Falta de Atualização de Agentes e Runtimes do ECS nas Instâncias EC2',
+        'Inventarie versões do container agent e da ECS-optimized AMI nas instâncias EC2 e planeje atualizações suportadas.'),
+    ('amazon-ecs', 'duplicacao-de-clusters-ecs-por-unidades-de-negocio-sem-governanca',
+        'Duplicação de Clusters ECS por Unidades de Negócio Sem Governança',
+        'Revise clusters, serviços, capacidade e fronteiras de segurança para identificar recursos realmente duplicados ou mal governados.'),
+    ('amazon-ecs', 'falta-de-testes-de-resiliencia-e-recuperacao-de-tarefas-task-recovery',
+        'Falta de Testes de Resiliência e Recuperação de Tarefas (Task Recovery)',
+        'Valide health checks, circuit breaker e rollback de deployments ECS com uma aplicação de teste e critérios de recuperação definidos.'),
+    ('amazon-ecs', 'ausencia-de-alertas-de-custo-para-escalabilidade-descontrolada-de-fargate',
+        'Ausência de Alertas de Custo para Escalabilidade Descontrolada de Fargate',
+        'Acompanhe consumo de vCPU e memória no Fargate com budgets e sinais operacionais de scaling, considerando atraso dos dados de cobrança.'),
+    ('amazon-ecs', 'estrategias-de-deploy-sem-capacidade-reserva-rolling-update-ineficiente',
+        'Estratégias de Deploy sem Capacidade Reserva (Rolling Update Ineficiente)',
+        'Confira percentuais de tarefas saudáveis e capacidade disponível para que o scheduler consiga iniciar e substituir tarefas durante o deployment.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ecs', 'trafego-de-entrada-saida-roteado-via-nat-gateway-sem-endpoints', 'check', 1,
+        'Mapeie destinos e rotas', 'Identifique serviços acessados pelas tarefas, sub-redes, tabelas de rotas e métricas de bytes do NAT, separando tráfego AWS de destinos públicos.'),
+    ('amazon-ecs', 'trafego-de-entrada-saida-roteado-via-nat-gateway-sem-endpoints', 'check', 2,
+        'Verifique o endpoint adequado', 'Avalie gateway endpoints para S3 e DynamoDB e interface endpoints para serviços compatíveis como SQS, ECR, Secrets Manager e CloudWatch Logs.'),
+    ('amazon-ecs', 'trafego-de-entrada-saida-roteado-via-nat-gateway-sem-endpoints', 'action', 1,
+        'Teste política e conectividade privada', 'Configure endpoints necessários na região e ajuste rotas, DNS, security groups e endpoint policies; valide pull de imagens, logs e chamadas de serviço.'),
+    ('amazon-ecs', 'trafego-de-entrada-saida-roteado-via-nat-gateway-sem-endpoints', 'caution', 1,
+        'Endpoint incompleto pode manter tráfego público', 'Faltando endpoints exigidos, tráfego pode continuar usando public endpoints; interface endpoints podem ter cobrança e NAT ainda pode ser necessário para destinos externos.'),
+
+    ('amazon-ecs', 'falta-de-atualizacao-de-agentes-e-runtimes-do-ecs-nas-instancias-ec2', 'check', 1,
+        'Inventarie agente e AMI', 'Revise versões do ECS container agent, ecs-init, ECS-optimized AMI, sistema operacional e estado das instâncias por cluster.'),
+    ('amazon-ecs', 'falta-de-atualizacao-de-agentes-e-runtimes-do-ecs-nas-instancias-ec2', 'check', 2,
+        'Avalie impacto e método de atualização', 'Confirme se há tarefas em execução, capacidade substituta, janela de manutenção e procedimento aplicável à AMI ou ao sistema customizado.'),
+    ('amazon-ecs', 'falta-de-atualizacao-de-agentes-e-runtimes-do-ecs-nas-instancias-ec2', 'action', 1,
+        'Atualize com capacidade de reposição', 'Planeje drenagem ou substituição gradual de instâncias conforme o método recomendado para a AMI e valide registro do agente e saúde das tarefas.'),
+    ('amazon-ecs', 'falta-de-atualizacao-de-agentes-e-runtimes-do-ecs-nas-instancias-ec2', 'caution', 1,
+        'Windows usa estratégia diferente', 'Atualizações do agente não se aplicam a instâncias Windows; a AWS recomenda lançar novas instâncias para atualizar a versão nesses clusters.'),
+
+    ('amazon-ecs', 'duplicacao-de-clusters-ecs-por-unidades-de-negocio-sem-governanca', 'check', 1,
+        'Compare recursos e fronteiras', 'Mapeie clusters, capacity providers, serviços, VPCs, sub-redes, namespaces, métricas e equipes proprietárias por região.'),
+    ('amazon-ecs', 'duplicacao-de-clusters-ecs-por-unidades-de-negocio-sem-governanca', 'check', 2,
+        'Confirme motivo de isolamento', 'Verifique requisitos de IAM, rede, compliance, blast radius, quota, ciclo de vida e autonomia operacional antes de classificar clusters como duplicados.'),
+    ('amazon-ecs', 'duplicacao-de-clusters-ecs-por-unidades-de-negocio-sem-governanca', 'action', 1,
+        'Padronize governança antes de consolidar', 'Quando os limites forem compatíveis, padronize tags, capacity providers, observabilidade e templates; planeje consolidação somente após teste de isolamento e migração.'),
+    ('amazon-ecs', 'duplicacao-de-clusters-ecs-por-unidades-de-negocio-sem-governanca', 'caution', 1,
+        'Cluster não equivale a cobrança de compute', 'Clusters são agrupamentos lógicos; avalie tarefas, instâncias, serviços gerenciados e monitoramento associados em vez de inferir custo pelo número de clusters.'),
+
+    ('amazon-ecs', 'falta-de-testes-de-resiliencia-e-recuperacao-de-tarefas-task-recovery', 'check', 1,
+        'Teste falhas representativas', 'Em ambiente controlado, provoque falha de container ou health check e observe substituição da tarefa, registro no target group e impacto na capacidade saudável.'),
+    ('amazon-ecs', 'falta-de-testes-de-resiliencia-e-recuperacao-de-tarefas-task-recovery', 'check', 2,
+        'Revise rollback e estado anterior', 'Confirme circuit breaker, rollback habilitado, deployment COMPLETED disponível e eventos de deployment enviados ao EventBridge.'),
+    ('amazon-ecs', 'falta-de-testes-de-resiliencia-e-recuperacao-de-tarefas-task-recovery', 'action', 1,
+        'Ative e valide proteção de deployment', 'Quando compatível com deployment controller ECS, configure circuit breaker e rollback e teste critérios de saúde e alertas de falha.'),
+    ('amazon-ecs', 'falta-de-testes-de-resiliencia-e-recuperacao-de-tarefas-task-recovery', 'caution', 1,
+        'Rollback depende de revisão concluída', 'Sem um deployment anterior em estado COMPLETED, o circuito não tem revisão para restaurar; teste em staging e mantenha capacidade e dados recuperáveis.'),
+
+    ('amazon-ecs', 'ausencia-de-alertas-de-custo-para-escalabilidade-descontrolada-de-fargate', 'check', 1,
+        'Revise consumo e escala', 'Acompanhe tarefas, vCPU-hora, GB-hora, desired count, deployments e picos anormais por serviço e ambiente.'),
+    ('amazon-ecs', 'ausencia-de-alertas-de-custo-para-escalabilidade-descontrolada-de-fargate', 'check', 2,
+        'Confirme budget e notificações', 'Verifique filtros por conta ou serviço, valor e período do budget e entrega dos avisos aos responsáveis de operação e finanças.'),
+    ('amazon-ecs', 'ausencia-de-alertas-de-custo-para-escalabilidade-descontrolada-de-fargate', 'action', 1,
+        'Configure orçamento e resposta operacional', 'Crie um AWS Budget apropriado ao escopo ECS/Fargate e combine notificações com alarmes de utilização ou escala para investigação imediata.'),
+    ('amazon-ecs', 'ausencia-de-alertas-de-custo-para-escalabilidade-descontrolada-de-fargate', 'caution', 1,
+        'Budget não é limite instantâneo de consumo', 'Dados de cobrança podem atualizar várias horas depois; alarmes técnicos podem detectar a causa antes do aviso financeiro.'),
+
+    ('amazon-ecs', 'estrategias-de-deploy-sem-capacidade-reserva-rolling-update-ineficiente', 'check', 1,
+        'Calcule tarefas durante rollout', 'Revise desired count, minimumHealthyPercent e maximumPercent para garantir que o scheduler possa iniciar ou parar ao menos uma tarefa.'),
+    ('amazon-ecs', 'estrategias-de-deploy-sem-capacidade-reserva-rolling-update-ineficiente', 'check', 2,
+        'Confira capacidade e readiness', 'Valide quota Fargate ou capacidade EC2, limite de CPU/memória, tempo de inicialização, health checks e recursos de outras tarefas.'),
+    ('amazon-ecs', 'estrategias-de-deploy-sem-capacidade-reserva-rolling-update-ineficiente', 'action', 1,
+        'Ajuste configuração e teste deployment', 'Defina percentuais que permitam substituir tarefas com o nível de disponibilidade requerido e valide rollout e rollback em ambiente não produtivo.'),
+    ('amazon-ecs', 'estrategias-de-deploy-sem-capacidade-reserva-rolling-update-ineficiente', 'caution', 1,
+        'Percentuais inválidos podem bloquear rollout', 'Valores são arredondados e podem impedir start ou stop; instâncias sem capacidade também podem deixar tarefas pendentes apesar da configuração.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ecs', 'trafego-de-entrada-saida-roteado-via-nat-gateway-sem-endpoints',
+        'Amazon ECS interface VPC endpoints', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/vpc-endpoints.html'),
+    ('amazon-ecs', 'falta-de-atualizacao-de-agentes-e-runtimes-do-ecs-nas-instancias-ec2',
+        'Updating the Amazon ECS container agent', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-update.html'),
+    ('amazon-ecs', 'duplicacao-de-clusters-ecs-por-unidades-de-negocio-sem-governanca',
+        'Amazon ECS clusters', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html'),
+    ('amazon-ecs', 'falta-de-testes-de-resiliencia-e-recuperacao-de-tarefas-task-recovery',
+        'How the Amazon ECS deployment circuit breaker detects failures', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-circuit-breaker.html'),
+    ('amazon-ecs', 'ausencia-de-alertas-de-custo-para-escalabilidade-descontrolada-de-fargate',
+        'Managing your costs with AWS Budgets', 'https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html'),
+    ('amazon-ecs', 'estrategias-de-deploy-sem-capacidade-reserva-rolling-update-ineficiente',
+        'Deploy Amazon ECS services by replacing tasks', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ecs', 'servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos',
+        'Serviços ECS Órfãos de Versões Anteriores de Deploy Não Removidos',
+        'Identifique serviços sem proprietário e task definition revisions sem dependências antes de desregistrar ou excluir recursos.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ecs', 'servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos', 'check', 1,
+        'Identifique recursos realmente órfãos', 'Liste serviços por cluster, desired/running count, deployment state, proprietário e atividade recente; inventarie task definition revisions ACTIVE e INACTIVE.'),
+    ('amazon-ecs', 'servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos', 'check', 2,
+        'Verifique referências e rollback', 'Confirme se revisões são usadas por serviços, tarefas, deployments ou task sets e se imagens, logs ou configurações são necessárias para rollback.'),
+    ('amazon-ecs', 'servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos', 'action', 1,
+        'Desregistre e exclua em etapas', 'Após aprovação do responsável, reduza serviços sem uso a zero e remova-os; desregistre revisões sem dependências e solicite exclusão definitiva quando apropriado.'),
+    ('amazon-ecs', 'servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos', 'caution', 1,
+        'Revisão antiga não significa custo de compute', 'Task definitions INACTIVE não lançam novas tarefas, mas serviços e tarefas existentes continuam; recursos dependentes bloqueiam a exclusão e imagens ECR têm ciclo de vida separado.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ecs', 'servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos',
+        'Amazon ECS task definition states', 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-definition-state.html'),
+    ('amazon-ecs', 'servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos',
+        'DeregisterTaskDefinition API reference', 'https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DeregisterTaskDefinition.html'),
+    ('amazon-ecs', 'servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos',
+        'DeleteService API reference', 'https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DeleteService.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-eks', 'falta-de-configuracao-de-horizontal-pod-autoscaler-hpa-e-cluster-autoscaler',
+        'Falta de Configuração de Horizontal Pod Autoscaler (HPA) e Cluster Autoscaler',
+        'Revise escalabilidade de réplicas e de nós como controles separados, usando métricas e requisitos reais do workload.'),
+    ('amazon-eks', 'ausencia-de-definicoes-de-requests-e-limits-nos-pods',
+        'Ausência de Definições de Requests e Limits nos Pods',
+        'Meça consumo por container e alinhe requests e limits para melhorar scheduling sem provocar throttling ou OOM.'),
+    ('amazon-eks', 'uso-exclusivo-de-instancias-on-demand-nos-nos-do-eks',
+        'Uso Exclusivo de Instâncias On-Demand nos Nós do EKS',
+        'Avalie capacidade Spot para workloads tolerantes a interrupção e mantenha capacidade On-Demand para componentes críticos.'),
+    ('amazon-eks', 'cargas-de-homologacao-e-testes-rodando-24-7',
+        'Cargas de Homologação e Testes Rodando 24/7',
+        'Revise períodos ociosos, réplicas e capacidade de nós dos ambientes não produtivos antes de agendar scale-down.'),
+    ('amazon-eks', 'trafego-de-rede-excessivo-entre-pods-de-zonas-diferentes-cross-az',
+        'Tráfego de Rede Excessivo Entre Pods de Zonas Diferentes (Cross-AZ)',
+        'Meça fluxo entre AZs e revise topologia de pods e dependências sem comprometer disponibilidade ou distribuição resiliente.'),
+    ('amazon-eks', 'sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch',
+        'Sobrecarga e Acúmulo de Logs no Fluentbit / CloudWatch',
+        'Identifique fontes, níveis e volumes enviados pelo Fluent Bit e ajuste filtragem e retenção conforme necessidades operacionais.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-eks', 'falta-de-configuracao-de-horizontal-pod-autoscaler-hpa-e-cluster-autoscaler', 'check', 1,
+        'Separe escala de pods e de nós', 'Verifique se HPA ajusta réplicas com métricas adequadas e se Cluster Autoscaler ou Karpenter ajusta nós para pods pendentes.'),
+    ('amazon-eks', 'falta-de-configuracao-de-horizontal-pod-autoscaler-hpa-e-cluster-autoscaler', 'check', 2,
+        'Valide métricas e guardrails', 'Confira Metrics Server ou adaptador de métricas, requests definidos, limites mínimo/máximo, PDBs e capacidade dos node groups.'),
+    ('amazon-eks', 'falta-de-configuracao-de-horizontal-pod-autoscaler-hpa-e-cluster-autoscaler', 'action', 1,
+        'Teste escalabilidade por camada', 'Em homologação, aplique HPA para o workload e autoscaler de nós para capacidade, validando backlog, latência e scale-in em cenários realistas.'),
+    ('amazon-eks', 'falta-de-configuracao-de-horizontal-pod-autoscaler-hpa-e-cluster-autoscaler', 'caution', 1,
+        'PDBs podem impedir redução de nós', 'Autoscalers respeitam interrupções seguras; PDB restritivo ou requests ausentes podem bloquear scale-down ou impedir scheduling esperado.'),
+
+    ('amazon-eks', 'ausencia-de-definicoes-de-requests-e-limits-nos-pods', 'check', 1,
+        'Meça cada container e sidecar', 'Compare requests e limits declarados com CPU e memória usados em picos e períodos representativos, incluindo sidecars.'),
+    ('amazon-eks', 'ausencia-de-definicoes-de-requests-e-limits-nos-pods', 'check', 2,
+        'Examine eventos de scheduling e OOM', 'Revise pods pendentes, pressão de nó, throttling de CPU e encerramentos por memória para identificar reservas ou limites inadequados.'),
+    ('amazon-eks', 'ausencia-de-definicoes-de-requests-e-limits-nos-pods', 'action', 1,
+        'Defina valores a partir de medições', 'Ajuste requests para refletir demanda e limits conforme isolamento necessário; use VPA em modo de recomendação para analisar propostas antes de aplicá-las.'),
+    ('amazon-eks', 'ausencia-de-definicoes-de-requests-e-limits-nos-pods', 'caution', 1,
+        'CPU e memória têm efeitos diferentes', 'Requests influenciam scheduling e capacidade contabilizada; CPU limit pode causar throttling e memory limit excedido pode encerrar o container.'),
+
+    ('amazon-eks', 'uso-exclusivo-de-instancias-on-demand-nos-nos-do-eks', 'check', 1,
+        'Classifique tolerância a interrupção', 'Identifique workloads stateless, batch e retomáveis e separe aplicações de estado, control plane add-ons e componentes fault-intolerant.'),
+    ('amazon-eks', 'uso-exclusivo-de-instancias-on-demand-nos-nos-do-eks', 'check', 2,
+        'Revise capacidade e diversidade', 'Confira tipos de instância, AZs, node groups, Spot availability e tratamento de interruption/rebalance em cada workload elegível.'),
+    ('amazon-eks', 'uso-exclusivo-de-instancias-on-demand-nos-nos-do-eks', 'action', 1,
+        'Teste Spot em grupo dedicado', 'Use managed node group Spot ou Karpenter para pods tolerantes a interrupção, com diversidade de tipos, PDB adequado e capacidade On-Demand para funções críticas.'),
+    ('amazon-eks', 'uso-exclusivo-de-instancias-on-demand-nos-nos-do-eks', 'caution', 1,
+        'Spot pode não ter capacidade disponível', 'Instâncias Spot podem ser retomadas com aviso de dois minutos e a nova capacidade não é garantida; mantenha checkpoint/retry e teste desligamento gracioso.'),
+
+    ('amazon-eks', 'cargas-de-homologacao-e-testes-rodando-24-7', 'check', 1,
+        'Mapeie janelas sem uso', 'Identifique clusters, workloads, namespaces e node groups não produtivos com períodos previsíveis de inatividade e confirme responsáveis.'),
+    ('amazon-eks', 'cargas-de-homologacao-e-testes-rodando-24-7', 'check', 2,
+        'Revise dependências e recuperação', 'Verifique pipelines, testes noturnos, bancos, jobs agendados, PDBs e o tempo necessário para voltar a um estado utilizável.'),
+    ('amazon-eks', 'cargas-de-homologacao-e-testes-rodando-24-7', 'action', 1,
+        'Agende scale-down de workloads e nós', 'Para ambientes elegíveis, reduza réplicas e capacidade de nós nos períodos ociosos; automatize a retomada e teste aplicações antes do próximo horário de uso.'),
+    ('amazon-eks', 'cargas-de-homologacao-e-testes-rodando-24-7', 'caution', 1,
+        'Scale-down de nós não encerra o cluster', 'A control plane EKS e outros recursos podem continuar ativos e cobrados; avalie o custo total e as consequências de excluir e recriar o cluster.'),
+
+    ('amazon-eks', 'trafego-de-rede-excessivo-entre-pods-de-zonas-diferentes-cross-az', 'check', 1,
+        'Meça fluxo entre AZs', 'Use VPC Flow Logs, métricas e Cost Explorer/CUR para identificar origem, destino, volume e serviços que trocam dados entre zonas.'),
+    ('amazon-eks', 'trafego-de-rede-excessivo-entre-pods-de-zonas-diferentes-cross-az', 'check', 2,
+        'Revise topologia e afinidade', 'Compare placement de pods, topology spread constraints, tráfego para bancos e réplicas, e comportamento durante failover.'),
+    ('amazon-eks', 'trafego-de-rede-excessivo-entre-pods-de-zonas-diferentes-cross-az', 'action', 1,
+        'Otimize somente fluxos comprovados', 'Se houver tráfego evitável, avalie topology-aware routing ou afinidade por zona e teste distribuição, latência e recuperação de falha.'),
+    ('amazon-eks', 'trafego-de-rede-excessivo-entre-pods-de-zonas-diferentes-cross-az', 'caution', 1,
+        'Não restrinja pods a uma zona por padrão', 'Distribuição entre AZs aumenta resiliência; custo e volume inter-AZ dependem da arquitetura e devem ser confirmados com dados de cobrança.'),
+
+    ('amazon-eks', 'sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch', 'check', 1,
+        'Meça ingestão por grupo e aplicação', 'Compare bytes ingeridos, streams, níveis de log e fontes Fluent Bit em períodos normais e de pico.'),
+    ('amazon-eks', 'sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch', 'check', 2,
+        'Confirme retenção e auditoria', 'Revise políticas de retenção por log group, requisitos de investigação e políticas account-level que possam sobrepor configurações individuais.'),
+    ('amazon-eks', 'sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch', 'action', 1,
+        'Filtre ruído e defina prazo', 'Reduza debug/verbose em workloads selecionados após aprovação e aplique retenção adequada ao grupo, mantendo logs de segurança necessários.'),
+    ('amazon-eks', 'sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch', 'caution', 1,
+        'Filtragem pode remover evidências', 'Mudanças no Fluent Bit e na retenção podem descartar eventos úteis; teste filtros, acesso e requisitos de compliance antes da implantação.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-eks', 'falta-de-configuracao-de-horizontal-pod-autoscaler-hpa-e-cluster-autoscaler',
+        'EKS Compute and Autoscaling cost optimization', 'https://docs.aws.amazon.com/eks/latest/best-practices/cost-opt-compute.html'),
+    ('amazon-eks', 'falta-de-configuracao-de-horizontal-pod-autoscaler-hpa-e-cluster-autoscaler',
+        'Scale cluster compute with Karpenter and Cluster Autoscaler', 'https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html'),
+    ('amazon-eks', 'ausencia-de-definicoes-de-requests-e-limits-nos-pods',
+        'EKS Compute and Autoscaling cost optimization', 'https://docs.aws.amazon.com/eks/latest/best-practices/cost-opt-compute.html'),
+    ('amazon-eks', 'ausencia-de-definicoes-de-requests-e-limits-nos-pods',
+        'EKS node and workload efficiency', 'https://docs.aws.amazon.com/eks/latest/best-practices/node_and_workload_efficiency.html'),
+    ('amazon-eks', 'uso-exclusivo-de-instancias-on-demand-nos-nos-do-eks',
+        'Managed node groups and Spot capacity types', 'https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html'),
+    ('amazon-eks', 'uso-exclusivo-de-instancias-on-demand-nos-nos-do-eks',
+        'EKS Compute and Autoscaling cost optimization', 'https://docs.aws.amazon.com/eks/latest/best-practices/cost-opt-compute.html'),
+    ('amazon-eks', 'cargas-de-homologacao-e-testes-rodando-24-7',
+        'EKS Compute and Autoscaling cost optimization', 'https://docs.aws.amazon.com/eks/latest/best-practices/cost-opt-compute.html'),
+    ('amazon-eks', 'cargas-de-homologacao-e-testes-rodando-24-7',
+        'Amazon EKS pricing', 'https://aws.amazon.com/eks/pricing/'),
+    ('amazon-eks', 'trafego-de-rede-excessivo-entre-pods-de-zonas-diferentes-cross-az',
+        'Best practices for Amazon EKS networking', 'https://docs.aws.amazon.com/eks/latest/best-practices/networking.html'),
+    ('amazon-eks', 'trafego-de-rede-excessivo-entre-pods-de-zonas-diferentes-cross-az',
+        'Amazon VPC pricing', 'https://aws.amazon.com/vpc/pricing/'),
+    ('amazon-eks', 'sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch',
+        'Configuring cluster logging in Amazon EKS', 'https://docs.aws.amazon.com/eks/latest/userguide/cluster-logging.html'),
+    ('amazon-eks', 'sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch',
+        'What is Amazon CloudWatch Logs?', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html'),
+    ('amazon-eks', 'sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch',
+        'Working with log groups and log streams', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-eks', 'ociosidade-em-load-balancers-aws-load-balancer-controller',
+        'Ociosidade em Load Balancers (AWS Load Balancer Controller)',
+        'Revise ALBs/NLBs provisionados, listeners, regras, destinos e tráfego antes de avaliar compartilhamento ou remoção.'),
+    ('amazon-eks', 'versoes-desatualizadas-do-kubernetes-com-custos-de-suporte-estendidos',
+        'Versões Desatualizadas do Kubernetes com Custos de Suporte Estendidos',
+        'Confira a fase de suporte e o cronograma de atualização do control plane, add-ons e nós para cada cluster EKS.'),
+    ('amazon-eks', 'falta-de-otimizacao-da-control-plane-com-eks-auto-mode-ou-fargate',
+        'Falta de Otimização da Control Plane com EKS Auto Mode ou Fargate',
+        'Compare opções de gerenciamento de compute para os workloads, separando control plane EKS e data plane de pods/nós.'),
+    ('amazon-eks', 'uso-de-tipos-de-instancias-incompativeis-com-a-arquitetura-da-aplicacao',
+        'Uso de Tipos de Instâncias Incompatíveis com a Arquitetura da Aplicação',
+        'Avalie ARM64 ou x86_64 somente após verificar imagens, add-ons, DaemonSets, dependências e desempenho da aplicação.'),
+    ('amazon-eks', 'falta-de-uso-de-spot-instances-para-workers-de-processamento-em-lote',
+        'Falta de Uso de Spot Instances para Workers de Processamento em Lote',
+        'Avalie Spot para jobs tolerantes a interrupção e retomáveis, preservando capacidade estável para cargas críticas.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-eks', 'ociosidade-em-load-balancers-aws-load-balancer-controller', 'check', 1,
+        'Inventarie listeners e utilização', 'Mapeie ingress/services, ALBs/NLBs, listeners, regras, target groups, tráfego, custos e equipes proprietárias por ambiente.'),
+    ('amazon-eks', 'ociosidade-em-load-balancers-aws-load-balancer-controller', 'check', 2,
+        'Avalie compatibilidade e confiança', 'Verifique se regras, certificados, esquemas, target types e controladores permitem agrupar ingresses sem cruzar fronteiras de segurança.'),
+    ('amazon-eks', 'ociosidade-em-load-balancers-aws-load-balancer-controller', 'action', 1,
+        'Compartilhe ALB quando o isolamento permitir', 'Teste IngressGroup com regras e prioridades revisadas, valide roteamento, saúde dos targets e controle RBAC antes de migrar tráfego.'),
+    ('amazon-eks', 'ociosidade-em-load-balancers-aws-load-balancer-controller', 'caution', 1,
+        'IngressGroup compartilha uma fronteira de confiança', 'Usuários autorizados a criar ingress podem afetar regras do grupo; compartilhe somente entre equipes confiáveis e mantenha rollback.'),
+
+    ('amazon-eks', 'versoes-desatualizadas-do-kubernetes-com-custos-de-suporte-estendidos', 'check', 1,
+        'Consulte suporte vigente por cluster', 'Verifique versão, upgrade policy, data de fim do suporte padrão e estado de suporte estendido no console ou na API EKS.'),
+    ('amazon-eks', 'versoes-desatualizadas-do-kubernetes-com-custos-de-suporte-estendidos', 'check', 2,
+        'Inventarie componentes dependentes', 'Confira compatibilidade de add-ons, APIs removidas, controladores, managed/self-managed node groups e kubelets.'),
+    ('amazon-eks', 'versoes-desatualizadas-do-kubernetes-com-custos-de-suporte-estendidos', 'action', 1,
+        'Planeje upgrade em etapas', 'Teste migração em ambiente não produtivo, atualize componentes na ordem compatível e programe control plane e nodes dentro de uma janela aprovada.'),
+    ('amazon-eks', 'versoes-desatualizadas-do-kubernetes-com-custos-de-suporte-estendidos', 'caution', 1,
+        'Suporte estendido e nodes têm ciclos distintos', 'EKS cobra suporte estendido por cluster-hora; fim do suporte pode acionar upgrade automático do control plane, mas managed node groups e Fargate pods podem exigir atualização separada.'),
+
+    ('amazon-eks', 'falta-de-otimizacao-da-control-plane-com-eks-auto-mode-ou-fargate', 'check', 1,
+        'Identifique o gargalo de operação', 'Separe manutenção do control plane EKS de gestão de nós, escalabilidade, balanceamento e armazenamento do data plane.'),
+    ('amazon-eks', 'falta-de-otimizacao-da-control-plane-com-eks-auto-mode-ou-fargate', 'check', 2,
+        'Compare requisitos por workload', 'Verifique compatibilidade com DaemonSets, EBS, GPUs, acesso a nodes, isolamento, perfis Fargate, Auto Mode NodePools e políticas de rede.'),
+    ('amazon-eks', 'falta-de-otimizacao-da-control-plane-com-eks-auto-mode-ou-fargate', 'action', 1,
+        'Teste o modelo gerenciado em workloads adequados', 'Avalie EKS Auto Mode para gestão ampliada de infraestrutura ou Fargate para pods isolados sem gestão de nós; compare operação e custo total em piloto.'),
+    ('amazon-eks', 'falta-de-otimizacao-da-control-plane-com-eks-auto-mode-ou-fargate', 'caution', 1,
+        'Opções gerenciadas têm limites e cobrança próprios', 'Fargate não suporta DaemonSets, EBS ou Spot e cobra cada pod por CPU/memória; EKS Auto Mode também requer revisão de capacidades, configuração e preço regional.'),
+
+    ('amazon-eks', 'uso-de-tipos-de-instancias-incompativeis-com-a-arquitetura-da-aplicacao', 'check', 1,
+        'Inventarie arquitetura dos workloads', 'Revise `kubernetes.io/arch` nos nodes, arquitetura das imagens, binários nativos, plugins, add-ons e DaemonSets.'),
+    ('amazon-eks', 'uso-de-tipos-de-instancias-incompativeis-com-a-arquitetura-da-aplicacao', 'check', 2,
+        'Verifique artefatos multi-arch', 'Confirme manifest lists e disponibilidade de imagens compatíveis com arm64 para cada container e dependência do sistema.'),
+    ('amazon-eks', 'uso-de-tipos-de-instancias-incompativeis-com-a-arquitetura-da-aplicacao', 'action', 1,
+        'Teste arquitetura alternativa', 'Construa ou selecione imagens compatíveis, use node selectors/affinity e valide performance, add-ons e workloads em um node group canário.'),
+    ('amazon-eks', 'uso-de-tipos-de-instancias-incompativeis-com-a-arquitetura-da-aplicacao', 'caution', 1,
+        'Não misture arquiteturas sem agendamento explícito', 'Imagens somente x86 não rodam em Arm; manter node groups e tolerations inadequados pode deixar pods pendentes ou alterar desempenho e compatibilidade.'),
+
+    ('amazon-eks', 'falta-de-uso-de-spot-instances-para-workers-de-processamento-em-lote', 'check', 1,
+        'Confirme retomada segura dos jobs', 'Verifique checkpoints, idempotência, tolerância a repetição, tempo de desligamento e se os workers são stateless ou recuperáveis.'),
+    ('amazon-eks', 'falta-de-uso-de-spot-instances-para-workers-de-processamento-em-lote', 'check', 2,
+        'Revise grupos e interrupções', 'Confira capacidade Spot por AZ e tipo, node groups separados, interruption handling, PDBs, prioridades e capacidade On-Demand de contingência.'),
+    ('amazon-eks', 'falta-de-uso-de-spot-instances-para-workers-de-processamento-em-lote', 'action', 1,
+        'Teste Spot em workers batch', 'Use managed node groups Spot com vários tipos de instância equivalentes ou autoscaler compatível; direcione somente workloads tolerantes e monitore retomadas.'),
+    ('amazon-eks', 'falta-de-uso-de-spot-instances-para-workers-de-processamento-em-lote', 'caution', 1,
+        'Interrupção e capacidade não são garantidas', 'Spot pode ser retomado com aviso curto e a oferta pode faltar; workloads stateful, control plane add-ons e tarefas sem checkpoint devem usar capacidade apropriada.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-eks', 'ociosidade-em-load-balancers-aws-load-balancer-controller',
+        'Route application and HTTP traffic with Application Load Balancers', 'https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html'),
+    ('amazon-eks', 'versoes-desatualizadas-do-kubernetes-com-custos-de-suporte-estendidos',
+        'Understand the Kubernetes version lifecycle on EKS', 'https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html'),
+    ('amazon-eks', 'versoes-desatualizadas-do-kubernetes-com-custos-de-suporte-estendidos',
+        'Amazon EKS pricing', 'https://aws.amazon.com/eks/pricing/'),
+    ('amazon-eks', 'falta-de-otimizacao-da-control-plane-com-eks-auto-mode-ou-fargate',
+        'Automate cluster infrastructure with EKS Auto Mode', 'https://docs.aws.amazon.com/eks/latest/userguide/automode.html'),
+    ('amazon-eks', 'falta-de-otimizacao-da-control-plane-com-eks-auto-mode-ou-fargate',
+        'Simplify compute management with AWS Fargate', 'https://docs.aws.amazon.com/eks/latest/userguide/fargate.html'),
+    ('amazon-eks', 'uso-de-tipos-de-instancias-incompativeis-com-a-arquitetura-da-aplicacao',
+        'Amazon EKS-optimized Arm Amazon Linux AMIs', 'https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html'),
+    ('amazon-eks', 'falta-de-uso-de-spot-instances-para-workers-de-processamento-em-lote',
+        'Managed node groups and Spot capacity types', 'https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-eks', 'provisionamento-ineficiente-de-volumes-persistentes-ebs-pvcs',
+        'Provisionamento Ineficiente de Volumes Persistentes (EBS PVCs)',
+        'Revise tamanho, uso, estado e política de reclaim de volumes persistentes EBS antes de ajustar capacidade ou remover PVCs.'),
+    ('amazon-eks', 'escalonamento-incorreto-de-daemonsets',
+        'Escalonamento Incorreto de DaemonSets',
+        'Meça recursos consumidos por DaemonSets em cada nó e ajuste tolerations, requests e escopo de implantação conforme sua função.'),
+    ('amazon-eks', 'excesso-de-monitoramento-com-container-insights-sem-filtros',
+        'Excesso de Monitoramento com Container Insights Sem Filtros',
+        'Identifique modo de Container Insights, granularidade, namespaces e dados coletados antes de alterar a observabilidade do cluster.'),
+    ('amazon-eks', 'falta-de-governanca-em-namespaces-de-desenvolvedores',
+        'Falta de Governança em Namespaces de Desenvolvedores',
+        'Revise ownership, quotas, requests, limites, acesso e workloads ociosos nos namespaces usados por equipes de desenvolvimento.'),
+    ('amazon-eks', 'configuracao-excessiva-de-replicas-por-falta-de-teste-de-carga',
+        'Configuração Excessiva de Réplicas por Falta de Teste de Carga',
+        'Compare réplicas e capacidade com saturação, latência e demanda medida para definir escala mínima, máxima e dinâmica.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-eks', 'provisionamento-ineficiente-de-volumes-persistentes-ebs-pvcs', 'check', 1,
+        'Mapeie claims e volumes', 'Compare PVC requested size, capacidade do PV, volume EBS associado, métricas de espaço usado, estado e aplicações consumidoras.'),
+    ('amazon-eks', 'provisionamento-ineficiente-de-volumes-persistentes-ebs-pvcs', 'check', 2,
+        'Revise reclaim e recuperação', 'Confira StorageClass, reclaim policy, snapshots, tags e processo de backup para volumes ligados e não ligados.'),
+    ('amazon-eks', 'provisionamento-ineficiente-de-volumes-persistentes-ebs-pvcs', 'action', 1,
+        'Ajuste somente com plano de dados', 'Para novas claims, dimensione a partir do uso medido; para volumes existentes, use expansão suportada e valide filesystem, snapshots e restauração.'),
+    ('amazon-eks', 'provisionamento-ineficiente-de-volumes-persistentes-ebs-pvcs', 'caution', 1,
+        'Reclaim policy pode excluir dados', 'Excluir PVC ou PV pode disparar exclusão do volume conforme a política; EBS não pode ser anexado a pods Fargate e modos EKS Auto Mode têm provisioner distinto.'),
+
+    ('amazon-eks', 'escalonamento-incorreto-de-daemonsets', 'check', 1,
+        'Meça custo de recursos por nó', 'Liste DaemonSets, pods por nó, CPU/memória requests e utilização, incluindo agentes de rede, segurança, armazenamento e observabilidade.'),
+    ('amazon-eks', 'escalonamento-incorreto-de-daemonsets', 'check', 2,
+        'Confirme cobertura e escopo', 'Revise selectors, tolerations e taints para verificar em quais node groups e arquiteturas cada DaemonSet realmente precisa executar.'),
+    ('amazon-eks', 'escalonamento-incorreto-de-daemonsets', 'action', 1,
+        'Ajuste requests ou placement', 'Dimensione recursos com métricas e restrinja o DaemonSet a nós que exigem sua função, testando conectividade, segurança e coleta após a mudança.'),
+    ('amazon-eks', 'escalonamento-incorreto-de-daemonsets', 'caution', 1,
+        'Agentes por nó podem ser essenciais', 'Reduzir réplicas ou remover agentes de rede, segurança, logs ou storage pode afetar todos os workloads e a operação do cluster.'),
+
+    ('amazon-eks', 'excesso-de-monitoramento-com-container-insights-sem-filtros', 'check', 1,
+        'Identifique modo e granularidade', 'Verifique Container Insights original, enhanced observability ou OTel, métricas/logs emitidos e níveis cluster, node, namespace, pod e container.'),
+    ('amazon-eks', 'excesso-de-monitoramento-com-container-insights-sem-filtros', 'check', 2,
+        'Localize fontes e cardinalidade', 'Compare performance log events, dimensions/labels, grupos de logs, ingestão e consumidores de alarmes, dashboards e diagnósticos.'),
+    ('amazon-eks', 'excesso-de-monitoramento-com-container-insights-sem-filtros', 'action', 1,
+        'Reduza coleta de forma orientada', 'Desative granularidade ou fontes não utilizadas apenas após confirmar necessidades de operação, segurança e incident response; defina retenção para grupos de performance.'),
+    ('amazon-eks', 'excesso-de-monitoramento-com-container-insights-sem-filtros', 'caution', 1,
+        'Modelo de cobrança depende da configuração', 'Container Insights original e enhanced observability para EKS têm modelos distintos; confira a cobrança vigente e não remova métricas usadas por autoscaling ou alertas.'),
+
+    ('amazon-eks', 'falta-de-governanca-em-namespaces-de-desenvolvedores', 'check', 1,
+        'Identifique ownership e atividade', 'Liste namespaces de dev/test, equipe responsável, deployments, jobs, serviços, PVCs, load balancers e data da última atividade.'),
+    ('amazon-eks', 'falta-de-governanca-em-namespaces-de-desenvolvedores', 'check', 2,
+        'Revise quotas e isolamento', 'Confira ResourceQuotas, LimitRanges, requests/limits, RBAC, network policies e requisitos para workloads compartilhados entre equipes.'),
+    ('amazon-eks', 'falta-de-governanca-em-namespaces-de-desenvolvedores', 'action', 1,
+        'Defina owner e ciclo de vida', 'Aplique labels e quotas por equipe, estabeleça prazo de revisão e remova workloads ou namespaces só depois da confirmação do responsável e backup aprovado.'),
+    ('amazon-eks', 'falta-de-governanca-em-namespaces-de-desenvolvedores', 'caution', 1,
+        'Namespace não isola todos os recursos', 'Recursos compartilhados do cluster, control plane, rede e permissões podem atravessar namespaces; alguns ambientes exigem clusters separados.'),
+
+    ('amazon-eks', 'configuracao-excessiva-de-replicas-por-falta-de-teste-de-carga', 'check', 1,
+        'Meça saturação por workload', 'Compare réplicas atuais com taxa de requisição, latência, concorrência, CPU/memória e pressão nos serviços downstream sob carga representativa.'),
+    ('amazon-eks', 'configuracao-excessiva-de-replicas-por-falta-de-teste-de-carga', 'check', 2,
+        'Revise requests e escala', 'Confirme se HPA usa métrica que representa saturação, se há min/max adequados e se requests estão alinhados à utilização.'),
+    ('amazon-eks', 'configuracao-excessiva-de-replicas-por-falta-de-teste-de-carga', 'action', 1,
+        'Execute teste e ajuste gradualmente', 'Teste cenários de pico em ambiente controlado e reduza réplicas mínimas ou ative HPA somente após validar SLO, PDB e capacidade de escalar.'),
+    ('amazon-eks', 'configuracao-excessiva-de-replicas-por-falta-de-teste-de-carga', 'caution', 1,
+        'Não reduza capacidade com base em média simples', 'Picos, inicialização lenta, quotas, PDBs e dependências podem tornar a redução indisponível ou aumentar latência e throttling.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-eks', 'provisionamento-ineficiente-de-volumes-persistentes-ebs-pvcs',
+        'Use Kubernetes volume storage with Amazon EBS', 'https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html'),
+    ('amazon-eks', 'escalonamento-incorreto-de-daemonsets',
+        'EKS node and workload efficiency', 'https://docs.aws.amazon.com/eks/latest/best-practices/node_and_workload_efficiency.html'),
+    ('amazon-eks', 'escalonamento-incorreto-de-daemonsets',
+        'EKS Compute and Autoscaling cost optimization', 'https://docs.aws.amazon.com/eks/latest/best-practices/cost-opt-compute.html'),
+    ('amazon-eks', 'excesso-de-monitoramento-com-container-insights-sem-filtros',
+        'Container Insights', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html'),
+    ('amazon-eks', 'falta-de-governanca-em-namespaces-de-desenvolvedores',
+        'EKS workload scaling best practices', 'https://docs.aws.amazon.com/eks/latest/best-practices/scale-workloads.html'),
+    ('amazon-eks', 'configuracao-excessiva-de-replicas-por-falta-de-teste-de-carga',
+        'EKS Compute and Autoscaling cost optimization', 'https://docs.aws.amazon.com/eks/latest/best-practices/cost-opt-compute.html'),
+    ('amazon-eks', 'configuracao-excessiva-de-replicas-por-falta-de-teste-de-carga',
+        'EKS node and workload efficiency', 'https://docs.aws.amazon.com/eks/latest/best-practices/node_and_workload_efficiency.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-eks', 'acumulo-de-imagens-de-conteineres-orfas-nos-nos',
+        'Acúmulo de Imagens de Contêineres Órfãs nos Nós',
+        'Investigue pressão de disco e imagens locais não utilizadas nos nodes antes de alterar retenção ou substituir instâncias.'),
+    ('amazon-eks', 'duplicacao-de-componentes-de-rede-e-service-mesh-pesados',
+        'Duplicação de Componentes de Rede e Service Mesh Pesados',
+        'Mapeie proxies e componentes de rede por workload, meça recursos e confirme suporte do service mesh antes de consolidar ou migrar.'),
+    ('amazon-eks', 'trafego-de-saida-excessivo-via-nat-gateway-a-partir-dos-pods',
+        'Tráfego de Saída Excessivo via NAT Gateway a partir dos Pods',
+        'Identifique destinos acessados por Pods e valide endpoints VPC e rotas privadas para serviços AWS compatíveis.'),
+    ('amazon-eks', 'ausencia-de-pod-disruption-budgets-pdbs-em-pods-criticos',
+        'Ausência de Pod Disruption Budgets (PDBs) em Pods Críticos',
+        'Revise tolerância a indisponibilidade e política de evicção voluntária para workloads críticos durante manutenção e autoscaling.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-eks', 'acumulo-de-imagens-de-conteineres-orfas-nos-nos', 'check', 1,
+        'Meça pressão de disco nos nodes', 'Revise espaço disponível em imagefs/nodefs, métricas e eventos de DiskPressure e identifique nodes e workloads afetados.'),
+    ('amazon-eks', 'acumulo-de-imagens-de-conteineres-orfas-nos-nos', 'check', 2,
+        'Inspecione imagens e uso recente', 'Correlacione images locais, pods ativos, pull time, churn de deployments e política de atualização da AMI/runtime.'),
+    ('amazon-eks', 'acumulo-de-imagens-de-conteineres-orfas-nos-nos', 'action', 1,
+        'Use limpeza e ciclo de node suportados', 'Aplique o mecanismo de garbage collection do kubelet/runtime e, em managed node groups, planeje drain e substituição gradual se a capacidade estiver degradada.'),
+    ('amazon-eks', 'acumulo-de-imagens-de-conteineres-orfas-nos-nos', 'caution', 1,
+        'Não remova arquivos ativos do container runtime manualmente', 'Apagar conteúdo direto do diretório do containerd pode corromper imagens ou tarefas em execução; valide política de retenção e rollback antes de reciclar nodes.'),
+
+    ('amazon-eks', 'duplicacao-de-componentes-de-rede-e-service-mesh-pesados', 'check', 1,
+        'Inventarie proxies e controladores', 'Liste sidecars, controladores de rede, mesh, requests/limits e recursos por Pod; identifique componentes que fazem a mesma função.'),
+    ('amazon-eks', 'duplicacao-de-componentes-de-rede-e-service-mesh-pesados', 'check', 2,
+        'Confirme função e suporte do mesh', 'Verifique quais workloads dependem de mTLS, retries, traffic management e telemetria; confirme o ciclo de suporte do produto implantado.'),
+    ('amazon-eks', 'duplicacao-de-componentes-de-rede-e-service-mesh-pesados', 'action', 1,
+        'Remova duplicação com migração controlada', 'Para componentes redundantes, compare uma arquitetura simplificada em staging; se usar AWS App Mesh, planeje migração para alternativa suportada antes do fim do acesso ao serviço.'),
+    ('amazon-eks', 'duplicacao-de-componentes-de-rede-e-service-mesh-pesados', 'caution', 1,
+        'AWS App Mesh encerrou suporte', 'A AWS encerrou suporte ao App Mesh em 30 de setembro de 2026; não inicie uma implantação nova e planeje migração preservando roteamento, identidade e observabilidade.'),
+
+    ('amazon-eks', 'trafego-de-saida-excessivo-via-nat-gateway-a-partir-dos-pods', 'check', 1,
+        'Identifique serviços e volumes de saída', 'Use VPC Flow Logs e métricas do NAT para agrupar destinos, portas, AZs e volume gerado por workloads e nodes.'),
+    ('amazon-eks', 'trafego-de-saida-excessivo-via-nat-gateway-a-partir-dos-pods', 'check', 2,
+        'Revise endpoints e requisitos privados', 'Confirme quais destinos são AWS APIs, ECR, CloudWatch Logs, STS, EKS Auth, APIs públicas ou serviços on-premises.'),
+    ('amazon-eks', 'trafego-de-saida-excessivo-via-nat-gateway-a-partir-dos-pods', 'action', 1,
+        'Configure endpoints para destinos compatíveis', 'Para serviços AWS usados pelos Pods ou nodes, crie os endpoints de interface/gateway exigidos, configure private DNS e valide permissões e rotas.'),
+    ('amazon-eks', 'trafego-de-saida-excessivo-via-nat-gateway-a-partir-dos-pods', 'caution', 1,
+        'Nem todo tráfego pode evitar NAT', 'Acesso a serviços públicos e destinos sem endpoint privado pode continuar exigindo saída NAT; endpoints de interface têm preço e VPC endpoints são regionais.'),
+
+    ('amazon-eks', 'ausencia-de-pod-disruption-budgets-pdbs-em-pods-criticos', 'check', 1,
+        'Identifique workloads críticos e evicções', 'Revise réplicas disponíveis, readiness, manutenção de nodes, upgrades, autoscaler e interrupções planejadas de Pods.'),
+    ('amazon-eks', 'ausencia-de-pod-disruption-budgets-pdbs-em-pods-criticos', 'check', 2,
+        'Valide selector e orçamento atual', 'Confirme que o selector do PDB corresponde aos Pods corretos e compare minAvailable ou maxUnavailable com réplicas e capacidade de recuperação.'),
+    ('amazon-eks', 'ausencia-de-pod-disruption-budgets-pdbs-em-pods-criticos', 'action', 1,
+        'Defina proteção e teste evicção', 'Crie um PDB compatível com o objetivo de disponibilidade e teste drain/upgrade em staging, observando se o autoscaler consegue remover nós.'),
+    ('amazon-eks', 'ausencia-de-pod-disruption-budgets-pdbs-em-pods-criticos', 'caution', 1,
+        'PDB não impede toda interrupção', 'PDB restritivo pode bloquear scale-down; reduções de desired count e AZRebalance em managed node groups podem terminar Pods sem respeitá-lo após o período de drenagem.' )
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-eks', 'acumulo-de-imagens-de-conteineres-orfas-nos-nos',
+        'Troubleshoot problems with Amazon EKS clusters and nodes', 'https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html'),
+    ('amazon-eks', 'acumulo-de-imagens-de-conteineres-orfas-nos-nos',
+        'Create nodes with optimized Amazon Linux AMIs', 'https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html'),
+    ('amazon-eks', 'duplicacao-de-componentes-de-rede-e-service-mesh-pesados',
+        'What Is AWS App Mesh?', 'https://docs.aws.amazon.com/app-mesh/latest/userguide/what-is-app-mesh.html'),
+    ('amazon-eks', 'duplicacao-de-componentes-de-rede-e-service-mesh-pesados',
+        'EKS node and workload efficiency', 'https://docs.aws.amazon.com/eks/latest/best-practices/node_and_workload_efficiency.html'),
+    ('amazon-eks', 'trafego-de-saida-excessivo-via-nat-gateway-a-partir-dos-pods',
+        'Deploy private clusters with limited internet access', 'https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html'),
+    ('amazon-eks', 'ausencia-de-pod-disruption-budgets-pdbs-em-pods-criticos',
+        'EKS Compute and Autoscaling cost optimization', 'https://docs.aws.amazon.com/eks/latest/best-practices/cost-opt-compute.html'),
+    ('amazon-eks', 'ausencia-de-pod-disruption-budgets-pdbs-em-pods-criticos',
+        'Simplify node lifecycle with managed node groups', 'https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ebs', 'sobredimensionamento-do-tamanho-do-disco-over-provisioning-storage',
+        'Sobredimensionamento do Tamanho do Disco (Over-provisioning Storage)',
+        'Compare capacidade alocada com uso do filesystem e recomendações EBS antes de migrar dados para um volume menor.'),
+    ('amazon-ebs', 'retencao-prolongada-de-backups-automaticos-do-amazon-data-lifecycle-manager-dlm',
+        'Retenção Prolongada de Backups Automáticos do Amazon Data Lifecycle Manager (DLM)',
+        'Revise agenda e retenção de snapshots gerenciados por DLM conforme recuperação, auditoria e retenção aprovada.'),
+    ('amazon-ebs', 'falta-de-monitoramento-de-iops-e-latencia-de-disco-volumequeuelength',
+        'Falta de Monitoramento de IOPS e Latência de Disco (VolumeQueueLength)',
+        'Avalie IOPS, throughput, fila e latência do volume junto com os limites da instância e a carga da aplicação.'),
+    ('amazon-ebs', 'ausencia-de-redimensionamento-dinamico-elastic-volumes',
+        'Ausência de Redimensionamento Dinâmico (Elastic Volumes)',
+        'Verifique suporte a Elastic Volumes e planeje modificações de tipo, capacidade e desempenho sem recriar a instância quando possível.'),
+    ('amazon-ebs', 'discos-de-instancias-desativadas-stopped-instances-cobrados-continuamente',
+        'Discos de Instâncias Desativadas (Stopped Instances) Cobrados Continuamente',
+        'Inspecione volumes EBS associados a instâncias paradas e confirme quais dados, backups e volumes precisam permanecer.'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms',
+        'Faltas de Alertas de Capacidade de Espaço em Disco (FreeSpace Alarms)',
+        'Monitore espaço livre no filesystem e crescimento do volume para detectar pressão antes de uma condição de disco cheio.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ebs', 'sobredimensionamento-do-tamanho-do-disco-over-provisioning-storage', 'check', 1,
+        'Compare capacidade e uso real', 'Meça espaço alocado, espaço usado no filesystem, crescimento, snapshots e períodos de pico para cada volume.'),
+    ('amazon-ebs', 'sobredimensionamento-do-tamanho-do-disco-over-provisioning-storage', 'check', 2,
+        'Revise desempenho e alternativas', 'Compare recomendações do Compute Optimizer, tipo, IOPS, throughput, tamanho mínimo do filesystem e requisitos de recuperação.'),
+    ('amazon-ebs', 'sobredimensionamento-do-tamanho-do-disco-over-provisioning-storage', 'action', 1,
+        'Migre dados se precisar reduzir capacidade', 'EBS Elastic Volumes permite aumentar tamanho e alterar tipo/performance, mas não reduzir o tamanho; para diminuir, crie volume menor e migre os dados com plano de rollback.'),
+    ('amazon-ebs', 'sobredimensionamento-do-tamanho-do-disco-over-provisioning-storage', 'caution', 1,
+        'Não reduza baseado apenas no uso atual', 'Dados temporários, picos, expansão de filesystem e tempo de cópia podem alterar a capacidade necessária; valide backup e recuperação antes da migração.'),
+
+    ('amazon-ebs', 'retencao-prolongada-de-backups-automaticos-do-amazon-data-lifecycle-manager-dlm', 'check', 1,
+        'Revise política e snapshots gerenciados', 'Inspecione políticas DLM, tags de seleção, frequência, retenção, cópias entre regiões e requisitos de restauração ou auditoria.'),
+    ('amazon-ebs', 'retencao-prolongada-de-backups-automaticos-do-amazon-data-lifecycle-manager-dlm', 'check', 2,
+        'Confirme origem das cópias', 'Verifique se os snapshots foram criados pelo próprio DLM; a política não administra snapshots produzidos por outros meios.'),
+    ('amazon-ebs', 'retencao-prolongada-de-backups-automaticos-do-amazon-data-lifecycle-manager-dlm', 'action', 1,
+        'Ajuste retenção com teste', 'Após aprovação dos responsáveis, atualize política DLM e valide snapshots de teste e eventos de criação/expiração antes de ampliar o escopo.'),
+    ('amazon-ebs', 'retencao-prolongada-de-backups-automaticos-do-amazon-data-lifecycle-manager-dlm', 'caution', 1,
+        'Preserve janelas obrigatórias de recuperação', 'Reduzir retenção pode eliminar pontos de restauração exigidos; retenção de snapshots em regiões ou contas distintas deve ser avaliada separadamente.'),
+
+    ('amazon-ebs', 'falta-de-monitoramento-de-iops-e-latencia-de-disco-volumequeuelength', 'check', 1,
+        'Analise métricas no período da lentidão', 'Compare VolumeReadOps, VolumeWriteOps, VolumeQueueLength, throughput, BurstBalance quando aplicável e latência durante picos.'),
+    ('amazon-ebs', 'falta-de-monitoramento-de-iops-e-latencia-de-disco-volumequeuelength', 'check', 2,
+        'Diferencie volume de limite da instância', 'Verifique tipo e IOPS provisionados do volume, limite EBS da instância, I/O size e natureza sequencial ou aleatória da carga.'),
+    ('amazon-ebs', 'falta-de-monitoramento-de-iops-e-latencia-de-disco-volumequeuelength', 'action', 1,
+        'Alarme em sinais de saturação', 'Crie alarmes para fila, IOPS/throughput excedidos ou latência sustentada com limiares definidos a partir do SLO e histórico.'),
+    ('amazon-ebs', 'falta-de-monitoramento-de-iops-e-latencia-de-disco-volumequeuelength', 'caution', 1,
+        'Uma fila alta isolada não prova falta de IOPS', 'Interpretação depende de tamanho de I/O, concorrência, volume, instância e comportamento da aplicação; métricas de latência podem não estar disponíveis em todos os tipos de instância.'),
+
+    ('amazon-ebs', 'ausencia-de-redimensionamento-dinamico-elastic-volumes', 'check', 1,
+        'Confirme suporte e estado', 'Verifique tipo, instância, estado do volume, alterações anteriores e se a modificação pode ocorrer enquanto o volume está anexado.'),
+    ('amazon-ebs', 'ausencia-de-redimensionamento-dinamico-elastic-volumes', 'check', 2,
+        'Planeje capacidade e filesystem', 'Calcule o novo tamanho e desempenho, confirme limites do filesystem e verifique se será necessário expandir partição ou filesystem no sistema operacional.'),
+    ('amazon-ebs', 'ausencia-de-redimensionamento-dinamico-elastic-volumes', 'action', 1,
+        'Modifique o volume e acompanhe estado', 'Use Elastic Volumes quando suportado, monitore a modificação até completed e expanda filesystem com procedimento apropriado.'),
+    ('amazon-ebs', 'ausencia-de-redimensionamento-dinamico-elastic-volumes', 'caution', 1,
+        'Modificação não pode ser cancelada nem reduzir o tamanho', 'A operação pode levar horas e não pode ser cancelada; volumes só podem ser aumentados, e a nova configuração passa a ser cobrada quando a modificação começa.'),
+
+    ('amazon-ebs', 'discos-de-instancias-desativadas-stopped-instances-cobrados-continuamente', 'check', 1,
+        'Localize volumes em instâncias paradas', 'Liste instâncias stopped e volumes attached/available com tamanho, tipo, tags, owner, snapshots e uso esperado no próximo start.'),
+    ('amazon-ebs', 'discos-de-instancias-desativadas-stopped-instances-cobrados-continuamente', 'check', 2,
+        'Confirme dados preservados e recursos auxiliares', 'Verifique volume raiz, data volumes, snapshots, interfaces de rede, endereços e dependências da aplicação antes de qualquer limpeza.'),
+    ('amazon-ebs', 'discos-de-instancias-desativadas-stopped-instances-cobrados-continuamente', 'action', 1,
+        'Remova apenas volumes aprovados', 'Se a instância permanecer parada, faça snapshot aprovado e exclua volumes comprovadamente desnecessários; considere agendar start/stop se a instância precisar continuar disponível.'),
+    ('amazon-ebs', 'discos-de-instancias-desativadas-stopped-instances-cobrados-continuamente', 'caution', 1,
+        'Parar instância preserva EBS e dados podem continuar cobrados', 'Instâncias EBS-backed podem ser iniciadas novamente, mas dados em instance store são apagados ao parar; excluir volumes permanentes é uma ação distinta e destrutiva.'),
+
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms', 'check', 1,
+        'Meça espaço no sistema operacional', 'Colete disk_free e disk_used_percent com CloudWatch Agent por filesystem e dispositivo; métricas nativas EBS não indicam arquivos livres dentro do filesystem.'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms', 'check', 2,
+        'Compare crescimento e capacidade provisionada', 'Revise tendência de uso, logs, arquivos temporários, alertas de EBS volume modification e margem necessária para crescimento.'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms', 'action', 1,
+        'Configure alarmes por filesystem', 'Publique métricas do CloudWatch Agent com dimensões adequadas e crie alarmes para espaço absoluto e percentual, testando notificação e runbook.'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms', 'caution', 1,
+        'Filesystem livre e volume EBS são medidas diferentes', 'Aumentar o volume não libera espaço ocupado por arquivos; expanda partição/filesystem quando necessário e monitore inodes além de bytes.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ebs', 'sobredimensionamento-do-tamanho-do-disco-over-provisioning-storage',
+        'Viewing Amazon EBS volume recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-ebs-recommendations.html'),
+    ('amazon-ebs', 'sobredimensionamento-do-tamanho-do-disco-over-provisioning-storage',
+        'Modify an Amazon EBS volume using Elastic Volumes operations', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html'),
+    ('amazon-ebs', 'retencao-prolongada-de-backups-automaticos-do-amazon-data-lifecycle-manager-dlm',
+        'Automate backups with Amazon Data Lifecycle Manager', 'https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html'),
+    ('amazon-ebs', 'falta-de-monitoramento-de-iops-e-latencia-de-disco-volumequeuelength',
+        'Amazon CloudWatch metrics for Amazon EBS', 'https://docs.aws.amazon.com/ebs/latest/userguide/using_cloudwatch_ebs.html'),
+    ('amazon-ebs', 'falta-de-monitoramento-de-iops-e-latencia-de-disco-volumequeuelength',
+        'Amazon EBS volume recommendations', 'https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-ebs-recommendations.html'),
+    ('amazon-ebs', 'ausencia-de-redimensionamento-dinamico-elastic-volumes',
+        'Modify an Amazon EBS volume using Elastic Volumes operations', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html'),
+    ('amazon-ebs', 'discos-de-instancias-desativadas-stopped-instances-cobrados-continuamente',
+        'Stop and start Amazon EC2 instances', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html'),
+    ('amazon-ebs', 'discos-de-instancias-desativadas-stopped-instances-cobrados-continuamente',
+        'Amazon EBS pricing', 'https://aws.amazon.com/ebs/pricing/'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms',
+        'Metrics collected by the CloudWatch agent', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/metrics-collected-by-CloudWatch-agent.html'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms',
+        'View information about an Amazon EBS volume', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-describing-volumes.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ebs', 'espelhamento-de-ambientes-de-staging-com-discos-identicos-aos-de-producao',
+        'Espelhamento de Ambientes de Staging com Discos Idênticos aos de Produção',
+        'Dimensione ambientes não produtivos pelo uso e requisitos de teste, evitando manter cópias completas de discos sem necessidade.'),
+    ('amazon-ebs', 'falta-de-uso-de-compressao-em-logs-armazenados-diretamente-em-disco',
+        'Falta de Uso de Compressão em Logs Armazenados Diretamente em Disco',
+        'Identifique crescimento de logs locais e aplique rotação, compressão ou encaminhamento com retenção adequada.'),
+    ('amazon-ebs', 'discos-de-dados-temporarios-scratch-space-alocados-permanentemente',
+        'Discos de Dados Temporários (Scratch Space) Alocados Permanentemente',
+        'Separe dados temporários de persistentes e use armazenamento efêmero ou ciclos de vida automatizados quando a carga permitir.'),
+    ('amazon-ebs', 'clones-de-bancos-de-dados-legados-mantidos-em-discos-separados',
+        'Clones de Bancos de Dados Legados Mantidos em Discos Separados',
+        'Revise cópias de banco usadas em testes e substitua clones permanentes por cópias sob demanda, com retenção e mascaramento controlados.'),
+    ('amazon-ebs', 'falta-de-criptografia-em-discos-antigos-impedindo-otimizacoes-de-copia',
+        'Falta de Criptografia em Discos Antigos (Impedindo Otimizações de Cópia)',
+        'Inventarie volumes sem criptografia e planeje migração para volumes criptografados com chave KMS aprovada.'),
+    ('amazon-ebs', 'uso-de-tipos-de-instancias-ec2-que-exigem-volumes-ebs-dedicados-extras',
+        'Uso de Tipos de Instâncias EC2 que Exigem Volumes EBS Dedicados Extras',
+        'Compare limites EBS por tipo de instância com o perfil de I/O antes de adicionar volumes ou redimensionar a instância.'),
+    ('amazon-ebs', 'fragmentacao-de-multiplos-discos-pequenos-em-vez-de-um-volume-otimizado',
+        'Fragmentação de Múltiplos Discos Pequenos em Vez de Um Volume Otimizado',
+        'Avalie se a fragmentação em muitos volumes ainda atende isolamento e desempenho ou se a consolidação reduz complexidade.'),
+    ('amazon-ebs', 'snapshots-incrementais-inflados-por-alteracoes-constantes-de-blocos',
+        'Snapshots Incrementais Inflados por Alterações Constantes de Blocos',
+        'Correlacione churn de blocos, frequência de snapshots e retenção para controlar crescimento sem perder pontos de recuperação necessários.'),
+    ('amazon-ebs', 'uso-de-ebs-em-vez-de-amazon-efs-para-arquivos-compartilhados-entre-instancias',
+        'Uso de EBS em Vez de Amazon EFS para Arquivos Compartilhados Entre Instâncias',
+        'Identifique requisitos reais de acesso concorrente a arquivos e escolha armazenamento compartilhado ou em bloco conforme a semântica da aplicação.'),
+    ('amazon-ebs', 'replicas-e-backups-cruzados-entre-regioes-sem-necessidade-regulatoria',
+        'Réplicas e Backups Cruzados entre Regiões sem Necessidade Regulatória',
+        'Revise cópias de snapshots entre regiões em relação a objetivos de recuperação, requisitos de residência e custos de transferência e retenção.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ebs', 'espelhamento-de-ambientes-de-staging-com-discos-identicos-aos-de-producao', 'check', 1,
+        'Meça o perfil do ambiente não produtivo', 'Compare capacidade usada, IOPS, throughput, horas de execução e dados necessários para os testes; não use somente o tamanho do volume de produção como padrão.'),
+    ('amazon-ebs', 'espelhamento-de-ambientes-de-staging-com-discos-identicos-aos-de-producao', 'check', 2,
+        'Revise a origem e a proteção dos dados', 'Identifique snapshots e cópias de volumes usados para staging, controles de acesso, mascaramento e políticas de retenção.'),
+    ('amazon-ebs', 'espelhamento-de-ambientes-de-staging-com-discos-identicos-aos-de-producao', 'action', 1,
+        'Reduza e automatize ambientes de teste', 'Crie volumes não produtivos dimensionados ao conjunto de dados necessário, aplique agendamento de criação/remoção e mantenha cópias de teste somente pelo período aprovado.'),
+    ('amazon-ebs', 'espelhamento-de-ambientes-de-staging-com-discos-identicos-aos-de-producao', 'caution', 1,
+        'Proteja dados de produção', 'Snapshots preservam os dados do volume no instante da cópia; aplique mascaramento e controles de acesso antes de disponibilizar cópias a equipes de teste.'),
+
+    ('amazon-ebs', 'falta-de-uso-de-compressao-em-logs-armazenados-diretamente-em-disco', 'check', 1,
+        'Localize o consumo de logs', 'Meça crescimento por diretório e filesystem, verifique rotação, duplicação, verbosidade e prazo de retenção dos logs locais.'),
+    ('amazon-ebs', 'falta-de-uso-de-compressao-em-logs-armazenados-diretamente-em-disco', 'check', 2,
+        'Compare armazenamento local e centralizado', 'Avalie CloudWatch Logs ou outro destino central com filtros e retenção, incluindo custos de ingestão e armazenamento.'),
+    ('amazon-ebs', 'falta-de-uso-de-compressao-em-logs-armazenados-diretamente-em-disco', 'action', 1,
+        'Aplique rotação e compressão segura', 'Configure rotação, compressão de arquivos encerrados e encaminhamento de eventos necessários para um destino com retenção definida.'),
+    ('amazon-ebs', 'falta-de-uso-de-compressao-em-logs-armazenados-diretamente-em-disco', 'caution', 1,
+        'Preserve auditoria e espaço de emergência', 'Não remova logs exigidos por auditoria; monitore espaço e inodes e evite comprimir arquivos que ainda estejam abertos pelo processo de escrita.'),
+
+    ('amazon-ebs', 'discos-de-dados-temporarios-scratch-space-alocados-permanentemente', 'check', 1,
+        'Identifique a classe de dados', 'Confirme se cada volume contém cache, temporários regeneráveis ou dados persistentes e verifique o ciclo de vida esperado da instância.'),
+    ('amazon-ebs', 'discos-de-dados-temporarios-scratch-space-alocados-permanentemente', 'check', 2,
+        'Verifique suporte a armazenamento local', 'Consulte o tipo e o tamanho da instância para confirmar a presença de instance store e avalie capacidade, desempenho e comportamento de persistência.'),
+    ('amazon-ebs', 'discos-de-dados-temporarios-scratch-space-alocados-permanentemente', 'action', 1,
+        'Automatize armazenamento temporário', 'Use instance store quando disponível e apropriado para dados regeneráveis; caso contrário, automatize criação, limpeza ou exclusão de volumes EBS conforme o ciclo da carga.'),
+    ('amazon-ebs', 'discos-de-dados-temporarios-scratch-space-alocados-permanentemente', 'caution', 1,
+        'Não trate armazenamento efêmero como backup', 'Dados em instance store podem ser perdidos ao parar, hibernar ou encerrar uma instância; mantenha cópias persistentes para qualquer dado necessário à recuperação.'),
+
+    ('amazon-ebs', 'clones-de-bancos-de-dados-legados-mantidos-em-discos-separados', 'check', 1,
+        'Inventarie clones e seus responsáveis', 'Relacione volumes, snapshots, instâncias consumidoras, última utilização, necessidade de teste e retenção autorizada.'),
+    ('amazon-ebs', 'clones-de-bancos-de-dados-legados-mantidos-em-discos-separados', 'check', 2,
+        'Compare alternativas de provisionamento', 'Avalie restauração de snapshot sob demanda, conjuntos de dados reduzidos e mecanismos próprios do banco para refresh de ambientes.'),
+    ('amazon-ebs', 'clones-de-bancos-de-dados-legados-mantidos-em-discos-separados', 'action', 1,
+        'Mantenha clones pelo tempo necessário', 'Automatize a criação de volumes a partir de snapshots para testes aprovados e remova clones após a janela definida, mantendo o ponto de recuperação requerido.'),
+    ('amazon-ebs', 'clones-de-bancos-de-dados-legados-mantidos-em-discos-separados', 'caution', 1,
+        'Valide desempenho e privacidade da restauração', 'Volumes restaurados podem precisar de inicialização para desempenho previsível; mascare dados sensíveis e teste consistência antes de usar o clone.'),
+
+    ('amazon-ebs', 'falta-de-criptografia-em-discos-antigos-impedindo-otimizacoes-de-copia', 'check', 1,
+        'Confirme estado de criptografia e chave', 'Inventarie volumes e snapshots não criptografados, classifique dados e valide políticas, permissões e disponibilidade das chaves KMS aprovadas.'),
+    ('amazon-ebs', 'falta-de-criptografia-em-discos-antigos-impedindo-otimizacoes-de-copia', 'check', 2,
+        'Planeje a migração de dados', 'Mapeie dependências, tamanho, janela de mudança, forma de sincronização e procedimento de retorno para cada volume legado.'),
+    ('amazon-ebs', 'falta-de-criptografia-em-discos-antigos-impedindo-otimizacoes-de-copia', 'action', 1,
+        'Crie uma cópia criptografada e faça a migração', 'Como não é possível criptografar diretamente um volume existente, crie snapshot e restaure um novo volume criptografado ou copie o snapshot com a chave KMS adequada; valide antes da troca.'),
+    ('amazon-ebs', 'falta-de-criptografia-em-discos-antigos-impedindo-otimizacoes-de-copia', 'caution', 1,
+        'Não interrompa acesso ao volume original prematuramente', 'A cópia pode exigir janela de manutenção e a chave KMS deve permanecer utilizável; mantenha rollback e só remova recursos antigos após validação e aprovação.'),
+
+    ('amazon-ebs', 'uso-de-tipos-de-instancias-ec2-que-exigem-volumes-ebs-dedicados-extras', 'check', 1,
+        'Meça desempenho agregado requerido', 'Compare IOPS e throughput dos volumes com os limites EBS da instância, o tamanho de I/O e os limites de anexação do tipo de instância.'),
+    ('amazon-ebs', 'uso-de-tipos-de-instancias-ec2-que-exigem-volumes-ebs-dedicados-extras', 'check', 2,
+        'Revise instâncias com armazenamento local', 'Confirme suporte e capacidade de instance store e diferencie esse armazenamento efêmero dos volumes EBS persistentes.'),
+    ('amazon-ebs', 'uso-de-tipos-de-instancias-ec2-que-exigem-volumes-ebs-dedicados-extras', 'action', 1,
+        'Ajuste o conjunto instância e volumes', 'Teste se volumes com tipo e desempenho adequados atendem à carga dentro do limite da instância; considere mudar o tipo da instância quando isso reduzir volumes extras sem degradar o serviço.'),
+    ('amazon-ebs', 'uso-de-tipos-de-instancias-ec2-que-exigem-volumes-ebs-dedicados-extras', 'caution', 1,
+        'A instância pode ser o gargalo', 'O desempenho efetivo é limitado pelo menor entre o agregado dos volumes e a capacidade EBS da instância; não mova dados persistentes para instance store sem estratégia de cópia.'),
+
+    ('amazon-ebs', 'fragmentacao-de-multiplos-discos-pequenos-em-vez-de-um-volume-otimizado', 'check', 1,
+        'Revise papel e métricas de cada volume', 'Mapeie filesystem, aplicação, IOPS, throughput, latência, snapshots e limites de instância para identificar volumes subutilizados ou sobrepostos.'),
+    ('amazon-ebs', 'fragmentacao-de-multiplos-discos-pequenos-em-vez-de-um-volume-otimizado', 'check', 2,
+        'Compare consolidação com isolamento', 'Estime o desempenho de um volume dimensionado para a carga e verifique se a separação atual é necessária para throughput, disponibilidade, segurança ou recuperação.'),
+    ('amazon-ebs', 'fragmentacao-de-multiplos-discos-pequenos-em-vez-de-um-volume-otimizado', 'action', 1,
+        'Consolide somente após teste', 'Migre dados para volume com tipo e desempenho verificados, atualize mounts e configuração da aplicação e observe a carga antes de remover volumes antigos.'),
+    ('amazon-ebs', 'fragmentacao-de-multiplos-discos-pequenos-em-vez-de-um-volume-otimizado', 'caution', 1,
+        'Evite consolidar cargas independentes às cegas', 'Um único volume pode mudar isolamento de falhas, janelas de backup e contenção de I/O; mantenha snapshots e plano de retorno durante a mudança.'),
+
+    ('amazon-ebs', 'snapshots-incrementais-inflados-por-alteracoes-constantes-de-blocos', 'check', 1,
+        'Correlacione churn com a cadeia de snapshots', 'Revise taxa de alteração de blocos, volume de escrita, frequência de snapshot, retenção e crescimento observado em cada região.'),
+    ('amazon-ebs', 'snapshots-incrementais-inflados-por-alteracoes-constantes-de-blocos', 'check', 2,
+        'Confirme pontos de recuperação necessários', 'Compare frequência e retenção com RPO, recuperação testada, obrigações regulatórias e necessidades de cópia entre contas ou regiões.'),
+    ('amazon-ebs', 'snapshots-incrementais-inflados-por-alteracoes-constantes-de-blocos', 'action', 1,
+        'Otimize a política sem perder recuperação', 'Ajuste cadência e expiração com DLM ou AWS Backup de acordo com requisitos aprovados e acompanhe armazenamento de snapshots ao longo do tempo.'),
+    ('amazon-ebs', 'snapshots-incrementais-inflados-por-alteracoes-constantes-de-blocos', 'caution', 1,
+        'Excluir um snapshot pode não reduzir armazenamento', 'Snapshots são incrementais e blocos referenciados por outros pontos são preservados; valide os efeitos da cadeia e a recuperação antes de excluir.'),
+
+    ('amazon-ebs', 'uso-de-ebs-em-vez-de-amazon-efs-para-arquivos-compartilhados-entre-instancias', 'check', 1,
+        'Confirme necessidade de compartilhamento', 'Verifique quantas instâncias precisam acessar simultaneamente os mesmos arquivos, consistência, bloqueios, latência, throughput e zona de disponibilidade.'),
+    ('amazon-ebs', 'uso-de-ebs-em-vez-de-amazon-efs-para-arquivos-compartilhados-entre-instancias', 'check', 2,
+        'Compare semântica e limites dos serviços', 'EBS é armazenamento em bloco anexado a instâncias; Multi-Attach é limitado a tipos e configurações específicos. EFS oferece filesystem compartilhado por NFS para clientes compatíveis.'),
+    ('amazon-ebs', 'uso-de-ebs-em-vez-de-amazon-efs-para-arquivos-compartilhados-entre-instancias', 'action', 1,
+        'Migre somente após teste funcional', 'Teste montagem, permissões, locks, throughput, latência e comportamento de falha no EFS; então migre dados e consumidores em etapas.'),
+    ('amazon-ebs', 'uso-de-ebs-em-vez-de-amazon-efs-para-arquivos-compartilhados-entre-instancias', 'caution', 1,
+        'EFS e EBS não são intercambiáveis por padrão', 'A migração altera protocolo e modelo de armazenamento e pode afetar custos e desempenho; mantenha backup, compatibilidade e plano de rollback.'),
+
+    ('amazon-ebs', 'replicas-e-backups-cruzados-entre-regioes-sem-necessidade-regulatoria', 'check', 1,
+        'Mapeie cópias e requisitos de recuperação', 'Liste snapshots copiados por região, conta e política; confirme responsáveis, RPO/RTO, residência de dados e necessidade de isolamento.'),
+    ('amazon-ebs', 'replicas-e-backups-cruzados-entre-regioes-sem-necessidade-regulatoria', 'check', 2,
+        'Revise custos e testes de restauração', 'Avalie armazenamento, cópia entre regiões e retenção, e verifique se os pontos de recuperação são restauráveis onde o plano de DR exige.'),
+    ('amazon-ebs', 'replicas-e-backups-cruzados-entre-regioes-sem-necessidade-regulatoria', 'action', 1,
+        'Restrinja cópias ao plano aprovado', 'Ajuste políticas DLM ou AWS Backup para manter destinos e janelas necessários e remova cópias comprovadamente excedentes após aprovação.'),
+    ('amazon-ebs', 'replicas-e-backups-cruzados-entre-regioes-sem-necessidade-regulatoria', 'caution', 1,
+        'Não elimine a proteção exigida pelo negócio', 'Backups em outra região podem ser necessários para recuperação ou conformidade mesmo sem obrigação legal explícita; teste o plano e preserve a retenção aprovada.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ebs', 'espelhamento-de-ambientes-de-staging-com-discos-identicos-aos-de-producao',
+        'Amazon EBS snapshots', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html'),
+    ('amazon-ebs', 'espelhamento-de-ambientes-de-staging-com-discos-identicos-aos-de-producao',
+        'Create a snapshot of an EBS volume', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-create-snapshot.html'),
+    ('amazon-ebs', 'falta-de-uso-de-compressao-em-logs-armazenados-diretamente-em-disco',
+        'Collect metrics, logs, and traces using the CloudWatch agent', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html'),
+    ('amazon-ebs', 'falta-de-uso-de-compressao-em-logs-armazenados-diretamente-em-disco',
+        'Metrics collected by the CloudWatch agent', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/metrics-collected-by-CloudWatch-agent.html'),
+    ('amazon-ebs', 'discos-de-dados-temporarios-scratch-space-alocados-permanentemente',
+        'Instance store temporary block storage for EC2 instances', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html'),
+    ('amazon-ebs', 'discos-de-dados-temporarios-scratch-space-alocados-permanentemente',
+        'Data persistence for Amazon EC2 instance store volumes', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-store-lifetime.html'),
+    ('amazon-ebs', 'clones-de-bancos-de-dados-legados-mantidos-em-discos-separados',
+        'Amazon EBS snapshots', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html'),
+    ('amazon-ebs', 'clones-de-bancos-de-dados-legados-mantidos-em-discos-separados',
+        'Create a snapshot of an EBS volume', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-create-snapshot.html'),
+    ('amazon-ebs', 'falta-de-criptografia-em-discos-antigos-impedindo-otimizacoes-de-copia',
+        'Amazon EBS encryption', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-encryption.html'),
+    ('amazon-ebs', 'falta-de-criptografia-em-discos-antigos-impedindo-otimizacoes-de-copia',
+        'Copy an Amazon EBS snapshot', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-copy-snapshot.html'),
+    ('amazon-ebs', 'uso-de-tipos-de-instancias-ec2-que-exigem-volumes-ebs-dedicados-extras',
+        'Amazon EBS-optimized instance types', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html'),
+    ('amazon-ebs', 'uso-de-tipos-de-instancias-ec2-que-exigem-volumes-ebs-dedicados-extras',
+        'Instance store temporary block storage for EC2 instances', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html'),
+    ('amazon-ebs', 'fragmentacao-de-multiplos-discos-pequenos-em-vez-de-um-volume-otimizado',
+        'Amazon EBS volume types', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html'),
+    ('amazon-ebs', 'fragmentacao-de-multiplos-discos-pequenos-em-vez-de-um-volume-otimizado',
+        'Amazon EBS volume performance', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-performance.html'),
+    ('amazon-ebs', 'snapshots-incrementais-inflados-por-alteracoes-constantes-de-blocos',
+        'Amazon EBS snapshots', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html'),
+    ('amazon-ebs', 'snapshots-incrementais-inflados-por-alteracoes-constantes-de-blocos',
+        'Automate backups with Amazon Data Lifecycle Manager', 'https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html'),
+    ('amazon-ebs', 'uso-de-ebs-em-vez-de-amazon-efs-para-arquivos-compartilhados-entre-instancias',
+        'What is Amazon Elastic File System?', 'https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html'),
+    ('amazon-ebs', 'uso-de-ebs-em-vez-de-amazon-efs-para-arquivos-compartilhados-entre-instancias',
+        'Amazon EBS volume types', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html'),
+    ('amazon-ebs', 'replicas-e-backups-cruzados-entre-regioes-sem-necessidade-regulatoria',
+        'Copy an Amazon EBS snapshot', 'https://docs.aws.amazon.com/ebs/latest/userguide/ebs-copy-snapshot.html'),
+    ('amazon-ebs', 'replicas-e-backups-cruzados-entre-regioes-sem-necessidade-regulatoria',
+        'Automate backups with Amazon Data Lifecycle Manager', 'https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ebs', 'ausencia-de-automacao-de-snapshots-via-amazon-dlm',
+        'Ausência de Automação de Snapshots via Amazon DLM',
+        'Automatize snapshots de volumes EBS com agenda, retenção e seleção por tags alinhadas aos objetivos de recuperação.'),
+    ('amazon-dynamodb', 'uso-incorreto-de-modo-on-demand-em-tabelas-com-trafego-alto-e-previsivel',
+        'Uso Incorreto de Modo On-Demand em Tabelas com Tráfego Alto e Previsível',
+        'Compare cobrança por requisição com capacidade provisionada para workloads estáveis, considerando variabilidade, autoscaling e custo de operação.'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-standard-infrequent-access-standard-ia',
+        'Falta de Uso do DynamoDB Standard-Infrequent Access (Standard-IA)',
+        'Avalie a classe Standard-IA para tabelas com dados acessados com pouca frequência, comparando armazenamento, requisições e índices.'),
+    ('amazon-dynamodb', 'hot-partitions-por-escolha-ruim-de-chave-de-particao-partition-key',
+        'Hot Partitions por Escolha Ruim de Chave de Partição (Partition Key)',
+        'Detecte concentração de leituras e gravações em poucas chaves e redesenhe a distribuição conforme padrões de acesso observados.'),
+    ('amazon-dynamodb', 'projecao-excessiva-de-atributos-em-indices-secundarios-globais-gsis',
+        'Projeção Excessiva de Atributos em Índices Secundários Globais (GSIs)',
+        'Reduza dados projetados em GSIs quando não forem necessários aos padrões de consulta, medindo efeitos em armazenamento, gravação e latência.'),
+    ('amazon-dynamodb', 'leitura-consistente-forte-strongly-consistent-reads-sem-necessidade',
+        'Leitura Consistente Forte (Strongly Consistent Reads) sem Necessidade',
+        'Use leituras eventualmente consistentes quando o caso de negócio tolerar dados recentes ainda não propagados e a economia de capacidade justificar.'),
+    ('amazon-dynamodb', 'consultas-com-scan-em-vez-de-query-em-tabelas-grandes',
+        'Consultas com Scan em Vez de Query em Tabelas Grandes',
+        'Substitua varreduras repetidas por consultas orientadas à chave ou índice quando os padrões de acesso permitirem.'),
+    ('amazon-dynamodb', 'falta-de-filtros-pre-invocacao-em-dynamodb-streams-com-aws-lambda',
+        'Falta de Filtros Pré-Invocação em DynamoDB Streams com AWS Lambda',
+        'Filtre registros irrelevantes no mapeamento de origem do evento quando compatível, reduzindo invocações que não produzem trabalho útil.'),
+    ('amazon-dynamodb', 'ausencia-de-politica-de-time-to-live-ttl-para-limpeza-automatica-de-dados',
+        'Ausência de Política de Time To Live (TTL) para Limpeza Automática de Dados',
+        'Use TTL para remover itens expirados que não precisam mais estar armazenados, com atributo numérico de época Unix e prazo de remoção compatível.'),
+    ('amazon-dynamodb', 'tamanho-excessivo-dos-itens-item-size-overhead',
+        'Tamanho Excessivo dos Itens (Item Size Overhead)',
+        'Reduza atributos e payloads não necessários em itens DynamoDB e armazene objetos grandes em um serviço apropriado como S3.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ebs', 'ausencia-de-automacao-de-snapshots-via-amazon-dlm', 'check', 1,
+        'Inventarie volumes e política de backup', 'Verifique tags de seleção, políticas DLM, horários, retenção, cópias entre regiões e resultados de snapshots recentes.'),
+    ('amazon-ebs', 'ausencia-de-automacao-de-snapshots-via-amazon-dlm', 'check', 2,
+        'Confirme requisitos de recuperação', 'Defina RPO, RTO, retenção regulatória, consistência necessária para aplicações e responsáveis por testar restaurações.'),
+    ('amazon-ebs', 'ausencia-de-automacao-de-snapshots-via-amazon-dlm', 'action', 1,
+        'Implemente política DLM validada', 'Crie política com tags e agenda aprovadas, retenha cópias necessárias e monitore eventos e falhas de execução.'),
+    ('amazon-ebs', 'ausencia-de-automacao-de-snapshots-via-amazon-dlm', 'caution', 1,
+        'Teste restauração e não misture origens', 'DLM gerencia snapshots criados pela própria política, não snapshots produzidos por outros meios; teste a restauração e preserve cópias isoladas exigidas pelo plano de recuperação.'),
+
+    ('amazon-dynamodb', 'uso-incorreto-de-modo-on-demand-em-tabelas-com-trafego-alto-e-previsivel', 'check', 1,
+        'Compare demanda e consumo faturado', 'Analise histórico de requisições, picos, previsibilidade, throttling, capacidade consumida e custos de tabela e índices.'),
+    ('amazon-dynamodb', 'uso-incorreto-de-modo-on-demand-em-tabelas-com-trafego-alto-e-previsivel', 'check', 2,
+        'Modele provisionado com margem', 'Projete RCUs e WCUs de tabela e GSIs usando período representativo e considere autoscaling, capacidade mínima, picos e sazonalidade.'),
+    ('amazon-dynamodb', 'uso-incorreto-de-modo-on-demand-em-tabelas-com-trafego-alto-e-previsivel', 'action', 1,
+        'Teste o modo com dados reais', 'Compare modos em carga representativa e migre para provisionado somente quando a economia medida compensar o planejamento e a operação.'),
+    ('amazon-dynamodb', 'uso-incorreto-de-modo-on-demand-em-tabelas-com-trafego-alto-e-previsivel', 'caution', 1,
+        'Tráfego alto não significa custo sempre previsível', 'On-demand evita provisionamento manual, mas cobra por requisição; provisionado cobra capacidade provisionada e pode sofrer throttling se a capacidade estiver abaixo da demanda.'),
+
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-standard-infrequent-access-standard-ia', 'check', 1,
+        'Meça frequência e distribuição de acesso', 'Avalie idade dos dados, requisições de leitura/escrita, armazenamento da tabela e GSIs e impacto de padrões sazonais.'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-standard-infrequent-access-standard-ia', 'check', 2,
+        'Compare custo total por classe', 'Use preços atuais da região para comparar armazenamento e requisições; considere tamanho da tabela, acessos e custos associados aos índices.'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-standard-infrequent-access-standard-ia', 'action', 1,
+        'Teste mudança de classe', 'Para tabelas elegíveis, simule ou aplique a classe Standard-IA em janela controlada e acompanhe faturamento e desempenho.'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-standard-infrequent-access-standard-ia', 'caution', 1,
+        'Armazenamento mais barato pode elevar outros componentes', 'Standard-IA pode ter cobrança maior por requisição; não escolha a classe apenas pela frequência de acesso sem considerar taxas de leitura, gravação e índice.'),
+
+    ('amazon-dynamodb', 'hot-partitions-por-escolha-ruim-de-chave-de-particao-partition-key', 'check', 1,
+        'Localize chaves e padrões concentrados', 'Analise throttling, métricas de consumo e chaves quentes durante picos; verifique cardinalidade e distribuição de leituras e gravações.'),
+    ('amazon-dynamodb', 'hot-partitions-por-escolha-ruim-de-chave-de-particao-partition-key', 'check', 2,
+        'Confirme a causa no padrão de acesso', 'Compare limites da tabela, tamanho dos itens, partições e índices secundários; capacidade adaptativa não elimina todos os efeitos de uma chave concentrada.'),
+    ('amazon-dynamodb', 'hot-partitions-por-escolha-ruim-de-chave-de-particao-partition-key', 'action', 1,
+        'Redesenhe a distribuição quando necessário', 'Considere chave com maior cardinalidade, sharding de escrita ou alteração de modelo e valide em teste de carga antes de migrar dados e consumidores.'),
+    ('amazon-dynamodb', 'hot-partitions-por-escolha-ruim-de-chave-de-particao-partition-key', 'caution', 1,
+        'Sharding aumenta complexidade de leitura', 'Distribuir uma chave em múltiplas chaves pode exigir fan-out, agregação e mudanças de consistência; avalie impacto funcional e operacional.'),
+
+    ('amazon-dynamodb', 'projecao-excessiva-de-atributos-em-indices-secundarios-globais-gsis', 'check', 1,
+        'Mapeie atributos realmente consultados', 'Compare projeção de cada GSI com consultas e respostas da aplicação; observe tamanho do índice, armazenamento e consumo de gravação.'),
+    ('amazon-dynamodb', 'projecao-excessiva-de-atributos-em-indices-secundarios-globais-gsis', 'check', 2,
+        'Revise efeitos em atualizações', 'Identifique itens e atributos que alteram entradas projetadas, tráfego de escrita e possíveis limitações de capacidade do índice.'),
+    ('amazon-dynamodb', 'projecao-excessiva-de-atributos-em-indices-secundarios-globais-gsis', 'action', 1,
+        'Reduza projeções sem uso comprovado', 'Planeje novo GSI com KEYS_ONLY ou INCLUDE se os atributos necessários forem limitados; migre consultas e valide antes de remover índices antigos.'),
+    ('amazon-dynamodb', 'projecao-excessiva-de-atributos-em-indices-secundarios-globais-gsis', 'caution', 1,
+        'A mudança pode exigir reconstrução e alterar latência', 'GSIs não buscam atributos não projetados na tabela base; projetar menos pode exigir leituras adicionais e deve ser validado contra os padrões reais.'),
+
+    ('amazon-dynamodb', 'leitura-consistente-forte-strongly-consistent-reads-sem-necessidade', 'check', 1,
+        'Identifique operações com leitura forte', 'Localize ConsistentRead em GetItem, Query e Scan e determine quais fluxos realmente precisam refletir gravações recentes.'),
+    ('amazon-dynamodb', 'leitura-consistente-forte-strongly-consistent-reads-sem-necessidade', 'check', 2,
+        'Valide tolerância a dados eventualmente consistentes', 'Revise requisitos de saldo, autorização, idempotência e decisões transacionais com responsáveis de negócio antes de alterar consistência.'),
+    ('amazon-dynamodb', 'leitura-consistente-forte-strongly-consistent-reads-sem-necessidade', 'action', 1,
+        'Use leitura eventual nos fluxos elegíveis', 'Remova ConsistentRead apenas de operações cujo consumidor aceita eventual consistência e acompanhe consumo de capacidade e comportamento da aplicação.'),
+    ('amazon-dynamodb', 'leitura-consistente-forte-strongly-consistent-reads-sem-necessidade', 'caution', 1,
+        'Não é suportada em GSIs ou Streams', 'Leituras fortemente consistentes não estão disponíveis em GSIs; reduzir consistência pode expor temporariamente dados desatualizados e não deve ser feito em fluxos críticos sem validação.'),
+
+    ('amazon-dynamodb', 'consultas-com-scan-em-vez-de-query-em-tabelas-grandes', 'check', 1,
+        'Encontre varreduras frequentes', 'Inspecione chamadas Scan, itens avaliados e retornados, dados processados, throttling e frequência nas tabelas e GSIs.'),
+    ('amazon-dynamodb', 'consultas-com-scan-em-vez-de-query-em-tabelas-grandes', 'check', 2,
+        'Associe operação a padrão de acesso', 'Determine se os critérios podem ser expressos com partition key, sort key ou GSI; FilterExpression descarta resultados após a leitura e não evita o consumo das unidades lidas.'),
+    ('amazon-dynamodb', 'consultas-com-scan-em-vez-de-query-em-tabelas-grandes', 'action', 1,
+        'Modele uma consulta direcionada', 'Crie ou adapte chave/índice para consultas recorrentes, implemente paginação e compare consumo, latência e consistência sob carga.'),
+    ('amazon-dynamodb', 'consultas-com-scan-em-vez-de-query-em-tabelas-grandes', 'caution', 1,
+        'Nem todo Scan pode ser substituído diretamente', 'A consulta exige chave de partição; um novo GSI tem custos e limites próprios e deve corresponder a um padrão de acesso estável.'),
+
+    ('amazon-dynamodb', 'falta-de-filtros-pre-invocacao-em-dynamodb-streams-com-aws-lambda', 'check', 1,
+        'Meça eventos e invocações sem trabalho útil', 'Compare registros no stream com lotes recebidos, invocações, duração, erros, descartes e filtros já configurados.'),
+    ('amazon-dynamodb', 'falta-de-filtros-pre-invocacao-em-dynamodb-streams-com-aws-lambda', 'check', 2,
+        'Valide o formato dos eventos', 'Confirme quais tipos de evento e campos podem ser filtrados e se todas as alterações necessárias à aplicação continuam sendo entregues.'),
+    ('amazon-dynamodb', 'falta-de-filtros-pre-invocacao-em-dynamodb-streams-com-aws-lambda', 'action', 1,
+        'Configure critérios de filtro no mapeamento', 'Aplique event filtering ao event source mapping para encaminhar apenas registros pertinentes e monitore invocações, atraso e lotes descartados.'),
+    ('amazon-dynamodb', 'falta-de-filtros-pre-invocacao-em-dynamodb-streams-com-aws-lambda', 'caution', 1,
+        'Filtros não substituem tratamento de falha', 'Filtros incorretos podem ignorar eventos necessários; mantenha retentativas, destino de falha e alarmes para idade do registro e erros.'),
+
+    ('amazon-dynamodb', 'ausencia-de-politica-de-time-to-live-ttl-para-limpeza-automatica-de-dados', 'check', 1,
+        'Identifique dados realmente expirados', 'Revise requisitos de retenção, auditoria, recuperação, uso posterior e regras de expiração por tipo de item.'),
+    ('amazon-dynamodb', 'ausencia-de-politica-de-time-to-live-ttl-para-limpeza-automatica-de-dados', 'check', 2,
+        'Valide atributo e unidades do TTL', 'Confirme atributo numérico com timestamp Unix em segundos, valores válidos e efeitos de TTL em Streams e Global Tables.'),
+    ('amazon-dynamodb', 'ausencia-de-politica-de-time-to-live-ttl-para-limpeza-automatica-de-dados', 'action', 1,
+        'Habilite TTL para os itens elegíveis', 'Ative TTL no atributo aprovado, teste em uma amostra e monitore remoções e armazenamento após o período de expiração.'),
+    ('amazon-dynamodb', 'ausencia-de-politica-de-time-to-live-ttl-para-limpeza-automatica-de-dados', 'caution', 1,
+        'TTL não remove itens no instante exato', 'A exclusão ocorre de forma assíncrona e pode levar alguns dias; filtre itens expirados das respostas e não use TTL como mecanismo de retenção exata.'),
+
+    ('amazon-dynamodb', 'tamanho-excessivo-dos-itens-item-size-overhead', 'check', 1,
+        'Meça o tamanho e os atributos dominantes', 'Analise amostras representativas incluindo nomes de atributos, documentos, binários, overhead, índices projetados e unidades consumidas.'),
+    ('amazon-dynamodb', 'tamanho-excessivo-dos-itens-item-size-overhead', 'check', 2,
+        'Localize payloads que podem ficar fora da tabela', 'Identifique objetos grandes ou raramente consultados e avalie S3, mantendo na tabela apenas metadados e referências necessárias.'),
+    ('amazon-dynamodb', 'tamanho-excessivo-dos-itens-item-size-overhead', 'action', 1,
+        'Reduza dados redundantes com compatibilidade', 'Remova campos comprovadamente dispensáveis ou armazene objetos no S3 com metadados e referências seguras; migre leitores e escritores gradualmente.'),
+    ('amazon-dynamodb', 'tamanho-excessivo-dos-itens-item-size-overhead', 'caution', 1,
+        'Separar objetos altera atomicidade e recuperação', 'A tabela e o objeto no S3 não compartilham uma transação; implemente consistência, controle de acesso, versionamento e limpeza coordenada.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ebs', 'ausencia-de-automacao-de-snapshots-via-amazon-dlm',
+        'Automate backups with Amazon Data Lifecycle Manager', 'https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html'),
+    ('amazon-dynamodb', 'uso-incorreto-de-modo-on-demand-em-tabelas-com-trafego-alto-e-previsivel',
+        'DynamoDB throughput capacity', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html'),
+    ('amazon-dynamodb', 'uso-incorreto-de-modo-on-demand-em-tabelas-com-trafego-alto-e-previsivel',
+        'Considerations when switching capacity modes in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-switching-capacity-modes.html'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-standard-infrequent-access-standard-ia',
+        'DynamoDB table classes', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CostOptimization_TableClasses.html'),
+    ('amazon-dynamodb', 'hot-partitions-por-escolha-ruim-de-chave-de-particao-partition-key',
+        'Best practices for designing and using partition keys effectively in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html'),
+    ('amazon-dynamodb', 'hot-partitions-por-escolha-ruim-de-chave-de-particao-partition-key',
+        'Designing partition keys to distribute your workload in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-uniform-load.html'),
+    ('amazon-dynamodb', 'projecao-excessiva-de-atributos-em-indices-secundarios-globais-gsis',
+        'Using Global Secondary Indexes in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html'),
+    ('amazon-dynamodb', 'leitura-consistente-forte-strongly-consistent-reads-sem-necessidade',
+        'DynamoDB read consistency', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html'),
+    ('amazon-dynamodb', 'consultas-com-scan-em-vez-de-query-em-tabelas-grandes',
+        'Querying tables in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html'),
+    ('amazon-dynamodb', 'consultas-com-scan-em-vez-de-query-em-tabelas-grandes',
+        'Scan operations in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html'),
+    ('amazon-dynamodb', 'falta-de-filtros-pre-invocacao-em-dynamodb-streams-com-aws-lambda',
+        'DynamoDB Streams and AWS Lambda triggers', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.html'),
+    ('amazon-dynamodb', 'falta-de-filtros-pre-invocacao-em-dynamodb-streams-com-aws-lambda',
+        'Filtering event source mappings for AWS Lambda', 'https://docs.aws.amazon.com/lambda/latest/dg/invocation-eventfiltering.html'),
+    ('amazon-dynamodb', 'ausencia-de-politica-de-time-to-live-ttl-para-limpeza-automatica-de-dados',
+        'Using time to live (TTL) in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html'),
+    ('amazon-dynamodb', 'tamanho-excessivo-dos-itens-item-size-overhead',
+        'DynamoDB item sizes and formats', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CapacityUnitCalculations.html'),
+    ('amazon-dynamodb', 'tamanho-excessivo-dos-itens-item-size-overhead',
+        'Amazon DynamoDB pricing', 'https://aws.amazon.com/dynamodb/pricing/')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem',
+        'Escrita Individual em Lote em Vez de Operações Batch (BatchWriteItem)',
+        'Avalie BatchWriteItem para gravações independentes em lote, controlando tamanho do lote, throughput consumido e solicitações não processadas.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem', 'check', 1,
+        'Meça a carga de gravação atual', 'Compare chamadas PutItem/DeleteItem, latência, throttling, capacidade consumida e custos de tabela e índices para a janela de ingestão.'),
+    ('amazon-dynamodb', 'escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem', 'check', 2,
+        'Verifique compatibilidade das operações', 'Confirme que os itens são puts ou deletes independentes; BatchWriteItem aceita até 25 operações e não oferece UpdateItem nem condições por item.'),
+    ('amazon-dynamodb', 'escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem', 'action', 1,
+        'Agrupe operações e acompanhe resposta', 'Implemente lotes dentro dos limites da API, registre ConsumedCapacity e reenvie apenas UnprocessedItems com backoff exponencial.'),
+    ('amazon-dynamodb', 'escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem', 'caution', 1,
+        'Lotes não tornam a cobrança por item gratuita', 'Cada put/delete continua consumindo capacidade; o lote como um todo não é atômico, pode retornar itens não processados e pode sobrescrever um item existente.'),
+    ('amazon-dynamodb', 'escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem', 'caution', 2,
+        'Preserve semântica e controle de fluxo', 'Não substitua atualizações condicionais por puts em lote; regule concorrência e retentativas para evitar rajadas que aumentem throttling.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem',
+        'BatchWriteItem API reference', 'https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BatchWriteItem.html'),
+    ('amazon-dynamodb', 'escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem',
+        'Error handling with DynamoDB: Batch operations and error handling', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.Errors.html#Programming.Errors.BatchOperations')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria',
+        'Global Tables Multi-Região Ativas sem Necessidade Regulatória',
+        'Revise réplicas DynamoDB multi-região conforme latência, continuidade, consistência e requisitos de recuperação do negócio.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria', 'check', 1,
+        'Confirme o requisito multi-região', 'Valide objetivos de continuidade, RPO/RTO, latência local, residência de dados, isolamento entre contas e regiões realmente necessárias.'),
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria', 'check', 2,
+        'Meça replicação e custo agregado', 'Revise replicação entre réplicas, capacidade e escritas replicadas, classes de tabela, custos por região e latência de replicação MREC.'),
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria', 'action', 1,
+        'Remova somente réplicas dispensáveis', 'Se aprovada, siga o procedimento AWS para desassociar/remover a réplica, atualize tráfego e monitore a tabela regional resultante, custos e comportamento da aplicação.'),
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria', 'caution', 1,
+        'Não remova a redundância antes de testar failover', 'MREC replica de forma assíncrona e pode apresentar dados recentes ainda não propagados; valide consistência, RPO e procedimento de retorno antes de reduzir cobertura regional.'),
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria', 'caution', 2,
+        'Considere restrições do modo de consistência', 'MRSC requer regiões e configuração compatíveis, pode aumentar latência de escrita e não permite alternar o modo depois da criação; não trate os modos como intercambiáveis.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria',
+        'Global tables - multi-active, multi-Region replication', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html'),
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria',
+        'How DynamoDB global tables work', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/V2globaltables_HowItWorks.html'),
+    ('amazon-dynamodb', 'global-tables-multi-regiao-ativas-sem-necessidade-regulatoria',
+        'Understanding Amazon DynamoDB billing for global tables', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/global-tables-billing.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes',
+        'Snapshots e Point-In-Time Recovery (PITR) Mantidos em Ambientes de Testes',
+        'Revise proteção contínua e backups sob demanda em tabelas de teste conforme capacidade de recriação, retenção e recuperação exigida.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes', 'check', 1,
+        'Confirme se os dados podem ser recriados', 'Verifique origem dos dados, possibilidade de recarga, dependências de teste, dados pessoais, requisitos de auditoria e objetivos de recuperação.'),
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes', 'check', 2,
+        'Inventarie PITR e backups', 'Revise PITR ativo, período de recuperação, backups sob demanda, políticas AWS Backup, responsáveis, última restauração testada e cobrança por tabela e duração.'),
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes', 'action', 1,
+        'Ajuste retenção conforme aprovação', 'Se os dados forem reconstruíveis e não houver obrigação de retenção, reduza a janela PITR ou desative a proteção e expire backups aprovados; monitore os custos após a mudança.'),
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes', 'caution', 1,
+        'Preserve pontos de recuperação necessários', 'PITR mantém recuperação contínua por uma janela configurável de até 35 dias; desativar proteção reduz a capacidade de recuperar exclusões ou escritas acidentais.'),
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes', 'caution', 2,
+        'Planeje restauração para nova tabela', 'Uma restauração cria nova tabela, não substitui a original automaticamente; valide nomes, índices, permissões, tags e mudança dos consumidores antes do cutover.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes',
+        'Backup and restore for DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Backup-and-Restore.html'),
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes',
+        'Using on-demand DynamoDB backup and restore', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backuprestore_HowItWorks.html'),
+    ('amazon-dynamodb', 'snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes',
+        'Understanding Amazon DynamoDB billing for backups', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backup-restore-billing.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso',
+        'Filtros na Aplicação (Filter Expressions) Consumindo RCUs em Excesso',
+        'Investigue consultas que leem muitos itens e descartam a maioria com FilterExpression, ajustando chaves e índices conforme os padrões de acesso.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso', 'check', 1,
+        'Compare itens avaliados e retornados', 'Revise ScannedCount versus Count, ConsumedCapacity, latência e frequência para Queries e Scans com FilterExpression.'),
+    ('amazon-dynamodb', 'filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso', 'check', 2,
+        'Verifique o desenho da chave', 'Confirme se os critérios frequentes podem usar partition key e sort key na KeyConditionExpression ou se exigem um GSI alinhado ao padrão de acesso.'),
+    ('amazon-dynamodb', 'filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso', 'action', 1,
+        'Reduza dados lidos desnecessariamente', 'Implemente consulta direcionada por chave ou índice aprovado, limite a leitura e pagine os resultados; compare consumo e latência sob carga.'),
+    ('amazon-dynamodb', 'filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso', 'caution', 1,
+        'Filtro não reduz RCUs da leitura já feita', 'FilterExpression é aplicada após a leitura; a página processa até 1 MB antes de filtrar, e um GSI novo acrescenta armazenamento e consumo de gravação.'),
+    ('amazon-dynamodb', 'filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso', 'caution', 2,
+        'Preserve paginação e resultado funcional', 'Continue usando LastEvaluatedKey quando houver páginas restantes e valide que filtros e limites não omitam resultados necessários à aplicação.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso',
+        'Filter expressions for the Query operation in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.FilterExpression.html'),
+    ('amazon-dynamodb', 'filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso',
+        'Scanning tables in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'gravacoes-transacionais-transactwriteitems-sem-necessidade',
+        'Gravações Transacionais (TransactWriteItems) sem Necessidade',
+        'Revise operações TransactWriteItems para confirmar que a atomicidade entre itens é necessária e medir seu impacto em capacidade e conflitos.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'gravacoes-transacionais-transactwriteitems-sem-necessidade', 'check', 1,
+        'Localize transações e invariantes', 'Mapeie TransactWriteItems, itens envolvidos, condições, relações entre atualizações e requisitos de all-or-nothing no domínio.'),
+    ('amazon-dynamodb', 'gravacoes-transacionais-transactwriteitems-sem-necessidade', 'check', 2,
+        'Meça capacidade e cancelamentos', 'Analise ConsumedCapacity, conflitos, throttling e transações canceladas; cada item transacionado consome operações internas de leitura/escrita para preparar e confirmar.'),
+    ('amazon-dynamodb', 'gravacoes-transacionais-transactwriteitems-sem-necessidade', 'action', 1,
+        'Simplifique apenas operações independentes', 'Quando a correção não exigir atomicidade entre itens, avalie gravações condicionais individuais ou BatchWriteItem para bulk; compare capacidade, latência e taxa de sucesso.'),
+    ('amazon-dynamodb', 'gravacoes-transacionais-transactwriteitems-sem-necessidade', 'caution', 1,
+        'Não remova garantias de consistência necessárias', 'Separar uma transação pode deixar atualizações parciais e alterar invariantes de negócio; preserve atomicidade onde requerida e trate retentativas com idempotência.'),
+    ('amazon-dynamodb', 'gravacoes-transacionais-transactwriteitems-sem-necessidade', 'caution', 2,
+        'Transações têm escopo regional e limites', 'As operações devem ocorrer na mesma conta e região, com até 100 ações e 4 MB agregados; transações canceladas também podem consumir capacidade.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'gravacoes-transacionais-transactwriteitems-sem-necessidade',
+        'Amazon DynamoDB Transactions: How it works', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html'),
+    ('amazon-dynamodb', 'gravacoes-transacionais-transactwriteitems-sem-necessidade',
+        'TransactWriteItems API reference', 'https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso',
+        'Índices Secundários Globais (GSIs) Órfãos ou Sem Uso',
+        'Inventarie índices secundários globais sem consultas ou com projeção ociosa e avalie a remoção de índices que só acrescentam custo de gravação e armazenamento.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso', 'check', 1,
+        'Liste índices e padrões de consulta', 'Use ListTables e DescribeTable para inventariar GSIs, status, tamanho estimado e as consultas da aplicação que dependem de cada índice.'),
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso', 'check', 2,
+        'Meça consumo por índice', 'Compare gravações na tabela base, WCUs consumidas, armazenamento do índice e latência; índices sem uso continuam cobrando por item gravado e por GB armazenado.'),
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso', 'action', 1,
+        'Remova somente índices comprovadamente ociosos', 'Após confirmar que nenhuma consulta depende do GSI, remova-o com UpdateTable na operação Delete GSI, que é online; valide a aplicação e acompanhe custos e erros.'),
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso', 'caution', 1,
+        'Remoção de GSI não apaga dados da tabela', 'Excluir um índice remove apenas a estrutura de consulta; recriar o índice depois exige novo backfill e nova cobrança temporária de capacidade de escrita.'),
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso', 'caution', 2,
+        'Verifique dependências antes de remover', 'Busque referências no código, em consultas salvas e em pipelines analíticos; um índice aparentemente ocioso pode atender relatórios sazonais ou de auditoria.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso',
+        'Global secondary indexes', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html'),
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso',
+        'Improving data access with secondary indexes', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SecondaryIndexes.html'),
+    ('amazon-dynamodb', 'indices-secundarios-globais-gsis-orfaos-ou-sem-uso',
+        'Online index operations in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.OnlineOps.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit',
+        'Leitura Ineficiente de Histórico sem Paging (Limit)',
+        'Avalie leituras de histórico que percorrem a tabela inteira sem paginação e implemente Limit e LastEvaluatedKey para ler apenas o necessário.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit', 'check', 1,
+        'Identifique leituras sem paginação', 'Procure chamadas Query e Scan sem Limit que acumulam todos os itens em memória ou em variáveis, principalmente em telas de extrato e histórico.'),
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit', 'check', 2,
+        'Meça itens lidos versus exibidos', 'Compare ConsumedCapacity, ScannedCount e Count com o volume real apresentado ao usuário; cada resposta é limitada a 1 MB de dados avaliados.'),
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit', 'action', 1,
+        'Implemente paginação incremental', 'Use Limit adequado à tela, ExclusiveStartKey e LastEvaluatedKey e trate HasMoreResults; preserve a ordenação por sort key e valide em homologação antes de produção.'),
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit', 'caution', 1,
+        'Limit é avaliado antes do filtro', 'FilterExpression pode descartar itens após a página ser lida, retornando menos resultados que o esperado; itere as páginas até completar a janela desejada.'),
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit', 'caution', 2,
+        'Paginação não substitui exportação em massa', 'Para relatórios completos ou migrações, considere exportação para S3 ou processamento assíncrono em vez de muitas páginas sequenciais que elevam latência e custo.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit',
+        'Query pagination in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.Pagination.html'),
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit',
+        'Querying data in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html'),
+    ('amazon-dynamodb', 'leitura-ineficiente-de-historico-sem-paging-limit',
+        'Scan pagination in DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.Pagination.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax',
+        'Replicação manual de Cache no DynamoDB em Vez de usar DAX',
+        'Compare o cache manual da aplicação com o DynamoDB Accelerator (DAX) para leituras quentes, medindo RCUs, latência e o custo de manter uma camada própria.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax', 'check', 1,
+        'Identifique chaves de leitura quentes', 'Meça Reads consumidos por item e por operação, latência de GetItem e Query e a taxa de acerto de caches já existentes na aplicação.'),
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax', 'check', 2,
+        'Avalie o cache atual', 'Verifique TTL, invalidação, consistência exigida pelo negócio, armazenamento em memória e o esforço operacional de manter a replicação manual.'),
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax', 'action', 1,
+        'Dimensione um cluster DAX quando fizer sentido', 'Se a latência em microssegundos e a redução de RCUs justificarem o custo, crie um cluster DAX com nós e réplicas adequados à alta disponibilidade e aponte o endpoint do SDK.'),
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax', 'caution', 1,
+        'DAX é cache write-through, não reduz custo de escrita', 'Toda gravação continua indo à tabela DynamoDB e consumindo WCUs; o DAX acelera leituras, mas adiciona custo próprio de nós e não substitui o planejamento de capacidade.'),
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax', 'caution', 2,
+        'Consistência e invalidação precisam ser validadas', 'Itens em cache podem ficar defasados em relação à tabela; confirme o comportamento de consistência do DAX para a sua carga e teste cenários de atualização antes de migrar tráfego.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax',
+        'DynamoDB Accelerator (DAX)', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html'),
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax',
+        'DAX concepts', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.concepts.html'),
+    ('amazon-dynamodb', 'replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax',
+        'DAX deployment scenarios', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.DeploymentScenarios.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb',
+        'Armazenamento de Binários/Arquivos Grandes no Item do DynamoDB',
+        'Identifique itens DynamoDB que armazenam arquivos, PDFs ou payloads grandes e avalie movê-los para o S3 mantendo apenas metadados e ponteiros na tabela.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb', 'check', 1,
+        'Meça o tamanho dos itens', 'Verifique o tamanho médio e máximo dos itens e atributos; itens grandes aumentam RCUs e WCUs por blocos de dados e têm limite rígido de 400 KB por item.'),
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb', 'check', 2,
+        'Localize binários embutidos', 'Procure atributos com base64, binários ou conteúdo de arquivo tratado como parte do item em vez de referência a um armazenamento dedicado.'),
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb', 'action', 1,
+        'Migre arquivos para S3 com referência na tabela', 'Armazene o objeto no S3, grave no item a chave, os metadados e a política de acesso; migre em lotes e valide a integridade antes de remover os binários antigos.'),
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb', 'caution', 1,
+        'O limite de 400 KB por item é rígido', 'Não é possível contornar com compressão ou divisão dentro do mesmo item sem redesign do modelo; planeje a migração antes de atingir o limite em produção.'),
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb', 'caution', 2,
+        'Preserve acesso, retenção e recuperação', 'Defina políticas de ciclo de vida, criptografia e backup tanto no S3 quanto na tabela, e mantenha consistência entre o ponteiro no DynamoDB e o objeto real durante a migração.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb',
+        'Service quotas for DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ServiceQuotas.html'),
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb',
+        'PutItem API reference', 'https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html'),
+    ('amazon-dynamodb', 'armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb',
+        'Best practices for using DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test',
+        'Falta de Restrição em Testes de Carga Automatizados (Stress Test)',
+        'Restrinja testes de carga automatizados que apontam para tabelas de produção em modo On-Demand, definindo limites de concorrência, ambiente dedicado e alertas de custo.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test', 'check', 1,
+        'Localize testes sem limites', 'Identifique scripts de stress e benchmark agendados ou contínuos, as tabelas de destino, a concorrência máxima, a duração e se rodam contra dados ou tabelas de produção.'),
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test', 'check', 2,
+        'Estime o impacto de custo', 'Modele requisições por segundo, tamanho dos itens e duração do teste; o modo On-Demand ajusta a capacidade automaticamente e pode gerar consumo elevado em janelas longas.'),
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test', 'action', 1,
+        'Isole a carga em ambiente controlado', 'Execute testes em tabelas dedicadas de homologação, com capacidade provisionada dimensionada ou limites de requisição, agendamento fora de pico e alarmes de consumo durante a janela.'),
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test', 'caution', 1,
+        'Testes ilimitados podem escalar a fatura', 'Sem teto de requisições nem alerta, um loop de retry ou um teste esquecido pode manter a tabela em alta vazão por dias; configure limites e encerramento automático.'),
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test', 'caution', 2,
+        'Respeite cotas e impacto operacional', 'Verifique as quotas de throughput e limites por partição antes do teste, e evite gerar throttling ou ruído em métricas que alimentam alarmes de produção.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test',
+        'DynamoDB on-demand capacity mode', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/on-demand-capacity-mode.html'),
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test',
+        'How DynamoDB read and write capacity modes work', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadWriteCapacityMode.html'),
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test',
+        'Service quotas for DynamoDB', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ServiceQuotas.html'),
+    ('amazon-dynamodb', 'falta-de-restricao-em-testes-de-carga-automatizados-stress-test',
+        'Considerations for read and write capacity limits', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-limits.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia',
+        'Falta de Uso do DynamoDB Accelerator (DAX) para Altissima Frequência',
+        'Avalie a ausência do DynamoDB Accelerator para leituras de baixíssima latência, comparando o custo do cluster DAX com o consumo de RCUs e o impacto no desempenho.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia', 'check', 1,
+        'Meça requisitos de latência e leitura', 'Identifique operações que exigem microssegundos, o volume de leituras quentes e as RCUs consumidas por GetItem e Query frequentes na tabela.'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia', 'check', 2,
+        'Revise topologia e disponibilidade atuais', 'Confirme VPC, sub-redes, quantidade de nós DAX necessários para o SLA, criptografia, permissões IAM e se a aplicação tolera a consistência oferecida pelo cache.'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia', 'action', 1,
+        'Implante DAX de forma gradual', 'Crie o cluster DAX com os nós aprovados, aponte o client para o endpoint do cluster e valide latência, taxa de acerto de cache e erros antes de migrar todo o tráfego de leitura.'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia', 'caution', 1,
+        'DAX não reduz custos de gravação', 'Escritas continuam na tabela com WCUs e o DAX adiciona cobrança por nó e por hora; a economia vem da redução de RCUs de leitura, que precisa ser medida.'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia', 'caution', 2,
+        'Planeje alta disponibilidade e recuperação', 'Dimensione múltiplos nós para não criar ponto único de falha, defina o comportamento de failover e documente como voltar ao acesso direto à tabela em caso de indisponibilidade do DAX.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia',
+        'DynamoDB Accelerator (DAX)', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia',
+        'DAX concepts', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.concepts.html'),
+    ('amazon-dynamodb', 'falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia',
+        'DAX deployment scenarios', 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.DeploymentScenarios.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms',
+        'Faltas de Alertas de Capacidade de Espaço em Disco (FreeSpace Alarms)',
+        'Configure alarmes de espaço livre em disco para detectar volumes próximos do limite antes que a falta de espaço derrube aplicações ou force ampliações emergenciais.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms', 'check', 1,
+        'Verifique a coleta de métricas de disco', 'O espaço livre não é métrica padrão do EBS; confirme se o CloudWatch agent está instalado e coletando métricas de disco nos pontos de montagem críticos.'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms', 'check', 2,
+        'Inventarie volumes e pontos de montagem', 'Liste volumes EBS por instância, identifique sistemas de arquivos e pontos de montagem que armazenam dados de aplicação, logs e bancos de dados.'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms', 'action', 1,
+        'Crie alarmes de uso de disco por montagem', 'Com o CloudWatch agent publicando as métricas de disco, crie alarmes sobre a porcentagem de uso por ponto de montagem com limiares escalonados e notificação para a equipe responsável.'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms', 'caution', 1,
+        'Alarme sem plano de resposta não resolve', 'Defina antes o procedimento: limpar logs, rotacionar arquivos, expandir o volume ou migrar dados; teste o alarme com um volume de homologação.'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms', 'caution', 2,
+        'Não duplique volumes como reação padrão', 'Ampliar o disco aumenta custo contínuo; avalie primeiro retenção de logs, compressão e redimensionamento planejado, e lembre que o espaço livre de instâncias efêmeras não persiste.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms',
+        'Install the CloudWatch agent', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms',
+        'Monitor EBS volumes', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-volume-status.html'),
+    ('amazon-ebs', 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms',
+        'Alarms on metrics', 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Alarm-On-Metric-Alarm-Name.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering',
+        'Falta de Uso ou Uso Incorreto do S3 Intelligent-Tiering',
+        'Avalie se o padrão de acesso dos objetos justifica o S3 Intelligent-Tiering e se a proporção de objetos pequenos não anula a economia esperada.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering', 'check', 1,
+        'Analise o padrão de acesso dos dados', 'Compare a frequência real de leitura e gravação com os prazos de acesso das camadas; dados com padrão previsível podem sair mais baratos em classes de ciclo de vida fixas.'),
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering', 'check', 2,
+        'Verifique o tamanho e a quantidade de objetos', 'Objetos muito pequenos têm custo de monitoramento e de camada que pode superar a economia; revise o tamanho médio e a contagem de objetos do bucket.'),
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering', 'action', 1,
+        'Aplique a classe somente onde houver benefício', 'Ative o Intelligent-Tiering em prefixos com acesso imprevisível e volume suficiente, acompanhe as métricas de monitoramento e compare o custo resultante com a classe anterior.'),
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering', 'caution', 1,
+        'A automação tem prazos de movimentação', 'Os objetos não mudam de camada instantaneamente; leituras recentes podem ocorrer ainda na camada de acesso frequente, o que precisa constar no dimensionamento.'),
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering', 'caution', 2,
+        'Considere cobranças de monitoramento e resgate', 'O serviço cobra por objeto monitorado e as camadas de arquivo dentro do Intelligent-Tiering podem gerar taxas de resgate; valide se o volume compensa antes de migrar tudo.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering',
+        'S3 Intelligent-Tiering', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering.html'),
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering',
+        'Monitoring activity and storage costs with S3 Intelligent-Tiering', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering-monitoring.html'),
+    ('amazon-s3', 'falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering',
+        'Cost optimization for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao',
+        'Armazenamento de Milhões de Arquivos Minúsculos sem Compactação',
+        'Avalie buckets com milhões de objetos pequenos, onde o custo de requisições e listagens pode superar o de armazenamento, e considere compactar ou reorganizar os dados.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao', 'check', 1,
+        'Meça contagem e tamanho médio dos objetos', 'Use métricas de Bucket Size e Number of Objects e amostre os objetos para estimar o tamanho médio; milhões de objetos de poucos KB geram muitas requisições.'),
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao', 'check', 2,
+        'Identifique o padrão de acesso', 'Verifique quantas operações de leitura e listagem ocorrem por objeto; para arquivos pequenos, o custo de requisições costuma dominar o de armazenamento.'),
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao', 'action', 1,
+        'Compacte ou reorganize os dados', 'Avalie agrupar arquivos relacionados em objetos maiores, formatos de dados apropriados ou mover metadados para um banco; planeje a migração e o índice de acesso antes de executar.'),
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao', 'caution', 1,
+        'Compactação muda o modelo de acesso', 'Um arquivo por objeto facilita leitura pontual; empacotar objetos exige que a aplicação saiba localizar e extrair o item, o que pode aumentar latência e complexidade.'),
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao', 'caution', 2,
+        'Listagens custam por cada mil requisições', 'ListObjects em buckets com muitos objetos pode gerar milhares de chamadas paginadas; revise o uso de listagens frequentes e considere estruturas de índice antes de otimizar só o armazenamento.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao',
+        'Cost optimization for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html'),
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao',
+        'Performance guidelines for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html'),
+    ('amazon-s3', 'armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao',
+        'Amazon S3 storage classes', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier',
+        'Taxas de Leitura e Resgate Inesperadas nas Classes Glacier',
+        'Revise resgates e restaurações em massa nas classes de arquivo do S3, onde taxas de recuperação e prazos de restauração podem gerar custos e atrasos inesperados.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier', 'check', 1,
+        'Mapeie o padrão real de leitura', 'Identifique quais objetos nas classes Glacier e Glacier Deep Archive são lidos com frequência; dados consultados regularmente podem exigir classe de menor latência.'),
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier', 'check', 2,
+        'Meça volume e tipo de resgates', 'Verifique restaurações padrão, expeditas ou em massa, o volume de GB restaurado e a frequência; cada tipo tem custo e prazo diferentes.'),
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier', 'action', 1,
+        'Ajuste a classe e o processo de restauração', 'Para dados com leitura recorrente, avalie transição para classes de acesso mais rápido; para arquivos frios, planeje restaurações em lote com antecedência e acompanhe os custos de recuperação.'),
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier', 'caution', 1,
+        'Restauração não é instantânea', 'As classes de arquivo exigem tempo de restauração que varia por tipo de resgate; aplicações que precisam de leitura imediata não devem depender de objetos nessas classes sem plano de contingência.'),
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier', 'caution', 2,
+        'Mudanças antecipadas geram cobranças proporcionais', 'Sair de uma classe de arquivo antes do período mínimo de armazenamento gera cobrança proporcional ao tempo restante; valide a retenção mínima antes de mover ou excluir objetos.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier',
+        'Amazon S3 storage classes', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html'),
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier',
+        'Restoring archived objects', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects.html'),
+    ('amazon-s3', 'taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier',
+        'Transitioning objects using lifecycle configuration', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+INSERT INTO cost_scenarios (service_id, slug, title, summary)
+SELECT service.id, scenario.slug, scenario.title, scenario.summary
+FROM (VALUES
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento',
+        'Leitura Direta de Arquivos Brutos em Data Lakes sem Particionamento',
+        'Avalie consultas em data lakes que leem arquivos brutos sem partições ou formatos colunares, gerando varreduras de dados desnecessárias e custos maiores de consulta.')
+) AS scenario(service_slug, slug, title, summary)
+JOIN aws_services AS service ON service.slug = scenario.service_slug
+ON CONFLICT (service_id, slug) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    updated_at = NOW();
+
+INSERT INTO scenario_steps (scenario_id, step_type, position, title, content)
+SELECT scenario.id, step.step_type, step.position, step.title, step.content
+FROM (VALUES
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento', 'check', 1,
+        'Identifique arquivos sem estrutura de consulta', 'Localize CSV, TXT ou JSON lidos diretamente por consultas sem partições, compactação ou formato colunar, e estime o volume varrido por consulta.'),
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento', 'check', 2,
+        'Meça bytes processados versus retornados', 'Compare Bytes Scanned e Bytes Returned nas consultas do motor analítico; filtros que descartam a maior parte dos dados indicam falta de particionamento.'),
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento', 'action', 1,
+        'Estruture os dados para consulta direcionada', 'Organize os objetos por partições úteis ao padrão de consulta, adote formato colunar compactado quando suportado e atualize o catálogo para aproveitar as partições.'),
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento', 'caution', 1,
+        'Reorganização exige migração e reprocessamento', 'Mudar o layout dos dados invalida consultas existentes e pode exigir reescrita dos arquivos; planeje janela de migração, versionamento e validação de resultados.'),
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento', 'caution', 2,
+        'Particionamento mal escolhido não ajuda', 'Partições com baixa cardinalidade ou filtros que não usam a chave de partição continuam varrendo tudo; escolha as dimensões conforme as consultas reais e monitore o scan após a mudança.')
+) AS step(service_slug, scenario_slug, step_type, position, title, content)
+JOIN aws_services AS service ON service.slug = step.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = step.scenario_slug
+ON CONFLICT (scenario_id, step_type, position) DO UPDATE
+SET title = EXCLUDED.title,
+    content = EXCLUDED.content;
+
+INSERT INTO scenario_sources (scenario_id, title, url)
+SELECT scenario.id, source.title, source.url
+FROM (VALUES
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento',
+        'Partitioned data for queries', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/partition-optimized-queries.html'),
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento',
+        'Partitioning in Athena', 'https://docs.aws.amazon.com/athena/latest/ug/partitioning.html'),
+    ('amazon-s3', 'leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento',
+        'Performance guidelines for S3', 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html')
+) AS source(service_slug, scenario_slug, title, url)
+JOIN aws_services AS service ON service.slug = source.service_slug
+JOIN cost_scenarios AS scenario
+    ON scenario.service_id = service.id AND scenario.slug = source.scenario_slug
+ON CONFLICT (scenario_id, url) DO UPDATE
+SET title = EXCLUDED.title,
+    reviewed_at = CURRENT_DATE;
+
+-- Remove cenario orfao do EBS: o slug anterior (free-space-alarms) nao corresponde
+-- ao slug gerado pela interface a partir do titulo do cartao (freespace-alarms).
+DELETE FROM cost_scenarios
+WHERE slug = 'faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms'
+    AND service_id = (SELECT id FROM aws_services WHERE slug = 'amazon-ebs');
+
 COMMIT;

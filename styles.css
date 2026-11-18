@@ -1771,6 +1771,66 @@ body.tela-servicos-ativa > .canvas-onda {
     font-size: 0.86rem;
 }
 
+.mensagens-advisor {
+    display: flex;
+    max-height: 390px;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    margin-top: 12px;
+    padding-right: 2px;
+}
+
+.mensagem-advisor {
+    display: flex;
+    max-width: 86%;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.mensagem-advisor-user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.mensagem-advisor-assistant {
+    align-self: flex-start;
+}
+
+.bolha-mensagem-advisor {
+    box-sizing: border-box;
+    border-radius: 16px;
+    padding: 11px 13px;
+    background: #eaf2ff;
+    color: #1e293b;
+    font-family: inherit;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.mensagem-advisor-user .bolha-mensagem-advisor {
+    border-bottom-right-radius: 5px;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.mensagem-advisor-assistant .bolha-mensagem-advisor {
+    border-bottom-left-radius: 5px;
+}
+
+.metadados-mensagem-advisor,
+.documentacao-mensagem-advisor {
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 0.92rem;
+}
+
+.documentacao-mensagem-advisor {
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
 .resultado-advisor {
     margin-top: 12px;
     padding: 16px;
@@ -3042,6 +3102,11 @@ button.item-historico-perfil:focus-visible {
 
     .painel-advisor.advisor-consulta .formulario-advisor textarea {
         min-height: 52px;
+    }
+
+    .mensagens-advisor {
+        max-height: 48vh;
+        margin-top: 8px;
     }
 
     .painel-advisor.advisor-consulta #contador-advisor,

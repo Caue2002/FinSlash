@@ -253,7 +253,7 @@ Contexto: ${contextoSeguro}`
                 body: JSON.stringify({
                     model: modelo,
                     messages: mensagens,
-                    temperature: 0.2,
+                    temperature: 0,
                     max_completion_tokens: 700,
                     response_format: { type: 'json_object' }
                 }),
@@ -301,6 +301,29 @@ function criarResultadoForaDoEscopo() {
     };
 }
 
+function criarRespostaBasica(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    if (!/^(oi|ola|hello|hey|bom dia|boa tarde|boa noite|tudo bem|obrigado|obrigada|tchau|ate logo)\b/u.test(normalizada)) {
+        return null;
+    }
+    const resposta = normalizada === 'tchau' || normalizada.startsWith('ate logo')
+        ? 'Até logo. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.'
+        : 'Olá! Posso ajudar com serviços AWS, custos, utilização e diagnósticos cadastrados no FinSlash.';
+    return {
+        modo: 'conversacao',
+        encontrado: false,
+        diagnostico: 'Saudação',
+        servico: null,
+        resposta,
+        documentacao: 'https://aws.amazon.com/',
+        confianca: 1,
+        fonte: 'resposta_fixa',
+        validacao: null,
+        resultados: [],
+        sugestoes: []
+    };
+}
+
 async function lerJsonAdvisor(request) {
     const contentLength = Number(request.headers.get('content-length'));
     if (Number.isFinite(contentLength) && contentLength > LIMITE_BYTES_ADVISOR) {
@@ -329,7 +352,7 @@ async function lerJsonAdvisor(request) {
     if (!json || typeof json !== 'object' || Array.isArray(json)) {
         throw new TypeError('O corpo precisa ser um objeto JSON.');
     }
-    if (Object.keys(json).some((chave) => !['pergunta', 'historico'].includes(chave))) {
+    if (Object.keys(json).some((chave) => chave !== 'pergunta')) {
         throw new TypeError('O corpo contém campos não permitidos.');
     }
     if (typeof json.pergunta !== 'string') {
@@ -347,27 +370,7 @@ async function lerJsonAdvisor(request) {
     if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(pergunta)) {
         throw new TypeError('A pergunta contém caracteres inválidos.');
     }
-    let historico = [];
-    if (json.historico !== undefined) {
-        if (!Array.isArray(json.historico) || json.historico.length > 6) {
-            throw new TypeError('O histórico deve ter no máximo seis mensagens.');
-        }
-        historico = json.historico.map((mensagem) => {
-            if (!mensagem
-                || typeof mensagem !== 'object'
-                || !['user', 'assistant'].includes(mensagem.role)
-                || typeof mensagem.content !== 'string') {
-                throw new TypeError('O histórico contém uma mensagem inválida.');
-            }
-            const conteudo = mensagem.content.normalize('NFC').replace(/\r\n?/gu, ' ').replace(/\s+/gu, ' ').trim();
-            if (!conteudo || Array.from(conteudo).length > 300
-                || /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(conteudo)) {
-                throw new TypeError('O histórico contém uma mensagem inválida.');
-            }
-            return { role: mensagem.role, content: conteudo };
-        });
-    }
-    return { pergunta, historico };
+    return { pergunta, historico: [] };
 }
 
 async function consultarAdvisor(pergunta) {
@@ -734,7 +737,7 @@ nem repita o JSON.`
                     tool_choice: tentativa === 0
                         ? { type: 'function', function: { name: 'search_diagnostics' } }
                         : 'auto',
-                    temperature: 0.1,
+                    temperature: 0,
                     parallel_tool_calls: false,
                     max_completion_tokens: 700
                 }),
@@ -1044,6 +1047,16 @@ async function receberAdvisor(request, origemPermitida) {
     try {
         const pergunta = entradaAdvisor.pergunta;
         const historico = entradaAdvisor.historico;
+        const respostaBasica = criarRespostaBasica(pergunta);
+        if (respostaBasica) {
+            return responder(200, {
+                ...respostaBasica,
+                agente: {
+                    status: 'resposta-fixa',
+                    erro: null
+                }
+            }, cabecalhos);
+        }
         if (!perguntaRelacionadoAoProjeto(pergunta)) {
             const resultadoForaDoEscopo = criarResultadoForaDoEscopo();
             return responder(200, {

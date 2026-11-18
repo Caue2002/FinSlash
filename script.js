@@ -247,16 +247,8 @@ const contadorAdvisor = document.getElementById('contador-advisor');
 const botaoEnviarAdvisor = document.getElementById('botao-enviar-advisor');
 const statusAdvisor = document.getElementById('status-advisor');
 const cenariosAdvisor = document.getElementById('cenarios-advisor');
-const resultadoAdvisor = document.getElementById('resultado-advisor');
-const tipoResultadosAdvisor = document.getElementById('tipo-resultados-advisor');
-const confiancaAdvisor = document.getElementById('confianca-advisor');
-const tituloResultadosAdvisor = document.getElementById('titulo-resultados-advisor');
-const respostaTextoAdvisor = document.getElementById('resposta-texto-advisor');
-const validacaoAdvisor = document.getElementById('validacao-advisor');
-const documentacaoAdvisor = document.getElementById('documentacao-advisor');
-const servicoAdvisor = document.getElementById('servico-advisor');
+const mensagensAdvisor = document.getElementById('mensagens-advisor');
 let enviandoAdvisor = false;
-const historicoAdvisor = [];
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
 const iconePerfilApp = document.getElementById('icone-perfil-app');
 const popupPerfil = document.getElementById('popup-perfil');
@@ -581,6 +573,7 @@ function fecharAdvisor(retornarFoco = true) {
         return;
     }
     popupAdvisor.classList.add('hidden');
+    mensagensAdvisor?.replaceChildren();
     if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
         botaoAdvisorApp.focus();
     }
@@ -588,6 +581,7 @@ function fecharAdvisor(retornarFoco = true) {
 
 function fecharAdvisorVisual(retornarFoco = false) {
     popupAdvisor.classList.add('hidden');
+    mensagensAdvisor?.replaceChildren();
     if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
         botaoAdvisorApp.focus();
     }
@@ -605,33 +599,50 @@ function validarLinkAws(url) {
     }
 }
 
-function exibirResultadoAdvisor(resultado) {
-    resultadoAdvisor.classList.remove('hidden');
-    resultadoAdvisor.closest('.painel-advisor')?.classList.add('advisor-consulta');
-    if (resultado.modo === 'conversacao') {
-        const cabecalho = resultadoAdvisor.querySelector('.cabecalho-resultados-advisor');
-        const titulo = tituloResultadosAdvisor;
-        cabecalho.classList.add('hidden');
-        titulo.textContent = typeof resultado.servico === 'string'
-            ? `Sobre ${resultado.servico}`
-            : 'Resposta do Finbot';
-        respostaTextoAdvisor.textContent = resultado.resposta;
-        servicoAdvisor.textContent = 'Visão geral baseada nos tópicos cadastrados';
-        validacaoAdvisor.textContent = 'Resposta baseada em informações oficiais validadas no projeto';
-        documentacaoAdvisor.href = typeof resultado.documentacao === 'string'
+function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
+    const mensagem = document.createElement('article');
+    mensagem.className = `mensagem-advisor mensagem-advisor-${tipo}`;
+
+    const bolha = document.createElement('div');
+    bolha.className = 'bolha-mensagem-advisor';
+    bolha.textContent = texto;
+    mensagem.appendChild(bolha);
+
+    if (tipo === 'assistant' && resultado) {
+        const metadados = document.createElement('div');
+        metadados.className = 'metadados-mensagem-advisor';
+        const itens = [];
+        if (resultado.servico) {
+            itens.push(resultado.servico);
+        }
+        if (resultado.encontrado && Number.isFinite(resultado.confianca)) {
+            itens.push(`Confiança ${Math.round(resultado.confianca * 100)}%`);
+        }
+        metadados.textContent = itens.join(' · ');
+        if (metadados.textContent) {
+            mensagem.appendChild(metadados);
+        }
+        const urlSegura = typeof resultado.documentacao === 'string'
+            && validarLinkAws(resultado.documentacao)
             ? resultado.documentacao
-            : 'https://docs.aws.amazon.com/';
-        return;
+            : null;
+        if (urlSegura) {
+            const link = document.createElement('a');
+            link.className = 'documentacao-mensagem-advisor';
+            link.href = urlSegura;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = 'Documentação oficial da AWS';
+            mensagem.appendChild(link);
+        }
     }
-    resultadoAdvisor.querySelector('.cabecalho-resultados-advisor')?.classList.remove('hidden');
-    tipoResultadosAdvisor.textContent = resultado.encontrado
-        ? 'Diagnóstico encontrado'
-        : 'Orientação padrão';
-    confiancaAdvisor.textContent = `Confiança ${Math.round((resultado.confianca || 0) * 100)}%`;
-    tituloResultadosAdvisor.textContent = typeof resultado.diagnostico === 'string'
-        ? resultado.diagnostico
-        : 'Não encontramos um diagnóstico específico.';
-    respostaTextoAdvisor.textContent = typeof resultado.resposta === 'string'
+
+    mensagensAdvisor.appendChild(mensagem);
+    mensagensAdvisor.scrollTop = mensagensAdvisor.scrollHeight;
+}
+
+function exibirResultadoAdvisor(resultado) {
+    const resposta = typeof resultado.resposta === 'string'
         && resultado.resposta.trim()
         ? resultado.resposta.trim()
         : [
@@ -640,21 +651,7 @@ function exibirResultadoAdvisor(resultado) {
             typeof resultado.acao === 'string' ? `Como proceder: ${resultado.acao}` : '',
             typeof resultado.cuidados === 'string' ? `Cuidados: ${resultado.cuidados}` : ''
         ].filter(Boolean).join('\n\n');
-
-    const urlSegura = typeof resultado.documentacao === 'string'
-        && validarLinkAws(resultado.documentacao)
-        ? resultado.documentacao
-        : 'https://docs.aws.amazon.com/';
-    documentacaoAdvisor.href = urlSegura;
-    servicoAdvisor.textContent = typeof resultado.servico === 'string'
-        ? `Serviço: ${resultado.servico}`
-        : 'Revise primeiro o cenário e os custos envolvidos.';
-    validacaoAdvisor.textContent = resultado.validacao?.status === 'oficial-cadastrado'
-        ? 'Resposta baseada em informações oficiais validadas no projeto'
-        : resultado.encontrado
-            ? 'Resposta baseada no diagnóstico validado no projeto'
-            : 'Orientação geral — nenhum diagnóstico específico foi encontrado';
-
+    adicionarMensagemAdvisor('assistant', resposta, resultado);
 }
 
 async function enviarPerguntaAdvisor(pergunta) {
@@ -684,8 +681,9 @@ async function enviarPerguntaAdvisor(pergunta) {
     botaoEnviarAdvisor.disabled = true;
     campoAdvisor.disabled = true;
     statusAdvisor.textContent = 'Consultando diagnósticos...';
-    resultadoAdvisor.classList.add('hidden');
-    resultadoAdvisor.closest('.painel-advisor')?.classList.remove('advisor-consulta');
+    adicionarMensagemAdvisor('user', texto);
+    campoAdvisor.value = '';
+    contadorAdvisor.textContent = '0/300';
 
     const controlador = new AbortController();
     const timeout = window.setTimeout(() => controlador.abort(), 12000);
@@ -699,10 +697,7 @@ async function enviarPerguntaAdvisor(pergunta) {
                 Accept: 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                pergunta: texto,
-                historico: historicoAdvisor.slice(-6)
-            }),
+            body: JSON.stringify({ pergunta: texto }),
             signal: controlador.signal
         });
 
@@ -729,18 +724,6 @@ async function enviarPerguntaAdvisor(pergunta) {
             ? 'Resposta baseada em diagnóstico AWS validado.'
             : 'Pergunta fora do alcance dos diagnósticos cadastrados.';
         exibirResultadoAdvisor(resultado);
-        historicoAdvisor.push(
-            { role: 'user', content: texto },
-            {
-                role: 'assistant',
-                content: typeof resultado.resposta === 'string' && resultado.resposta
-                    ? resultado.resposta.slice(0, 300)
-                    : resultado.diagnostico
-            }
-        );
-        if (historicoAdvisor.length > 6) {
-            historicoAdvisor.splice(0, historicoAdvisor.length - 6);
-        }
     } catch (error) {
         if (error.name === 'AbortError') {
             statusAdvisor.textContent = 'Tempo esgotado. Tente novamente.';

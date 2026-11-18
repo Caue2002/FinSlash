@@ -32,7 +32,7 @@ O Finbot permite enviar dúvidas sobre custos e uso da AWS por um painel integra
 
 Opcionalmente, uma chave gratuita do Groq ativa um modo agente. O modelo pode chamar `search_diagnostics` para consultar o PostgreSQL e `list_services` para listar os serviços publicados. A API mantém um limite de três iterações, usa somente conteúdo cadastrado como contexto e devolve ao navegador os dados já existentes na interface. Sem `GROQ_API_KEY`, o Finbot continua funcionando integralmente no modo local.
 
-O painel mantém apenas o histórico curto da sessão atual no navegador e envia até seis mensagens ao servidor em cada consulta. O histórico não é persistido no banco e permite acompanhamento de dúvidas informais, como fazer uma nova pergunta sem repetir todo o contexto. A resposta textual é gerada pelo modelo a partir dos diagnósticos recuperados pelas ferramentas.
+O painel não mantém nem envia histórico de mensagens ao servidor. Cada consulta é tratada isoladamente e as mensagens desaparecem ao fechar o Finbot.
 
 Para evitar alucinações, o Groq é limitado à compreensão da pergunta e à seleção da ferramenta. A resposta final usa somente título, resumo, etapas, confiança e documentação retornados pelo banco validado do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
 

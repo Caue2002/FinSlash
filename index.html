@@ -246,17 +246,7 @@
                 <button type="button" data-pergunta-advisor="Como reduzir custos com RDS">Banco caro</button>
                 <button type="button" data-pergunta-advisor="Como encontrar recursos sem uso">Recursos sem uso</button>
             </div>
-            <section class="resultado-advisor hidden" id="resultado-advisor" aria-live="polite">
-                <div class="cabecalho-resultados-advisor">
-                    <span class="tipo-resultados-advisor" id="tipo-resultados-advisor"></span>
-                    <span class="confianca-advisor" id="confianca-advisor"></span>
-                </div>
-                <h3 id="titulo-resultados-advisor"></h3>
-                <p class="servico-advisor" id="servico-advisor"></p>
-                <p class="validacao-advisor" id="validacao-advisor"></p>
-                <p class="resposta-texto-advisor" id="resposta-texto-advisor"></p>
-                <a class="documentacao-advisor" id="documentacao-advisor" href="https://docs.aws.amazon.com/" target="_blank" rel="noopener noreferrer">Ver documentação oficial da AWS</a>
-            </section>
+            <div class="mensagens-advisor" id="mensagens-advisor" aria-live="polite"></div>
             <form class="formulario-advisor" id="formulario-advisor">
                 <label for="campo-advisor">Sua dúvida sobre AWS</label>
                 <textarea id="campo-advisor" maxlength="300" rows="3" placeholder="Ex.: Como reduzir custos com EC2?"></textarea>

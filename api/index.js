@@ -476,6 +476,8 @@ async function consultarFinbotComGroq(pergunta, historico = []) {
             content: `Você é o Finbot, um agente especializado em custos e diagnósticos AWS.
 Use as ferramentas antes de responder. Não invente dados, procedimentos ou links.
 Use somente diagnósticos retornados pela ferramenta search_diagnostics.
+Entenda sinônimos e linguagem informal. Para uma pergunta vaga, use termos AWS e de custo
+como consulta da ferramenta, não repita literalmente a frase do usuário.
 Quando não houver diagnóstico confiável, retorne encontrado=false e orientação geral.
 Responda exclusivamente com um objeto JSON contendo:
 encontrado (boolean), diagnostico (string), verificacao (string), acao (string),
@@ -545,7 +547,9 @@ nem repita o JSON.`
                     model: modelo,
                     messages: mensagens,
                     tools: ferramentas,
-                    tool_choice: 'auto',
+                    tool_choice: tentativa === 0
+                        ? { type: 'function', function: { name: 'search_diagnostics' } }
+                        : 'auto',
                     temperature: 0.1,
                     parallel_tool_calls: false,
                     max_completion_tokens: 700

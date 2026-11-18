@@ -1793,7 +1793,6 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 .botao-anexo-advisor,
-.botao-modo-advisor,
 .botao-enviar-advisor {
     min-width: 36px;
     min-height: 36px;
@@ -1805,11 +1804,6 @@ body.tela-servicos-ativa > .canvas-onda {
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-}
-
-.botao-modo-advisor {
-    min-width: 52px;
-    font-size: 0.78rem;
 }
 
 .botao-enviar-advisor {

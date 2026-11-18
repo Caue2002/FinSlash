@@ -315,7 +315,6 @@ function criarRespostaBasica(pergunta) {
         diagnostico: 'Saudação',
         servico: null,
         resposta,
-        documentacao: 'https://aws.amazon.com/',
         confianca: 1,
         fonte: 'resposta_fixa',
         validacao: null,

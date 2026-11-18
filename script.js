@@ -720,9 +720,11 @@ async function enviarPerguntaAdvisor(pergunta) {
             throw new TypeError('O resultado do Finbot está incompleto.');
         }
 
-        statusAdvisor.textContent = resultado.encontrado
-            ? 'Resposta baseada em diagnóstico AWS validado.'
-            : 'Pergunta fora do alcance dos diagnósticos cadastrados.';
+        statusAdvisor.textContent = resultado.fonte === 'resposta_fixa'
+            ? 'Resposta do Finbot.'
+            : resultado.encontrado
+                ? 'Resposta baseada em diagnóstico AWS validado.'
+                : 'Pergunta fora do alcance dos diagnósticos cadastrados.';
         exibirResultadoAdvisor(resultado);
     } catch (error) {
         let mensagemErro = 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.';

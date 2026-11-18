@@ -464,14 +464,42 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
     ];
 
     for (let tentativa = 0; tentativa < 3; tentativa++) {
-        const modelos = [
+        const modelosPreferidos = [
             process.env.GROQ_MODEL,
-            'openai/gpt-oss-20b',
+            'llama-3.3-70b-versatile',
             'llama-3.1-8b-instant',
-            'llama-3.3-70b-versatile'
+            'openai/gpt-oss-20b'
         ].filter((modelo, indice, lista) =>
             modelo && lista.indexOf(modelo) === indice
         );
+
+        const modelos = [...modelosPreferidos];
+        try {
+            const respostaModelos = await fetch('https://api.groq.com/openai/v1/models', {
+                headers: {
+                    Authorization: `Bearer ${chave}`,
+                    'Content-Type': 'application/json'
+                },
+                signal: AbortSignal.timeout(5000)
+            });
+            if (respostaModelos.ok) {
+                const modelosAtivos = await respostaModelos.json();
+                const idsAtivos = (modelosAtivos.data || [])
+                    .map((modelo) => modelo.id)
+                    .filter((id) =>
+                        typeof id === 'string'
+                        && !id.includes('whisper')
+                        && !id.includes('prompt-guard')
+                    );
+                for (const id of idsAtivos) {
+                    if (!modelos.includes(id)) {
+                        modelos.push(id);
+                    }
+                }
+            }
+        } catch {
+            // Mantém a lista fixa como fallback.
+        }
 
         let resposta;
         for (const modelo of modelos) {

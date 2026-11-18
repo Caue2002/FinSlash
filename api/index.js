@@ -479,6 +479,9 @@ Use somente diagnósticos retornados pela ferramenta search_diagnostics.
 Entenda sinônimos e linguagem informal. Para uma pergunta vaga, use termos AWS e de custo
 como consulta da ferramenta, não repita literalmente a frase do usuário.
 Quando não houver diagnóstico confiável, retorne encontrado=false e orientação geral.
+Nunca substitua ou complete os dados do diagnóstico com conhecimento externo.
+As informações verificadas pelo usuário devem sair dos campos verification/check,
+action/action e caution do resultado da ferramenta.
 Responda exclusivamente com um objeto JSON contendo:
 encontrado (boolean), diagnostico (string), verificacao (string), acao (string),
 cuidados (string), documentacao (URL HTTPS AWS segura), servico (string ou null),
@@ -860,18 +863,18 @@ async function receberAdvisor(request, origemPermitida) {
                     const resultadosLocais = Array.isArray(resultado.resultados)
                         ? resultado.resultados
                         : [];
-                    const respostaNatural = typeof resultadoAgente.resposta === 'string'
-                        && resultadoAgente.resposta.trim()
-                        ? resultadoAgente.resposta.trim()
-                        : resultado.resposta;
                     resultado = {
                         ...resultado,
-                        resposta: respostaNatural,
                         sugestoes: Array.isArray(resultadoAgente.sugestoes)
                             ? resultadoAgente.sugestoes.slice(0, 3)
                             : resultado.sugestoes,
                         resultados: resultadosLocais,
-                        fonte: 'groq+banco'
+                        fonte: 'groq+banco-validado',
+                        validacao: {
+                            status: 'oficial-cadastrado',
+                            origem: 'PostgreSQL do FinSlash',
+                            aviso: 'A resposta usa exclusivamente diagnósticos oficiais validados no projeto.'
+                        }
                     };
                 }
             } catch (erroAgente) {

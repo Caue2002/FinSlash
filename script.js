@@ -252,6 +252,7 @@ const tipoResultadosAdvisor = document.getElementById('tipo-resultados-advisor')
 const confiancaAdvisor = document.getElementById('confianca-advisor');
 const tituloResultadosAdvisor = document.getElementById('titulo-resultados-advisor');
 const respostaTextoAdvisor = document.getElementById('resposta-texto-advisor');
+const validacaoAdvisor = document.getElementById('validacao-advisor');
 const documentacaoAdvisor = document.getElementById('documentacao-advisor');
 const servicoAdvisor = document.getElementById('servico-advisor');
 let enviandoAdvisor = false;
@@ -632,6 +633,11 @@ function exibirResultadoAdvisor(resultado) {
     servicoAdvisor.textContent = typeof resultado.servico === 'string'
         ? `Serviço: ${resultado.servico}`
         : 'Revise primeiro o cenário e os custos envolvidos.';
+    validacaoAdvisor.textContent = resultado.validacao?.status === 'oficial-cadastrado'
+        ? 'Resposta baseada em informações oficiais validadas no projeto'
+        : resultado.encontrado
+            ? 'Resposta baseada no diagnóstico validado no projeto'
+            : 'Orientação geral — nenhum diagnóstico específico foi encontrado';
 
 }
 

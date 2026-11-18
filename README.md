@@ -34,6 +34,8 @@ Opcionalmente, uma chave gratuita do Groq ativa um modo agente. O modelo pode ch
 
 O painel mantém apenas o histórico curto da sessão atual no navegador e envia até seis mensagens ao servidor em cada consulta. O histórico não é persistido no banco e permite acompanhamento de dúvidas informais, como fazer uma nova pergunta sem repetir todo o contexto. A resposta textual é gerada pelo modelo a partir dos diagnósticos recuperados pelas ferramentas.
 
+Para evitar alucinações, o Groq é limitado à compreensão da pergunta e à seleção da ferramenta. A resposta final usa somente título, resumo, etapas, confiança e documentação retornados pelo banco validado do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
+
 A busca reconhece serviços e termos como EC2, S3, RDS, Lambda, CloudWatch, IAM, CloudFront, EBS, EKS, ECS, DynamoDB, NAT Gateway, AWS Budgets e Cost Explorer. O ranking considera correspondência com o serviço, título, resumo, slug e etapas cadastradas. A resposta principal vem acompanhada de até dois diagnósticos relacionados e sugestões da mesma área.
 
 Endpoint:

@@ -1149,7 +1149,7 @@ async function receberAdvisor(request, origemPermitida) {
     } catch (error) {
         console.error('Falha ao consultar o Finbot:', error);
         return responder(500, {
-            error: 'Não foi possível consultar o Advisor agora.'
+            error: 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.'
         }, cabecalhos);
     }
 }

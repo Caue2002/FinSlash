@@ -673,7 +673,7 @@ async function enviarPerguntaAdvisor(pergunta) {
     }
 
     if (window.location.protocol === 'file:') {
-        statusAdvisor.textContent = 'Para usar o Advisor, abra o FinSlash pela API ou pela publicação na Vercel.';
+        statusAdvisor.textContent = 'Para usar o Finbot, abra o FinSlash pela API ou pela publicação na Vercel.';
         return;
     }
 
@@ -711,13 +711,13 @@ async function enviarPerguntaAdvisor(pergunta) {
         if (!resposta.ok) {
             throw new Error(typeof resultado.error === 'string'
                 ? resultado.error
-                : 'Não foi possível consultar o Advisor.');
+                : 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.');
         }
         if (!resultado
             || typeof resultado !== 'object'
             || typeof resultado.encontrado !== 'boolean'
             || typeof resultado.diagnostico !== 'string') {
-            throw new TypeError('O resultado do Advisor está incompleto.');
+            throw new TypeError('O resultado do Finbot está incompleto.');
         }
 
         statusAdvisor.textContent = resultado.encontrado
@@ -725,13 +725,14 @@ async function enviarPerguntaAdvisor(pergunta) {
             : 'Pergunta fora do alcance dos diagnósticos cadastrados.';
         exibirResultadoAdvisor(resultado);
     } catch (error) {
+        let mensagemErro = 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.';
         if (error.name === 'AbortError') {
-            statusAdvisor.textContent = 'Tempo esgotado. Tente novamente.';
+            mensagemErro = 'A resposta demorou demais. Tente novamente em alguns segundos.';
         } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-            statusAdvisor.textContent = 'Não foi possível conectar à API. Verifique sua conexão.';
-        } else {
-            statusAdvisor.textContent = error.message || 'Não foi possível consultar o Advisor.';
+            mensagemErro = 'Não consegui conectar ao Finbot. Verifique sua conexão e tente novamente.';
         }
+        statusAdvisor.textContent = '';
+        adicionarMensagemAdvisor('assistant', mensagemErro);
     } finally {
         window.clearTimeout(timeout);
         enviandoAdvisor = false;

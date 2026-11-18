@@ -66,9 +66,9 @@ Resposta encontrada:
 }
 ```
 
-Quando não existe correspondência confiável, o endpoint retorna uma orientação padrão segura com `encontrado: false` e até três sugestões. O servidor e o navegador não persistem perguntas; o Advisor mantém apenas a interação da sessão atual.
+Quando não existe correspondência confiável, o endpoint retorna uma orientação padrão segura com `encontrado: false` e até três sugestões. O servidor e o navegador não persistem perguntas.
 
-O Advisor usa `DATABASE_URL` e `ALLOWED_ORIGIN`, já necessárias pela API existente. A interface usa `window.FINSLASH_API_BASE_URL` e não fixa uma URL externa. O modo `file://` mostra instruções para abrir o projeto pela API ou pela publicação na Vercel.
+O Finbot usa `DATABASE_URL` e `ALLOWED_ORIGIN`, já necessárias pela API existente. A interface usa `window.FINSLASH_API_BASE_URL` e não fixa uma URL externa. O modo `file://` mostra instruções para abrir o projeto pela API ou pela publicação na Vercel.
 
 ## Tecnologias
 

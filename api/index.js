@@ -600,7 +600,22 @@ nem repita o JSON.`
             try {
                 return JSON.parse(texto);
             } catch {
-                throw new Error('Groq devolveu JSON inválido.');
+                const blocoJson = texto.match(/```(?:json)?\s*([\s\S]*?)```/iu);
+                if (blocoJson) {
+                    try {
+                        return JSON.parse(blocoJson[1].trim());
+                    } catch {
+                        // Continua para resposta textual segura.
+                    }
+                }
+                if (texto.trim()) {
+                    return {
+                        encontrado: true,
+                        diagnostico: 'Resposta textual do agente',
+                        resposta: texto.trim()
+                    };
+                }
+                throw new Error('Groq devolveu uma resposta vazia.');
             }
         }
 

@@ -1664,17 +1664,17 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 .icone-advisor {
-    width: 60px;
-    height: 60px;
+    width: 76px;
+    height: 76px;
     object-fit: contain;
-    flex: 0 0 60px;
-    border-radius: 18px;
+    flex: 0 0 76px;
+    border-radius: 20px;
     background: #ffffff;
 }
 
 .icone-logo-advisor-nav {
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
     object-fit: contain;
 }
 
@@ -3018,10 +3018,10 @@ button.item-historico-perfil:focus-visible {
     }
 
     .icone-advisor {
-        width: 52px;
-        height: 52px;
-        flex-basis: 52px;
-        border-radius: 15px;
+        width: 64px;
+        height: 64px;
+        flex-basis: 64px;
+        border-radius: 17px;
     }
 
     .cabecalho-advisor h2 {

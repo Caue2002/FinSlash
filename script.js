@@ -731,7 +731,7 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
         exportar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path><path d="M7 7v10h10"></path></svg>';
         exportar.addEventListener('click', () => {
             const cabecalho = [
-                'Finbot - Relatório de diagnóstico',
+                'Navi - Relatório de diagnóstico',
                 '',
                 texto,
                 '',
@@ -746,7 +746,7 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'finbot-relatorio.txt';
+            link.download = 'navi-relatorio.txt';
             link.click();
             URL.revokeObjectURL(url);
         });
@@ -791,7 +791,7 @@ async function enviarPerguntaAdvisor(pergunta) {
     }
 
     if (window.location.protocol === 'file:') {
-        statusAdvisor.textContent = 'Para usar o Finbot, abra o FinSlash pela API ou pela publicação na Vercel.';
+        statusAdvisor.textContent = 'Para usar a Navi, abra o FinSlash pela API ou pela publicação na Vercel.';
         return;
     }
 
@@ -832,28 +832,28 @@ async function enviarPerguntaAdvisor(pergunta) {
         if (!resposta.ok) {
             throw new Error(typeof resultado.error === 'string'
                 ? resultado.error
-                : 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.');
+                : 'A Navi não conseguiu consultar os diagnósticos agora. Tente novamente.');
         }
         if (!resultado
             || typeof resultado !== 'object'
             || typeof resultado.encontrado !== 'boolean'
             || typeof resultado.diagnostico !== 'string') {
-            throw new TypeError('O resultado do Finbot está incompleto.');
+            throw new TypeError('O resultado da Navi está incompleto.');
         }
 
         statusAdvisor.textContent = resultado.fonte === 'gemini-saudaçao'
-            ? 'Resposta do Finbot.'
+            ? 'Resposta da Navi.'
             : resultado.encontrado
                 ? 'Resposta baseada em diagnóstico AWS validado.'
                 : 'Pergunta fora do alcance dos diagnósticos cadastrados.';
         pensando.remove();
         exibirResultadoAdvisor(resultado);
     } catch (error) {
-        let mensagemErro = 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.';
+        let mensagemErro = 'A Navi não conseguiu consultar os diagnósticos agora. Tente novamente.';
         if (error.name === 'AbortError') {
             mensagemErro = 'A resposta demorou demais. Tente novamente em alguns segundos.';
         } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-            mensagemErro = 'Não consegui conectar ao Finbot. Verifique sua conexão e tente novamente.';
+            mensagemErro = 'Não consegui conectar à Navi. Verifique sua conexão e tente novamente.';
         }
         statusAdvisor.textContent = '';
         pensando.remove();

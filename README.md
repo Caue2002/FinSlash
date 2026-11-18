@@ -11,7 +11,7 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Perfil com histórico de serviços, medalhas e envio de feedback sem cadastro.
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações, cuidados e links para documentação oficial da AWS.
-- Finbot, assistente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
+- Navi, agente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
 - Modo agente opcional com Gemini: o modelo gera respostas a partir dos diagnósticos publicados e das fontes oficiais cadastradas.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
 - Até três diagnósticos relacionados por consulta, além de sugestões de perguntas comuns.
@@ -26,17 +26,17 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 
 A interface não requer compilação. Para explorar as telas, abra `index.html` no navegador. Para usar diagnósticos e feedback, a API requer Node.js e PostgreSQL configurados.
 
-## Finbot
+## Navi
 
-O Finbot permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Por padrão, ele usa busca local com normalização, sinônimos e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
+A Navi permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Por padrão, ela usa busca local com normalização, sinônimos e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
 
-Opcionalmente, uma chave do Google AI Studio ativa o Gemini. Configure `GEMINI_API_KEY` e `GEMINI_MODEL` nas variáveis de ambiente. A API envia a pergunta e um contexto fechado com diagnóstico, etapas e fontes cadastradas. Sem `GEMINI_API_KEY`, o Finbot continua funcionando integralmente no modo local.
+Opcionalmente, uma chave do Google AI Studio ativa o Gemini. Configure `GEMINI_API_KEY` e `GEMINI_MODEL` nas variáveis de ambiente. A API envia a pergunta e um contexto fechado com diagnóstico, etapas e fontes cadastradas. Sem `GEMINI_API_KEY`, a Navi continua funcionando integralmente no modo local.
 
-O painel não mantém nem envia histórico de mensagens ao servidor. Cada consulta é tratada isoladamente e as mensagens desaparecem ao fechar o Finbot.
+O painel não mantém nem envia histórico de mensagens ao servidor. Cada consulta é tratada isoladamente e as mensagens desaparecem ao fechar a Navi.
 
 Saudações e respostas AWS usam o Gemini quando disponível, com temperatura zero. Perguntas fora do escopo são bloqueadas antes da geração. A barra de rolagem do painel acompanha o tema escuro do chat.
 
-Quando existe um diagnóstico validado, o Finbot apresenta:
+Quando existe um diagnóstico validado, a Navi apresenta:
 
 - Plano em três etapas: verificar, agir e proteger.
 - Checklist interativo da sessão.
@@ -44,7 +44,7 @@ Quando existe um diagnóstico validado, o Finbot apresenta:
 - Confiança baseada na correspondência com o catálogo.
 - Exportação da resposta em arquivo de texto.
 - Copiar a resposta para a área de transferência.
-- Estado visual enquanto o Finbot consulta os diagnósticos.
+- Estado visual enquanto a Navi consulta os diagnósticos.
 - Botão para limpar todas as mensagens temporárias do painel.
 - Detecção de consultas ambíguas entre vários serviços.
 
@@ -84,7 +84,7 @@ Resposta encontrada:
 
 Quando não existe correspondência confiável, o endpoint retorna uma orientação padrão segura com `encontrado: false` e até três sugestões. O servidor e o navegador não persistem perguntas.
 
-O Finbot usa `DATABASE_URL` e `ALLOWED_ORIGIN`, já necessárias pela API existente. A interface usa `window.FINSLASH_API_BASE_URL` e não fixa uma URL externa. O modo `file://` mostra instruções para abrir o projeto pela API ou pela publicação na Vercel.
+A Navi usa `DATABASE_URL` e `ALLOWED_ORIGIN`, já necessárias pela API existente. A interface usa `window.FINSLASH_API_BASE_URL` e não fixa uma URL externa. O modo `file://` mostra instruções para abrir o projeto pela API ou pela publicação na Vercel.
 
 ## Tecnologias
 
@@ -113,7 +113,7 @@ FinSlash/
 ├── LICENSE                 # Licença MIT
 ├── README.md               # Documentação do projeto
 └── imagens/
-    ├── logo-advisor.png    # Identidade visual do Finbot
+    ├── logo-advisor.png    # Identidade visual da Navi
     └── ...                 # Imagens e animações
 ```
 

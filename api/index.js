@@ -312,7 +312,7 @@ async function obterContextoVisaoGeral(nomeServico) {
 
 async function responderVisaoGeralServico(pergunta, historico, contexto) {
     const contextoSeguro = JSON.stringify(contexto).slice(0, 18000);
-    const systemInstruction = `Você é o Finbot. Explique o serviço AWS em texto natural.
+    const systemInstruction = `Você é a Navi. Explique o serviço AWS em texto natural.
 Use exclusivamente o contexto cadastrado abaixo. Não invente recursos, preços,
 procedimentos, benefícios ou links. Não escolha um único diagnóstico quando a
 pessoa pediu uma visão geral. Responda em português, em 2 ou 3 parágrafos curtos.
@@ -336,7 +336,7 @@ function criarResultadoForaDoEscopo() {
     return {
         encontrado: false,
         diagnostico: 'Esta pergunta não corresponde a um diagnóstico validado do FinSlash.',
-        verificacao: 'O Finbot responde apenas a dúvidas sobre os serviços, custos e diagnósticos cadastrados no projeto.',
+        verificacao: 'A Navi responde apenas a dúvidas sobre os serviços, custos e diagnósticos cadastrados no projeto.',
         acao: 'Pergunte sobre um serviço AWS ou sobre um cenário de custo, utilização, segurança ou arquitetura incluído no FinSlash.',
         cuidados: 'Não use este painel para perguntas pessoais, gerais ou que não estejam relacionadas ao projeto AWS.',
         resposta: 'Não encontrei um diagnóstico AWS validado para essa pergunta. Posso ajudar com serviços AWS, custos, utilização, arquitetura e cenários cadastrados no FinSlash. Reformule sua dúvida incluindo o serviço ou problema AWS, por exemplo EC2, S3, RDS ou Lambda.',
@@ -356,13 +356,13 @@ function ehSaudacao(pergunta) {
     return /^(oi|ola|hello|hey|bom dia|boa tarde|boa noite|tudo bem|obrigado|obrigada|tchau|ate logo)\b/u.test(normalizada);
 }
 
-async function gerarSaudacaoFinbot(pergunta) {
+async function gerarSaudacaoNavi(pergunta) {
     if (!process.env.GEMINI_API_KEY) {
         return 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
     }
     try {
         const objeto = await chamarGemini({
-            systemInstruction: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Identifique-se apenas como Finbot se fizer sentido.',
+            systemInstruction: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Identifique-se apenas como Navi se fizer sentido.',
             prompt: pergunta,
             json: true
         });
@@ -383,7 +383,7 @@ async function criarRespostaBasica(pergunta) {
         encontrado: false,
         diagnostico: 'Saudação',
         servico: null,
-        resposta: await gerarSaudacaoFinbot(pergunta),
+        resposta: await gerarSaudacaoNavi(pergunta),
         confianca: 1,
         fonte: 'resposta_fixa',
         validacao: null,
@@ -610,8 +610,8 @@ async function consultarAdvisor(pergunta) {
         return {
             encontrado: false,
             diagnostico: 'Esta pergunta não corresponde a um diagnóstico validado do FinSlash.',
-            verificacao: 'O Finbot responde apenas a dúvidas sobre os serviços, custos e diagnósticos cadastrados no projeto.',
-            acao: 'Pergunte sobre um serviço AWS ou sobre um cenário de custo, utilização, segurança ou arquitetura incluído no FinSlash.',
+            verificacao: 'A Navi responde apenas a dúvidas sobre os serviços, custos e diagnósticos cadastrados no projeto.',
+            acao: 'Pergunte à Navi sobre um serviço AWS ou sobre um cenário de custo, utilização, segurança ou arquitetura incluído no FinSlash.',
             cuidados: 'Não use este painel para perguntas pessoais, gerais ou que não estejam relacionadas ao projeto AWS.',
             resposta: 'Não encontrei um diagnóstico AWS validado para essa pergunta. Posso ajudar com serviços AWS, custos, utilização, arquitetura e cenários cadastrados no FinSlash. Reformule sua dúvida incluindo o serviço ou problema AWS, por exemplo EC2, S3, RDS ou Lambda.',
             documentacao: 'https://aws.amazon.com/aws-cost-management/',
@@ -704,7 +704,7 @@ async function listarServicosPublicados() {
     return resultado.rows.map((linha) => linha.name);
 }
 
-async function gerarRespostaFinbotGemini(pergunta, contexto) {
+async function gerarRespostaNaviGemini(pergunta, contexto) {
     if (!process.env.GEMINI_API_KEY) {
         return null;
     }
@@ -713,7 +713,7 @@ async function gerarRespostaFinbotGemini(pergunta, contexto) {
         diagnostico: contexto
     }).slice(0, 18000);
     const objeto = await chamarGemini({
-        systemInstruction: `Você é o Finbot. Gere uma resposta dinâmica em português.
+        systemInstruction: `Você é a Navi. Gere uma resposta dinâmica em português.
 Use exclusivamente o contexto abaixo. Ele contém dados validados e fontes oficiais AWS
 cadastradas no projeto. Não invente recursos, preços, procedimentos, dados da conta,
 estimativas reais ou URLs. Explique a situação, como verificar, como agir e os cuidados.
@@ -1142,7 +1142,7 @@ async function receberAdvisor(request, origemPermitida) {
             agenteStatus = 'erro';
             try {
                 if (resultado.encontrado) {
-                    const respostaGerada = await gerarRespostaFinbotGemini(pergunta, resultado);
+                    const respostaGerada = await gerarRespostaNaviGemini(pergunta, resultado);
                     if (!respostaGerada) {
                         throw new Error('Gemini não devolveu uma resposta textual.');
                     }
@@ -1180,9 +1180,9 @@ async function receberAdvisor(request, origemPermitida) {
         };
         return responder(200, resultado, cabecalhos);
     } catch (error) {
-        console.error('Falha ao consultar o Finbot:', error);
+        console.error('Falha ao consultar a Navi:', error);
         return responder(500, {
-            error: 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.'
+            error: 'A Navi não conseguiu consultar os diagnósticos agora. Tente novamente.'
         }, cabecalhos);
     }
 }

@@ -985,7 +985,12 @@ async function receberAdvisor(request, origemPermitida) {
             const nomeServico = await identificarServicoPorBanco(pergunta);
             const contexto = await obterContextoVisaoGeral(nomeServico);
             if (contexto) {
-                const respostaNatural = await responderVisaoGeralServico(pergunta, historico, contexto);
+                let respostaNatural = null;
+                try {
+                    respostaNatural = await responderVisaoGeralServico(pergunta, historico, contexto);
+                } catch (erroVisao) {
+                    console.error('Falha ao gerar visão geral pelo Gemini:', erroVisao);
+                }
                 if (respostaNatural) {
                     return responder(200, {
                         modo: 'conversacao',
@@ -1012,6 +1017,36 @@ async function receberAdvisor(request, origemPermitida) {
                         }
                     }, cabecalhos);
                 }
+                const resumoLocal = contexto.topics
+                    .slice(0, 5)
+                    .map((topico) => topico.summary)
+                    .filter(Boolean)
+                    .join(' ');
+                return responder(200, {
+                    modo: 'conversacao',
+                    encontrado: true,
+                    diagnostico: `Visão geral: ${contexto.service}`,
+                    servico: contexto.service,
+                    resposta: resumoLocal
+                        || `${contexto.service} está incluído no catálogo validado do FinSlash.`,
+                    documentacao: contexto.topics.flatMap((topico) => topico.sources || [])
+                        .find((fonte) =>
+                            typeof fonte.url === 'string'
+                            && (fonte.url.startsWith('https://docs.aws.amazon.com/')
+                                || fonte.url.startsWith('https://aws.amazon.com/'))
+                        )?.url || 'https://docs.aws.amazon.com/',
+                    confianca: 1,
+                    fonte: 'banco-validado',
+                    validacao: {
+                        status: 'oficial-cadastrado',
+                        origem: 'PostgreSQL do FinSlash',
+                        aviso: 'A visão geral usa os tópicos cadastrados e validados do projeto.'
+                    },
+                    agente: {
+                        status: 'fallback-local',
+                        erro: null
+                    }
+                }, cabecalhos);
             }
         }
         let resultado = await consultarAdvisor(pergunta);

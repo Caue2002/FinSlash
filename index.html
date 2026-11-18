@@ -246,15 +246,6 @@
                 <button type="button" data-pergunta-advisor="Como reduzir custos com RDS">Banco caro</button>
                 <button type="button" data-pergunta-advisor="Como encontrar recursos sem uso">Recursos sem uso</button>
             </div>
-            <form class="formulario-advisor" id="formulario-advisor">
-                <label for="campo-advisor">Sua dúvida sobre AWS</label>
-                <textarea id="campo-advisor" maxlength="300" rows="3" placeholder="Ex.: Como reduzir custos com EC2?"></textarea>
-                <div class="acoes-advisor">
-                    <span id="contador-advisor">0/300</span>
-                    <button class="botao-enviar-advisor" id="botao-enviar-advisor" type="submit">Consultar</button>
-                </div>
-                <p class="status-advisor" id="status-advisor" role="status" aria-live="polite"></p>
-            </form>
             <section class="resultado-advisor hidden" id="resultado-advisor" aria-live="polite">
                 <div class="cabecalho-resultados-advisor">
                     <span class="tipo-resultados-advisor" id="tipo-resultados-advisor"></span>
@@ -265,6 +256,15 @@
                 <p class="resposta-texto-advisor" id="resposta-texto-advisor"></p>
                 <a class="documentacao-advisor" id="documentacao-advisor" href="https://docs.aws.amazon.com/" target="_blank" rel="noopener noreferrer">Ver documentação oficial da AWS</a>
             </section>
+            <form class="formulario-advisor" id="formulario-advisor">
+                <label for="campo-advisor">Sua dúvida sobre AWS</label>
+                <textarea id="campo-advisor" maxlength="300" rows="3" placeholder="Ex.: Como reduzir custos com EC2?"></textarea>
+                <div class="acoes-advisor">
+                    <span id="contador-advisor">0/300</span>
+                    <button class="botao-enviar-advisor" id="botao-enviar-advisor" type="submit">Consultar</button>
+                </div>
+                <p class="status-advisor" id="status-advisor" role="status" aria-live="polite"></p>
+            </form>
         </aside>
     </div>
 

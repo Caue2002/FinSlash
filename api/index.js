@@ -12,7 +12,7 @@ const LIMITE_CARACTERES_ADVISOR = 300;
 const LIMITE_ENVIOS_POR_HORA = 5;
 const CATEGORIAS_FEEDBACK = new Set(['suggestion', 'issue', 'content']);
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_MODEL = 'openai/gpt-oss-20b';
 
 const SINONIMOS_ADVISOR = {
     ec2: ['ec2', 'servidor', 'servidores', 'maquina', 'maquinas', 'instancia', 'instancias', 'compute', 'direito ao tamanho', 'dimensionamento', 'ocioso', 'ociosa', 'subutilizado', 'subutilizada', 'savings plan'],
@@ -464,26 +464,42 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
     ];
 
     for (let tentativa = 0; tentativa < 3; tentativa++) {
-        const resposta = await fetch(GROQ_API_URL, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${chave}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: process.env.GROQ_MODEL || GROQ_MODEL,
-                messages: mensagens,
-                tools: ferramentas,
-                tool_choice: 'auto',
-                temperature: 0.1,
-                max_tokens: 700,
-                response_format: { type: 'json_object' }
-            }),
-            signal: AbortSignal.timeout(10000)
-        });
+        const modelos = [
+            process.env.GROQ_MODEL,
+            'openai/gpt-oss-20b',
+            'llama-3.1-8b-instant',
+            'llama-3.3-70b-versatile'
+        ].filter((modelo, indice, lista) =>
+            modelo && lista.indexOf(modelo) === indice
+        );
 
-        if (!resposta.ok) {
-            throw new Error(`Groq respondeu com o status ${resposta.status}.`);
+        let resposta;
+        for (const modelo of modelos) {
+            resposta = await fetch(GROQ_API_URL, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${chave}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: modelo,
+                    messages: mensagens,
+                    tools: ferramentas,
+                    tool_choice: 'auto',
+                    temperature: 0.1,
+                    max_tokens: 700,
+                    response_format: { type: 'json_object' }
+                }),
+                signal: AbortSignal.timeout(10000)
+            });
+            if (resposta.ok) {
+                modeloUsado = modelo;
+                break;
+            }
+        }
+
+        if (!resposta?.ok) {
+            throw new Error(`Groq respondeu com o status ${resposta?.status || 'desconhecido'}.`);
         }
 
         const payload = await resposta.json();

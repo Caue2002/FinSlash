@@ -271,9 +271,6 @@ async function consultarAdvisor(pergunta) {
                 if (textoLinha.includes(palavra)) {
                     pontuacao += 4;
                 }
-                if (textoLinha.includes(palavra.slice(0, Math.max(4, palavra.length - 2)))) {
-                    pontuacao += 1;
-                }
             }
         });
         if (textoLinha.includes(normalizada) && normalizada.length >= 8) {

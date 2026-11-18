@@ -14,7 +14,8 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Finbot, assistente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
 - Até três diagnósticos relacionados por consulta, além de sugestões de perguntas comuns.
-- Painel responsivo com cenários rápidos, estados de carregamento e resultado, modo compacto no mobile e visual próprio do Finbot.
+- Painel mobile em formato de cartão inferior, cenários rápidos em grade, resposta principal destacada e detalhes verificáveis em cards expansíveis.
+- O modo compacto oculta descrições e cenários após a consulta para manter o diagnóstico legível em telas pequenas.
 - Privacidade por padrão: perguntas não são enviadas a IA externa e não são persistidas no servidor ou no navegador.
 - Barra inferior com atalhos para o menu, pesquisa de serviços e perfil; navegação de retorno compatível com dispositivos móveis.
 - Botão voltar do aparelho ou do navegador e gesto de arrastar para a direita.

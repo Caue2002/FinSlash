@@ -261,13 +261,22 @@
                     <span class="confianca-advisor" id="confianca-advisor"></span>
                 </div>
                 <h3 id="titulo-resultados-advisor"></h3>
-                <dl class="detalhes-resultados-advisor">
-                    <div><dt>Verificação</dt><dd id="verificacao-advisor"></dd></div>
-                    <div><dt>Ação recomendada</dt><dd id="acao-advisor"></dd></div>
-                    <div><dt>Cuidados</dt><dd id="cuidados-advisor"></dd></div>
-                </dl>
-                <a class="documentacao-advisor" id="documentacao-advisor" href="https://docs.aws.amazon.com/" target="_blank" rel="noopener noreferrer">Abrir documentação oficial da AWS</a>
                 <p class="servico-advisor" id="servico-advisor"></p>
+                <div class="detalhes-resultados-advisor">
+                    <details open>
+                        <summary><span>Verificação</span></summary>
+                        <p id="verificacao-advisor"></p>
+                    </details>
+                    <details>
+                        <summary><span>Ação recomendada</span></summary>
+                        <p id="acao-advisor"></p>
+                    </details>
+                    <details>
+                        <summary><span>Cuidados</span></summary>
+                        <p id="cuidados-advisor"></p>
+                    </details>
+                </div>
+                <a class="documentacao-advisor" id="documentacao-advisor" href="https://docs.aws.amazon.com/" target="_blank" rel="noopener noreferrer">Ver documentação oficial da AWS</a>
                 <div class="relacionados-advisor" id="relacionados-advisor" aria-label="Diagnósticos relacionados"></div>
             </section>
         </aside>

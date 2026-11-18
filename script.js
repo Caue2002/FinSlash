@@ -565,6 +565,7 @@ function fecharPerfil() {
 function abrirAdvisor() {
     fecharPerfil();
     popupAdvisor.classList.remove('hidden');
+    popupAdvisor.querySelector('.painel-advisor')?.classList.remove('advisor-consulta');
     if (window.history.state?.app === 'FinSlash' && window.history.state.tela !== 'advisor') {
         atualizarHistoricoAplicacao('advisor', {
             telaAnterior: window.history.state.tela
@@ -607,6 +608,7 @@ function validarLinkAws(url) {
 
 function exibirResultadoAdvisor(resultado) {
     resultadoAdvisor.classList.remove('hidden');
+    resultadoAdvisor.closest('.painel-advisor')?.classList.add('advisor-consulta');
     tipoResultadosAdvisor.textContent = resultado.encontrado
         ? 'Diagnóstico encontrado'
         : 'Orientação padrão';
@@ -682,6 +684,7 @@ async function enviarPerguntaAdvisor(pergunta) {
     campoAdvisor.disabled = true;
     statusAdvisor.textContent = 'Consultando diagnósticos...';
     resultadoAdvisor.classList.add('hidden');
+    resultadoAdvisor.closest('.painel-advisor')?.classList.remove('advisor-consulta');
 
     const controlador = new AbortController();
     const timeout = window.setTimeout(() => controlador.abort(), 12000);

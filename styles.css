@@ -1799,21 +1799,43 @@ body.tela-servicos-ativa > .canvas-onda {
     margin: 0;
 }
 
-.detalhes-resultados-advisor div {
-    padding: 10px;
+.detalhes-resultados-advisor details {
+    overflow: hidden;
+    border: 1px solid #dbeafe;
     border-radius: 12px;
     background: #ffffff;
 }
 
-.detalhes-resultados-advisor dt {
-    margin-bottom: 4px;
+.detalhes-resultados-advisor summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
     color: #1d4ed8;
-    font-size: 0.78rem;
+    font-size: 0.84rem;
     font-weight: 800;
+    cursor: pointer;
+    list-style: none;
 }
 
-.detalhes-resultados-advisor dd {
+.detalhes-resultados-advisor summary::-webkit-details-marker {
+    display: none;
+}
+
+.detalhes-resultados-advisor summary::after {
+    content: '+';
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.detalhes-resultados-advisor details[open] summary::after {
+    content: '−';
+}
+
+.detalhes-resultados-advisor p {
     margin: 0;
+    padding: 0 12px 12px;
     color: #334155;
     line-height: 1.42;
 }
@@ -2986,42 +3008,25 @@ button.item-historico-perfil:focus-visible {
 
 @media (max-width: 768px) {
     .painel-advisor {
-        width: calc(100% - 16px);
-        max-height: calc(100dvh - 112px);
-        margin: 8px 8px 104px;
-        border-radius: 20px;
-        padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+        width: 100%;
+        max-height: calc(100dvh - 70px);
+        margin: 0;
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: 24px 24px 0 0;
+        padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
     }
 
     .popup-advisor {
         align-items: flex-end;
     }
 
-    .painel-advisor.advisor-digitando {
-        max-height: calc(100dvh - 24px);
-        margin-bottom: 16px;
-    }
-
-    .painel-advisor:focus-within {
-        max-height: calc(100dvh - 24px);
-        margin-bottom: 16px;
-    }
-
-    .painel-advisor.advisor-digitando .descricao-advisor,
-    .painel-advisor.advisor-digitando .cenarios-advisor {
-        display: none;
-    }
-
-    .painel-advisor:focus-within .descricao-advisor,
-    .painel-advisor:focus-within .cenarios-advisor {
-        display: none;
-    }
-
     .icone-advisor {
-        width: 64px;
-        height: 64px;
-        flex-basis: 64px;
-        border-radius: 17px;
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+        border-radius: 15px;
     }
 
     .cabecalho-advisor h2 {
@@ -3029,18 +3034,85 @@ button.item-historico-perfil:focus-visible {
     }
 
     .descricao-advisor {
-        margin: 10px 0;
-        font-size: 0.88rem;
+        margin: 8px 0;
+        font-size: 0.82rem;
+        line-height: 1.35;
     }
 
     .cenarios-advisor {
-        max-height: 74px;
-        overflow-y: auto;
-        margin-bottom: 10px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+        margin-bottom: 8px;
     }
 
     .cenarios-advisor button {
-        flex: 1 1 calc(50% - 7px);
+        width: 100%;
+        min-height: 38px;
+        padding: 6px 8px;
+        font-size: 0.74rem;
+    }
+
+    .formulario-advisor textarea {
+        min-height: 64px;
+        max-height: 96px;
+    }
+
+    .status-advisor {
+        min-height: 18px;
+        margin-top: 6px;
+        font-size: 0.78rem;
+    }
+
+    .resultado-advisor {
+        margin-top: 8px;
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    .resultado-advisor h3 {
+        margin: 6px 0 8px;
+        font-size: 1rem;
+        line-height: 1.28;
+    }
+
+    .detalhes-resultados-advisor {
+        gap: 6px;
+    }
+
+    .detalhes-resultados-advisor summary {
+        min-height: 40px;
+        padding: 8px 10px;
+    }
+
+    .detalhes-resultados-advisor p {
+        padding: 0 10px 10px;
+        font-size: 0.82rem;
+        line-height: 1.38;
+    }
+
+    .painel-advisor.advisor-consulta .descricao-advisor,
+    .painel-advisor.advisor-consulta .cenarios-advisor {
+        display: none;
+    }
+
+    .painel-advisor.advisor-consulta .cabecalho-advisor {
+        padding-bottom: 8px;
+    }
+
+    .painel-advisor.advisor-consulta .formulario-advisor textarea {
+        min-height: 52px;
+    }
+
+    .relacionados-advisor {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        margin-right: -4px;
+    }
+
+    .relacionados-advisor button {
+        flex: 0 0 auto;
+        max-width: 220px;
     }
 
     .navegacao-app {

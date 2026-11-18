@@ -256,13 +256,19 @@ async function consultarAdvisor(pergunta) {
             ...(linha.steps || []).flatMap((step) => [step.title, step.content])
         ].join(' '));
         let pontuacao = 0;
+        const tituloNormalizado = normalizarTextoAdvisor(linha.title);
+        const consultaS3 = /\bs3\b/u.test(normalizada);
         if (normalizada.includes('aws budgets')
             && textoLinha.includes('aws budgets')) {
             pontuacao += 30;
         }
-        if (normalizada.includes('aws budgets')
-            && /ausencia de alertas no aws budgets|falta de alertas.*aws budgets|alarmes cloudwatch no aws budgets/u.test(normalizarTextoAdvisor(linha.title))) {
-            pontuacao += 35;
+        if (normalizada.includes('aws budgets')) {
+            if (/ausencia de alertas no aws budgets|falta de alertas.*aws budgets|alarmes cloudwatch no aws budgets/u.test(tituloNormalizado)) {
+                pontuacao += 100;
+            }
+            if (/custo acumulado diario do cloudwatch/u.test(tituloNormalizado)) {
+                pontuacao -= 100;
+            }
         }
         if (normalizada.includes('cost explorer')
             && textoLinha.includes('cost explorer')) {
@@ -272,14 +278,14 @@ async function consultarAdvisor(pergunta) {
             normalizada.includes(termo)
         );
         if (consultaEconomica
-            && normalizada.includes(' s3 ')
+            && consultaS3
             && /(intelligent tiering|manutencao de todos os arquivos|transicao|glacier|ciclo de vida|lifecycle|expiracao)/u.test(normalizarTextoAdvisor(linha.title))) {
-            pontuacao += 35;
+            pontuacao += 100;
         }
         if (consultaEconomica
-            && normalizada.includes(' s3 ')
+            && consultaS3
             && /versionamento ativado|replica.*cross region|download direto/u.test(normalizarTextoAdvisor(linha.title))) {
-            pontuacao -= 20;
+            pontuacao -= 100;
         }
         if (consultaEconomica
             && /(custo|economia|orcamento|budget|lifecycle|ciclo de vida|transferencia|armazenamento)/u.test(textoLinha)) {

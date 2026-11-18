@@ -122,6 +122,48 @@ function normalizarTextoAdvisor(texto) {
         .trim();
 }
 
+function perguntaRelacionadoAoProjeto(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    if (!normalizada) {
+        return false;
+    }
+    if (/\b(aws|amazon|ec2|s3|rds|aurora|lambda|cloudwatch|cloudfront|dynamodb|eks|ecs|ebs|nat gateway|budgets|cost explorer)\b/u.test(normalizada)) {
+        return true;
+    }
+    return Object.values(SINONIMOS_ADVISOR).some((sinonimos) =>
+        sinonimos.some((sinonimo) =>
+            sinonimo !== 'custo'
+            && sinonimo !== 'custos'
+            && sinonimo !== 'gasto'
+            && sinonimo !== 'gastos'
+            && sinonimo !== 'economizar'
+            && sinonimo !== 'reduzir'
+            && sinonimo !== 'otimizar'
+            && sinonimo !== 'desperdicio'
+            && normalizada.includes(normalizarTextoAdvisor(sinonimo))
+        )
+    );
+}
+
+function criarResultadoForaDoEscopo() {
+    return {
+        encontrado: false,
+        diagnostico: 'Esta pergunta não corresponde a um diagnóstico validado do FinSlash.',
+        verificacao: 'O Finbot responde apenas a dúvidas sobre os serviços, custos e diagnósticos cadastrados no projeto.',
+        acao: 'Pergunte sobre um serviço AWS ou sobre um cenário de custo, utilização, segurança ou arquitetura incluído no FinSlash.',
+        cuidados: 'Não use este painel para perguntas pessoais, gerais ou que não estejam relacionadas ao projeto AWS.',
+        resposta: 'Não encontrei um diagnóstico AWS validado para essa pergunta. Posso ajudar com serviços AWS, custos, utilização, arquitetura e cenários cadastrados no FinSlash. Reformule sua dúvida incluindo o serviço ou problema AWS, por exemplo EC2, S3, RDS ou Lambda.',
+        documentacao: 'https://aws.amazon.com/aws-cost-management/',
+        servico: null,
+        topico: null,
+        fonte: 'orientacao_padrao',
+        validacao: null,
+        confianca: 0,
+        resultados: [],
+        sugestoes: []
+    };
+}
+
 async function lerJsonAdvisor(request) {
     const contentLength = Number(request.headers.get('content-length'));
     if (Number.isFinite(contentLength) && contentLength > LIMITE_BYTES_ADVISOR) {
@@ -865,6 +907,16 @@ async function receberAdvisor(request, origemPermitida) {
     try {
         const pergunta = entradaAdvisor.pergunta;
         const historico = entradaAdvisor.historico;
+        if (!perguntaRelacionadoAoProjeto(pergunta)) {
+            const resultadoForaDoEscopo = criarResultadoForaDoEscopo();
+            return responder(200, {
+                ...resultadoForaDoEscopo,
+                agente: {
+                    status: 'fora-do-escopo',
+                    erro: null
+                }
+            }, cabecalhos);
+        }
         let resultado = await consultarAdvisor(pergunta);
         let agenteStatus = 'desativado';
         let agenteErro = null;

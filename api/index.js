@@ -886,12 +886,14 @@ async function receberAdvisor(request, origemPermitida) {
                             ? resultadoAgente.sugestoes.slice(0, 3)
                             : resultado.sugestoes,
                         resultados: resultadosLocais,
-                        fonte: 'groq+banco-validado',
-                        validacao: {
+                        fonte: resultado.encontrado
+                            ? 'groq+banco-validado'
+                            : 'orientacao_padrao',
+                        validacao: resultado.encontrado ? {
                             status: 'oficial-cadastrado',
                             origem: 'PostgreSQL do FinSlash',
                             aviso: 'A resposta usa exclusivamente diagnósticos oficiais validados no projeto.'
-                        }
+                        } : null
                     };
                 }
             } catch (erroAgente) {

@@ -3104,6 +3104,11 @@ button.item-historico-perfil:focus-visible {
         min-height: 52px;
     }
 
+    .painel-advisor.advisor-consulta #contador-advisor,
+    .painel-advisor.advisor-consulta .status-advisor {
+        display: none;
+    }
+
     .relacionados-advisor {
         flex-wrap: nowrap;
         overflow-x: auto;

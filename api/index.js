@@ -256,6 +256,21 @@ async function consultarAdvisor(pergunta) {
             ...(linha.steps || []).flatMap((step) => [step.title, step.content])
         ].join(' '));
         let pontuacao = 0;
+        if (normalizada.includes('aws budgets')
+            && textoLinha.includes('aws budgets')) {
+            pontuacao += 30;
+        }
+        if (normalizada.includes('cost explorer')
+            && textoLinha.includes('cost explorer')) {
+            pontuacao += 30;
+        }
+        const consultaEconomica = ['economizar', 'reduzir custos', 'gastos', 'custos', 'custo'].some((termo) =>
+            normalizada.includes(termo)
+        );
+        if (consultaEconomica
+            && /(custo|economia|orcamento|budget|lifecycle|ciclo de vida|transferencia|armazenamento)/u.test(textoLinha)) {
+            pontuacao += 12;
+        }
         Object.entries(SERVICOS_ADVISOR).forEach(([chave, nomeServico]) => {
             const sinonimos = SINONIMOS_ADVISOR[chave] || [];
             const reconhecido = sinonimos.some((sinonimo) =>

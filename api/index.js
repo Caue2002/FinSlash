@@ -856,19 +856,6 @@ async function receberAdvisor(request, origemPermitida) {
                     const resultadosLocais = Array.isArray(resultado.resultados)
                         ? resultado.resultados
                         : [];
-                    let documentacao = resultadoAgente.documentacao;
-                    try {
-                        const url = new URL(documentacao);
-                        const dominioPermitido = url.protocol === 'https:'
-                            && (url.hostname === 'docs.aws.amazon.com'
-                                || url.hostname === 'aws.amazon.com'
-                                || url.hostname.endsWith('.amazonaws.com'));
-                        if (!dominioPermitido) {
-                            documentacao = 'https://docs.aws.amazon.com/';
-                        }
-                    } catch {
-                        documentacao = 'https://docs.aws.amazon.com/';
-                    }
                     const respostaNatural = typeof resultadoAgente.resposta === 'string'
                         && resultadoAgente.resposta.trim()
                         ? resultadoAgente.resposta.trim()
@@ -876,10 +863,6 @@ async function receberAdvisor(request, origemPermitida) {
                     resultado = {
                         ...resultado,
                         resposta: respostaNatural,
-                        documentacao,
-                        confianca: Number.isFinite(resultadoAgente.confianca)
-                            ? Math.max(0, Math.min(1, resultadoAgente.confianca))
-                            : resultado.confianca,
                         sugestoes: Array.isArray(resultadoAgente.sugestoes)
                             ? resultadoAgente.sugestoes.slice(0, 3)
                             : resultado.sugestoes,

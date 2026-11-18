@@ -982,8 +982,14 @@ async function receberAdvisor(request, origemPermitida) {
             }, cabecalhos);
         }
         if (!pedirDiagnosticoDeCusto(pergunta)) {
-            const nomeServico = await identificarServicoPorBanco(pergunta);
-            const contexto = await obterContextoVisaoGeral(nomeServico);
+            let nomeServico = null;
+            let contexto = null;
+            try {
+                nomeServico = await identificarServicoPorBanco(pergunta);
+                contexto = await obterContextoVisaoGeral(nomeServico);
+            } catch (erroContexto) {
+                console.error('Falha ao obter contexto geral do serviço:', erroContexto);
+            }
             if (contexto) {
                 let respostaNatural = null;
                 try {

@@ -46,11 +46,13 @@ Resposta encontrada:
   "servico": "Amazon EC2",
   "topico": "Título do diagnóstico",
   "fonte": "banco",
-  "confianca": 0.85
+  "confianca": 0.85,
+  "resultados": [],
+  "sugestoes": []
 }
 ```
 
-Quando não existe correspondência confiável, o endpoint retorna uma orientação padrão segura com `encontrado: false`. As perguntas não são persistidas pelo Advisor.
+Quando não existe correspondência confiável, o endpoint retorna uma orientação padrão segura com `encontrado: false` e até três sugestões. O servidor não persiste perguntas. O navegador pode guardar até oito dúvidas recentes no `localStorage`, com opção de limpar o histórico.
 
 O Advisor usa `DATABASE_URL` e `ALLOWED_ORIGIN`, já necessárias pela API existente. A interface usa `window.FINSLASH_API_BASE_URL` e não fixa uma URL externa. O modo `file://` mostra instruções para abrir o projeto pela API ou pela publicação na Vercel.
 

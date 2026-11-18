@@ -13,14 +13,21 @@ const LIMITE_ENVIOS_POR_HORA = 5;
 const CATEGORIAS_FEEDBACK = new Set(['suggestion', 'issue', 'content']);
 
 const SINONIMOS_ADVISOR = {
-    ec2: ['ec2', 'servidor', 'servidores', 'maquina', 'maquinas', 'instancia', 'instancias', 'compute'],
-    s3: ['s3', 'bucket', 'buckets', 'objeto', 'objetos', 'armazenamento'],
-    rds: ['rds', 'banco relacional', 'banco de dados', 'bancos de dados', 'base relacional'],
-    lambda: ['lambda', 'funcao serverless', 'funcoes serverless'],
-    cloudwatch: ['cloudwatch', 'monitoramento', 'metrica', 'metricas', 'alarme', 'alarmes'],
-    iam: ['iam', 'permissao', 'permissoes', 'usuarios', 'politicas'],
-    cloudfront: ['cloudfront', 'cdn'],
-    finops: ['custo', 'custos', 'gasto', 'gastos', 'orcamento', 'orcamentos', 'cobranca', 'economizar', 'reduzir']
+    ec2: ['ec2', 'servidor', 'servidores', 'maquina', 'maquinas', 'instancia', 'instancias', 'compute', 'direito ao tamanho', 'dimensionamento', 'ocioso', 'ociosa', 'subutilizado', 'subutilizada', 'savings plan'],
+    s3: ['s3', 'bucket', 'buckets', 'objeto', 'objetos', 'armazenamento', 'lifecycle', 'ciclo de vida', 'glacier', 'multipart', 'transferencia', 'transferir'],
+    rds: ['rds', 'aurora', 'banco relacional', 'banco de dados', 'bancos de dados', 'base relacional', 'database', 'db', 'mysql', 'postgresql', 'sql'],
+    lambda: ['lambda', 'funcao serverless', 'funcoes serverless', 'memoria', 'ram', 'invocacao', 'invocoes'],
+    cloudwatch: ['cloudwatch', 'monitoramento', 'metrica', 'metricas', 'alarme', 'alarmes', 'logs', 'observabilidade'],
+    iam: ['iam', 'permissao', 'permissoes', 'usuarios', 'politicas', 'acesso', 'roles', 'identidade'],
+    cloudfront: ['cloudfront', 'cdn', 'cache', 'distribuicao', 'edge', 'conteudo estatico'],
+    ebs: ['ebs', 'disco', 'discos', 'volume', 'volumes', 'snapshot', 'snapshots', 'anexo', 'desanexado'],
+    eks: ['eks', 'kubernetes', 'cluster', 'nos', 'pods', 'node'],
+    ecs: ['ecs', 'container', 'containers', 'fargate', 'tarefa', 'tarefas'],
+    dynamodb: ['dynamodb', 'nosql', 'tabela', 'tabelas', 'throughput', 'throttling', 'sob demanda'],
+    natgateway: ['nat gateway', 'gateway nat', 'saida para internet', 'trafego externo'],
+    budgets: ['budget', 'budgets', 'orcamento', 'orcamentos', 'limite de custo', 'alerta de custo'],
+    costexplorer: ['cost explorer', 'explorador de custos', 'curva de custo', 'gastos mensais', 'fatura'],
+    finops: ['custo', 'custos', 'gasto', 'gastos', 'cobranca', 'economizar', 'economia', 'reduzir', 'otimizar', 'desperdicio', 'despesas']
 };
 
 const SERVICOS_ADVISOR = {
@@ -30,7 +37,12 @@ const SERVICOS_ADVISOR = {
     lambda: 'AWS Lambda',
     cloudwatch: 'Amazon CloudWatch',
     iam: 'AWS IAM',
-    cloudfront: 'Amazon CloudFront'
+    cloudfront: 'Amazon CloudFront',
+    ebs: 'Amazon EBS',
+    eks: 'Amazon EKS',
+    ecs: 'Amazon ECS',
+    dynamodb: 'Amazon DynamoDB',
+    natgateway: 'NAT Gateway'
 };
 
 // Força TLS validado e evita que opções TLS da URL substituam a configuração do pool.
@@ -234,8 +246,7 @@ async function consultarAdvisor(pergunta) {
         parametros
     );
 
-    let melhor = null;
-    let melhorPontuacao = 0;
+    const resultadosPontuados = [];
     resultado.rows.forEach((linha) => {
         const textoLinha = normalizarTextoAdvisor([
             linha.serviceName,
@@ -246,11 +257,9 @@ async function consultarAdvisor(pergunta) {
         ].join(' '));
         let pontuacao = 0;
         Object.entries(SERVICOS_ADVISOR).forEach(([chave, nomeServico]) => {
-            const reconhecido = Object.entries(SINONIMOS_ADVISOR).some(([grupo, sinonimos]) =>
-                grupo === chave
-                && sinonimos.some((sinonimo) =>
-                    normalizada.includes(normalizarTextoAdvisor(sinonimo))
-                )
+            const sinonimos = SINONIMOS_ADVISOR[chave] || [];
+            const reconhecido = sinonimos.some((sinonimo) =>
+                normalizada.includes(normalizarTextoAdvisor(sinonimo))
             );
             if (reconhecido
                 && normalizarTextoAdvisor(linha.serviceName) === normalizarTextoAdvisor(nomeServico)) {
@@ -258,8 +267,13 @@ async function consultarAdvisor(pergunta) {
             }
         });
         palavras.forEach((palavra) => {
-            if (palavra.length >= 4 && textoLinha.includes(palavra)) {
-                pontuacao += 3;
+            if (palavra.length >= 4) {
+                if (textoLinha.includes(palavra)) {
+                    pontuacao += 4;
+                }
+                if (textoLinha.includes(palavra.slice(0, Math.max(4, palavra.length - 2)))) {
+                    pontuacao += 1;
+                }
             }
         });
         if (textoLinha.includes(normalizada) && normalizada.length >= 8) {
@@ -268,11 +282,25 @@ async function consultarAdvisor(pergunta) {
         if (linha.title && normalizada.includes(normalizarTextoAdvisor(linha.title))) {
             pontuacao += 15;
         }
-        if (pontuacao > melhorPontuacao) {
-            melhor = linha;
-            melhorPontuacao = pontuacao;
+        if (pontuacao > 0) {
+            resultadosPontuados.push({ linha, pontuacao });
         }
     });
+    resultadosPontuados.sort((primeiro, segundo) =>
+        segundo.pontuacao - primeiro.pontuacao
+        || segundo.linha.title.localeCompare(primeiro.linha.title)
+    );
+
+    const melhoresResultados = resultadosPontuados
+        .filter((resultadoPontuado, indice, lista) =>
+            resultadoPontuado.pontuacao >= 8
+            && indice < 5
+            && lista.findIndex((item) => item.linha.id === resultadoPontuado.linha.id) === indice
+        )
+        .slice(0, 3);
+    const melhorResultado = melhoresResultados[0];
+    const melhor = melhorResultado?.linha || null;
+    const melhorPontuacao = melhorResultado?.pontuacao || 0;
 
     if (!melhor || melhorPontuacao < 8) {
         return {
@@ -285,32 +313,53 @@ async function consultarAdvisor(pergunta) {
             servico: null,
             topico: null,
             fonte: 'orientacao_padrao',
-            confianca: 0
+            confianca: 0,
+            resultados: [],
+            sugestoes: [
+                'Como controlar gastos mensais na AWS',
+                'Como configurar AWS Budgets',
+                'Como encontrar recursos sem uso'
+            ]
         };
     }
 
-    const porTipo = (tipo) => (melhor.steps || []).find((step) => step.type === tipo);
-    const verificacao = porTipo('check');
-    const acao = porTipo('action');
-    const cuidados = porTipo('caution');
-    const fonte = (melhor.sources || []).find((source) =>
-        typeof source.url === 'string'
-        && (source.url.startsWith('https://docs.aws.amazon.com/')
-            || source.url.startsWith('https://aws.amazon.com/'))
-    );
+    const formatarResultado = (item) => {
+        const porTipo = (tipo) => (item.linha.steps || []).find((step) => step.type === tipo);
+        const verificacao = porTipo('check');
+        const acao = porTipo('action');
+        const cuidados = porTipo('caution');
+        const fonte = (item.linha.sources || []).find((source) =>
+            typeof source.url === 'string'
+            && (source.url.startsWith('https://docs.aws.amazon.com/')
+                || source.url.startsWith('https://aws.amazon.com/'))
+        );
+        const confianca = Math.min(
+            0.95,
+            Number((0.55 + item.pontuacao / 100).toFixed(2))
+        );
+        return {
+            encontrado: true,
+            diagnostico: item.linha.title,
+            verificacao: verificacao?.content || item.linha.summary,
+            acao: acao?.content || 'Revise o cenário com dados reais antes de realizar alterações.',
+            cuidados: cuidados?.content || 'Confirme dependências e impacto antes da alteração.',
+            documentacao: fonte?.url || 'https://docs.aws.amazon.com/',
+            servico: item.linha.serviceName,
+            topico: item.linha.title,
+            fonte: 'banco',
+            confianca
+        };
+    };
 
-    const confianca = Math.min(0.95, Number((0.55 + melhorPontuacao / 100).toFixed(2)));
+    const resultados = melhoresResultados.map(formatarResultado);
+    const melhorFormatado = resultados[0];
+    const sugestoes = [...new Set(resultados.map((resultado) =>
+        `Como revisar ${resultado.servico}`
+    ))].filter(Boolean).slice(0, 3);
     return {
-        encontrado: true,
-        diagnostico: melhor.title,
-        verificacao: verificacao?.content || melhor.summary,
-        acao: acao?.content || 'Revise o cenário com dados reais antes de realizar alterações.',
-        cuidados: cuidados?.content || 'Confirme dependências e impacto antes da alteração.',
-        documentacao: fonte?.url || 'https://docs.aws.amazon.com/',
-        servico: melhor.serviceName,
-        topico: melhor.title,
-        fonte: 'banco',
-        confianca
+        ...melhorFormatado,
+        resultados,
+        sugestoes
     };
 }
 

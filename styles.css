@@ -1828,6 +1828,84 @@ body.tela-servicos-ativa > .canvas-onda {
     font-size: 0.82rem;
 }
 
+.relacionados-advisor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 12px;
+}
+
+.relacionados-advisor button,
+.item-historico-advisor {
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #1d4ed8;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.relacionados-advisor button {
+    max-width: 100%;
+    padding: 7px 10px;
+    font-size: 0.78rem;
+    text-align: left;
+}
+
+.historico-advisor {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #dbeafe;
+}
+
+.cabecalho-historico-advisor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.cabecalho-historico-advisor h3 {
+    margin: 0;
+    color: #1e3a8a;
+    font-size: 0.9rem;
+}
+
+.cabecalho-historico-advisor button {
+    border: 0;
+    background: transparent;
+    color: #dc2626;
+    font-family: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.cabecalho-historico-advisor button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.lista-historico-advisor {
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.item-historico-advisor {
+    width: 100%;
+    padding: 8px 10px;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vazio-historico-advisor {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
 .popup-perfil {
     z-index: 1400;
     justify-content: flex-end;

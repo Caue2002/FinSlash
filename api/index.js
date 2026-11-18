@@ -474,6 +474,8 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
         );
 
         const modelos = [...modelosPreferidos];
+        let modelosErro = null;
+        let idsAtivos = [];
         try {
             const respostaModelos = await fetch('https://api.groq.com/openai/v1/models', {
                 headers: {
@@ -484,7 +486,7 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
             });
             if (respostaModelos.ok) {
                 const modelosAtivos = await respostaModelos.json();
-                const idsAtivos = (modelosAtivos.data || [])
+                idsAtivos = (modelosAtivos.data || [])
                     .map((modelo) => modelo.id)
                     .filter((id) =>
                         typeof id === 'string'
@@ -496,12 +498,16 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
                         modelos.push(id);
                     }
                 }
+            } else {
+                modelosErro = `Models API respondeu com o status ${respostaModelos.status}.`;
             }
-        } catch {
-            // Mantém a lista fixa como fallback.
+        } catch (error) {
+            modelosErro = 'Não foi possível consultar a lista de modelos.';
         }
 
         let resposta;
+        let modeloUsado = null;
+        const errosChat = [];
         for (const modelo of modelos) {
             resposta = await fetch(GROQ_API_URL, {
                 method: 'POST',
@@ -515,7 +521,8 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
                     tools: ferramentas,
                     tool_choice: 'auto',
                     temperature: 0.1,
-                    max_tokens: 700,
+                    parallel_tool_calls: false,
+                    max_completion_tokens: 700,
                     response_format: { type: 'json_object' }
                 }),
                 signal: AbortSignal.timeout(10000)
@@ -524,10 +531,15 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
                 modeloUsado = modelo;
                 break;
             }
+            errosChat.push(`${modelo}:${resposta.status}`);
         }
 
         if (!resposta?.ok) {
-            throw new Error(`Groq respondeu com o status ${resposta?.status || 'desconhecido'}.`);
+            const detalheModelos = modelosErro
+                || (idsAtivos.length
+                    ? `Modelos ativos encontrados; chat falhou: ${errosChat.join(', ')}.`
+                    : `Nenhum modelo ativo encontrado; chat falhou: ${errosChat.join(', ')}.`);
+            throw new Error(detalheModelos);
         }
 
         const payload = await resposta.json();

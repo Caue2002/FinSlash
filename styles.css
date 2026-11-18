@@ -1605,6 +1605,18 @@ body.tela-servicos-ativa > .canvas-onda {
     background-color: #1d4ed8;
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .navegacao-app:not(.hidden) ~ .popup-perfil {
     z-index: 1400;
 }
@@ -1618,14 +1630,17 @@ body.tela-servicos-ativa > .canvas-onda {
 
 .painel-advisor {
     position: relative;
+    display: flex;
+    flex-direction: column;
     width: min(520px, calc(100vw - 24px));
+    height: min(620px, calc(100dvh - 120px));
     max-height: calc(100dvh - 108px);
     margin: 12px 12px 92px auto;
     padding: 24px;
     overflow-y: auto;
-    border: 1px solid rgba(147, 197, 253, 0.75);
+    border: 1px solid rgba(148, 163, 184, 0.28);
     border-radius: 24px;
-    background: #ffffff;
+    background: #0f172a;
     box-shadow: 0 18px 48px rgba(15, 23, 42, 0.24);
     animation: deslizar-painel-advisor 0.22s ease-out;
 }
@@ -1663,6 +1678,23 @@ body.tela-servicos-ativa > .canvas-onda {
     padding-right: 44px;
 }
 
+.boas-vindas-advisor {
+    display: flex;
+    min-height: 230px;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.boas-vindas-advisor h3 {
+    margin: 0 0 18px;
+    color: #e2e8f0;
+    font-size: clamp(1.45rem, 4vw, 2rem);
+    font-weight: 500;
+}
+
 .icone-advisor {
     width: 76px;
     height: 76px;
@@ -1687,7 +1719,7 @@ body.tela-servicos-ativa > .canvas-onda {
 
 .cabecalho-advisor h2 {
     margin: 0;
-    color: #1e3a8a;
+    color: #f8fafc;
 }
 
 .descricao-advisor {
@@ -1699,64 +1731,91 @@ body.tela-servicos-ativa > .canvas-onda {
 .cenarios-advisor {
     display: flex;
     flex-wrap: wrap;
-    gap: 7px;
-    margin-bottom: 14px;
+    justify-content: center;
+    gap: 8px;
 }
 
 .cenarios-advisor button {
     min-height: 36px;
     padding: 7px 10px;
-    border: 1px solid #bfdbfe;
+    border: 1px solid #334155;
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: #1e293b;
+    color: #cbd5e1;
     font-family: inherit;
     font-size: 0.78rem;
     cursor: pointer;
 }
 
-.formulario-advisor label {
-    display: block;
-    margin-bottom: 7px;
-    color: #1e293b;
-    font-weight: 700;
-}
-
-.formulario-advisor textarea {
-    width: 100%;
-    min-height: 82px;
-    resize: vertical;
-    box-sizing: border-box;
-    padding: 12px;
-    border: 1px solid #bfdbfe;
-    border-radius: 14px;
-    background: #f8fafc;
-    color: #0f172a;
-    font-family: inherit;
+.formulario-advisor {
+    margin-top: 10px;
 }
 
 .acoes-advisor {
     display: flex;
+    min-height: 58px;
     align-items: center;
-    justify-content: space-between;
-    margin-top: 8px;
+    gap: 7px;
+    box-sizing: border-box;
+    padding: 7px;
+    border: 1px solid #334155;
+    border-radius: 18px;
+    background: #1e293b;
 }
 
-#contador-advisor {
+.acoes-advisor textarea {
+    min-width: 0;
+    flex: 1;
+    width: 100%;
+    max-height: 120px;
+    resize: none;
+    box-sizing: border-box;
+    padding: 10px 4px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #f8fafc;
+    font-family: inherit;
+    font-size: 0.92rem;
+    line-height: 1.35;
+}
+
+.acoes-advisor textarea::placeholder {
+    color: #94a3b8;
+}
+
+.contador-advisor {
+    display: block;
+    margin-top: 5px;
     color: #64748b;
+    font-size: 0.78rem;
+    text-align: right;
+}
+
+.botao-anexo-advisor,
+.botao-modo-advisor,
+.botao-enviar-advisor {
+    min-width: 36px;
+    min-height: 36px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #cbd5e1;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.botao-modo-advisor {
+    min-width: 52px;
     font-size: 0.78rem;
 }
 
 .botao-enviar-advisor {
-    min-height: 42px;
-    padding: 8px 18px;
-    border: 0;
-    border-radius: 12px;
-    background: #2563eb;
-    color: #ffffff;
-    font-family: inherit;
-    font-weight: 700;
-    cursor: pointer;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
 .botao-enviar-advisor:disabled {
@@ -1767,13 +1826,14 @@ body.tela-servicos-ativa > .canvas-onda {
 .status-advisor {
     min-height: 20px;
     margin: 9px 0 0;
-    color: #475569;
+    color: #94a3b8;
     font-size: 0.86rem;
 }
 
 .mensagens-advisor {
     display: flex;
-    max-height: 390px;
+    min-height: 0;
+    flex: 1;
     flex-direction: column;
     gap: 10px;
     overflow-y: auto;
@@ -1801,8 +1861,8 @@ body.tela-servicos-ativa > .canvas-onda {
     box-sizing: border-box;
     border-radius: 16px;
     padding: 11px 13px;
-    background: #eaf2ff;
-    color: #1e293b;
+    background: #1e293b;
+    color: #e5e7eb;
     font-family: inherit;
     font-size: 0.92rem;
     line-height: 1.5;
@@ -1811,8 +1871,8 @@ body.tela-servicos-ativa > .canvas-onda {
 
 .mensagem-advisor-user .bolha-mensagem-advisor {
     border-bottom-right-radius: 5px;
-    background: #2563eb;
-    color: #ffffff;
+    background: #334155;
+    color: #f8fafc;
 }
 
 .mensagem-advisor-assistant .bolha-mensagem-advisor {
@@ -3024,6 +3084,7 @@ button.item-historico-perfil:focus-visible {
 @media (max-width: 768px) {
     .painel-advisor {
         width: 100%;
+        height: calc(100dvh - 70px);
         max-height: calc(100dvh - 70px);
         margin: 0;
         border-right: 0;

@@ -237,23 +237,24 @@
                     <h2 id="titulo-advisor">Finbot</h2>
                 </div>
             </div>
-            <p class="descricao-advisor">Pesquise os diagnósticos cadastrados no FinSlash e receba verificações, ações e cuidados.</p>
-            <div class="cenarios-advisor" id="cenarios-advisor" role="group" aria-label="Cenários comuns">
-                <button type="button" data-pergunta-advisor="Estou gastando muito com EC2 ocioso">EC2 ocioso</button>
-                <button type="button" data-pergunta-advisor="Como economizar no S3">Custo alto no S3</button>
-                <button type="button" data-pergunta-advisor="Como configurar AWS Budgets">AWS Budgets</button>
-                <button type="button" data-pergunta-advisor="Como identificar instâncias subutilizadas">Instâncias subutilizadas</button>
-                <button type="button" data-pergunta-advisor="Como reduzir custos com RDS">Banco caro</button>
-                <button type="button" data-pergunta-advisor="Como encontrar recursos sem uso">Recursos sem uso</button>
+            <div class="boas-vindas-advisor" id="boas-vindas-advisor">
+                <h3>Por onde começamos?</h3>
+                <div class="cenarios-advisor" id="cenarios-advisor" role="group" aria-label="Sugestões de início">
+                    <button type="button" data-pergunta-advisor="Como reduzir custos com EC2">Reduzir custos com EC2</button>
+                    <button type="button" data-pergunta-advisor="Me fale sobre o serviço S3">Conhecer o S3</button>
+                    <button type="button" data-pergunta-advisor="Como configurar AWS Budgets">Criar alertas de custo</button>
+                </div>
             </div>
             <div class="mensagens-advisor" id="mensagens-advisor" aria-live="polite"></div>
             <form class="formulario-advisor" id="formulario-advisor">
-                <label for="campo-advisor">Sua dúvida sobre AWS</label>
-                <textarea id="campo-advisor" maxlength="300" rows="3" placeholder="Ex.: Como reduzir custos com EC2?"></textarea>
+                <label class="sr-only" for="campo-advisor">Sua dúvida sobre AWS</label>
                 <div class="acoes-advisor">
-                    <span id="contador-advisor">0/300</span>
-                    <button class="botao-enviar-advisor" id="botao-enviar-advisor" type="submit">Consultar</button>
+                    <button class="botao-anexo-advisor" type="button" aria-label="Adicionar contexto" title="Adicionar contexto">+</button>
+                    <textarea id="campo-advisor" maxlength="300" rows="1" placeholder="Pergunte ao Finbot sobre AWS"></textarea>
+                    <button class="botao-modo-advisor" type="button" aria-label="Modo automático" title="Modo automático">Auto⌄</button>
+                    <button class="botao-enviar-advisor" id="botao-enviar-advisor" type="submit" aria-label="Enviar pergunta">↑</button>
                 </div>
+                <span class="contador-advisor" id="contador-advisor">0/300</span>
                 <p class="status-advisor" id="status-advisor" role="status" aria-live="polite"></p>
             </form>
         </aside>

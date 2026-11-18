@@ -248,6 +248,7 @@ const botaoEnviarAdvisor = document.getElementById('botao-enviar-advisor');
 const statusAdvisor = document.getElementById('status-advisor');
 const cenariosAdvisor = document.getElementById('cenarios-advisor');
 const mensagensAdvisor = document.getElementById('mensagens-advisor');
+const boasVindasAdvisor = document.getElementById('boas-vindas-advisor');
 let enviandoAdvisor = false;
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
 const iconePerfilApp = document.getElementById('icone-perfil-app');
@@ -557,6 +558,11 @@ function abrirAdvisor() {
     fecharPerfil();
     popupAdvisor.classList.remove('hidden');
     popupAdvisor.querySelector('.painel-advisor')?.classList.remove('advisor-consulta');
+    if (!mensagensAdvisor.childElementCount) {
+        boasVindasAdvisor?.classList.remove('hidden');
+    } else {
+        boasVindasAdvisor?.classList.add('hidden');
+    }
     if (window.history.state?.app === 'FinSlash' && window.history.state.tela !== 'advisor') {
         atualizarHistoricoAplicacao('advisor', {
             telaAnterior: window.history.state.tela
@@ -574,6 +580,7 @@ function fecharAdvisor(retornarFoco = true) {
     }
     popupAdvisor.classList.add('hidden');
     mensagensAdvisor?.replaceChildren();
+    boasVindasAdvisor?.classList.remove('hidden');
     if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
         botaoAdvisorApp.focus();
     }
@@ -582,6 +589,7 @@ function fecharAdvisor(retornarFoco = true) {
 function fecharAdvisorVisual(retornarFoco = false) {
     popupAdvisor.classList.add('hidden');
     mensagensAdvisor?.replaceChildren();
+    boasVindasAdvisor?.classList.remove('hidden');
     if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
         botaoAdvisorApp.focus();
     }
@@ -681,6 +689,7 @@ async function enviarPerguntaAdvisor(pergunta) {
     botaoEnviarAdvisor.disabled = true;
     campoAdvisor.disabled = true;
     statusAdvisor.textContent = 'Consultando diagnósticos...';
+    boasVindasAdvisor?.classList.add('hidden');
     adicionarMensagemAdvisor('user', texto);
     campoAdvisor.value = '';
     contadorAdvisor.textContent = '0/300';

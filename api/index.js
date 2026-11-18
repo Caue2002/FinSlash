@@ -151,6 +151,11 @@ function pedirVisaoGeralServico(pergunta) {
         || /^(s3|ec2|rds|lambda|dynamodb|cloudwatch|iam|cloudfront|ebs|eks|ecs)\b/u.test(normalizada);
 }
 
+function pedirDiagnosticoDeCusto(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    return /\b(custo|custos|gasto|gastos|economi|reduzir|barato|mais caro|pagar menos|preco|orcamento|budget|saving|desconto|desperdicio|otimiz)\w*\b/u.test(normalizada);
+}
+
 function identificarServicoPergunta(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
     for (const [chave, nome] of Object.entries(SERVICOS_ADVISOR)) {
@@ -161,6 +166,23 @@ function identificarServicoPergunta(pergunta) {
         }
     }
     return null;
+}
+
+async function identificarServicoPorBanco(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    const resultado = await obterPoolBanco().query(
+        `SELECT DISTINCT service.name
+         FROM aws_services AS service
+         JOIN cost_scenarios AS scenario ON scenario.service_id = service.id
+         WHERE scenario.is_published = TRUE
+         ORDER BY length(service.name) DESC`
+    );
+    return resultado.rows
+        .map((linha) => linha.name)
+        .find((nome) =>
+            normalizada.includes(normalizarTextoAdvisor(nome))
+            || (nome === 'NAT Gateway' && /\bnat\b/u.test(normalizada))
+        ) || identificarServicoPergunta(pergunta);
 }
 
 async function obterContextoVisaoGeral(nomeServico) {
@@ -1032,8 +1054,8 @@ async function receberAdvisor(request, origemPermitida) {
                 }
             }, cabecalhos);
         }
-        if (pedirVisaoGeralServico(pergunta)) {
-            const nomeServico = identificarServicoPergunta(pergunta);
+        if (!pedirDiagnosticoDeCusto(pergunta)) {
+            const nomeServico = await identificarServicoPorBanco(pergunta);
             const contexto = await obterContextoVisaoGeral(nomeServico);
             if (contexto) {
                 const respostaNatural = await responderVisaoGeralServico(pergunta, historico, contexto);

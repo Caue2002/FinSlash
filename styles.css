@@ -1823,6 +1823,36 @@ body.tela-servicos-ativa > .canvas-onda {
     font-size: 0.86rem;
 }
 
+.painel-advisor,
+.mensagens-advisor {
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #111827;
+}
+
+.painel-advisor::-webkit-scrollbar,
+.mensagens-advisor::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.painel-advisor::-webkit-scrollbar-track,
+.mensagens-advisor::-webkit-scrollbar-track {
+    background: #111827;
+    border-radius: 999px;
+}
+
+.painel-advisor::-webkit-scrollbar-thumb,
+.mensagens-advisor::-webkit-scrollbar-thumb {
+    background: #475569;
+    border: 1px solid #111827;
+    border-radius: 999px;
+}
+
+.painel-advisor::-webkit-scrollbar-thumb:hover,
+.mensagens-advisor::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
 .mensagens-advisor {
     display: flex;
     min-height: 0;

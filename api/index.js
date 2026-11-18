@@ -337,20 +337,77 @@ function criarResultadoForaDoEscopo() {
     };
 }
 
-function criarRespostaBasica(pergunta) {
+function ehSaudacao(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
-    if (!/^(oi|ola|hello|hey|bom dia|boa tarde|boa noite|tudo bem|obrigado|obrigada|tchau|ate logo)\b/u.test(normalizada)) {
+    return /^(oi|ola|hello|hey|bom dia|boa tarde|boa noite|tudo bem|obrigado|obrigada|tchau|ate logo)\b/u.test(normalizada);
+}
+
+async function gerarSaudacaoFinbot(pergunta) {
+    const chave = process.env.GROQ_API_KEY;
+    if (!chave) {
+        return 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
+    }
+    const modelos = [
+        process.env.GROQ_MODEL,
+        'openai/gpt-oss-20b',
+        'llama-3.3-70b-versatile',
+        'llama-3.1-8b-instant'
+    ].filter((modelo, indice, lista) => modelo && lista.indexOf(modelo) === indice);
+    for (const modelo of modelos) {
+        try {
+            const resposta = await fetch(GROQ_API_URL, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${chave}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: modelo,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Identifique-se apenas como Finbot se fizer sentido.'
+                        },
+                        { role: 'user', content: pergunta }
+                    ],
+                    temperature: 0,
+                    max_completion_tokens: 120,
+                    response_format: { type: 'json_object' }
+                }),
+                signal: AbortSignal.timeout(7000)
+            });
+            if (!resposta.ok) {
+                continue;
+            }
+            const payload = await resposta.json();
+            const texto = payload.choices?.[0]?.message?.content;
+            if (typeof texto === 'string' && texto.trim()) {
+                try {
+                    const objeto = JSON.parse(texto);
+                    if (typeof objeto.resposta === 'string' && objeto.resposta.trim()) {
+                        return objeto.resposta.trim();
+                    }
+                } catch {
+                    return texto.trim();
+                }
+            }
+        } catch {
+            // Usa fallback seguro abaixo.
+        }
+    }
+    return 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
+}
+
+async function criarRespostaBasica(pergunta) {
+    if (!ehSaudacao(pergunta)) {
         return null;
     }
-    const resposta = normalizada === 'tchau' || normalizada.startsWith('ate logo')
-        ? 'Até logo. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.'
-        : 'Olá! Posso ajudar com serviços AWS, custos, utilização e diagnósticos cadastrados no FinSlash.';
     return {
         modo: 'conversacao',
         encontrado: false,
         diagnostico: 'Saudação',
         servico: null,
-        resposta,
+        resposta: await gerarSaudacaoFinbot(pergunta),
         confianca: 1,
         fonte: 'resposta_fixa',
         validacao: null,
@@ -1174,7 +1231,7 @@ async function receberAdvisor(request, origemPermitida) {
     try {
         const pergunta = entradaAdvisor.pergunta;
         const historico = entradaAdvisor.historico;
-        const respostaBasica = criarRespostaBasica(pergunta);
+        const respostaBasica = await criarRespostaBasica(pergunta);
         if (respostaBasica) {
             return responder(200, {
                 ...respostaBasica,

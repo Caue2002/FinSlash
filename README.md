@@ -34,6 +34,8 @@ Opcionalmente, uma chave gratuita do Groq ativa um modo agente. O modelo pode ch
 
 O painel não mantém nem envia histórico de mensagens ao servidor. Cada consulta é tratada isoladamente e as mensagens desaparecem ao fechar o Finbot.
 
+Saudações e respostas AWS usam o Groq quando disponível, com temperatura zero. Perguntas fora do escopo são bloqueadas antes da geração. A barra de rolagem do painel acompanha o tema escuro do chat.
+
 Quando existe um diagnóstico validado, o Finbot apresenta:
 
 - Plano em três etapas: verificar, agir e proteger.

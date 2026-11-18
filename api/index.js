@@ -267,7 +267,7 @@ async function identificarServicoPorBanco(pergunta) {
          FROM aws_services AS service
          JOIN cost_scenarios AS scenario ON scenario.service_id = service.id
          WHERE scenario.is_published = TRUE
-         ORDER BY length(service.name) DESC`
+          ORDER BY service.name`
     );
     return resultado.rows
         .map((linha) => linha.name)
@@ -1167,11 +1167,7 @@ async function receberAdvisor(request, origemPermitida) {
     } catch (error) {
         console.error('Falha ao consultar o Finbot:', error);
         return responder(500, {
-            error: 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.',
-            agente: {
-                status: 'erro',
-                erro: error instanceof Error ? error.message.slice(0, 180) : 'Erro desconhecido'
-            }
+            error: 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.'
         }, cabecalhos);
     }
 }

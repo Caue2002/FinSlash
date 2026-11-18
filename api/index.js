@@ -1235,8 +1235,13 @@ async function receberAdvisor(request, origemPermitida) {
         if (respostaBasica) {
             return responder(200, {
                 ...respostaBasica,
+                fonte: process.env.GROQ_API_KEY
+                    ? 'groq-saudaçao'
+                    : 'saudaçao-local',
                 agente: {
-                    status: 'resposta-fixa',
+                    status: process.env.GROQ_API_KEY
+                        ? 'ativo'
+                        : 'fallback-local',
                     erro: null
                 }
             }, cabecalhos);

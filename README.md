@@ -11,10 +11,10 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Perfil com histórico de serviços, medalhas e envio de feedback sem cadastro.
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações, cuidados e links para documentação oficial da AWS.
-- FinSlash Advisor, assistente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
+- Finbot, assistente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
 - Até três diagnósticos relacionados por consulta, além de sugestões de perguntas comuns.
-- Painel responsivo com cenários rápidos, estados de carregamento e resultado, modo compacto no mobile e visual próprio do Advisor.
+- Painel responsivo com cenários rápidos, estados de carregamento e resultado, modo compacto no mobile e visual próprio do Finbot.
 - Privacidade por padrão: perguntas não são enviadas a IA externa e não são persistidas no servidor ou no navegador.
 - Barra inferior com atalhos para o menu, pesquisa de serviços e perfil; navegação de retorno compatível com dispositivos móveis.
 - Botão voltar do aparelho ou do navegador e gesto de arrastar para a direita.
@@ -24,9 +24,9 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 
 A interface não requer compilação. Para explorar as telas, abra `index.html` no navegador. Para usar diagnósticos e feedback, a API requer Node.js e PostgreSQL configurados.
 
-## FinSlash Advisor
+## Finbot
 
-O FinSlash Advisor permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Ele não usa IA externa, modelos pagos ou serviços comerciais de geração de texto: a busca usa normalização, sinônimos locais e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
+O Finbot permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Ele não usa IA externa, modelos pagos ou serviços comerciais de geração de texto: a busca usa normalização, sinônimos locais e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
 
 A busca reconhece serviços e termos como EC2, S3, RDS, Lambda, CloudWatch, IAM, CloudFront, EBS, EKS, ECS, DynamoDB, NAT Gateway, AWS Budgets e Cost Explorer. O ranking considera correspondência com o serviço, título, resumo, slug e etapas cadastradas. A resposta principal vem acompanhada de até dois diagnósticos relacionados e sugestões da mesma área.
 
@@ -89,7 +89,7 @@ FinSlash/
 ├── LICENSE                 # Licença MIT
 ├── README.md               # Documentação do projeto
 └── imagens/
-    ├── logo-advisor.png    # Identidade visual do FinSlash Advisor
+    ├── logo-advisor.png    # Identidade visual do Finbot
     └── ...                 # Imagens e animações
 ```
 

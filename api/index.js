@@ -576,7 +576,7 @@ async function receberAdvisor(request, origemPermitida) {
         const resultado = await consultarAdvisor(pergunta);
         return responder(200, resultado, cabecalhos);
     } catch (error) {
-        console.error('Falha ao consultar o FinSlash Advisor:', error);
+        console.error('Falha ao consultar o Finbot:', error);
         return responder(500, {
             error: 'Não foi possível consultar o Advisor agora.'
         }, cabecalhos);

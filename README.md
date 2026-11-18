@@ -11,6 +11,7 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Perfil com histórico de serviços, medalhas e envio de feedback sem cadastro.
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações, cuidados e links para documentação oficial da AWS.
+- FinSlash Advisor, assistente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
 - Barra inferior com atalhos para o menu, pesquisa de serviços e perfil; navegação de retorno compatível com dispositivos móveis.
 - Botão voltar do aparelho ou do navegador e gesto de arrastar para a direita.
 - Interface adaptável a diferentes tamanhos de tela.
@@ -18,6 +19,40 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 ## Como executar
 
 A interface não requer compilação. Para explorar as telas, abra `index.html` no navegador. Para usar diagnósticos e feedback, a API requer Node.js e PostgreSQL configurados.
+
+## FinSlash Advisor
+
+O FinSlash Advisor permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Ele não usa IA externa, modelos pagos ou serviços comerciais de geração de texto: a busca usa normalização, sinônimos locais e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
+
+Endpoint:
+
+```text
+POST /api/v1/advisor
+Content-Type: application/json
+
+{"pergunta":"Estou gastando muito com EC2 ocioso"}
+```
+
+Resposta encontrada:
+
+```json
+{
+  "encontrado": true,
+  "diagnostico": "Título do diagnóstico cadastrado",
+  "verificacao": "Verificação cadastrada",
+  "acao": "Ação cadastrada",
+  "cuidados": "Cuidado cadastrado",
+  "documentacao": "https://docs.aws.amazon.com/",
+  "servico": "Amazon EC2",
+  "topico": "Título do diagnóstico",
+  "fonte": "banco",
+  "confianca": 0.85
+}
+```
+
+Quando não existe correspondência confiável, o endpoint retorna uma orientação padrão segura com `encontrado: false`. As perguntas não são persistidas pelo Advisor.
+
+O Advisor usa `DATABASE_URL` e `ALLOWED_ORIGIN`, já necessárias pela API existente. A interface usa `window.FINSLASH_API_BASE_URL` e não fixa uma URL externa. O modo `file://` mostra instruções para abrir o projeto pela API ou pela publicação na Vercel.
 
 ## Tecnologias
 

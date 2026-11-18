@@ -238,6 +238,25 @@ const navegacaoApp = document.getElementById('navegacao-app');
 const botaoMenuApp = document.getElementById('botao-menu-app');
 const botaoPesquisaApp = document.getElementById('botao-pesquisa-app');
 const botaoPerfilApp = document.getElementById('botao-perfil-app');
+const botaoAdvisorApp = document.getElementById('botao-advisor-app');
+const popupAdvisor = document.getElementById('popup-advisor');
+const botaoFecharAdvisor = document.getElementById('fechar-advisor');
+const formularioAdvisor = document.getElementById('formulario-advisor');
+const campoAdvisor = document.getElementById('campo-advisor');
+const contadorAdvisor = document.getElementById('contador-advisor');
+const botaoEnviarAdvisor = document.getElementById('botao-enviar-advisor');
+const statusAdvisor = document.getElementById('status-advisor');
+const cenariosAdvisor = document.getElementById('cenarios-advisor');
+const resultadoAdvisor = document.getElementById('resultado-advisor');
+const tipoResultadosAdvisor = document.getElementById('tipo-resultados-advisor');
+const confiancaAdvisor = document.getElementById('confianca-advisor');
+const tituloResultadosAdvisor = document.getElementById('titulo-resultados-advisor');
+const verificacaoAdvisor = document.getElementById('verificacao-advisor');
+const acaoAdvisor = document.getElementById('acao-advisor');
+const cuidadosAdvisor = document.getElementById('cuidados-advisor');
+const documentacaoAdvisor = document.getElementById('documentacao-advisor');
+const servicoAdvisor = document.getElementById('servico-advisor');
+let enviandoAdvisor = false;
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
 const iconePerfilApp = document.getElementById('icone-perfil-app');
 const popupPerfil = document.getElementById('popup-perfil');
@@ -542,6 +561,162 @@ function fecharPerfil() {
     popupPerfil.classList.add('hidden');
 }
 
+function abrirAdvisor() {
+    fecharPerfil();
+    popupAdvisor.classList.remove('hidden');
+    if (window.history.state?.app === 'FinSlash' && window.history.state.tela !== 'advisor') {
+        atualizarHistoricoAplicacao('advisor', {
+            telaAnterior: window.history.state.tela
+        });
+    }
+    window.setTimeout(() => campoAdvisor.focus(), 0);
+}
+
+function fecharAdvisor(retornarFoco = true) {
+    if (!popupAdvisor.classList.contains('hidden')
+        && window.history.state?.app === 'FinSlash'
+        && window.history.state.tela === 'advisor') {
+        window.history.back();
+        return;
+    }
+    popupAdvisor.classList.add('hidden');
+    if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
+        botaoAdvisorApp.focus();
+    }
+}
+
+function fecharAdvisorVisual(retornarFoco = false) {
+    popupAdvisor.classList.add('hidden');
+    if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
+        botaoAdvisorApp.focus();
+    }
+}
+
+function validarLinkAws(url) {
+    try {
+        const link = new URL(url);
+        return link.protocol === 'https:' && (
+            link.hostname === 'aws.amazon.com'
+            || link.hostname.endsWith('.amazonaws.com')
+        );
+    } catch (error) {
+        return false;
+    }
+}
+
+function exibirResultadoAdvisor(resultado) {
+    resultadoAdvisor.classList.remove('hidden');
+    tipoResultadosAdvisor.textContent = resultado.encontrado
+        ? 'Diagnóstico encontrado'
+        : 'Orientação padrão';
+    confiancaAdvisor.textContent = `Confiança ${Math.round((resultado.confianca || 0) * 100)}%`;
+    tituloResultadosAdvisor.textContent = typeof resultado.diagnostico === 'string'
+        ? resultado.diagnostico
+        : 'Não encontramos um diagnóstico específico.';
+    verificacaoAdvisor.textContent = typeof resultado.verificacao === 'string'
+        ? resultado.verificacao
+        : 'Revise o cenário no Cost Explorer.';
+    acaoAdvisor.textContent = typeof resultado.acao === 'string'
+        ? resultado.acao
+        : 'Configure AWS Budgets e avalie recursos subutilizados.';
+    cuidadosAdvisor.textContent = typeof resultado.cuidados === 'string'
+        ? resultado.cuidados
+        : 'Confirme dependências e impacto antes da alteração.';
+
+    const urlSegura = typeof resultado.documentacao === 'string'
+        && validarLinkAws(resultado.documentacao)
+        ? resultado.documentacao
+        : 'https://docs.aws.amazon.com/';
+    documentacaoAdvisor.href = urlSegura;
+    servicoAdvisor.textContent = typeof resultado.servico === 'string'
+        ? `Serviço: ${resultado.servico}`
+        : 'Revise primeiro o cenário e os custos envolvidos.';
+}
+
+async function enviarPerguntaAdvisor(pergunta) {
+    const texto = typeof pergunta === 'string'
+        ? pergunta.replace(/\s+/gu, ' ').trim()
+        : '';
+    if (!texto) {
+        statusAdvisor.textContent = 'Digite uma pergunta.';
+        campoAdvisor.focus();
+        return;
+    }
+    if (texto.length > 300) {
+        statusAdvisor.textContent = 'A pergunta deve ter no máximo 300 caracteres.';
+        campoAdvisor.focus();
+        return;
+    }
+    if (enviandoAdvisor) {
+        return;
+    }
+
+    if (window.location.protocol === 'file:') {
+        statusAdvisor.textContent = 'Para usar o Advisor, abra o FinSlash pela API ou pela publicação na Vercel.';
+        return;
+    }
+
+    enviandoAdvisor = true;
+    botaoEnviarAdvisor.disabled = true;
+    campoAdvisor.disabled = true;
+    statusAdvisor.textContent = 'Consultando diagnósticos...';
+    resultadoAdvisor.classList.add('hidden');
+
+    const controlador = new AbortController();
+    const timeout = window.setTimeout(() => controlador.abort(), 12000);
+    try {
+        const baseUrl = typeof window.FINSLASH_API_BASE_URL === 'string'
+            ? window.FINSLASH_API_BASE_URL.replace(/\/$/, '')
+            : window.location.origin;
+        const resposta = await fetch(`${baseUrl}/api/v1/advisor`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ pergunta: texto }),
+            signal: controlador.signal
+        });
+
+        let resultado;
+        try {
+            resultado = await resposta.json();
+        } catch (error) {
+            throw new TypeError('A API devolveu uma resposta inválida.');
+        }
+
+        if (!resposta.ok) {
+            throw new Error(typeof resultado.error === 'string'
+                ? resultado.error
+                : 'Não foi possível consultar o Advisor.');
+        }
+        if (!resultado
+            || typeof resultado !== 'object'
+            || typeof resultado.encontrado !== 'boolean'
+            || typeof resultado.diagnostico !== 'string') {
+            throw new TypeError('O resultado do Advisor está incompleto.');
+        }
+
+        statusAdvisor.textContent = resultado.encontrado
+            ? 'Resposta encontrada nos diagnósticos cadastrados.'
+            : 'Não encontramos uma correspondência específica.';
+        exibirResultadoAdvisor(resultado);
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            statusAdvisor.textContent = 'Tempo esgotado. Tente novamente.';
+        } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+            statusAdvisor.textContent = 'Não foi possível conectar à API. Verifique sua conexão.';
+        } else {
+            statusAdvisor.textContent = error.message || 'Não foi possível consultar o Advisor.';
+        }
+    } finally {
+        window.clearTimeout(timeout);
+        enviandoAdvisor = false;
+        botaoEnviarAdvisor.disabled = false;
+        campoAdvisor.disabled = false;
+    }
+}
+
 function abrirPopupConquistaFinal() {
     popupConquistaFinal.classList.remove('hidden');
     botaoFecharConquistaFinal.focus();
@@ -685,6 +860,7 @@ function renderizarTelaHistorico(estado) {
     cancelarAnimacaoCelebracao();
     fecharPopupBuscaVoz(false);
     fecharPerfil();
+    fecharAdvisorVisual();
 
     popupPersonagens.classList.add('hidden');
     popupPersonagemSelecionado.classList.add('hidden');
@@ -2723,6 +2899,38 @@ botaoContinuarMenu.addEventListener('click', irParaJornada);
 botaoVoltarSelecionado.addEventListener('click', voltarPelaNavegacao);
 botaoPerfilApp.addEventListener('click', abrirPerfil);
 botaoFecharPerfil.addEventListener('click', fecharPerfil);
+botaoAdvisorApp.addEventListener('click', abrirAdvisor);
+botaoFecharAdvisor.addEventListener('click', () => fecharAdvisor());
+popupAdvisor.addEventListener('click', event => {
+    if (event.target === popupAdvisor) {
+        fecharAdvisor();
+    }
+});
+campoAdvisor.addEventListener('input', () => {
+    contadorAdvisor.textContent = `${campoAdvisor.value.length}/300`;
+    if (statusAdvisor.textContent && statusAdvisor.textContent !== 'Consultando diagnósticos...') {
+        statusAdvisor.textContent = '';
+    }
+});
+campoAdvisor.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        formularioAdvisor.requestSubmit();
+    }
+});
+formularioAdvisor.addEventListener('submit', event => {
+    event.preventDefault();
+    enviarPerguntaAdvisor(campoAdvisor.value);
+});
+cenariosAdvisor.addEventListener('click', event => {
+    const botao = event.target.closest('[data-pergunta-advisor]');
+    if (!botao) {
+        return;
+    }
+    campoAdvisor.value = botao.dataset.perguntaAdvisor;
+    contadorAdvisor.textContent = `${campoAdvisor.value.length}/300`;
+    enviarPerguntaAdvisor(campoAdvisor.value);
+});
 botaoFecharConquistaFinal.addEventListener('click', fecharPopupConquistaFinal);
 botaoContinuarConquista.addEventListener('click', fecharPopupConquistaFinal);
 botaoEditarTituloPerfil.addEventListener('click', editarNomePerfil);
@@ -2826,6 +3034,10 @@ popupTopicoServico.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !popupAdvisor.classList.contains('hidden')) {
+        fecharAdvisor();
+        return;
+    }
     if (event.key === 'Escape' && !popupConquistaFinal.classList.contains('hidden')) {
         fecharPopupConquistaFinal();
         return;

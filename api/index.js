@@ -7,8 +7,21 @@ const { Pool } = pg;
 
 const LIMITE_BYTES_FEEDBACK = 4096;
 const LIMITE_CARACTERES_FEEDBACK = 1000;
+const LIMITE_BYTES_ADVISOR = 4096;
+const LIMITE_CARACTERES_ADVISOR = 300;
 const LIMITE_ENVIOS_POR_HORA = 5;
 const CATEGORIAS_FEEDBACK = new Set(['suggestion', 'issue', 'content']);
+
+const SINONIMOS_ADVISOR = {
+    ec2: ['ec2', 'servidor', 'servidores', 'maquina', 'maquinas', 'instancia', 'instancias', 'compute'],
+    s3: ['s3', 'bucket', 'buckets', 'objeto', 'objetos', 'armazenamento'],
+    rds: ['rds', 'banco relacional', 'banco de dados', 'bancos de dados', 'base relacional'],
+    lambda: ['lambda', 'funcao serverless', 'funcoes serverless'],
+    cloudwatch: ['cloudwatch', 'monitoramento', 'metrica', 'metricas', 'alarme', 'alarmes'],
+    iam: ['iam', 'permissao', 'permissoes', 'usuarios', 'politicas'],
+    cloudfront: ['cloudfront', 'cdn'],
+    finops: ['custo', 'custos', 'gasto', 'gastos', 'orcamento', 'orcamentos', 'cobranca', 'economizar', 'reduzir']
+};
 
 // Força TLS validado e evita que opções TLS da URL substituam a configuração do pool.
 function obterPoolBanco() {
@@ -73,6 +86,210 @@ function cabecalhosCors(request, origemPermitida, metodos) {
         cabecalhos['Access-Control-Max-Age'] = '600';
     }
     return cabecalhos;
+}
+
+function normalizarTextoAdvisor(texto) {
+    return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/gu, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/gu, ' ')
+        .replace(/\s+/gu, ' ')
+        .trim();
+}
+
+async function lerJsonAdvisor(request) {
+    const contentLength = Number(request.headers.get('content-length'));
+    if (Number.isFinite(contentLength) && contentLength > LIMITE_BYTES_ADVISOR) {
+        throw new RangeError('A pergunta excede o tamanho permitido.');
+    }
+    if (!request.body) {
+        throw new TypeError('O corpo precisa ser um objeto JSON.');
+    }
+
+    let textoBruto;
+    try {
+        textoBruto = await request.text();
+    } catch (error) {
+        throw new TypeError('O corpo precisa conter JSON válido.');
+    }
+    if (new TextEncoder().encode(textoBruto).byteLength > LIMITE_BYTES_ADVISOR) {
+        throw new RangeError('A pergunta excede o tamanho permitido.');
+    }
+
+    let json;
+    try {
+        json = JSON.parse(textoBruto);
+    } catch (error) {
+        throw new TypeError('O corpo precisa conter JSON válido.');
+    }
+    if (!json || typeof json !== 'object' || Array.isArray(json)) {
+        throw new TypeError('O corpo precisa ser um objeto JSON.');
+    }
+    if (Object.keys(json).some((chave) => chave !== 'pergunta')) {
+        throw new TypeError('O corpo contém campos não permitidos.');
+    }
+    if (typeof json.pergunta !== 'string') {
+        throw new TypeError('Informe a pergunta como texto.');
+    }
+
+    const pergunta = json.pergunta.normalize('NFC').replace(/\r\n?/gu, ' ').replace(/\s+/gu, ' ').trim();
+    const quantidadeCaracteres = Array.from(pergunta).length;
+    if (!pergunta) {
+        throw new TypeError('Digite uma pergunta.');
+    }
+    if (quantidadeCaracteres > LIMITE_CARACTERES_ADVISOR) {
+        throw new RangeError('A pergunta deve ter no máximo 300 caracteres.');
+    }
+    if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(pergunta)) {
+        throw new TypeError('A pergunta contém caracteres inválidos.');
+    }
+    return pergunta;
+}
+
+async function consultarAdvisor(pergunta) {
+    if (!process.env.DATABASE_URL) {
+        throw new Error('DATABASE_URL não configurada');
+    }
+
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    const palavras = normalizada.split(' ').filter((palavra) => palavra.length >= 3);
+    const termos = new Set(palavras);
+    Object.entries(SINONIMOS_ADVISOR).forEach(([servico, sinonimos]) => {
+        if (sinonimos.some((sinonimo) => normalizada.includes(normalizarTextoAdvisor(sinonimo)))) {
+            termos.add(servico);
+            sinonimos.forEach((sinonimo) => termos.add(normalizarTextoAdvisor(sinonimo)));
+        }
+    });
+
+    const termosBusca = [...termos].slice(0, 10);
+    const condicoes = [];
+    const parametros = [];
+    termosBusca.forEach((termo) => {
+        parametros.push(`%${termo}%`);
+        const indice = parametros.length;
+        condicoes.push(`(
+            service.name ILIKE $${indice}
+            OR scenario.title ILIKE $${indice}
+            OR scenario.summary ILIKE $${indice}
+            OR scenario.slug ILIKE $${indice}
+            OR EXISTS (
+                SELECT 1 FROM scenario_steps AS step
+                WHERE step.scenario_id = scenario.id
+                  AND (step.title ILIKE $${indice} OR step.content ILIKE $${indice})
+            )
+        )`);
+    });
+
+    if (!condicoes.length) {
+        condicoes.push('FALSE');
+    }
+
+    const resultado = await obterPoolBanco().query(
+        `SELECT
+            scenario.id,
+            service.slug AS "serviceSlug",
+            service.name AS "serviceName",
+            scenario.slug,
+            scenario.title,
+            scenario.summary,
+            COALESCE((
+                SELECT json_agg(json_build_object(
+                    'type', step.step_type,
+                    'title', step.title,
+                    'content', step.content
+                ) ORDER BY
+                    CASE step.step_type
+                        WHEN 'check' THEN 1
+                        WHEN 'action' THEN 2
+                        ELSE 3
+                    END,
+                    step.position)
+                FROM scenario_steps AS step
+                WHERE step.scenario_id = scenario.id
+            ), '[]'::json) AS steps,
+            COALESCE((
+                SELECT json_agg(json_build_object(
+                    'title', reference.title,
+                    'url', reference.url
+                ) ORDER BY reference.title)
+                FROM scenario_sources AS reference
+                WHERE reference.scenario_id = scenario.id
+            ), '[]'::json) AS sources
+        FROM cost_scenarios AS scenario
+        JOIN aws_services AS service ON service.id = scenario.service_id
+        WHERE scenario.is_published = TRUE
+          AND (${condicoes.join(' OR ')})
+        LIMIT 30`,
+        parametros
+    );
+
+    let melhor = null;
+    let melhorPontuacao = 0;
+    resultado.rows.forEach((linha) => {
+        const textoLinha = normalizarTextoAdvisor([
+            linha.serviceName,
+            linha.title,
+            linha.summary,
+            linha.slug,
+            ...(linha.steps || []).flatMap((step) => [step.title, step.content])
+        ].join(' '));
+        let pontuacao = 0;
+        palavras.forEach((palavra) => {
+            if (palavra.length >= 4 && textoLinha.includes(palavra)) {
+                pontuacao += 3;
+            }
+        });
+        if (textoLinha.includes(normalizada) && normalizada.length >= 8) {
+            pontuacao += 12;
+        }
+        if (linha.title && normalizada.includes(normalizarTextoAdvisor(linha.title))) {
+            pontuacao += 15;
+        }
+        if (pontuacao > melhorPontuacao) {
+            melhor = linha;
+            melhorPontuacao = pontuacao;
+        }
+    });
+
+    if (!melhor || melhorPontuacao < 8) {
+        return {
+            encontrado: false,
+            diagnostico: 'Não encontramos um diagnóstico específico.',
+            verificacao: 'Revise o cenário no Cost Explorer e verifique utilização e dependências.',
+            acao: 'Configure AWS Budgets e avalie recursos subutilizados antes de alterar.',
+            cuidados: 'Não desligue recursos sem confirmar dependências e impacto.',
+            documentacao: 'https://aws.amazon.com/aws-cost-management/',
+            servico: null,
+            topico: null,
+            fonte: 'orientacao_padrao',
+            confianca: 0
+        };
+    }
+
+    const porTipo = (tipo) => (melhor.steps || []).find((step) => step.type === tipo);
+    const verificacao = porTipo('check');
+    const acao = porTipo('action');
+    const cuidados = porTipo('caution');
+    const fonte = (melhor.sources || []).find((source) =>
+        typeof source.url === 'string'
+        && (source.url.startsWith('https://docs.aws.amazon.com/')
+            || source.url.startsWith('https://aws.amazon.com/'))
+    );
+
+    const confianca = Math.min(0.95, Number((0.55 + melhorPontuacao / 100).toFixed(2)));
+    return {
+        encontrado: true,
+        diagnostico: melhor.title,
+        verificacao: verificacao?.content || melhor.summary,
+        acao: acao?.content || 'Revise o cenário com dados reais antes de realizar alterações.',
+        cuidados: cuidados?.content || 'Confirme dependências e impacto antes da alteração.',
+        documentacao: fonte?.url || 'https://docs.aws.amazon.com/',
+        servico: melhor.serviceName,
+        topico: melhor.title,
+        fonte: 'banco',
+        confianca
+    };
 }
 
 function obterRota(url) {
@@ -258,6 +475,43 @@ async function limparLimitesExpirados(request) {
     }
 }
 
+async function receberAdvisor(request, origemPermitida) {
+    const cabecalhos = cabecalhosCors(request, origemPermitida, 'POST, OPTIONS');
+    if (!origemPermitida || request.headers.get('origin') !== origemPermitida) {
+        return responder(403, { error: 'Origem não permitida.' }, cabecalhos);
+    }
+    if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: cabecalhos });
+    }
+    if (request.method !== 'POST') {
+        return responder(405, { error: 'Método não permitido.' }, {
+            ...cabecalhos,
+            Allow: 'POST, OPTIONS'
+        });
+    }
+    if (!/^application\/json(?:\s*;|$)/iu.test(request.headers.get('content-type') || '')) {
+        return responder(415, { error: 'Envie os dados no formato JSON.' }, cabecalhos);
+    }
+
+    let pergunta;
+    try {
+        pergunta = await lerJsonAdvisor(request);
+    } catch (error) {
+        const status = error instanceof RangeError ? 413 : 400;
+        return responder(status, { error: error.message }, cabecalhos);
+    }
+
+    try {
+        const resultado = await consultarAdvisor(pergunta);
+        return responder(200, resultado, cabecalhos);
+    } catch (error) {
+        console.error('Falha ao consultar o FinSlash Advisor:', error);
+        return responder(500, {
+            error: 'Não foi possível consultar o Advisor agora.'
+        }, cabecalhos);
+    }
+}
+
 async function receberFeedback(request, origemPermitida) {
     const cabecalhos = cabecalhosCors(request, origemPermitida, 'POST, OPTIONS');
     if (!origemPermitida || request.headers.get('origin') !== origemPermitida) {
@@ -367,6 +621,9 @@ export default {
         }
 
         const origemPermitida = obterOrigemPermitida();
+        if (rota === '/api/v1/advisor') {
+            return receberAdvisor(request, origemPermitida);
+        }
         if (rota === '/api/v1/feedback') {
             return receberFeedback(request, origemPermitida);
         }

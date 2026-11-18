@@ -209,7 +209,71 @@
             </svg>
             <span class="insignia-conquista-perfil hidden" id="insignia-conquista-perfil" aria-label="Conquista Guardião AWS" title="Conquista Guardião AWS">🏆</span>
         </button>
+        <button
+            class="botao-navegacao-app botao-advisor-app"
+            id="botao-advisor-app"
+            type="button"
+            aria-label="Abrir FinSlash Advisor"
+            aria-haspopup="dialog"
+            aria-controls="popup-advisor"
+        >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3a7 7 0 0 0-7 7v1a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-1a7 7 0 0 0-7-7Z"></path>
+                <path d="M9 11h.01M15 11h.01M9.5 15.5c.7.7 1.5 1 2.5 1s1.8-.3 2.5-1"></path>
+            </svg>
+        </button>
     </nav>
+
+    <div
+        class="popup popup-advisor hidden"
+        id="popup-advisor"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-advisor"
+    >
+        <aside class="painel-advisor">
+            <button class="fechar-advisor" id="fechar-advisor" type="button" aria-label="Fechar FinSlash Advisor">×</button>
+            <div class="cabecalho-advisor">
+                <span class="icone-advisor" aria-hidden="true">IA</span>
+                <div>
+                    <p class="etiqueta-advisor">Assistente gratuito</p>
+                    <h2 id="titulo-advisor">FinSlash Advisor</h2>
+                </div>
+            </div>
+            <p class="descricao-advisor">Pesquise os diagnósticos cadastrados no FinSlash e receba verificações, ações e cuidados.</p>
+            <div class="cenarios-advisor" id="cenarios-advisor" role="group" aria-label="Cenários comuns">
+                <button type="button" data-pergunta-advisor="Estou gastando muito com EC2 ocioso">EC2 ocioso</button>
+                <button type="button" data-pergunta-advisor="Como economizar no S3">Custo alto no S3</button>
+                <button type="button" data-pergunta-advisor="Como configurar AWS Budgets">AWS Budgets</button>
+                <button type="button" data-pergunta-advisor="Como identificar instâncias subutilizadas">Instâncias subutilizadas</button>
+                <button type="button" data-pergunta-advisor="Como reduzir custos com RDS">Banco caro</button>
+                <button type="button" data-pergunta-advisor="Como encontrar recursos sem uso">Recursos sem uso</button>
+            </div>
+            <form class="formulario-advisor" id="formulario-advisor">
+                <label for="campo-advisor">Sua dúvida sobre AWS</label>
+                <textarea id="campo-advisor" maxlength="300" rows="3" placeholder="Ex.: Como reduzir custos com EC2?"></textarea>
+                <div class="acoes-advisor">
+                    <span id="contador-advisor">0/300</span>
+                    <button class="botao-enviar-advisor" id="botao-enviar-advisor" type="submit">Consultar</button>
+                </div>
+                <p class="status-advisor" id="status-advisor" role="status" aria-live="polite"></p>
+            </form>
+            <section class="resultado-advisor hidden" id="resultado-advisor" aria-live="polite">
+                <div class="cabecalho-resultados-advisor">
+                    <span class="tipo-resultados-advisor" id="tipo-resultados-advisor"></span>
+                    <span class="confianca-advisor" id="confianca-advisor"></span>
+                </div>
+                <h3 id="titulo-resultados-advisor"></h3>
+                <dl class="detalhes-resultados-advisor">
+                    <div><dt>Verificação</dt><dd id="verificacao-advisor"></dd></div>
+                    <div><dt>Ação recomendada</dt><dd id="acao-advisor"></dd></div>
+                    <div><dt>Cuidados</dt><dd id="cuidados-advisor"></dd></div>
+                </dl>
+                <a class="documentacao-advisor" id="documentacao-advisor" href="https://docs.aws.amazon.com/" target="_blank" rel="noopener noreferrer">Abrir documentação oficial da AWS</a>
+                <p class="servico-advisor" id="servico-advisor"></p>
+            </section>
+        </aside>
+    </div>
 
     <div
         class="popup popup-perfil hidden"

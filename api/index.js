@@ -761,13 +761,17 @@ async function receberAdvisor(request, origemPermitida) {
 
     try {
         let resultado = await consultarAdvisor(pergunta);
+        let agenteStatus = 'desativado';
+        let agenteErro = null;
         if (process.env.GROQ_API_KEY) {
+            agenteStatus = 'erro';
             try {
                 const resultadoAgente = await consultarFinbotComGroq(pergunta);
                 if (resultadoAgente
                     && typeof resultadoAgente === 'object'
                     && typeof resultadoAgente.encontrado === 'boolean'
                     && typeof resultadoAgente.diagnostico === 'string') {
+                    agenteStatus = 'ativo';
                     const resultadosLocais = Array.isArray(resultado.resultados)
                         ? resultado.resultados
                         : [];
@@ -799,8 +803,18 @@ async function receberAdvisor(request, origemPermitida) {
                 }
             } catch (erroAgente) {
                 console.error('Falha no agente Groq; usando diagnóstico local:', erroAgente);
+                agenteErro = erroAgente instanceof Error
+                    ? erroAgente.message.replace(/Bearer [^\s]+/gu, 'Bearer [oculto]').slice(0, 160)
+                    : 'Falha desconhecida.';
             }
         }
+        resultado = {
+            ...resultado,
+            agente: {
+                status: agenteStatus,
+                erro: agenteErro
+            }
+        };
         return responder(200, resultado, cabecalhos);
     } catch (error) {
         console.error('Falha ao consultar o Finbot:', error);

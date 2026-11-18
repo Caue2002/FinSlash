@@ -717,12 +717,27 @@ async function gerarRespostaFinbotGemini(pergunta, contexto) {
 Use exclusivamente o contexto abaixo. Ele contém dados validados e fontes oficiais AWS
 cadastradas no projeto. Não invente recursos, preços, procedimentos, dados da conta,
 estimativas reais ou URLs. Explique a situação, como verificar, como agir e os cuidados.
+Adapte o texto à pergunta específica do usuário. Use linguagem natural, não copie o texto
+template do diagnóstico e não repita literalmente os rótulos "Como proceder" ou "Cuidados".
 Responda somente com JSON válido no formato {"resposta":"texto"}.
 Contexto: ${contextoSeguro}`,
         prompt: pergunta,
         json: true
     });
-    return typeof objeto?.resposta === 'string' ? objeto.resposta.trim() : null;
+    const respostaGerada = typeof objeto?.resposta === 'string'
+        ? objeto.resposta.trim()
+        : null;
+    if (!respostaGerada) {
+        return null;
+    }
+    const textoLocal = typeof contexto.resposta === 'string'
+        ? contexto.resposta.normalize('NFC').replace(/\s+/gu, ' ').trim()
+        : '';
+    const textoGerado = respostaGerada.normalize('NFC').replace(/\s+/gu, ' ').trim();
+    if (textoLocal && textoGerado === textoLocal) {
+        return null;
+    }
+    return respostaGerada;
 }
 
 function obterRota(url) {

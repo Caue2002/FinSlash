@@ -962,6 +962,51 @@ async function receberAdvisor(request, origemPermitida) {
                 }
             }, cabecalhos);
         }
+        if (pedirVisaoGeralServico(pergunta)) {
+            const nomeServico = await identificarServicoPorBanco(pergunta);
+            if (nomeServico) {
+                let contexto = null;
+                try {
+                    contexto = await obterContextoVisaoGeral(nomeServico);
+                } catch (erroContexto) {
+                    console.error('Falha ao obter contexto geral do serviço:', erroContexto);
+                }
+                let respostaNatural = null;
+                if (contexto) {
+                    try {
+                        respostaNatural = await responderVisaoGeralServico(pergunta, historico, contexto);
+                    } catch (erroVisao) {
+                        console.error('Falha ao gerar visão geral pelo Gemini:', erroVisao);
+                    }
+                }
+                return responder(200, {
+                    modo: 'conversacao',
+                    encontrado: true,
+                    diagnostico: `Visão geral: ${nomeServico}`,
+                    servico: nomeServico,
+                    resposta: respostaNatural
+                        || `${nomeServico} está incluído no catálogo validado do FinSlash. Consulte os tópicos cadastrados para conhecer seus cenários de custo, uso e operação.`,
+                    documentacao: contexto
+                        ? contexto.topics.flatMap((topico) => topico.sources || [])
+                            .find((fonte) =>
+                                typeof fonte.url === 'string'
+                                && (fonte.url.startsWith('https://docs.aws.amazon.com/')
+                                    || fonte.url.startsWith('https://aws.amazon.com/'))
+                            )?.url || 'https://docs.aws.amazon.com/'
+                        : 'https://docs.aws.amazon.com/',
+                    confianca: 1,
+                    fonte: respostaNatural ? 'gemini+banco-validado' : 'banco-validado',
+                    validacao: {
+                        status: 'oficial-cadastrado',
+                        origem: 'PostgreSQL do FinSlash'
+                    },
+                    agente: {
+                        status: respostaNatural ? 'ativo' : 'fallback-local',
+                        erro: null
+                    }
+                }, cabecalhos);
+            }
+        }
         const servicosAmbiguos = identificarServicosAmbiguos(pergunta);
         if (!pedirDiagnosticoDeCusto(pergunta) && servicosAmbiguos.length > 1) {
             return responder(200, {

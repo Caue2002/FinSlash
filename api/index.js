@@ -11,8 +11,64 @@ const LIMITE_BYTES_ADVISOR = 4096;
 const LIMITE_CARACTERES_ADVISOR = 300;
 const LIMITE_ENVIOS_POR_HORA = 5;
 const CATEGORIAS_FEEDBACK = new Set(['suggestion', 'issue', 'content']);
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'openai/gpt-oss-20b';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_MODEL = 'gemini-2.5-flash';
+
+async function chamarGemini({ systemInstruction, prompt, json = false }) {
+    const chave = process.env.GEMINI_API_KEY;
+    const modelo = process.env.GEMINI_MODEL?.trim() || GEMINI_MODEL;
+    if (!chave) {
+        return null;
+    }
+    const url = `${GEMINI_API_URL}/${encodeURIComponent(modelo)}:generateContent?key=${encodeURIComponent(chave)}`;
+    const generationConfig = {
+        temperature: 0,
+        maxOutputTokens: 700
+    };
+    if (json) {
+        generationConfig.responseMimeType = 'application/json';
+    }
+    const resposta = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            systemInstruction: {
+                parts: [{ text: systemInstruction }]
+            },
+            contents: [
+                {
+                    role: 'user',
+                    parts: [{ text: prompt }]
+                }
+            ],
+            generationConfig
+        }),
+        signal: AbortSignal.timeout(10000)
+    });
+    if (!resposta.ok) {
+        throw new Error(`Gemini respondeu com o status ${resposta.status}.`);
+    }
+    const payload = await resposta.json();
+    const texto = payload.candidates?.[0]?.content?.parts
+        ?.map((parte) => typeof parte.text === 'string' ? parte.text : '')
+        .join('')
+        .trim();
+    if (!texto) {
+        throw new Error('Gemini devolveu uma resposta vazia.');
+    }
+    if (json) {
+        try {
+            return JSON.parse(texto);
+        } catch {
+            const blocoJson = texto.match(/```(?:json)?\s*([\s\S]*?)```/iu);
+            if (blocoJson) {
+                return JSON.parse(blocoJson[1].trim());
+            }
+            throw new Error('Gemini devolveu JSON inválido.');
+        }
+    }
+    return texto;
+}
 
 const SINONIMOS_ADVISOR = {
     ec2: ['ec2', 'servidor', 'servidores', 'maquina', 'maquinas', 'instancia', 'instancias', 'compute', 'direito ao tamanho', 'dimensionamento', 'ocioso', 'ociosa', 'subutilizado', 'subutilizada', 'savings plan'],
@@ -255,67 +311,25 @@ async function obterContextoVisaoGeral(nomeServico) {
 }
 
 async function responderVisaoGeralServico(pergunta, historico, contexto) {
-    const chave = process.env.GROQ_API_KEY;
-    if (!chave) {
-        return null;
-    }
-    const modelos = [
-        process.env.GROQ_MODEL,
-        'openai/gpt-oss-20b',
-        'llama-3.3-70b-versatile',
-        'llama-3.1-8b-instant'
-    ].filter((modelo, indice, lista) => modelo && lista.indexOf(modelo) === indice);
     const contextoSeguro = JSON.stringify(contexto).slice(0, 18000);
-    const mensagens = [
-        {
-            role: 'system',
-            content: `Você é o Finbot. Explique o serviço AWS em texto natural.
+    const systemInstruction = `Você é o Finbot. Explique o serviço AWS em texto natural.
 Use exclusivamente o contexto cadastrado abaixo. Não invente recursos, preços,
 procedimentos, benefícios ou links. Não escolha um único diagnóstico quando a
 pessoa pediu uma visão geral. Responda em português, em 2 ou 3 parágrafos curtos.
-Contexto: ${contextoSeguro}`
-        },
-        ...historico,
-        { role: 'user', content: pergunta }
-    ];
-    for (const modelo of modelos) {
-        try {
-            const resposta = await fetch(GROQ_API_URL, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${chave}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: modelo,
-                    messages: mensagens,
-                    temperature: 0,
-                    max_completion_tokens: 700,
-                    response_format: { type: 'json_object' }
-                }),
-                signal: AbortSignal.timeout(10000)
-            });
-            if (!resposta.ok) {
-                continue;
-            }
-            const payload = await resposta.json();
-            let texto = payload.choices?.[0]?.message?.content;
-            if (typeof texto === 'string') {
-                try {
-                    const objeto = JSON.parse(texto);
-                    texto = objeto.resposta || objeto.resumo || texto;
-                } catch {
-                    // Mantém o texto simples do modelo.
-                }
-                if (texto.trim()) {
-                    return texto.trim();
-                }
-            }
-        } catch {
-            // Tenta o próximo modelo.
-        }
+Contexto: ${contextoSeguro}`;
+    const texto = await chamarGemini({
+        systemInstruction,
+        prompt: pergunta,
+        json: true
+    });
+    if (!texto || typeof texto !== 'object') {
+        return null;
     }
-    return null;
+    return typeof texto.resposta === 'string'
+        ? texto.resposta
+        : typeof texto.resumo === 'string'
+            ? texto.resumo
+            : null;
 }
 
 function criarResultadoForaDoEscopo() {
@@ -343,59 +357,21 @@ function ehSaudacao(pergunta) {
 }
 
 async function gerarSaudacaoFinbot(pergunta) {
-    const chave = process.env.GROQ_API_KEY;
-    if (!chave) {
+    if (!process.env.GEMINI_API_KEY) {
         return 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
     }
-    const modelos = [
-        process.env.GROQ_MODEL,
-        'openai/gpt-oss-20b',
-        'llama-3.3-70b-versatile',
-        'llama-3.1-8b-instant'
-    ].filter((modelo, indice, lista) => modelo && lista.indexOf(modelo) === indice);
-    for (const modelo of modelos) {
-        try {
-            const resposta = await fetch(GROQ_API_URL, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${chave}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: modelo,
-                    messages: [
-                        {
-                            role: 'system',
-                            content: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Identifique-se apenas como Finbot se fizer sentido.'
-                        },
-                        { role: 'user', content: pergunta }
-                    ],
-                    temperature: 0,
-                    max_completion_tokens: 120,
-                    response_format: { type: 'json_object' }
-                }),
-                signal: AbortSignal.timeout(7000)
-            });
-            if (!resposta.ok) {
-                continue;
-            }
-            const payload = await resposta.json();
-            const texto = payload.choices?.[0]?.message?.content;
-            if (typeof texto === 'string' && texto.trim()) {
-                try {
-                    const objeto = JSON.parse(texto);
-                    if (typeof objeto.resposta === 'string' && objeto.resposta.trim()) {
-                        return objeto.resposta.trim();
-                    }
-                } catch {
-                    return texto.trim();
-                }
-            }
-        } catch {
-            // Usa fallback seguro abaixo.
-        }
+    try {
+        const objeto = await chamarGemini({
+            systemInstruction: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Identifique-se apenas como Finbot se fizer sentido.',
+            prompt: pergunta,
+            json: true
+        });
+        return typeof objeto?.resposta === 'string'
+            ? objeto.resposta
+            : 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
+    } catch {
+        return 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
     }
-    return 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
 }
 
 async function criarRespostaBasica(pergunta) {
@@ -728,295 +704,25 @@ async function listarServicosPublicados() {
     return resultado.rows.map((linha) => linha.name);
 }
 
-async function gerarRespostaFinbotGroq(pergunta, contexto) {
-    const chave = process.env.GROQ_API_KEY;
-    if (!chave) {
+async function gerarRespostaFinbotGemini(pergunta, contexto) {
+    if (!process.env.GEMINI_API_KEY) {
         return null;
     }
-    const modelos = [
-        process.env.GROQ_MODEL,
-        'openai/gpt-oss-20b',
-        'llama-3.3-70b-versatile',
-        'llama-3.1-8b-instant'
-    ].filter((modelo, indice, lista) => modelo && lista.indexOf(modelo) === indice);
     const contextoSeguro = JSON.stringify({
         pergunta,
         diagnostico: contexto
     }).slice(0, 18000);
-    const mensagens = [
-        {
-            role: 'system',
-            content: `Você é o Finbot. Gere uma resposta dinâmica em português.
+    const objeto = await chamarGemini({
+        systemInstruction: `Você é o Finbot. Gere uma resposta dinâmica em português.
 Use exclusivamente o contexto abaixo. Ele contém dados validados e fontes oficiais AWS
 cadastradas no projeto. Não invente recursos, preços, procedimentos, dados da conta,
 estimativas reais ou URLs. Explique a situação, como verificar, como agir e os cuidados.
 Responda somente com JSON válido no formato {"resposta":"texto"}.
-Contexto: ${contextoSeguro}`
-        },
-        { role: 'user', content: pergunta }
-    ];
-    for (const modelo of modelos) {
-        try {
-            const resposta = await fetch(GROQ_API_URL, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${chave}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: modelo,
-                    messages: mensagens,
-                    temperature: 0,
-                    max_completion_tokens: 700,
-                    response_format: { type: 'json_object' }
-                }),
-                signal: AbortSignal.timeout(10000)
-            });
-            if (!resposta.ok) {
-                continue;
-            }
-            const payload = await resposta.json();
-            const texto = payload.choices?.[0]?.message?.content;
-            if (typeof texto !== 'string') {
-                continue;
-            }
-            try {
-                const objeto = JSON.parse(texto);
-                if (typeof objeto.resposta === 'string' && objeto.resposta.trim()) {
-                    return objeto.resposta.trim();
-                }
-            } catch {
-                if (texto.trim()) {
-                    return texto.trim();
-                }
-            }
-        } catch {
-            // Tenta o próximo modelo disponível.
-        }
-    }
-    return null;
-}
-
-async function consultarFinbotComGroq(pergunta, historico = []) {
-    const chave = process.env.GROQ_API_KEY;
-    if (!chave) {
-        return null;
-    }
-
-    const ferramentas = [
-        {
-            type: 'function',
-            function: {
-                name: 'search_diagnostics',
-                description: 'Busca diagnósticos AWS publicados no FinSlash por serviço, problema, título ou ação.',
-                parameters: {
-                    type: 'object',
-                    properties: {
-                        query: {
-                            type: 'string',
-                            description: 'Termos curtos da dúvida ou problema AWS.'
-                        }
-                    },
-                    required: ['query'],
-                    additionalProperties: false
-                }
-            }
-        },
-        {
-            type: 'function',
-            function: {
-                name: 'list_services',
-                description: 'Lista os nomes dos serviços AWS que possuem dados publicados no FinSlash.',
-                parameters: {
-                    type: 'object',
-                    properties: {},
-                    additionalProperties: false
-                }
-            }
-        }
-    ];
-
-    const mensagens = [
-        {
-            role: 'system',
-            content: `Você é o Finbot, um agente especializado em custos e diagnósticos AWS.
-Use as ferramentas antes de responder. Não invente dados, procedimentos ou links.
-Use somente diagnósticos retornados pela ferramenta search_diagnostics.
-Entenda sinônimos e linguagem informal. Para uma pergunta vaga, use termos AWS e de custo
-como consulta da ferramenta, não repita literalmente a frase do usuário.
-Quando não houver diagnóstico confiável, retorne encontrado=false e orientação geral.
-Se a pergunta não mencionar ou não estiver relacionada a AWS, custos AWS, arquitetura AWS,
-serviços AWS ou diagnósticos cadastrados no FinSlash, retorne encontrado=false.
-Nunca substitua ou complete os dados do diagnóstico com conhecimento externo.
-As informações verificadas pelo usuário devem sair dos campos verification/check,
-action/action e caution do resultado da ferramenta.
-Responda exclusivamente com um objeto JSON contendo:
-encontrado (boolean), diagnostico (string), verificacao (string), acao (string),
-cuidados (string), documentacao (URL HTTPS AWS segura), servico (string ou null),
-topico (string ou null), confianca (numero entre 0 e 1), resposta (string em português),
-sugestoes (array de strings). A resposta deve explicar o diagnóstico em texto natural,
-com verificação, ação prática e cuidados em parágrafos claros. Não use listas técnicas,
-nem repita o JSON.`
-        },
-        ...historico,
-        { role: 'user', content: pergunta }
-    ];
-
-    for (let tentativa = 0; tentativa < 3; tentativa++) {
-        const modelosPreferidos = [
-            process.env.GROQ_MODEL,
-            'llama-3.3-70b-versatile',
-            'llama-3.1-8b-instant',
-            'openai/gpt-oss-20b'
-        ].filter((modelo, indice, lista) =>
-            modelo && lista.indexOf(modelo) === indice
-        );
-
-        const modelos = [...modelosPreferidos];
-        let modelosErro = null;
-        let idsAtivos = [];
-        try {
-            const respostaModelos = await fetch('https://api.groq.com/openai/v1/models', {
-                headers: {
-                    Authorization: `Bearer ${chave}`,
-                    'Content-Type': 'application/json'
-                },
-                signal: AbortSignal.timeout(5000)
-            });
-            if (respostaModelos.ok) {
-                const modelosAtivos = await respostaModelos.json();
-                idsAtivos = (modelosAtivos.data || [])
-                    .map((modelo) => modelo.id)
-                    .filter((id) =>
-                        typeof id === 'string'
-                        && !id.includes('whisper')
-                        && !id.includes('prompt-guard')
-                    );
-                for (const id of idsAtivos) {
-                    if (!modelos.includes(id)) {
-                        modelos.push(id);
-                    }
-                }
-            } else {
-                modelosErro = `Models API respondeu com o status ${respostaModelos.status}.`;
-            }
-        } catch (error) {
-            modelosErro = 'Não foi possível consultar a lista de modelos.';
-        }
-
-        let resposta;
-        let modeloUsado = null;
-        const errosChat = [];
-        for (const modelo of modelos) {
-            resposta = await fetch(GROQ_API_URL, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${chave}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: modelo,
-                    messages: mensagens,
-                    tools: ferramentas,
-                    tool_choice: tentativa === 0
-                        ? { type: 'function', function: { name: 'search_diagnostics' } }
-                        : 'auto',
-                    temperature: 0,
-                    parallel_tool_calls: false,
-                    max_completion_tokens: 700
-                }),
-                signal: AbortSignal.timeout(10000)
-            });
-            if (resposta.ok) {
-                modeloUsado = modelo;
-                break;
-            }
-            let motivo = '';
-            try {
-                const textoErro = await resposta.clone().text();
-                try {
-                    const erroCorpo = JSON.parse(textoErro);
-                    motivo = erroCorpo.error?.message
-                        || erroCorpo.message
-                        || '';
-                } catch {
-                    motivo = textoErro;
-                }
-            } catch {
-                motivo = '';
-            }
-            errosChat.push(`${modelo}:${resposta.status}${motivo ? ` ${motivo.slice(0, 120)}` : ''}`);
-        }
-
-        if (!resposta?.ok) {
-            const detalheModelos = modelosErro
-                || (idsAtivos.length
-                    ? `Modelos ativos encontrados; chat falhou: ${errosChat.join(', ')}.`
-                    : `Nenhum modelo ativo encontrado; chat falhou: ${errosChat.join(', ')}.`);
-            throw new Error(detalheModelos);
-        }
-
-        const payload = await resposta.json();
-        const mensagem = payload.choices?.[0]?.message;
-        if (!mensagem) {
-            throw new Error('Groq devolveu uma resposta vazia.');
-        }
-
-        const chamadas = Array.isArray(mensagem.tool_calls) ? mensagem.tool_calls : [];
-        if (!chamadas.length) {
-            const texto = typeof mensagem.content === 'string' ? mensagem.content : '';
-            try {
-                return JSON.parse(texto);
-            } catch {
-                const blocoJson = texto.match(/```(?:json)?\s*([\s\S]*?)```/iu);
-                if (blocoJson) {
-                    try {
-                        return JSON.parse(blocoJson[1].trim());
-                    } catch {
-                        // Continua para resposta textual segura.
-                    }
-                }
-                if (texto.trim()) {
-                    return {
-                        encontrado: true,
-                        diagnostico: 'Resposta textual do agente',
-                        resposta: texto.trim()
-                    };
-                }
-                throw new Error('Groq devolveu uma resposta vazia.');
-            }
-        }
-
-        mensagens.push(mensagem);
-        for (const chamada of chamadas) {
-            let resultadoFerramenta;
-            if (chamada.function?.name === 'search_diagnostics') {
-                let argumentos = {};
-                try {
-                    argumentos = JSON.parse(chamada.function.arguments || '{}');
-                } catch {
-                    argumentos = {};
-                }
-                const consulta = typeof argumentos.query === 'string'
-                    ? argumentos.query
-                    : '';
-                resultadoFerramenta = consulta
-                    ? await consultarAdvisor(consulta)
-                    : await consultarAdvisor(pergunta);
-            } else if (chamada.function?.name === 'list_services') {
-                resultadoFerramenta = { services: await listarServicosPublicados() };
-            } else {
-                resultadoFerramenta = { error: 'Ferramenta não disponível.' };
-            }
-            mensagens.push({
-                role: 'tool',
-                tool_call_id: chamada.id,
-                content: JSON.stringify(resultadoFerramenta)
-            });
-        }
-    }
-
-    throw new Error('O agente excedeu o limite de chamadas de ferramentas.');
+Contexto: ${contextoSeguro}`,
+        prompt: pergunta,
+        json: true
+    });
+    return typeof objeto?.resposta === 'string' ? objeto.resposta.trim() : null;
 }
 
 function obterRota(url) {
@@ -1235,11 +941,11 @@ async function receberAdvisor(request, origemPermitida) {
         if (respostaBasica) {
             return responder(200, {
                 ...respostaBasica,
-                fonte: process.env.GROQ_API_KEY
-                    ? 'groq-saudaçao'
+                fonte: process.env.GEMINI_API_KEY
+                    ? 'gemini-saudaçao'
                     : 'saudaçao-local',
                 agente: {
-                    status: process.env.GROQ_API_KEY
+                    status: process.env.GEMINI_API_KEY
                         ? 'ativo'
                         : 'fallback-local',
                     erro: null
@@ -1294,7 +1000,7 @@ async function receberAdvisor(request, origemPermitida) {
                                     || fonte.url.startsWith('https://aws.amazon.com/'))
                             )?.url || 'https://docs.aws.amazon.com/',
                         confianca: 1,
-                        fonte: 'groq+banco-validado',
+                        fonte: 'gemini+banco-validado',
                         validacao: {
                             status: 'oficial-cadastrado',
                             origem: 'PostgreSQL do FinSlash',
@@ -1311,13 +1017,13 @@ async function receberAdvisor(request, origemPermitida) {
         let resultado = await consultarAdvisor(pergunta);
         let agenteStatus = 'desativado';
         let agenteErro = null;
-        if (process.env.GROQ_API_KEY) {
+        if (process.env.GEMINI_API_KEY) {
             agenteStatus = 'erro';
             try {
                 if (resultado.encontrado) {
-                    const respostaGerada = await gerarRespostaFinbotGroq(pergunta, resultado);
+                    const respostaGerada = await gerarRespostaFinbotGemini(pergunta, resultado);
                     if (!respostaGerada) {
-                        throw new Error('Groq não devolveu uma resposta textual.');
+                        throw new Error('Gemini não devolveu uma resposta textual.');
                     }
                     agenteStatus = 'ativo';
                     const resultadosLocais = Array.isArray(resultado.resultados)
@@ -1328,7 +1034,7 @@ async function receberAdvisor(request, origemPermitida) {
                         resposta: respostaGerada,
                         resultados: resultadosLocais,
                         fonte: resultado.encontrado
-                            ? 'groq+banco-validado'
+                            ? 'gemini+banco-validado'
                             : 'orientacao_padrao',
                         validacao: resultado.encontrado ? {
                             status: 'oficial-cadastrado',
@@ -1338,7 +1044,7 @@ async function receberAdvisor(request, origemPermitida) {
                     };
                 }
             } catch (erroAgente) {
-                console.error('Falha no agente Groq; usando diagnóstico local:', erroAgente);
+                console.error('Falha no agente Gemini; usando diagnóstico local:', erroAgente);
                 agenteErro = erroAgente instanceof Error
                     ? erroAgente.message.replace(/Bearer [^\s]+/gu, 'Bearer [oculto]').slice(0, 160)
                     : 'Falha desconhecida.';

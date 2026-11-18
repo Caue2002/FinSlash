@@ -841,7 +841,7 @@ async function enviarPerguntaAdvisor(pergunta) {
             throw new TypeError('O resultado do Finbot está incompleto.');
         }
 
-        statusAdvisor.textContent = resultado.fonte === 'groq-saudaçao'
+        statusAdvisor.textContent = resultado.fonte === 'gemini-saudaçao'
             ? 'Resposta do Finbot.'
             : resultado.encontrado
                 ? 'Resposta baseada em diagnóstico AWS validado.'

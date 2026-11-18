@@ -12,12 +12,12 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações, cuidados e links para documentação oficial da AWS.
 - Finbot, assistente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
-- Modo agente opcional com Groq: o modelo pode consultar diagnósticos publicados e listar serviços antes de responder.
+- Modo agente opcional com Gemini: o modelo gera respostas a partir dos diagnósticos publicados e das fontes oficiais cadastradas.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
 - Até três diagnósticos relacionados por consulta, além de sugestões de perguntas comuns.
 - Painel mobile em formato de cartão inferior, cenários rápidos em grade, resposta principal destacada e detalhes verificáveis em cards expansíveis.
 - O modo compacto oculta descrições e cenários após a consulta para manter o diagnóstico legível em telas pequenas.
-- Privacidade por padrão: sem `GROQ_API_KEY`, perguntas não são enviadas a IA externa e não são persistidas no servidor ou no navegador.
+- Privacidade por padrão: sem `GEMINI_API_KEY`, perguntas não são enviadas a IA externa e não são persistidas no servidor ou no navegador.
 - Barra inferior com atalhos para o menu, pesquisa de serviços e perfil; navegação de retorno compatível com dispositivos móveis.
 - Botão voltar do aparelho ou do navegador e gesto de arrastar para a direita.
 - Interface adaptável a diferentes tamanhos de tela.
@@ -30,11 +30,11 @@ A interface não requer compilação. Para explorar as telas, abra `index.html` 
 
 O Finbot permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Por padrão, ele usa busca local com normalização, sinônimos e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
 
-Opcionalmente, uma chave gratuita do Groq ativa um modo agente. O modelo pode chamar `search_diagnostics` para consultar o PostgreSQL e `list_services` para listar os serviços publicados. A API mantém um limite de três iterações, usa somente conteúdo cadastrado como contexto e devolve ao navegador os dados já existentes na interface. Sem `GROQ_API_KEY`, o Finbot continua funcionando integralmente no modo local.
+Opcionalmente, uma chave do Google AI Studio ativa o Gemini. Configure `GEMINI_API_KEY` e `GEMINI_MODEL` nas variáveis de ambiente. A API envia a pergunta e um contexto fechado com diagnóstico, etapas e fontes cadastradas. Sem `GEMINI_API_KEY`, o Finbot continua funcionando integralmente no modo local.
 
 O painel não mantém nem envia histórico de mensagens ao servidor. Cada consulta é tratada isoladamente e as mensagens desaparecem ao fechar o Finbot.
 
-Saudações e respostas AWS usam o Groq quando disponível, com temperatura zero. Perguntas fora do escopo são bloqueadas antes da geração. A barra de rolagem do painel acompanha o tema escuro do chat.
+Saudações e respostas AWS usam o Gemini quando disponível, com temperatura zero. Perguntas fora do escopo são bloqueadas antes da geração. A barra de rolagem do painel acompanha o tema escuro do chat.
 
 Quando existe um diagnóstico validado, o Finbot apresenta:
 
@@ -48,9 +48,9 @@ Quando existe um diagnóstico validado, o Finbot apresenta:
 - Botão para limpar todas as mensagens temporárias do painel.
 - Detecção de consultas ambíguas entre vários serviços.
 
-Para evitar alucinações, o Groq é limitado à compreensão da pergunta e à seleção da ferramenta. A resposta final usa somente título, resumo, etapas, confiança e documentação retornados pelo banco validado do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
+Para evitar alucinações, o Gemini recebe somente o contexto fechado do banco validado. A resposta final usa somente título, resumo, etapas, confiança e documentação retornados pelo PostgreSQL do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
 
-Nas consultas com diagnóstico encontrado, a mensagem digitada é enviada ao Groq junto de um contexto fechado contendo o diagnóstico, suas etapas e as fontes AWS cadastradas. A resposta textual exibida no chat é gerada pelo modelo, mas metadados, confiança, documentos e campos técnicos continuam vindo do banco validado.
+Nas consultas com diagnóstico encontrado, a mensagem digitada é enviada ao Gemini junto de um contexto fechado contendo o diagnóstico, suas etapas e as fontes AWS cadastradas. A resposta textual exibida no chat é gerada pelo modelo, mas metadados, confiança, documentos e campos técnicos continuam vindo do banco validado.
 
 A busca reconhece serviços e termos como EC2, S3, RDS, Lambda, CloudWatch, IAM, CloudFront, EBS, EKS, ECS, DynamoDB, NAT Gateway, AWS Budgets e Cost Explorer. O ranking considera correspondência com o serviço, título, resumo, slug e etapas cadastradas. A resposta principal vem acompanhada de até dois diagnósticos relacionados e sugestões da mesma área.
 

@@ -260,6 +260,10 @@ async function consultarAdvisor(pergunta) {
             && textoLinha.includes('aws budgets')) {
             pontuacao += 30;
         }
+        if (normalizada.includes('aws budgets')
+            && /ausencia de alertas no aws budgets|falta de alertas.*aws budgets|alarmes cloudwatch no aws budgets/u.test(normalizarTextoAdvisor(linha.title))) {
+            pontuacao += 35;
+        }
         if (normalizada.includes('cost explorer')
             && textoLinha.includes('cost explorer')) {
             pontuacao += 30;
@@ -267,6 +271,16 @@ async function consultarAdvisor(pergunta) {
         const consultaEconomica = ['economizar', 'reduzir custos', 'gastos', 'custos', 'custo'].some((termo) =>
             normalizada.includes(termo)
         );
+        if (consultaEconomica
+            && normalizada.includes(' s3 ')
+            && /(intelligent tiering|manutencao de todos os arquivos|transicao|glacier|ciclo de vida|lifecycle|expiracao)/u.test(normalizarTextoAdvisor(linha.title))) {
+            pontuacao += 35;
+        }
+        if (consultaEconomica
+            && normalizada.includes(' s3 ')
+            && /versionamento ativado|replica.*cross region|download direto/u.test(normalizarTextoAdvisor(linha.title))) {
+            pontuacao -= 20;
+        }
         if (consultaEconomica
             && /(custo|economia|orcamento|budget|lifecycle|ciclo de vida|transferencia|armazenamento)/u.test(textoLinha)) {
             pontuacao += 12;

@@ -614,8 +614,11 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
 
     const bolha = document.createElement('div');
     bolha.className = 'bolha-mensagem-advisor';
-    bolha.textContent = texto;
     mensagem.appendChild(bolha);
+    const textoPrincipal = document.createElement('p');
+    textoPrincipal.className = 'texto-principal-mensagem-advisor';
+    textoPrincipal.textContent = texto;
+    bolha.appendChild(textoPrincipal);
 
     if (tipo === 'assistant' && resultado) {
         if (Array.isArray(resultado.plan) && resultado.plan.length) {
@@ -632,7 +635,7 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
                 item.append(fase, document.createTextNode(etapa.content));
                 plano.appendChild(item);
             });
-            mensagem.appendChild(plano);
+            bolha.appendChild(plano);
         }
 
         if (Array.isArray(resultado.checklist) && resultado.checklist.length) {
@@ -648,7 +651,7 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
                 linha.append(caixa, document.createTextNode(itemTexto));
                 checklist.appendChild(linha);
             });
-            mensagem.appendChild(checklist);
+            bolha.appendChild(checklist);
         }
 
         if (Array.isArray(resultado.sources) && resultado.sources.length) {
@@ -668,7 +671,7 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
                 link.textContent = fonte.title || 'Documentação AWS';
                 fontes.appendChild(link);
             });
-            mensagem.appendChild(fontes);
+            bolha.appendChild(fontes);
         }
 
         const metadados = document.createElement('div');
@@ -682,7 +685,7 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
         }
         metadados.textContent = itens.join(' · ');
         if (metadados.textContent) {
-            mensagem.appendChild(metadados);
+            bolha.appendChild(metadados);
         }
         const urlSegura = typeof resultado.documentacao === 'string'
             && validarLinkAws(resultado.documentacao)
@@ -695,30 +698,37 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
             link.textContent = 'Documentação oficial da AWS';
-            mensagem.appendChild(link);
+            bolha.appendChild(link);
         }
+
+        const acoes = document.createElement('div');
+        acoes.className = 'acoes-mensagem-advisor';
 
         const copiar = document.createElement('button');
         copiar.type = 'button';
-        copiar.className = 'exportar-mensagem-advisor';
-        copiar.textContent = 'Copiar resposta';
+        copiar.className = 'acao-mensagem-advisor';
+        copiar.setAttribute('aria-label', 'Copiar resposta');
+        copiar.title = 'Copiar resposta';
+        copiar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>';
         copiar.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(texto);
-                copiar.textContent = 'Copiado';
+                copiar.classList.add('acao-concluida');
                 window.setTimeout(() => {
-                    copiar.textContent = 'Copiar resposta';
+                    copiar.classList.remove('acao-concluida');
                 }, 1600);
             } catch {
-                copiar.textContent = 'Não foi possível copiar';
+                copiar.setAttribute('aria-label', 'Não foi possível copiar');
             }
         });
-        mensagem.appendChild(copiar);
+        acoes.appendChild(copiar);
 
         const exportar = document.createElement('button');
         exportar.type = 'button';
-        exportar.className = 'exportar-mensagem-advisor';
-        exportar.textContent = 'Exportar resposta';
+        exportar.className = 'acao-mensagem-advisor';
+        exportar.setAttribute('aria-label', 'Exportar resposta');
+        exportar.title = 'Exportar resposta';
+        exportar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path><path d="M7 7v10h10"></path></svg>';
         exportar.addEventListener('click', () => {
             const cabecalho = [
                 'Finbot - Relatório de diagnóstico',
@@ -740,7 +750,8 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
             link.click();
             URL.revokeObjectURL(url);
         });
-        mensagem.appendChild(exportar);
+        acoes.appendChild(exportar);
+        bolha.appendChild(acoes);
     }
 
     mensagensAdvisor.appendChild(mensagem);

@@ -34,6 +34,15 @@ Opcionalmente, uma chave gratuita do Groq ativa um modo agente. O modelo pode ch
 
 O painel não mantém nem envia histórico de mensagens ao servidor. Cada consulta é tratada isoladamente e as mensagens desaparecem ao fechar o Finbot.
 
+Quando existe um diagnóstico validado, o Finbot apresenta:
+
+- Plano em três etapas: verificar, agir e proteger.
+- Checklist interativo da sessão.
+- Fontes oficiais vinculadas ao cenário.
+- Confiança baseada na correspondência com o catálogo.
+- Exportação da resposta em arquivo de texto.
+- Detecção de consultas ambíguas entre vários serviços.
+
 Para evitar alucinações, o Groq é limitado à compreensão da pergunta e à seleção da ferramenta. A resposta final usa somente título, resumo, etapas, confiança e documentação retornados pelo banco validado do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
 
 A busca reconhece serviços e termos como EC2, S3, RDS, Lambda, CloudWatch, IAM, CloudFront, EBS, EKS, ECS, DynamoDB, NAT Gateway, AWS Budgets e Cost Explorer. O ranking considera correspondência com o serviço, título, resumo, slug e etapas cadastradas. A resposta principal vem acompanhada de até dois diagnósticos relacionados e sugestões da mesma área.

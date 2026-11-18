@@ -1884,6 +1884,67 @@ body.tela-servicos-ativa > .canvas-onda {
     font-weight: 700;
 }
 
+.plano-mensagem-advisor,
+.checklist-mensagem-advisor,
+.fontes-mensagem-advisor {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 8px;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 9px 10px;
+    background: #111827;
+    color: #e5e7eb;
+    font-size: 0.92rem;
+}
+
+.plano-mensagem-advisor h4,
+.checklist-mensagem-advisor h4,
+.fontes-mensagem-advisor h4 {
+    margin: 0 0 7px;
+    color: #bfdbfe;
+    font-size: 0.92rem;
+}
+
+.etapa-plano-advisor {
+    margin-top: 5px;
+    line-height: 1.42;
+}
+
+.checklist-mensagem-advisor label {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin-top: 6px;
+    line-height: 1.42;
+}
+
+.checklist-mensagem-advisor input {
+    margin-top: 3px;
+    accent-color: #2563eb;
+}
+
+.fontes-mensagem-advisor {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.fontes-mensagem-advisor a,
+.exportar-mensagem-advisor {
+    color: #93c5fd;
+    font-size: 0.92rem;
+}
+
+.exportar-mensagem-advisor {
+    margin-top: 8px;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 7px 9px;
+    background: #1e293b;
+    cursor: pointer;
+}
+
 .resultado-advisor {
     margin-top: 12px;
     padding: 16px;

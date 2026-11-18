@@ -156,6 +156,20 @@ function pedirDiagnosticoDeCusto(pergunta) {
     return /\b(custo|custos|gasto|gastos|economi|reduzir|barato|mais caro|pagar menos|preco|orcamento|budget|saving|desconto|desperdicio|otimiz)\w*\b/u.test(normalizada);
 }
 
+function identificarServicosAmbiguos(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    const encontrados = [];
+    Object.entries(SERVICOS_ADVISOR).forEach(([chave, nome]) => {
+        const reconhecido = (SINONIMOS_ADVISOR[chave] || []).some((sinonimo) =>
+            normalizada.includes(normalizarTextoAdvisor(sinonimo))
+        );
+        if (reconhecido && !encontrados.includes(nome)) {
+            encontrados.push(nome);
+        }
+    });
+    return encontrados;
+}
+
 function identificarServicoPergunta(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
     for (const [chave, nome] of Object.entries(SERVICOS_ADVISOR)) {
@@ -581,6 +595,29 @@ async function consultarAdvisor(pergunta) {
             cuidados: cuidados?.content || 'Confirme dependências e impacto antes da alteração.',
             resposta: `${item.linha.title}. ${verificacao?.content || item.linha.summary} Como proceder: ${acao?.content || 'Revise o cenário com dados reais antes de realizar alterações.'} Cuidados: ${cuidados?.content || 'Confirme dependências e impacto antes da alteração.'}`,
             documentacao: fonte?.url || 'https://docs.aws.amazon.com/',
+            sources: (item.linha.sources || []).filter((source) =>
+                typeof source.url === 'string'
+                && source.url.startsWith('https://docs.aws.amazon.com/')
+            ).slice(0, 5),
+            plan: [
+                {
+                    phase: 'Verificar',
+                    content: verificacao?.content || item.linha.summary
+                },
+                {
+                    phase: 'Agir',
+                    content: acao?.content || 'Revise o cenário com dados reais antes de realizar alterações.'
+                },
+                {
+                    phase: 'Proteger',
+                    content: cuidados?.content || 'Confirme dependências e impacto antes da alteração.'
+                }
+            ],
+            checklist: [
+                verificacao?.content || item.linha.summary,
+                acao?.content || 'Revise o cenário com dados reais antes de realizar alterações.',
+                cuidados?.content || 'Confirme dependências e impacto antes da alteração.'
+            ],
             servico: item.linha.serviceName,
             topico: item.linha.title,
             fonte: 'banco',
@@ -1062,6 +1099,25 @@ async function receberAdvisor(request, origemPermitida) {
                 ...resultadoForaDoEscopo,
                 agente: {
                     status: 'fora-do-escopo',
+                    erro: null
+                }
+            }, cabecalhos);
+        }
+        const servicosAmbiguos = identificarServicosAmbiguos(pergunta);
+        if (!pedirDiagnosticoDeCusto(pergunta) && servicosAmbiguos.length > 1) {
+            return responder(200, {
+                modo: 'conversacao',
+                encontrado: false,
+                diagnostico: 'Preciso identificar o serviço.',
+                servico: null,
+                resposta: `Sua pergunta pode se referir a ${servicosAmbiguos.slice(0, 4).join(', ')}. Informe qual serviço deseja analisar para eu responder com o contexto oficial válido.`,
+                confianca: 0,
+                fonte: 'pergunta_ambigua',
+                validacao: null,
+                resultados: [],
+                sugestoes: servicosAmbiguos.slice(0, 4).map((servico) => `Me fale sobre ${servico}`),
+                agente: {
+                    status: 'ambiguidade',
                     erro: null
                 }
             }, cabecalhos);

@@ -617,6 +617,59 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
     mensagem.appendChild(bolha);
 
     if (tipo === 'assistant' && resultado) {
+        if (Array.isArray(resultado.plan) && resultado.plan.length) {
+            const plano = document.createElement('section');
+            plano.className = 'plano-mensagem-advisor';
+            const tituloPlano = document.createElement('h4');
+            tituloPlano.textContent = 'Plano de ação';
+            plano.appendChild(tituloPlano);
+            resultado.plan.forEach((etapa) => {
+                const item = document.createElement('div');
+                item.className = 'etapa-plano-advisor';
+                const fase = document.createElement('strong');
+                fase.textContent = `${etapa.phase}: `;
+                item.append(fase, document.createTextNode(etapa.content));
+                plano.appendChild(item);
+            });
+            mensagem.appendChild(plano);
+        }
+
+        if (Array.isArray(resultado.checklist) && resultado.checklist.length) {
+            const checklist = document.createElement('section');
+            checklist.className = 'checklist-mensagem-advisor';
+            const tituloChecklist = document.createElement('h4');
+            tituloChecklist.textContent = 'Checklist';
+            checklist.appendChild(tituloChecklist);
+            resultado.checklist.forEach((itemTexto) => {
+                const linha = document.createElement('label');
+                const caixa = document.createElement('input');
+                caixa.type = 'checkbox';
+                linha.append(caixa, document.createTextNode(itemTexto));
+                checklist.appendChild(linha);
+            });
+            mensagem.appendChild(checklist);
+        }
+
+        if (Array.isArray(resultado.sources) && resultado.sources.length) {
+            const fontes = document.createElement('section');
+            fontes.className = 'fontes-mensagem-advisor';
+            const tituloFontes = document.createElement('h4');
+            tituloFontes.textContent = 'Fontes oficiais';
+            fontes.appendChild(tituloFontes);
+            resultado.sources.forEach((fonte) => {
+                if (typeof fonte.url !== 'string') {
+                    return;
+                }
+                const link = document.createElement('a');
+                link.href = fonte.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = fonte.title || 'Documentação AWS';
+                fontes.appendChild(link);
+            });
+            mensagem.appendChild(fontes);
+        }
+
         const metadados = document.createElement('div');
         metadados.className = 'metadados-mensagem-advisor';
         const itens = [];
@@ -643,6 +696,33 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
             link.textContent = 'Documentação oficial da AWS';
             mensagem.appendChild(link);
         }
+
+        const exportar = document.createElement('button');
+        exportar.type = 'button';
+        exportar.className = 'exportar-mensagem-advisor';
+        exportar.textContent = 'Exportar resposta';
+        exportar.addEventListener('click', () => {
+            const cabecalho = [
+                'Finbot - Relatório de diagnóstico',
+                '',
+                texto,
+                '',
+                resultado.servico ? `Serviço: ${resultado.servico}` : '',
+                resultado.diagnostico ? `Diagnóstico: ${resultado.diagnostico}` : '',
+                Number.isFinite(resultado.confianca)
+                    ? `Confiança: ${Math.round(resultado.confianca * 100)}%`
+                    : '',
+                urlSegura ? `Fonte oficial: ${urlSegura}` : ''
+            ].filter(Boolean).join('\n');
+            const blob = new Blob([cabecalho], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'finbot-relatorio.txt';
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+        mensagem.appendChild(exportar);
     }
 
     mensagensAdvisor.appendChild(mensagem);

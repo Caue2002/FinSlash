@@ -343,6 +343,7 @@ async function consultarAdvisor(pergunta) {
             verificacao: 'Revise o cenário no Cost Explorer e verifique utilização e dependências.',
             acao: 'Configure AWS Budgets e avalie recursos subutilizados antes de alterar.',
             cuidados: 'Não desligue recursos sem confirmar dependências e impacto.',
+            resposta: 'Não encontramos um diagnóstico específico. Revise o cenário no Cost Explorer e verifique utilização e dependências. Configure AWS Budgets e avalie recursos subutilizados antes de alterar. Não desligue recursos sem confirmar dependências e impacto.',
             documentacao: 'https://aws.amazon.com/aws-cost-management/',
             servico: null,
             topico: null,
@@ -377,6 +378,7 @@ async function consultarAdvisor(pergunta) {
             verificacao: verificacao?.content || item.linha.summary,
             acao: acao?.content || 'Revise o cenário com dados reais antes de realizar alterações.',
             cuidados: cuidados?.content || 'Confirme dependências e impacto antes da alteração.',
+            resposta: `${item.linha.title}. ${verificacao?.content || item.linha.summary} Como proceder: ${acao?.content || 'Revise o cenário com dados reais antes de realizar alterações.'} Cuidados: ${cuidados?.content || 'Confirme dependências e impacto antes da alteração.'}`,
             documentacao: fonte?.url || 'https://docs.aws.amazon.com/',
             servico: item.linha.serviceName,
             topico: item.linha.title,
@@ -458,7 +460,10 @@ Quando não houver diagnóstico confiável, retorne encontrado=false e orientaç
 Responda exclusivamente com um objeto JSON contendo:
 encontrado (boolean), diagnostico (string), verificacao (string), acao (string),
 cuidados (string), documentacao (URL HTTPS AWS segura), servico (string ou null),
-topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de strings).`
+topico (string ou null), confianca (numero entre 0 e 1), resposta (string em português),
+sugestoes (array de strings). A resposta deve explicar o diagnóstico em texto natural,
+com verificação, ação prática e cuidados em parágrafos claros. Não use listas técnicas,
+nem repita o JSON.`
         },
         { role: 'user', content: pergunta }
     ];

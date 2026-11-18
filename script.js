@@ -251,12 +251,9 @@ const resultadoAdvisor = document.getElementById('resultado-advisor');
 const tipoResultadosAdvisor = document.getElementById('tipo-resultados-advisor');
 const confiancaAdvisor = document.getElementById('confianca-advisor');
 const tituloResultadosAdvisor = document.getElementById('titulo-resultados-advisor');
-const verificacaoAdvisor = document.getElementById('verificacao-advisor');
-const acaoAdvisor = document.getElementById('acao-advisor');
-const cuidadosAdvisor = document.getElementById('cuidados-advisor');
+const respostaTextoAdvisor = document.getElementById('resposta-texto-advisor');
 const documentacaoAdvisor = document.getElementById('documentacao-advisor');
 const servicoAdvisor = document.getElementById('servico-advisor');
-const relacionadosAdvisor = document.getElementById('relacionados-advisor');
 let enviandoAdvisor = false;
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
 const iconePerfilApp = document.getElementById('icone-perfil-app');
@@ -616,15 +613,15 @@ function exibirResultadoAdvisor(resultado) {
     tituloResultadosAdvisor.textContent = typeof resultado.diagnostico === 'string'
         ? resultado.diagnostico
         : 'Não encontramos um diagnóstico específico.';
-    verificacaoAdvisor.textContent = typeof resultado.verificacao === 'string'
-        ? resultado.verificacao
-        : 'Revise o cenário no Cost Explorer.';
-    acaoAdvisor.textContent = typeof resultado.acao === 'string'
-        ? resultado.acao
-        : 'Configure AWS Budgets e avalie recursos subutilizados.';
-    cuidadosAdvisor.textContent = typeof resultado.cuidados === 'string'
-        ? resultado.cuidados
-        : 'Confirme dependências e impacto antes da alteração.';
+    respostaTextoAdvisor.textContent = typeof resultado.resposta === 'string'
+        && resultado.resposta.trim()
+        ? resultado.resposta.trim()
+        : [
+            typeof resultado.diagnostico === 'string' ? resultado.diagnostico : '',
+            typeof resultado.verificacao === 'string' ? resultado.verificacao : '',
+            typeof resultado.acao === 'string' ? `Como proceder: ${resultado.acao}` : '',
+            typeof resultado.cuidados === 'string' ? `Cuidados: ${resultado.cuidados}` : ''
+        ].filter(Boolean).join('\n\n');
 
     const urlSegura = typeof resultado.documentacao === 'string'
         && validarLinkAws(resultado.documentacao)
@@ -635,25 +632,6 @@ function exibirResultadoAdvisor(resultado) {
         ? `Serviço: ${resultado.servico}`
         : 'Revise primeiro o cenário e os custos envolvidos.';
 
-    relacionadosAdvisor.replaceChildren();
-    const relacionados = Array.isArray(resultado.resultados)
-        ? resultado.resultados.slice(1, 3)
-        : [];
-    const sugestoes = Array.isArray(resultado.sugestoes) ? resultado.sugestoes : [];
-    [...relacionados.map(item => item.diagnostico), ...sugestoes].filter(Boolean).slice(0, 4).forEach(texto => {
-        const botao = document.createElement('button');
-        botao.type = 'button';
-        botao.textContent = texto;
-        botao.addEventListener('click', () => {
-            const pergunta = sugestoes.includes(texto)
-                ? texto
-                : `Como revisar ${texto}`;
-            campoAdvisor.value = pergunta;
-            contadorAdvisor.textContent = `${pergunta.length}/300`;
-            enviarPerguntaAdvisor(pergunta);
-        });
-        relacionadosAdvisor.appendChild(botao);
-    });
 }
 
 async function enviarPerguntaAdvisor(pergunta) {

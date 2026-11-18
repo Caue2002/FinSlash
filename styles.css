@@ -1793,53 +1793,6 @@ body.tela-servicos-ativa > .canvas-onda {
     color: #1e3a8a;
 }
 
-.detalhes-resultados-advisor {
-    display: grid;
-    gap: 9px;
-    margin: 0;
-}
-
-.detalhes-resultados-advisor details {
-    overflow: hidden;
-    border: 1px solid #dbeafe;
-    border-radius: 12px;
-    background: #ffffff;
-}
-
-.detalhes-resultados-advisor summary {
-    display: flex;
-    min-height: 44px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-    color: #1d4ed8;
-    font-size: 0.84rem;
-    font-weight: 800;
-    cursor: pointer;
-    list-style: none;
-}
-
-.detalhes-resultados-advisor summary::-webkit-details-marker {
-    display: none;
-}
-
-.detalhes-resultados-advisor summary::after {
-    content: '+';
-    color: #64748b;
-    font-size: 1.1rem;
-}
-
-.detalhes-resultados-advisor details[open] summary::after {
-    content: '−';
-}
-
-.detalhes-resultados-advisor p {
-    margin: 0;
-    padding: 0 12px 12px;
-    color: #334155;
-    line-height: 1.42;
-}
-
 .documentacao-advisor {
     display: inline-block;
     margin-top: 12px;
@@ -1853,21 +1806,14 @@ body.tela-servicos-ativa > .canvas-onda {
     font-size: 0.82rem;
 }
 
-.relacionados-advisor {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    margin-top: 12px;
+.resposta-texto-advisor {
+    margin: 12px 0 0;
+    color: #334155;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
 }
 
-.relacionados-advisor button {
-    border: 1px solid #bfdbfe;
-    border-radius: 999px;
-    background: #ffffff;
-    color: #1d4ed8;
-    font-family: inherit;
-    cursor: pointer;
-}
 
 .relacionados-advisor button {
     max-width: 100%;
@@ -3076,21 +3022,6 @@ button.item-historico-perfil:focus-visible {
         line-height: 1.28;
     }
 
-    .detalhes-resultados-advisor {
-        gap: 6px;
-    }
-
-    .detalhes-resultados-advisor summary {
-        min-height: 40px;
-        padding: 8px 10px;
-    }
-
-    .detalhes-resultados-advisor p {
-        padding: 0 10px 10px;
-        font-size: 0.82rem;
-        line-height: 1.38;
-    }
-
     .painel-advisor.advisor-consulta .descricao-advisor,
     .painel-advisor.advisor-consulta .cenarios-advisor {
         display: none;
@@ -3109,16 +3040,6 @@ button.item-historico-perfil:focus-visible {
         display: none;
     }
 
-    .relacionados-advisor {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        margin-right: -4px;
-    }
-
-    .relacionados-advisor button {
-        flex: 0 0 auto;
-        max-width: 220px;
-    }
 
     .navegacao-app {
         gap: 5px;

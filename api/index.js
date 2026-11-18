@@ -23,6 +23,16 @@ const SINONIMOS_ADVISOR = {
     finops: ['custo', 'custos', 'gasto', 'gastos', 'orcamento', 'orcamentos', 'cobranca', 'economizar', 'reduzir']
 };
 
+const SERVICOS_ADVISOR = {
+    ec2: 'Amazon EC2',
+    s3: 'Amazon S3',
+    rds: 'Amazon RDS',
+    lambda: 'AWS Lambda',
+    cloudwatch: 'Amazon CloudWatch',
+    iam: 'AWS IAM',
+    cloudfront: 'Amazon CloudFront'
+};
+
 // Força TLS validado e evita que opções TLS da URL substituam a configuração do pool.
 function obterPoolBanco() {
     if (!pool) {
@@ -235,6 +245,18 @@ async function consultarAdvisor(pergunta) {
             ...(linha.steps || []).flatMap((step) => [step.title, step.content])
         ].join(' '));
         let pontuacao = 0;
+        Object.entries(SERVICOS_ADVISOR).forEach(([chave, nomeServico]) => {
+            const reconhecido = Object.entries(SINONIMOS_ADVISOR).some(([grupo, sinonimos]) =>
+                grupo === chave
+                && sinonimos.some((sinonimo) =>
+                    normalizada.includes(normalizarTextoAdvisor(sinonimo))
+                )
+            );
+            if (reconhecido
+                && normalizarTextoAdvisor(linha.serviceName) === normalizarTextoAdvisor(nomeServico)) {
+                pontuacao += 20;
+            }
+        });
         palavras.forEach((palavra) => {
             if (palavra.length >= 4 && textoLinha.includes(palavra)) {
                 pontuacao += 3;

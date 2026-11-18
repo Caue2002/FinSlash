@@ -1945,6 +1945,23 @@ body.tela-servicos-ativa > .canvas-onda {
     cursor: pointer;
 }
 
+.limpar-chat-advisor {
+    margin-left: auto;
+    border: 1px solid #334155;
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-family: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.mensagem-pensando-advisor .bolha-mensagem-advisor {
+    color: #94a3b8;
+    font-style: italic;
+}
+
 .resultado-advisor {
     margin-top: 12px;
     padding: 16px;

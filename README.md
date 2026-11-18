@@ -41,6 +41,9 @@ Quando existe um diagnóstico validado, o Finbot apresenta:
 - Fontes oficiais vinculadas ao cenário.
 - Confiança baseada na correspondência com o catálogo.
 - Exportação da resposta em arquivo de texto.
+- Copiar a resposta para a área de transferência.
+- Estado visual enquanto o Finbot consulta os diagnósticos.
+- Botão para limpar todas as mensagens temporárias do painel.
 - Detecção de consultas ambíguas entre vários serviços.
 
 Para evitar alucinações, o Groq é limitado à compreensão da pergunta e à seleção da ferramenta. A resposta final usa somente título, resumo, etapas, confiança e documentação retornados pelo banco validado do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.

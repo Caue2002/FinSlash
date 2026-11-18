@@ -248,6 +248,7 @@ const botaoEnviarAdvisor = document.getElementById('botao-enviar-advisor');
 const statusAdvisor = document.getElementById('status-advisor');
 const cenariosAdvisor = document.getElementById('cenarios-advisor');
 const mensagensAdvisor = document.getElementById('mensagens-advisor');
+const limparChatAdvisor = document.getElementById('limpar-chat-advisor');
 const boasVindasAdvisor = document.getElementById('boas-vindas-advisor');
 let enviandoAdvisor = false;
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
@@ -697,6 +698,23 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
             mensagem.appendChild(link);
         }
 
+        const copiar = document.createElement('button');
+        copiar.type = 'button';
+        copiar.className = 'exportar-mensagem-advisor';
+        copiar.textContent = 'Copiar resposta';
+        copiar.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(texto);
+                copiar.textContent = 'Copiado';
+                window.setTimeout(() => {
+                    copiar.textContent = 'Copiar resposta';
+                }, 1600);
+            } catch {
+                copiar.textContent = 'Não foi possível copiar';
+            }
+        });
+        mensagem.appendChild(copiar);
+
         const exportar = document.createElement('button');
         exportar.type = 'button';
         exportar.className = 'exportar-mensagem-advisor';
@@ -727,6 +745,7 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
 
     mensagensAdvisor.appendChild(mensagem);
     mensagensAdvisor.scrollTop = mensagensAdvisor.scrollHeight;
+    return mensagem;
 }
 
 function exibirResultadoAdvisor(resultado) {
@@ -771,6 +790,8 @@ async function enviarPerguntaAdvisor(pergunta) {
     statusAdvisor.textContent = 'Consultando diagnósticos...';
     boasVindasAdvisor?.classList.add('hidden');
     adicionarMensagemAdvisor('user', texto);
+    const pensando = adicionarMensagemAdvisor('assistant', 'Consultando os diagnósticos validados...');
+    pensando.classList.add('mensagem-pensando-advisor');
     campoAdvisor.value = '';
     contadorAdvisor.textContent = '0/300';
 
@@ -814,6 +835,7 @@ async function enviarPerguntaAdvisor(pergunta) {
             : resultado.encontrado
                 ? 'Resposta baseada em diagnóstico AWS validado.'
                 : 'Pergunta fora do alcance dos diagnósticos cadastrados.';
+        pensando.remove();
         exibirResultadoAdvisor(resultado);
     } catch (error) {
         let mensagemErro = 'O Finbot não conseguiu consultar os diagnósticos agora. Tente novamente.';
@@ -823,6 +845,7 @@ async function enviarPerguntaAdvisor(pergunta) {
             mensagemErro = 'Não consegui conectar ao Finbot. Verifique sua conexão e tente novamente.';
         }
         statusAdvisor.textContent = '';
+        pensando.remove();
         adicionarMensagemAdvisor('assistant', mensagemErro);
     } finally {
         window.clearTimeout(timeout);
@@ -3016,6 +3039,12 @@ botaoPerfilApp.addEventListener('click', abrirPerfil);
 botaoFecharPerfil.addEventListener('click', fecharPerfil);
 botaoAdvisorApp.addEventListener('click', abrirAdvisor);
 botaoFecharAdvisor.addEventListener('click', () => fecharAdvisor());
+limparChatAdvisor?.addEventListener('click', () => {
+    mensagensAdvisor.replaceChildren();
+    boasVindasAdvisor?.classList.remove('hidden');
+    statusAdvisor.textContent = '';
+    campoAdvisor.focus();
+});
 popupAdvisor.addEventListener('click', event => {
     if (event.target === popupAdvisor) {
         fecharAdvisor();

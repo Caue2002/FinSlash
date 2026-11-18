@@ -522,8 +522,7 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
                     tool_choice: 'auto',
                     temperature: 0.1,
                     parallel_tool_calls: false,
-                    max_completion_tokens: 700,
-                    response_format: { type: 'json_object' }
+                    max_completion_tokens: 700
                 }),
                 signal: AbortSignal.timeout(10000)
             });
@@ -531,7 +530,16 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
                 modeloUsado = modelo;
                 break;
             }
-            errosChat.push(`${modelo}:${resposta.status}`);
+            let motivo = '';
+            try {
+                const erroCorpo = await resposta.clone().json();
+                motivo = erroCorpo.error?.message
+                    || erroCorpo.message
+                    || '';
+            } catch {
+                motivo = '';
+            }
+            errosChat.push(`${modelo}:${resposta.status}${motivo ? ` ${motivo.slice(0, 120)}` : ''}`);
         }
 
         if (!resposta?.ok) {

@@ -359,11 +359,11 @@ async function consultarAdvisor(pergunta) {
     if (!melhor || melhorPontuacao < 8) {
         return {
             encontrado: false,
-            diagnostico: 'Não encontramos um diagnóstico específico.',
-            verificacao: 'Revise o cenário no Cost Explorer e verifique utilização e dependências.',
-            acao: 'Configure AWS Budgets e avalie recursos subutilizados antes de alterar.',
-            cuidados: 'Não desligue recursos sem confirmar dependências e impacto.',
-            resposta: 'Não encontramos um diagnóstico específico. Revise o cenário no Cost Explorer e verifique utilização e dependências. Configure AWS Budgets e avalie recursos subutilizados antes de alterar. Não desligue recursos sem confirmar dependências e impacto.',
+            diagnostico: 'Esta pergunta não corresponde a um diagnóstico validado do FinSlash.',
+            verificacao: 'O Finbot responde apenas a dúvidas sobre os serviços, custos e diagnósticos cadastrados no projeto.',
+            acao: 'Pergunte sobre um serviço AWS ou sobre um cenário de custo, utilização, segurança ou arquitetura incluído no FinSlash.',
+            cuidados: 'Não use este painel para perguntas pessoais, gerais ou que não estejam relacionadas ao projeto AWS.',
+            resposta: 'Não encontrei um diagnóstico AWS validado para essa pergunta. Posso ajudar com serviços AWS, custos, utilização, arquitetura e cenários cadastrados no FinSlash. Reformule sua dúvida incluindo o serviço ou problema AWS, por exemplo EC2, S3, RDS ou Lambda.',
             documentacao: 'https://aws.amazon.com/aws-cost-management/',
             servico: null,
             topico: null,
@@ -479,6 +479,8 @@ Use somente diagnósticos retornados pela ferramenta search_diagnostics.
 Entenda sinônimos e linguagem informal. Para uma pergunta vaga, use termos AWS e de custo
 como consulta da ferramenta, não repita literalmente a frase do usuário.
 Quando não houver diagnóstico confiável, retorne encontrado=false e orientação geral.
+Se a pergunta não mencionar ou não estiver relacionada a AWS, custos AWS, arquitetura AWS,
+serviços AWS ou diagnósticos cadastrados no FinSlash, retorne encontrado=false.
 Nunca substitua ou complete os dados do diagnóstico com conhecimento externo.
 As informações verificadas pelo usuário devem sair dos campos verification/check,
 action/action e caution do resultado da ferramenta.

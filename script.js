@@ -709,7 +709,9 @@ async function enviarPerguntaAdvisor(pergunta) {
             throw new TypeError('O resultado do Advisor está incompleto.');
         }
 
-        statusAdvisor.textContent = 'Resposta gerada pelo Finbot.';
+        statusAdvisor.textContent = resultado.encontrado
+            ? 'Resposta baseada em diagnóstico AWS validado.'
+            : 'Pergunta fora do alcance dos diagnósticos cadastrados.';
         exibirResultadoAdvisor(resultado);
         historicoAdvisor.push(
             { role: 'user', content: texto },

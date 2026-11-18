@@ -2995,6 +2995,12 @@ campoAdvisor.addEventListener('input', () => {
         statusAdvisor.textContent = '';
     }
 });
+campoAdvisor.addEventListener('focus', () => {
+    campoAdvisor.closest('.painel-advisor')?.classList.add('advisor-digitando');
+});
+campoAdvisor.addEventListener('blur', () => {
+    campoAdvisor.closest('.painel-advisor')?.classList.remove('advisor-digitando');
+});
 campoAdvisor.addEventListener('keydown', event => {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();

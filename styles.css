@@ -1664,15 +1664,18 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 .icone-advisor {
-    display: grid;
     width: 48px;
     height: 48px;
-    place-items: center;
+    object-fit: contain;
+    flex: 0 0 48px;
     border-radius: 16px;
-    background: linear-gradient(135deg, #2563eb, #60a5fa);
-    color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 800;
+    background: #ffffff;
+}
+
+.icone-logo-advisor-nav {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
 }
 
 .etiqueta-advisor {
@@ -3037,18 +3040,59 @@ button.item-historico-perfil:focus-visible {
 
 @media (max-width: 768px) {
     .painel-advisor {
-        width: 100%;
-        max-height: calc(100dvh - 92px);
-        margin: 0;
-        border-right: 0;
-        border-bottom: 0;
-        border-left: 0;
-        border-radius: 24px 24px 0 0;
-        padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+        width: calc(100% - 16px);
+        max-height: calc(100dvh - 112px);
+        margin: 8px 8px 104px;
+        border-radius: 20px;
+        padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
     }
 
     .popup-advisor {
         align-items: flex-end;
+    }
+
+    .painel-advisor.advisor-digitando {
+        max-height: calc(100dvh - 24px);
+        margin-bottom: 16px;
+    }
+
+    .painel-advisor:focus-within {
+        max-height: calc(100dvh - 24px);
+        margin-bottom: 16px;
+    }
+
+    .painel-advisor.advisor-digitando .descricao-advisor,
+    .painel-advisor.advisor-digitando .cenarios-advisor,
+    .painel-advisor.advisor-digitando .historico-advisor {
+        display: none;
+    }
+
+    .painel-advisor:focus-within .descricao-advisor,
+    .painel-advisor:focus-within .cenarios-advisor,
+    .painel-advisor:focus-within .historico-advisor {
+        display: none;
+    }
+
+    .icone-advisor {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        border-radius: 13px;
+    }
+
+    .cabecalho-advisor h2 {
+        font-size: 1.18rem;
+    }
+
+    .descricao-advisor {
+        margin: 10px 0;
+        font-size: 0.88rem;
+    }
+
+    .cenarios-advisor {
+        max-height: 74px;
+        overflow-y: auto;
+        margin-bottom: 10px;
     }
 
     .cenarios-advisor button {

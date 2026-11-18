@@ -608,6 +608,22 @@ function validarLinkAws(url) {
 function exibirResultadoAdvisor(resultado) {
     resultadoAdvisor.classList.remove('hidden');
     resultadoAdvisor.closest('.painel-advisor')?.classList.add('advisor-consulta');
+    if (resultado.modo === 'conversacao') {
+        const cabecalho = resultadoAdvisor.querySelector('.cabecalho-resultados-advisor');
+        const titulo = tituloResultadosAdvisor;
+        cabecalho.classList.add('hidden');
+        titulo.textContent = typeof resultado.servico === 'string'
+            ? `Sobre ${resultado.servico}`
+            : 'Resposta do Finbot';
+        respostaTextoAdvisor.textContent = resultado.resposta;
+        servicoAdvisor.textContent = 'Visão geral baseada nos tópicos cadastrados';
+        validacaoAdvisor.textContent = 'Resposta baseada em informações oficiais validadas no projeto';
+        documentacaoAdvisor.href = typeof resultado.documentacao === 'string'
+            ? resultado.documentacao
+            : 'https://docs.aws.amazon.com/';
+        return;
+    }
+    resultadoAdvisor.querySelector('.cabecalho-resultados-advisor')?.classList.remove('hidden');
     tipoResultadosAdvisor.textContent = resultado.encontrado
         ? 'Diagnóstico encontrado'
         : 'Orientação padrão';

@@ -145,6 +145,121 @@ function perguntaRelacionadoAoProjeto(pergunta) {
     );
 }
 
+function pedirVisaoGeralServico(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    return /\b(o que|como funciona|explique|fale sobre|conte sobre|resumo|visao geral|servico)\b/u.test(normalizada)
+        || /^(s3|ec2|rds|lambda|dynamodb|cloudwatch|iam|cloudfront|ebs|eks|ecs)\b/u.test(normalizada);
+}
+
+function identificarServicoPergunta(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    for (const [chave, nome] of Object.entries(SERVICOS_ADVISOR)) {
+        if ((SINONIMOS_ADVISOR[chave] || []).some((sinonimo) =>
+            normalizada.includes(normalizarTextoAdvisor(sinonimo))
+        )) {
+            return nome;
+        }
+    }
+    return null;
+}
+
+async function obterContextoVisaoGeral(nomeServico) {
+    if (!nomeServico) {
+        return null;
+    }
+    const resultado = await obterPoolBanco().query(
+        `SELECT
+            scenario.title,
+            scenario.summary,
+            COALESCE((
+                SELECT json_agg(json_build_object(
+                    'title', reference.title,
+                    'url', reference.url
+                ) ORDER BY reference.title)
+                FROM scenario_sources AS reference
+                WHERE reference.scenario_id = scenario.id
+            ), '[]'::json) AS sources
+         FROM cost_scenarios AS scenario
+         JOIN aws_services AS service ON service.id = scenario.service_id
+         WHERE service.name = $1
+           AND scenario.is_published = TRUE
+         ORDER BY scenario.title
+         LIMIT 21`,
+        [nomeServico]
+    );
+    if (!resultado.rows.length) {
+        return null;
+    }
+    return {
+        service: nomeServico,
+        topics: resultado.rows
+    };
+}
+
+async function responderVisaoGeralServico(pergunta, historico, contexto) {
+    const chave = process.env.GROQ_API_KEY;
+    if (!chave) {
+        return null;
+    }
+    const modelos = [
+        process.env.GROQ_MODEL,
+        'openai/gpt-oss-20b',
+        'llama-3.3-70b-versatile',
+        'llama-3.1-8b-instant'
+    ].filter((modelo, indice, lista) => modelo && lista.indexOf(modelo) === indice);
+    const contextoSeguro = JSON.stringify(contexto).slice(0, 18000);
+    const mensagens = [
+        {
+            role: 'system',
+            content: `Você é o Finbot. Explique o serviço AWS em texto natural.
+Use exclusivamente o contexto cadastrado abaixo. Não invente recursos, preços,
+procedimentos, benefícios ou links. Não escolha um único diagnóstico quando a
+pessoa pediu uma visão geral. Responda em português, em 2 ou 3 parágrafos curtos.
+Contexto: ${contextoSeguro}`
+        },
+        ...historico,
+        { role: 'user', content: pergunta }
+    ];
+    for (const modelo of modelos) {
+        try {
+            const resposta = await fetch(GROQ_API_URL, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${chave}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: modelo,
+                    messages: mensagens,
+                    temperature: 0.2,
+                    max_completion_tokens: 700,
+                    response_format: { type: 'json_object' }
+                }),
+                signal: AbortSignal.timeout(10000)
+            });
+            if (!resposta.ok) {
+                continue;
+            }
+            const payload = await resposta.json();
+            let texto = payload.choices?.[0]?.message?.content;
+            if (typeof texto === 'string') {
+                try {
+                    const objeto = JSON.parse(texto);
+                    texto = objeto.resposta || objeto.resumo || texto;
+                } catch {
+                    // Mantém o texto simples do modelo.
+                }
+                if (texto.trim()) {
+                    return texto.trim();
+                }
+            }
+        } catch {
+            // Tenta o próximo modelo.
+        }
+    }
+    return null;
+}
+
 function criarResultadoForaDoEscopo() {
     return {
         encontrado: false,
@@ -916,6 +1031,39 @@ async function receberAdvisor(request, origemPermitida) {
                     erro: null
                 }
             }, cabecalhos);
+        }
+        if (pedirVisaoGeralServico(pergunta)) {
+            const nomeServico = identificarServicoPergunta(pergunta);
+            const contexto = await obterContextoVisaoGeral(nomeServico);
+            if (contexto) {
+                const respostaNatural = await responderVisaoGeralServico(pergunta, historico, contexto);
+                if (respostaNatural) {
+                    return responder(200, {
+                        modo: 'conversacao',
+                        encontrado: true,
+                        diagnostico: `Visão geral: ${contexto.service}`,
+                        servico: contexto.service,
+                        resposta: respostaNatural,
+                        documentacao: contexto.topics.flatMap((topico) => topico.sources || [])
+                            .find((fonte) =>
+                                typeof fonte.url === 'string'
+                                && (fonte.url.startsWith('https://docs.aws.amazon.com/')
+                                    || fonte.url.startsWith('https://aws.amazon.com/'))
+                            )?.url || 'https://docs.aws.amazon.com/',
+                        confianca: 1,
+                        fonte: 'groq+banco-validado',
+                        validacao: {
+                            status: 'oficial-cadastrado',
+                            origem: 'PostgreSQL do FinSlash',
+                            aviso: 'A visão geral usa os tópicos cadastrados e validados do projeto.'
+                        },
+                        agente: {
+                            status: 'ativo',
+                            erro: null
+                        }
+                    }, cabecalhos);
+                }
+            }
         }
         let resultado = await consultarAdvisor(pergunta);
         let agenteStatus = 'desativado';

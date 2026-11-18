@@ -257,9 +257,6 @@ const cuidadosAdvisor = document.getElementById('cuidados-advisor');
 const documentacaoAdvisor = document.getElementById('documentacao-advisor');
 const servicoAdvisor = document.getElementById('servico-advisor');
 const relacionadosAdvisor = document.getElementById('relacionados-advisor');
-const listaHistoricoAdvisor = document.getElementById('lista-historico-advisor');
-const botaoLimparHistoricoAdvisor = document.getElementById('limpar-historico-advisor');
-const chaveHistoricoAdvisor = 'finslash:advisor-doubts';
 let enviandoAdvisor = false;
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
 const iconePerfilApp = document.getElementById('icone-perfil-app');
@@ -568,7 +565,6 @@ function fecharPerfil() {
 function abrirAdvisor() {
     fecharPerfil();
     popupAdvisor.classList.remove('hidden');
-    renderizarHistoricoAdvisor();
     if (window.history.state?.app === 'FinSlash' && window.history.state.tela !== 'advisor') {
         atualizarHistoricoAplicacao('advisor', {
             telaAnterior: window.history.state.tela
@@ -607,55 +603,6 @@ function validarLinkAws(url) {
     } catch (error) {
         return false;
     }
-}
-
-function carregarHistoricoAdvisor() {
-    try {
-        const salvo = JSON.parse(window.localStorage.getItem(chaveHistoricoAdvisor) || '[]');
-        return Array.isArray(salvo)
-            ? salvo.filter(item => typeof item === 'string' && item.trim()).slice(0, 8)
-            : [];
-    } catch (error) {
-        return [];
-    }
-}
-
-function registrarHistoricoAdvisor(pergunta) {
-    const historico = [
-        pergunta,
-        ...carregarHistoricoAdvisor().filter(item => item !== pergunta)
-    ].slice(0, 8);
-    try {
-        window.localStorage.setItem(chaveHistoricoAdvisor, JSON.stringify(historico));
-    } catch (error) {
-        console.error('Nao foi possivel salvar o historico local do Advisor.', error);
-    }
-    renderizarHistoricoAdvisor();
-}
-
-function renderizarHistoricoAdvisor() {
-    listaHistoricoAdvisor.replaceChildren();
-    const historico = carregarHistoricoAdvisor();
-    botaoLimparHistoricoAdvisor.disabled = !historico.length;
-    if (!historico.length) {
-        const vazio = document.createElement('p');
-        vazio.className = 'vazio-historico-advisor';
-        vazio.textContent = 'Nenhuma dúvida recente.';
-        listaHistoricoAdvisor.appendChild(vazio);
-        return;
-    }
-    historico.forEach(pergunta => {
-        const botao = document.createElement('button');
-        botao.type = 'button';
-        botao.className = 'item-historico-advisor';
-        botao.textContent = pergunta;
-        botao.addEventListener('click', () => {
-            campoAdvisor.value = pergunta;
-            contadorAdvisor.textContent = `${pergunta.length}/300`;
-            enviarPerguntaAdvisor(pergunta);
-        });
-        listaHistoricoAdvisor.appendChild(botao);
-    });
 }
 
 function exibirResultadoAdvisor(resultado) {
@@ -774,7 +721,6 @@ async function enviarPerguntaAdvisor(pergunta) {
         statusAdvisor.textContent = resultado.encontrado
             ? 'Resposta encontrada nos diagnósticos cadastrados.'
             : 'Não encontramos uma correspondência específica.';
-        registrarHistoricoAdvisor(texto);
         exibirResultadoAdvisor(resultado);
     } catch (error) {
         if (error.name === 'AbortError') {
@@ -2976,14 +2922,6 @@ botaoPerfilApp.addEventListener('click', abrirPerfil);
 botaoFecharPerfil.addEventListener('click', fecharPerfil);
 botaoAdvisorApp.addEventListener('click', abrirAdvisor);
 botaoFecharAdvisor.addEventListener('click', () => fecharAdvisor());
-botaoLimparHistoricoAdvisor.addEventListener('click', () => {
-    try {
-        window.localStorage.removeItem(chaveHistoricoAdvisor);
-    } catch (error) {
-        console.error('Nao foi possivel limpar o historico local do Advisor.', error);
-    }
-    renderizarHistoricoAdvisor();
-});
 popupAdvisor.addEventListener('click', event => {
     if (event.target === popupAdvisor) {
         fecharAdvisor();

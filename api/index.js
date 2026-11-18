@@ -532,10 +532,15 @@ topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de str
             }
             let motivo = '';
             try {
-                const erroCorpo = await resposta.clone().json();
-                motivo = erroCorpo.error?.message
-                    || erroCorpo.message
-                    || '';
+                const textoErro = await resposta.clone().text();
+                try {
+                    const erroCorpo = JSON.parse(textoErro);
+                    motivo = erroCorpo.error?.message
+                        || erroCorpo.message
+                        || '';
+                } catch {
+                    motivo = textoErro;
+                }
             } catch {
                 motivo = '';
             }

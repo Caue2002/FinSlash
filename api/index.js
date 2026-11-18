@@ -150,7 +150,7 @@ async function lerJsonAdvisor(request) {
     if (!json || typeof json !== 'object' || Array.isArray(json)) {
         throw new TypeError('O corpo precisa ser um objeto JSON.');
     }
-    if (Object.keys(json).some((chave) => chave !== 'pergunta')) {
+    if (Object.keys(json).some((chave) => !['pergunta', 'historico'].includes(chave))) {
         throw new TypeError('O corpo contém campos não permitidos.');
     }
     if (typeof json.pergunta !== 'string') {
@@ -168,7 +168,27 @@ async function lerJsonAdvisor(request) {
     if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(pergunta)) {
         throw new TypeError('A pergunta contém caracteres inválidos.');
     }
-    return pergunta;
+    let historico = [];
+    if (json.historico !== undefined) {
+        if (!Array.isArray(json.historico) || json.historico.length > 6) {
+            throw new TypeError('O histórico deve ter no máximo seis mensagens.');
+        }
+        historico = json.historico.map((mensagem) => {
+            if (!mensagem
+                || typeof mensagem !== 'object'
+                || !['user', 'assistant'].includes(mensagem.role)
+                || typeof mensagem.content !== 'string') {
+                throw new TypeError('O histórico contém uma mensagem inválida.');
+            }
+            const conteudo = mensagem.content.normalize('NFC').replace(/\r\n?/gu, ' ').replace(/\s+/gu, ' ').trim();
+            if (!conteudo || Array.from(conteudo).length > 300
+                || /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(conteudo)) {
+                throw new TypeError('O histórico contém uma mensagem inválida.');
+            }
+            return { role: mensagem.role, content: conteudo };
+        });
+    }
+    return { pergunta, historico };
 }
 
 async function consultarAdvisor(pergunta) {
@@ -411,7 +431,7 @@ async function listarServicosPublicados() {
     return resultado.rows.map((linha) => linha.name);
 }
 
-async function consultarFinbotComGroq(pergunta) {
+async function consultarFinbotComGroq(pergunta, historico = []) {
     const chave = process.env.GROQ_API_KEY;
     if (!chave) {
         return null;
@@ -465,6 +485,7 @@ sugestoes (array de strings). A resposta deve explicar o diagnóstico em texto n
 com verificação, ação prática e cuidados em parágrafos claros. Não use listas técnicas,
 nem repita o JSON.`
         },
+        ...historico,
         { role: 'user', content: pergunta }
     ];
 
@@ -809,22 +830,24 @@ async function receberAdvisor(request, origemPermitida) {
         return responder(415, { error: 'Envie os dados no formato JSON.' }, cabecalhos);
     }
 
-    let pergunta;
+    let entradaAdvisor;
     try {
-        pergunta = await lerJsonAdvisor(request);
+        entradaAdvisor = await lerJsonAdvisor(request);
     } catch (error) {
         const status = error instanceof RangeError ? 413 : 400;
         return responder(status, { error: error.message }, cabecalhos);
     }
 
     try {
+        const pergunta = entradaAdvisor.pergunta;
+        const historico = entradaAdvisor.historico;
         let resultado = await consultarAdvisor(pergunta);
         let agenteStatus = 'desativado';
         let agenteErro = null;
         if (process.env.GROQ_API_KEY) {
             agenteStatus = 'erro';
             try {
-                const resultadoAgente = await consultarFinbotComGroq(pergunta);
+                const resultadoAgente = await consultarFinbotComGroq(pergunta, historico);
                 if (resultadoAgente
                     && typeof resultadoAgente === 'object'
                     && typeof resultadoAgente.encontrado === 'boolean'
@@ -846,8 +869,13 @@ async function receberAdvisor(request, origemPermitida) {
                     } catch {
                         documentacao = 'https://docs.aws.amazon.com/';
                     }
+                    const respostaNatural = typeof resultadoAgente.resposta === 'string'
+                        && resultadoAgente.resposta.trim()
+                        ? resultadoAgente.resposta.trim()
+                        : resultado.resposta;
                     resultado = {
-                        ...resultadoAgente,
+                        ...resultado,
+                        resposta: respostaNatural,
                         documentacao,
                         confianca: Number.isFinite(resultadoAgente.confianca)
                             ? Math.max(0, Math.min(1, resultadoAgente.confianca))

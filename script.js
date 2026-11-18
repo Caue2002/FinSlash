@@ -255,6 +255,7 @@ const respostaTextoAdvisor = document.getElementById('resposta-texto-advisor');
 const documentacaoAdvisor = document.getElementById('documentacao-advisor');
 const servicoAdvisor = document.getElementById('servico-advisor');
 let enviandoAdvisor = false;
+const historicoAdvisor = [];
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
 const iconePerfilApp = document.getElementById('icone-perfil-app');
 const popupPerfil = document.getElementById('popup-perfil');
@@ -676,7 +677,10 @@ async function enviarPerguntaAdvisor(pergunta) {
                 Accept: 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ pergunta: texto }),
+            body: JSON.stringify({
+                pergunta: texto,
+                historico: historicoAdvisor.slice(-6)
+            }),
             signal: controlador.signal
         });
 
@@ -699,10 +703,20 @@ async function enviarPerguntaAdvisor(pergunta) {
             throw new TypeError('O resultado do Advisor está incompleto.');
         }
 
-        statusAdvisor.textContent = resultado.encontrado
-            ? 'Resposta encontrada nos diagnósticos cadastrados.'
-            : 'Não encontramos uma correspondência específica.';
+        statusAdvisor.textContent = 'Resposta gerada pelo Finbot.';
         exibirResultadoAdvisor(resultado);
+        historicoAdvisor.push(
+            { role: 'user', content: texto },
+            {
+                role: 'assistant',
+                content: typeof resultado.resposta === 'string' && resultado.resposta
+                    ? resultado.resposta.slice(0, 300)
+                    : resultado.diagnostico
+            }
+        );
+        if (historicoAdvisor.length > 6) {
+            historicoAdvisor.splice(0, historicoAdvisor.length - 6);
+        }
     } catch (error) {
         if (error.name === 'AbortError') {
             statusAdvisor.textContent = 'Tempo esgotado. Tente novamente.';

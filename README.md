@@ -32,6 +32,8 @@ O Finbot permite enviar dúvidas sobre custos e uso da AWS por um painel integra
 
 Opcionalmente, uma chave gratuita do Groq ativa um modo agente. O modelo pode chamar `search_diagnostics` para consultar o PostgreSQL e `list_services` para listar os serviços publicados. A API mantém um limite de três iterações, usa somente conteúdo cadastrado como contexto e devolve ao navegador os dados já existentes na interface. Sem `GROQ_API_KEY`, o Finbot continua funcionando integralmente no modo local.
 
+O painel mantém apenas o histórico curto da sessão atual no navegador e envia até seis mensagens ao servidor em cada consulta. O histórico não é persistido no banco e permite acompanhamento de dúvidas informais, como fazer uma nova pergunta sem repetir todo o contexto. A resposta textual é gerada pelo modelo a partir dos diagnósticos recuperados pelas ferramentas.
+
 A busca reconhece serviços e termos como EC2, S3, RDS, Lambda, CloudWatch, IAM, CloudFront, EBS, EKS, ECS, DynamoDB, NAT Gateway, AWS Budgets e Cost Explorer. O ranking considera correspondência com o serviço, título, resumo, slug e etapas cadastradas. A resposta principal vem acompanhada de até dois diagnósticos relacionados e sugestões da mesma área.
 
 Endpoint:

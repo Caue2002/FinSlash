@@ -159,6 +159,28 @@ function pedirDiagnosticoDeCusto(pergunta) {
 function identificarServicosAmbiguos(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
     const encontrados = [];
+    const nomesExplicitos = [
+        ['ec2', 'Amazon EC2'],
+        ['s3', 'Amazon S3'],
+        ['rds', 'Amazon RDS'],
+        ['lambda', 'AWS Lambda'],
+        ['dynamodb', 'Amazon DynamoDB'],
+        ['cloudwatch', 'Amazon CloudWatch'],
+        ['iam', 'AWS IAM'],
+        ['cloudfront', 'Amazon CloudFront'],
+        ['ebs', 'Amazon EBS'],
+        ['eks', 'Amazon EKS'],
+        ['ecs', 'Amazon ECS']
+    ];
+    nomesExplicitos.forEach(([termo, nome]) => {
+        if (new RegExp(`(^| )${termo}( |$)`, 'u').test(normalizada)
+            && !encontrados.includes(nome)) {
+            encontrados.push(nome);
+        }
+    });
+    if (encontrados.length) {
+        return encontrados;
+    }
     Object.entries(SERVICOS_ADVISOR).forEach(([chave, nome]) => {
         const reconhecido = (SINONIMOS_ADVISOR[chave] || []).some((sinonimo) =>
             normalizada.includes(normalizarTextoAdvisor(sinonimo))

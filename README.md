@@ -12,11 +12,12 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações, cuidados e links para documentação oficial da AWS.
 - Finbot, assistente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
+- Modo agente opcional com Groq: o modelo pode consultar diagnósticos publicados e listar serviços antes de responder.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
 - Até três diagnósticos relacionados por consulta, além de sugestões de perguntas comuns.
 - Painel mobile em formato de cartão inferior, cenários rápidos em grade, resposta principal destacada e detalhes verificáveis em cards expansíveis.
 - O modo compacto oculta descrições e cenários após a consulta para manter o diagnóstico legível em telas pequenas.
-- Privacidade por padrão: perguntas não são enviadas a IA externa e não são persistidas no servidor ou no navegador.
+- Privacidade por padrão: sem `GROQ_API_KEY`, perguntas não são enviadas a IA externa e não são persistidas no servidor ou no navegador.
 - Barra inferior com atalhos para o menu, pesquisa de serviços e perfil; navegação de retorno compatível com dispositivos móveis.
 - Botão voltar do aparelho ou do navegador e gesto de arrastar para a direita.
 - Interface adaptável a diferentes tamanhos de tela.
@@ -27,7 +28,9 @@ A interface não requer compilação. Para explorar as telas, abra `index.html` 
 
 ## Finbot
 
-O Finbot permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Ele não usa IA externa, modelos pagos ou serviços comerciais de geração de texto: a busca usa normalização, sinônimos locais e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
+O Finbot permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Por padrão, ele usa busca local com normalização, sinônimos e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
+
+Opcionalmente, uma chave gratuita do Groq ativa um modo agente. O modelo pode chamar `search_diagnostics` para consultar o PostgreSQL e `list_services` para listar os serviços publicados. A API mantém um limite de três iterações, usa somente conteúdo cadastrado como contexto e devolve ao navegador os dados já existentes na interface. Sem `GROQ_API_KEY`, o Finbot continua funcionando integralmente no modo local.
 
 A busca reconhece serviços e termos como EC2, S3, RDS, Lambda, CloudWatch, IAM, CloudFront, EBS, EKS, ECS, DynamoDB, NAT Gateway, AWS Budgets e Cost Explorer. O ranking considera correspondência com o serviço, título, resumo, slug e etapas cadastradas. A resposta principal vem acompanhada de até dois diagnósticos relacionados e sugestões da mesma área.
 

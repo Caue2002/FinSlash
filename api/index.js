@@ -11,6 +11,8 @@ const LIMITE_BYTES_ADVISOR = 4096;
 const LIMITE_CARACTERES_ADVISOR = 300;
 const LIMITE_ENVIOS_POR_HORA = 5;
 const CATEGORIAS_FEEDBACK = new Set(['suggestion', 'issue', 'content']);
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 const SINONIMOS_ADVISOR = {
     ec2: ['ec2', 'servidor', 'servidores', 'maquina', 'maquinas', 'instancia', 'instancias', 'compute', 'direito ao tamanho', 'dimensionamento', 'ocioso', 'ociosa', 'subutilizado', 'subutilizada', 'savings plan'],
@@ -395,6 +397,143 @@ async function consultarAdvisor(pergunta) {
     };
 }
 
+async function listarServicosPublicados() {
+    const resultado = await obterPoolBanco().query(
+        `SELECT DISTINCT service.name
+         FROM aws_services AS service
+         JOIN cost_scenarios AS scenario ON scenario.service_id = service.id
+         WHERE scenario.is_published = TRUE
+         ORDER BY service.name
+         LIMIT 100`
+    );
+    return resultado.rows.map((linha) => linha.name);
+}
+
+async function consultarFinbotComGroq(pergunta) {
+    const chave = process.env.GROQ_API_KEY;
+    if (!chave) {
+        return null;
+    }
+
+    const ferramentas = [
+        {
+            type: 'function',
+            function: {
+                name: 'search_diagnostics',
+                description: 'Busca diagnósticos AWS publicados no FinSlash por serviço, problema, título ou ação.',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        query: {
+                            type: 'string',
+                            description: 'Termos curtos da dúvida ou problema AWS.'
+                        }
+                    },
+                    required: ['query'],
+                    additionalProperties: false
+                }
+            }
+        },
+        {
+            type: 'function',
+            function: {
+                name: 'list_services',
+                description: 'Lista os nomes dos serviços AWS que possuem dados publicados no FinSlash.',
+                parameters: {
+                    type: 'object',
+                    properties: {},
+                    additionalProperties: false
+                }
+            }
+        }
+    ];
+
+    const mensagens = [
+        {
+            role: 'system',
+            content: `Você é o Finbot, um agente especializado em custos e diagnósticos AWS.
+Use as ferramentas antes de responder. Não invente dados, procedimentos ou links.
+Use somente diagnósticos retornados pela ferramenta search_diagnostics.
+Quando não houver diagnóstico confiável, retorne encontrado=false e orientação geral.
+Responda exclusivamente com um objeto JSON contendo:
+encontrado (boolean), diagnostico (string), verificacao (string), acao (string),
+cuidados (string), documentacao (URL HTTPS AWS segura), servico (string ou null),
+topico (string ou null), confianca (numero entre 0 e 1), sugestoes (array de strings).`
+        },
+        { role: 'user', content: pergunta }
+    ];
+
+    for (let tentativa = 0; tentativa < 3; tentativa++) {
+        const resposta = await fetch(GROQ_API_URL, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${chave}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: process.env.GROQ_MODEL || GROQ_MODEL,
+                messages: mensagens,
+                tools: ferramentas,
+                tool_choice: 'auto',
+                temperature: 0.1,
+                max_tokens: 700,
+                response_format: { type: 'json_object' }
+            }),
+            signal: AbortSignal.timeout(10000)
+        });
+
+        if (!resposta.ok) {
+            throw new Error(`Groq respondeu com o status ${resposta.status}.`);
+        }
+
+        const payload = await resposta.json();
+        const mensagem = payload.choices?.[0]?.message;
+        if (!mensagem) {
+            throw new Error('Groq devolveu uma resposta vazia.');
+        }
+
+        const chamadas = Array.isArray(mensagem.tool_calls) ? mensagem.tool_calls : [];
+        if (!chamadas.length) {
+            const texto = typeof mensagem.content === 'string' ? mensagem.content : '';
+            try {
+                return JSON.parse(texto);
+            } catch {
+                throw new Error('Groq devolveu JSON inválido.');
+            }
+        }
+
+        mensagens.push(mensagem);
+        for (const chamada of chamadas) {
+            let resultadoFerramenta;
+            if (chamada.function?.name === 'search_diagnostics') {
+                let argumentos = {};
+                try {
+                    argumentos = JSON.parse(chamada.function.arguments || '{}');
+                } catch {
+                    argumentos = {};
+                }
+                const consulta = typeof argumentos.query === 'string'
+                    ? argumentos.query
+                    : '';
+                resultadoFerramenta = consulta
+                    ? await consultarAdvisor(consulta)
+                    : await consultarAdvisor(pergunta);
+            } else if (chamada.function?.name === 'list_services') {
+                resultadoFerramenta = { services: await listarServicosPublicados() };
+            } else {
+                resultadoFerramenta = { error: 'Ferramenta não disponível.' };
+            }
+            mensagens.push({
+                role: 'tool',
+                tool_call_id: chamada.id,
+                content: JSON.stringify(resultadoFerramenta)
+            });
+        }
+    }
+
+    throw new Error('O agente excedeu o limite de chamadas de ferramentas.');
+}
+
 function obterRota(url) {
     const rotasReescritas = url.searchParams.getAll('route');
     if (rotasReescritas.length !== 1) {
@@ -605,7 +744,47 @@ async function receberAdvisor(request, origemPermitida) {
     }
 
     try {
-        const resultado = await consultarAdvisor(pergunta);
+        let resultado = await consultarAdvisor(pergunta);
+        if (process.env.GROQ_API_KEY) {
+            try {
+                const resultadoAgente = await consultarFinbotComGroq(pergunta);
+                if (resultadoAgente
+                    && typeof resultadoAgente === 'object'
+                    && typeof resultadoAgente.encontrado === 'boolean'
+                    && typeof resultadoAgente.diagnostico === 'string') {
+                    const resultadosLocais = Array.isArray(resultado.resultados)
+                        ? resultado.resultados
+                        : [];
+                    let documentacao = resultadoAgente.documentacao;
+                    try {
+                        const url = new URL(documentacao);
+                        const dominioPermitido = url.protocol === 'https:'
+                            && (url.hostname === 'docs.aws.amazon.com'
+                                || url.hostname === 'aws.amazon.com'
+                                || url.hostname.endsWith('.amazonaws.com'));
+                        if (!dominioPermitido) {
+                            documentacao = 'https://docs.aws.amazon.com/';
+                        }
+                    } catch {
+                        documentacao = 'https://docs.aws.amazon.com/';
+                    }
+                    resultado = {
+                        ...resultadoAgente,
+                        documentacao,
+                        confianca: Number.isFinite(resultadoAgente.confianca)
+                            ? Math.max(0, Math.min(1, resultadoAgente.confianca))
+                            : resultado.confianca,
+                        sugestoes: Array.isArray(resultadoAgente.sugestoes)
+                            ? resultadoAgente.sugestoes.slice(0, 3)
+                            : resultado.sugestoes,
+                        resultados: resultadosLocais,
+                        fonte: 'groq+banco'
+                    };
+                }
+            } catch (erroAgente) {
+                console.error('Falha no agente Groq; usando diagnóstico local:', erroAgente);
+            }
+        }
         return responder(200, resultado, cabecalhos);
     } catch (error) {
         console.error('Falha ao consultar o Finbot:', error);

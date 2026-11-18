@@ -649,6 +649,75 @@ async function listarServicosPublicados() {
     return resultado.rows.map((linha) => linha.name);
 }
 
+async function gerarRespostaFinbotGroq(pergunta, contexto) {
+    const chave = process.env.GROQ_API_KEY;
+    if (!chave) {
+        return null;
+    }
+    const modelos = [
+        process.env.GROQ_MODEL,
+        'openai/gpt-oss-20b',
+        'llama-3.3-70b-versatile',
+        'llama-3.1-8b-instant'
+    ].filter((modelo, indice, lista) => modelo && lista.indexOf(modelo) === indice);
+    const contextoSeguro = JSON.stringify({
+        pergunta,
+        diagnostico: contexto
+    }).slice(0, 18000);
+    const mensagens = [
+        {
+            role: 'system',
+            content: `Você é o Finbot. Gere uma resposta dinâmica em português.
+Use exclusivamente o contexto abaixo. Ele contém dados validados e fontes oficiais AWS
+cadastradas no projeto. Não invente recursos, preços, procedimentos, dados da conta,
+estimativas reais ou URLs. Explique a situação, como verificar, como agir e os cuidados.
+Responda somente com JSON válido no formato {"resposta":"texto"}.
+Contexto: ${contextoSeguro}`
+        },
+        { role: 'user', content: pergunta }
+    ];
+    for (const modelo of modelos) {
+        try {
+            const resposta = await fetch(GROQ_API_URL, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${chave}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: modelo,
+                    messages: mensagens,
+                    temperature: 0,
+                    max_completion_tokens: 700,
+                    response_format: { type: 'json_object' }
+                }),
+                signal: AbortSignal.timeout(10000)
+            });
+            if (!resposta.ok) {
+                continue;
+            }
+            const payload = await resposta.json();
+            const texto = payload.choices?.[0]?.message?.content;
+            if (typeof texto !== 'string') {
+                continue;
+            }
+            try {
+                const objeto = JSON.parse(texto);
+                if (typeof objeto.resposta === 'string' && objeto.resposta.trim()) {
+                    return objeto.resposta.trim();
+                }
+            } catch {
+                if (texto.trim()) {
+                    return texto.trim();
+                }
+            }
+        } catch {
+            // Tenta o próximo modelo disponível.
+        }
+    }
+    return null;
+}
+
 async function consultarFinbotComGroq(pergunta, historico = []) {
     const chave = process.env.GROQ_API_KEY;
     if (!chave) {
@@ -1161,20 +1230,18 @@ async function receberAdvisor(request, origemPermitida) {
         if (process.env.GROQ_API_KEY) {
             agenteStatus = 'erro';
             try {
-                const resultadoAgente = await consultarFinbotComGroq(pergunta, historico);
-                if (resultadoAgente
-                    && typeof resultadoAgente === 'object'
-                    && typeof resultadoAgente.encontrado === 'boolean'
-                    && typeof resultadoAgente.diagnostico === 'string') {
+                if (resultado.encontrado) {
+                    const respostaGerada = await gerarRespostaFinbotGroq(pergunta, resultado);
+                    if (!respostaGerada) {
+                        throw new Error('Groq não devolveu uma resposta textual.');
+                    }
                     agenteStatus = 'ativo';
                     const resultadosLocais = Array.isArray(resultado.resultados)
                         ? resultado.resultados
                         : [];
                     resultado = {
                         ...resultado,
-                        sugestoes: Array.isArray(resultadoAgente.sugestoes)
-                            ? resultadoAgente.sugestoes.slice(0, 3)
-                            : resultado.sugestoes,
+                        resposta: respostaGerada,
                         resultados: resultadosLocais,
                         fonte: resultado.encontrado
                             ? 'groq+banco-validado'

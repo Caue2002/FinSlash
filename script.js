@@ -1008,7 +1008,11 @@ async function enviarAvaliacaoAdvisor(mensagem, resultado, avaliacao, status, mo
             },
             body: JSON.stringify({
                 category: 'content',
-                message: `Avaliação da Navi: resposta ${valorAvaliacao}. Tema: ${tema}.${motivoTexto ? ` Motivo: ${motivoTexto}.` : ''}`
+                message: `Avaliação da Navi: resposta ${valorAvaliacao}. Tema: ${tema}.${motivoTexto ? ` Motivo: ${motivoTexto}.` : ''}`,
+                advisorSignal: {
+                    rating: avaliacao,
+                    reason: avaliacao === 'util' ? null : motivo
+                }
             })
         });
         let respostaFeedback;
@@ -1042,11 +1046,17 @@ async function enviarAvaliacaoAdvisor(mensagem, resultado, avaliacao, status, mo
             botao.setAttribute('aria-pressed', String(selecionado));
             botao.classList.toggle('acao-concluida', selecionado);
         });
-        status.textContent = preferenciaSalva
-            ? avaliacao === 'nao-util'
-                ? 'A Navi vai considerar esse ajuste nesta conversa e ao gerar outra resposta.'
-                : 'Obrigado! A Navi vai manter esse estilo nesta conversa.'
-            : 'Avaliação enviada, mas não foi possível manter o ajuste nesta aba.';
+        if (respostaFeedback.aprendizadoGlobal === 'registrado') {
+            status.textContent = 'Avaliação enviada. A Navi pode ajustar o estilo global após volume mínimo de avaliações agregadas, sem usar o histórico.';
+        } else if (respostaFeedback.aprendizadoGlobal === 'aguardando_migracao') {
+            status.textContent = 'Avaliação enviada, mas a adaptação entre conversas ainda aguarda a configuração do banco.';
+        } else if (preferenciaSalva && avaliacao === 'nao-util') {
+            status.textContent = 'A Navi vai considerar esse ajuste nesta conversa e ao gerar outra resposta.';
+        } else if (preferenciaSalva) {
+            status.textContent = 'Obrigado! A Navi vai manter esse estilo nesta conversa.';
+        } else {
+            status.textContent = 'Avaliação enviada, mas não foi possível manter o ajuste nesta aba.';
+        }
         salvarHistoricoAdvisor();
     } catch (error) {
         console.error('Não foi possível enviar a avaliação da Navi:', error);

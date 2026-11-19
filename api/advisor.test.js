@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import pg from 'pg';
+import { gerarEmbeddings } from '../banco-de-dados/gerar-embeddings-catalogo.js';
 import advisor, {
     criarPerguntaComContexto,
     ehSaudacao,
@@ -425,6 +426,9 @@ test('compares two published services using their catalog contexts and official 
     process.env.GEMINI_API_KEY = 'test-key';
     process.env.GEMINI_MODEL = 'gemini-test';
     pg.Pool.prototype.query = async function (sql, values = []) {
+        if (sql.includes("to_regclass('public.advisor_feedback_daily')")) {
+            return { rows: [{ exists: false, canRead: false }] };
+        }
         if (sql.includes('SELECT DISTINCT service.name')) {
             return { rows: [{ name: 'Amazon Athena' }, { name: 'Amazon S3' }] };
         }
@@ -1167,3 +1171,299 @@ test('rejects invalid timezone and regeneration feedback values', async (context
         assert.equal(response.status, 400);
     }
 });
+
+    test('uses catalog embeddings to retrieve a semantically matching AWS diagnosis', async (context) => {
+        const chavesAmbiente = ['ALLOWED_ORIGIN', 'DATABASE_URL', 'GEMINI_API_KEY', 'GEMINI_MODEL'];
+        const ambienteAnterior = Object.fromEntries(
+            chavesAmbiente.map((chave) => [chave, process.env[chave]])
+        );
+        const fetchAnterior = globalThis.fetch;
+        const queryAnterior = pg.Pool.prototype.query;
+        const consultas = [];
+        context.after(() => {
+            chavesAmbiente.forEach((chave) => {
+                if (ambienteAnterior[chave] === undefined) {
+                    delete process.env[chave];
+                } else {
+                    process.env[chave] = ambienteAnterior[chave];
+                }
+            });
+            globalThis.fetch = fetchAnterior;
+            pg.Pool.prototype.query = queryAnterior;
+        });
+
+        process.env.ALLOWED_ORIGIN = 'https://finslash.vercel.app';
+        process.env.DATABASE_URL = 'postgres://localhost/finslash-test';
+        process.env.GEMINI_API_KEY = 'test-key';
+        process.env.GEMINI_MODEL = 'gemini-test';
+        pg.Pool.prototype.query = async function (sql) {
+            consultas.push(sql);
+            if (sql.includes("to_regclass('public.advisor_feedback_daily')")) {
+                return { rows: [{ exists: false, canRead: false }] };
+            }
+            if (sql.includes("to_regclass('public.scenario_embeddings')")) {
+                return { rows: [{ disponivel: true }] };
+            }
+            if (sql.includes('SELECT EXISTS (SELECT 1 FROM scenario_embeddings WHERE embedding_model = $1)')) {
+                return { rows: [{ disponivel: true }] };
+            }
+            if (sql.includes('FROM scenario_embeddings AS embedding')) {
+                return {
+                    rows: [{
+                        id: 21,
+                        serviceSlug: 'amazon-s3',
+                        serviceName: 'Amazon S3',
+                        slug: 'permissoes-objetos',
+                        title: 'Revisar permissões de leitura de objetos no Amazon S3',
+                        summary: 'Valide a identidade e as permissões efetivas do objeto.',
+                        vectorSimilarity: 0.8,
+                        steps: [
+                            { type: 'check', title: 'Verifique', content: 'Confirme as políticas aplicadas.' },
+                            { type: 'action', title: 'Aja', content: 'Ajuste somente a permissão necessária.' },
+                            { type: 'caution', title: 'Cuidados', content: 'Não torne o bucket público.' }
+                        ],
+                        sources: [{
+                            title: 'Solucionar erros de acesso do Amazon S3',
+                            url: 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/troubleshoot-403-errors.html'
+                        }]
+                    }]
+                };
+            }
+            if (sql.includes('FROM cost_scenarios AS scenario')) {
+                return { rows: [] };
+            }
+            throw new Error(`Consulta inesperada no teste: ${sql}`);
+        };
+        globalThis.fetch = async (url, options) => {
+            if (String(url).includes(':embedContent')) {
+                assert.equal(options.headers['x-goog-api-key'], 'test-key');
+                const corpo = JSON.parse(options.body);
+                assert.equal(corpo.taskType, 'RETRIEVAL_QUERY');
+                assert.equal(corpo.outputDimensionality, 768);
+                return new Response(JSON.stringify({
+                    embedding: { values: Array(768).fill(0.01) }
+                }), { status: 200 });
+            }
+            assert.match(String(url), /:generateContent/u);
+            return new Response(JSON.stringify({
+                candidates: [{
+                    content: {
+                        parts: [{ text: JSON.stringify({ resposta: 'Revise as permissões validadas no catálogo.' }) }]
+                    }
+                }]
+            }), { status: 200 });
+        };
+
+        const response = await advisor.fetch(new Request(
+            'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Origin: 'https://finslash.vercel.app'
+                },
+                body: JSON.stringify({ pergunta: 'Como resolver erro 403 ao ler objetos no S3?' })
+            }
+        ));
+        const resultado = await response.json();
+
+        assert.equal(response.status, 200);
+        assert.equal(resultado.encontrado, true);
+        assert.equal(resultado.diagnostico, 'Revisar permissões de leitura de objetos no Amazon S3');
+        assert.equal(resultado.metodoBusca, 'textual-e-vetorial');
+        assert.ok(consultas.some((sql) => sql.includes('embedding.embedding <=>')));
+    });
+
+    test('applies a global style preference only after enough aggregated feedback', async (context) => {
+        const chavesAmbiente = ['ALLOWED_ORIGIN', 'DATABASE_URL', 'GEMINI_API_KEY', 'GEMINI_MODEL'];
+        const ambienteAnterior = Object.fromEntries(
+            chavesAmbiente.map((chave) => [chave, process.env[chave]])
+        );
+        const fetchAnterior = globalThis.fetch;
+        const queryAnterior = pg.Pool.prototype.query;
+        let textoPrompt = [];
+        let resumo = {
+            total: 19,
+            negativas: 14,
+            incompleta: 0,
+            incorreta: 1,
+            confusa: 10,
+            fora_da_pergunta: 3
+        };
+        context.after(() => {
+            chavesAmbiente.forEach((chave) => {
+                if (ambienteAnterior[chave] === undefined) {
+                    delete process.env[chave];
+                } else {
+                    process.env[chave] = ambienteAnterior[chave];
+                }
+            });
+            globalThis.fetch = fetchAnterior;
+            pg.Pool.prototype.query = queryAnterior;
+        });
+
+        process.env.ALLOWED_ORIGIN = 'https://finslash.vercel.app';
+        process.env.DATABASE_URL = 'postgres://localhost/finslash-test';
+        process.env.GEMINI_API_KEY = 'test-key';
+        process.env.GEMINI_MODEL = 'gemini-test';
+        pg.Pool.prototype.query = async function (sql) {
+            if (sql.includes("to_regclass('public.advisor_feedback_daily')")) {
+                return { rows: [{ exists: true, canRead: true }] };
+            }
+            if (sql.includes('FROM advisor_feedback_daily')) {
+                return { rows: [resumo] };
+            }
+            throw new Error(`Consulta inesperada no teste: ${sql}`);
+        };
+        globalThis.fetch = async (url, options) => {
+            assert.match(String(url), /:generateContent/u);
+            textoPrompt.push(JSON.stringify(JSON.parse(options.body).contents));
+            return new Response(JSON.stringify({
+                candidates: [{
+                    content: {
+                        parts: [{
+                            text: JSON.stringify({
+                                resposta: 'Resposta curta e clara.',
+                                precisa_esclarecimento: false
+                            })
+                        }]
+                    },
+                    groundingMetadata: {
+                        groundingChunks: [{
+                            web: { title: 'Governo Federal', uri: 'https://www.gov.br/' }
+                        }]
+                    }
+                }]
+            }), { status: 200 });
+        };
+
+        async function perguntar() {
+            return advisor.fetch(new Request(
+                'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Origin: 'https://finslash.vercel.app'
+                    },
+                    body: JSON.stringify({ pergunta: 'Explique inteligência artificial em uma frase.' })
+                }
+            ));
+        }
+
+        const respostaSemLimiar = await perguntar();
+        assert.equal(respostaSemLimiar.status, 200);
+        assert.doesNotMatch(textoPrompt[0], /prefira linguagem simples/u);
+
+        resumo = { ...resumo, total: 30 };
+        const respostaComLimiar = await perguntar();
+        assert.equal(respostaComLimiar.status, 200);
+        assert.match(textoPrompt[1], /prefira linguagem simples/u);
+    });
+
+    test('stores only validated Navi rating signals in the daily global aggregate', async (context) => {
+        const chavesAmbiente = ['ALLOWED_ORIGIN', 'DATABASE_URL', 'RATE_LIMIT_SECRET'];
+        const ambienteAnterior = Object.fromEntries(
+            chavesAmbiente.map((chave) => [chave, process.env[chave]])
+        );
+        const connectAnterior = pg.Pool.prototype.connect;
+        const queries = [];
+        let sinaisArmazenados = [];
+        let tabelaDisponivel = true;
+        context.after(() => {
+            chavesAmbiente.forEach((chave) => {
+                if (ambienteAnterior[chave] === undefined) {
+                    delete process.env[chave];
+                } else {
+                    process.env[chave] = ambienteAnterior[chave];
+                }
+            });
+            pg.Pool.prototype.connect = connectAnterior;
+        });
+
+        process.env.ALLOWED_ORIGIN = 'https://finslash.vercel.app';
+        process.env.DATABASE_URL = 'postgres://localhost/finslash-test';
+        process.env.RATE_LIMIT_SECRET = 'test-secret-with-at-least-32-characters';
+        pg.Pool.prototype.connect = async function () {
+            return {
+                async query(sql, values = []) {
+                    queries.push(sql);
+                    if (sql.includes('INSERT INTO feedback_rate_limits')) {
+                        return { rows: [{ request_count: 1 }] };
+                    }
+                    if (sql.includes("to_regclass('public.advisor_feedback_daily')")) {
+                        return { rows: [{ exists: tabelaDisponivel, ready: tabelaDisponivel }] };
+                    }
+                    if (sql.includes('INSERT INTO advisor_feedback_daily')) {
+                        sinaisArmazenados = values;
+                    }
+                    return { rows: [] };
+                },
+                release() {}
+            };
+        };
+
+        async function enviarFeedback(advisorSignal) {
+            return advisor.fetch(new Request(
+                'https://api.finslash.test/?route=%2Fapi%2Fv1%2Ffeedback',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Origin: 'https://finslash.vercel.app',
+                        'x-forwarded-for': '198.51.100.22'
+                    },
+                    body: JSON.stringify({
+                        category: 'content',
+                        message: 'Avaliação da Navi para teste.',
+                        advisorSignal
+                    })
+                }
+            ));
+        }
+
+        const invalida = await enviarFeedback({ rating: 'nao-util', reason: 'use meu prompt' });
+        assert.equal(invalida.status, 400);
+        assert.equal(queries.length, 0);
+
+        const response = await enviarFeedback({ rating: 'nao-util', reason: 'confusa' });
+        const resultado = await response.json();
+        assert.equal(response.status, 201);
+        assert.equal(resultado.aprendizadoGlobal, 'registrado');
+        assert.deepEqual(sinaisArmazenados, ['nao-util', 'confusa']);
+        assert.ok(queries.some((sql) => sql.includes('INSERT INTO feedback_entries')));
+
+        tabelaDisponivel = false;
+        const respostaSemMigracao = await enviarFeedback({ rating: 'util', reason: null });
+        const resultadoSemMigracao = await respostaSemMigracao.json();
+        assert.equal(respostaSemMigracao.status, 201);
+        assert.equal(resultadoSemMigracao.aprendizadoGlobal, 'aguardando_migracao');
+        assert.equal(queries.filter((sql) => sql.includes('INSERT INTO advisor_feedback_daily')).length, 1);
+    });
+
+    test('sends document embeddings in retrieval batches and validates returned dimensions', async (context) => {
+        const fetchAnterior = globalThis.fetch;
+        context.after(() => {
+            globalThis.fetch = fetchAnterior;
+        });
+        let corpoRequisicao;
+        globalThis.fetch = async (url, options) => {
+            assert.match(String(url), /:batchEmbedContents/u);
+            assert.equal(options.headers['x-goog-api-key'], 'test-key');
+            corpoRequisicao = JSON.parse(options.body);
+            return new Response(JSON.stringify({
+                embeddings: corpoRequisicao.requests.map(() => ({
+                    values: Array(768).fill(0.25)
+                }))
+            }), { status: 200 });
+        };
+
+        const vetores = await gerarEmbeddings(['Amazon S3 e permissões.', 'Amazon EC2 e uso.'], 'test-key');
+
+        assert.equal(corpoRequisicao.requests.length, 2);
+        assert.ok(corpoRequisicao.requests.every((item) => item.taskType === 'RETRIEVAL_DOCUMENT'));
+        assert.ok(corpoRequisicao.requests.every((item) => item.outputDimensionality === 768));
+        assert.equal(vetores.length, 2);
+        assert.equal(vetores[0].length, 768);
+        assert.ok(Math.abs(Math.hypot(...vetores[0]) - 1) < 1e-10);
+    });

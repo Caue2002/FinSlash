@@ -13,6 +13,8 @@ const LIMITE_MENSAGENS_HISTORICO_ADVISOR = 6;
 const LIMITE_CARACTERES_HISTORICO_ADVISOR = 300;
 const LIMITE_CONTEXTO_CONVERSA_ADVISOR = 1800;
 const LIMITE_ENVIOS_POR_HORA = 5;
+const MODELO_EMBEDDING_ADVISOR = 'gemini-embedding-001';
+const DIMENSOES_EMBEDDING_ADVISOR = 768;
 const CATEGORIAS_FEEDBACK = new Set(['suggestion', 'issue', 'content']);
 const MOTIVOS_REGENERACAO = new Set(['incompleta', 'incorreta', 'confusa', 'fora_da_pergunta']);
 const PREFERENCIAS_RESPOSTA_ADVISOR = new Set([
@@ -37,6 +39,8 @@ const FONTE_OPEN_METEO = {
     title: 'Open-Meteo',
     url: 'https://open-meteo.com/en/docs'
 };
+let avisoTabelaAprendizadoAusente = false;
+let avisoTabelaEmbeddingsAusente = false;
 
 // Conecta a Navi ao Gemini e valida as fontes retornadas pela Pesquisa Google.
 function obterFontesGoogleGrounding(metadata) {
@@ -307,6 +311,62 @@ function obterPoolBanco() {
         });
     }
     return pool;
+}
+
+async function obterPreferenciaGlobalFeedback() {
+    if (!process.env.DATABASE_URL) {
+        return null;
+    }
+
+    const banco = obterPoolBanco();
+    const disponibilidade = await banco.query(
+        `SELECT
+            to_regclass('public.advisor_feedback_daily') IS NOT NULL AS "exists",
+            CASE
+                WHEN to_regclass('public.advisor_feedback_daily') IS NULL THEN FALSE
+                ELSE has_table_privilege(
+                    to_regclass('public.advisor_feedback_daily'),
+                    'SELECT'
+                )
+            END AS "canRead"`
+    );
+    if (!disponibilidade.rows[0]?.exists || !disponibilidade.rows[0]?.canRead) {
+        if (!avisoTabelaAprendizadoAusente) {
+            console.warn('Aprendizado global da Navi indisponível: aplique a migração de feedback agregado e as permissões da API.');
+            avisoTabelaAprendizadoAusente = true;
+        }
+        return null;
+    }
+
+    const resultado = await banco.query(
+        `SELECT
+            COALESCE(SUM(signal_count), 0) AS total,
+            COALESCE(SUM(signal_count) FILTER (WHERE rating = 'nao-util'), 0) AS negativas,
+            COALESCE(SUM(signal_count) FILTER (WHERE reason = 'incompleta'), 0) AS incompleta,
+            COALESCE(SUM(signal_count) FILTER (WHERE reason = 'incorreta'), 0) AS incorreta,
+            COALESCE(SUM(signal_count) FILTER (WHERE reason = 'confusa'), 0) AS confusa,
+            COALESCE(SUM(signal_count) FILTER (WHERE reason = 'fora_da_pergunta'), 0) AS fora_da_pergunta
+         FROM advisor_feedback_daily
+         WHERE signal_date >= CURRENT_DATE - INTERVAL '29 days'`
+    );
+    const resumo = resultado.rows[0] || {};
+    const total = Number(resumo.total || 0);
+    const negativas = Number(resumo.negativas || 0);
+    if (total < 20 || negativas < 10 || negativas / total < 0.3) {
+        return null;
+    }
+
+    const preferencias = [
+        { motivo: 'incompleta', contagem: Number(resumo.incompleta || 0), preferencia: 'mais_completa' },
+        { motivo: 'incorreta', contagem: Number(resumo.incorreta || 0), preferencia: 'mais_verificada' },
+        { motivo: 'confusa', contagem: Number(resumo.confusa || 0), preferencia: 'mais_simples' },
+        { motivo: 'fora_da_pergunta', contagem: Number(resumo.fora_da_pergunta || 0), preferencia: 'mais_direta' }
+    ].sort((primeiro, segundo) => segundo.contagem - primeiro.contagem);
+    const principal = preferencias[0];
+    if (principal.contagem < 8 || principal.contagem / negativas < 0.6) {
+        return null;
+    }
+    return principal.preferencia;
 }
 
 function responder(status, corpo, cabecalhos = {}) {
@@ -1445,6 +1505,68 @@ async function lerJsonAdvisor(request) {
 }
 
 // Localiza diagnósticos AWS e monta respostas a partir das fontes cadastradas.
+async function gerarEmbeddingConsulta(pergunta, banco) {
+    if (!process.env.GEMINI_API_KEY) {
+        return null;
+    }
+
+    const tabela = await banco.query(
+        `SELECT to_regclass('public.scenario_embeddings') IS NOT NULL AS disponivel`
+    );
+    if (!tabela.rows[0]?.disponivel) {
+        if (!avisoTabelaEmbeddingsAusente) {
+            console.warn('Busca vetorial da Navi indisponível: aplique a migração de embeddings e as permissões da API.');
+            avisoTabelaEmbeddingsAusente = true;
+        }
+        return null;
+    }
+
+    const vetores = await banco.query(
+        'SELECT EXISTS (SELECT 1 FROM scenario_embeddings WHERE embedding_model = $1) AS disponivel',
+        [MODELO_EMBEDDING_ADVISOR]
+    );
+    if (!vetores.rows[0]?.disponivel) {
+        if (!avisoTabelaEmbeddingsAusente) {
+            console.warn('Busca vetorial da Navi indisponível: execute npm run embeddings:sync para preencher o catálogo.');
+            avisoTabelaEmbeddingsAusente = true;
+        }
+        return null;
+    }
+
+    const resposta = await fetch(
+        `${GEMINI_API_URL}/${MODELO_EMBEDDING_ADVISOR}:embedContent`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': process.env.GEMINI_API_KEY
+            },
+            body: JSON.stringify({
+                model: `models/${MODELO_EMBEDDING_ADVISOR}`,
+                content: { parts: [{ text: pergunta }] },
+                taskType: 'RETRIEVAL_QUERY',
+                outputDimensionality: DIMENSOES_EMBEDDING_ADVISOR
+            }),
+            signal: AbortSignal.timeout(10000)
+        }
+    );
+    if (!resposta.ok) {
+        throw new Error(`Gemini respondeu HTTP ${resposta.status} ao gerar embedding.`);
+    }
+    const dados = await resposta.json();
+    const valores = dados.embedding?.values;
+    if (!Array.isArray(valores)
+        || valores.length !== DIMENSOES_EMBEDDING_ADVISOR
+        || valores.some((valor) => !Number.isFinite(valor))) {
+        throw new TypeError('O Gemini devolveu um embedding inválido para a pergunta.');
+    }
+    const norma = Math.hypot(...valores);
+    if (!Number.isFinite(norma) || norma === 0) {
+        throw new TypeError('O Gemini devolveu um embedding sem magnitude válida.');
+    }
+    return `[${valores.map((valor) => valor / norma).join(',')}]`;
+}
+
 async function consultarAdvisor(pergunta) {
     if (!process.env.DATABASE_URL) {
         throw new Error('DATABASE_URL não configurada');
@@ -1483,9 +1605,17 @@ async function consultarAdvisor(pergunta) {
         condicoes.push('FALSE');
     }
 
-    const resultado = await obterPoolBanco().query(
-        `SELECT
-            scenario.id,
+    const banco = obterPoolBanco();
+    let embeddingConsulta = null;
+    if (process.env.GEMINI_API_KEY) {
+        try {
+            embeddingConsulta = await gerarEmbeddingConsulta(pergunta, banco);
+        } catch (error) {
+            console.error('Falha ao gerar embedding da pergunta; usando busca textual:', error);
+        }
+    }
+
+    const colunasCenario = `scenario.id,
             service.slug AS "serviceSlug",
             service.name AS "serviceName",
             scenario.slug,
@@ -1513,17 +1643,46 @@ async function consultarAdvisor(pergunta) {
                 ) ORDER BY reference.title)
                 FROM scenario_sources AS reference
                 WHERE reference.scenario_id = scenario.id
-            ), '[]'::json) AS sources
-        FROM cost_scenarios AS scenario
-        JOIN aws_services AS service ON service.id = scenario.service_id
-        WHERE scenario.is_published = TRUE
-          AND (${condicoes.join(' OR ')})
-        LIMIT 30`,
+            ), '[]'::json) AS sources`;
+    const relacoesCenario = `FROM cost_scenarios AS scenario
+        JOIN aws_services AS service ON service.id = scenario.service_id`;
+    const resultado = await banco.query(
+        `SELECT ${colunasCenario}, NULL::double precision AS "vectorSimilarity"
+         ${relacoesCenario}
+         WHERE scenario.is_published = TRUE
+           AND (${condicoes.join(' OR ')})
+         LIMIT 30`,
         parametros
     );
+    const candidatosPorId = new Map(
+        resultado.rows.map((linha) => [String(linha.id), linha])
+    );
+    if (embeddingConsulta) {
+        const vetoriais = await banco.query(
+            `SELECT ${colunasCenario},
+                    1 - (embedding.embedding <=> $1::extensions.vector(${DIMENSOES_EMBEDDING_ADVISOR}))
+                        AS "vectorSimilarity"
+             FROM scenario_embeddings AS embedding
+             JOIN cost_scenarios AS scenario ON scenario.id = embedding.scenario_id
+             JOIN aws_services AS service ON service.id = scenario.service_id
+             WHERE scenario.is_published = TRUE
+               AND embedding.embedding_model = $2
+             ORDER BY embedding.embedding <=> $1::extensions.vector(${DIMENSOES_EMBEDDING_ADVISOR})
+             LIMIT 20`,
+            [embeddingConsulta, MODELO_EMBEDDING_ADVISOR]
+        );
+        vetoriais.rows.forEach((linha) => {
+            const existente = candidatosPorId.get(String(linha.id));
+            if (existente) {
+                existente.vectorSimilarity = linha.vectorSimilarity;
+            } else {
+                candidatosPorId.set(String(linha.id), linha);
+            }
+        });
+    }
 
     const resultadosPontuados = [];
-    resultado.rows.forEach((linha) => {
+    [...candidatosPorId.values()].forEach((linha) => {
         const textoLinha = normalizarTextoAdvisor([
             linha.serviceName,
             linha.title,
@@ -1531,7 +1690,8 @@ async function consultarAdvisor(pergunta) {
             linha.slug,
             ...(linha.steps || []).flatMap((step) => [step.title, step.content])
         ].join(' '));
-        let pontuacao = 0;
+        const similaridade = Number(linha.vectorSimilarity) || 0;
+        let pontuacao = Math.round(Math.max(0, similaridade) * 12);
         const tituloNormalizado = normalizarTextoAdvisor(linha.title);
         const consultaS3 = /\bs3\b/u.test(normalizada);
         if (normalizada.includes('aws budgets')
@@ -1622,6 +1782,7 @@ async function consultarAdvisor(pergunta) {
             servico: null,
             topico: null,
             fonte: 'orientacao_padrao',
+            metodoBusca: embeddingConsulta ? 'textual-e-vetorial' : 'textual',
             confianca: 0,
             resultados: [],
             sugestoes: [
@@ -1691,6 +1852,7 @@ async function consultarAdvisor(pergunta) {
     ))].filter(Boolean).slice(0, 3);
     return {
         ...melhorFormatado,
+        metodoBusca: embeddingConsulta ? 'textual-e-vetorial' : 'textual',
         resultados,
         sugestoes
     };
@@ -1831,6 +1993,26 @@ async function obterDiagnostico(serviceSlug, scenarioSlug) {
     }
 }
 
+function validarSinalFeedbackAdvisor(sinal) {
+    if (!sinal
+        || typeof sinal !== 'object'
+        || Array.isArray(sinal)
+        || Object.keys(sinal).some((chave) => !['rating', 'reason'].includes(chave))
+        || !['util', 'nao-util'].includes(sinal.rating)) {
+        throw new TypeError('O sinal de avaliação da Navi é inválido.');
+    }
+
+    if (sinal.rating === 'util' && sinal.reason === null) {
+        return { rating: 'util', reason: 'none' };
+    }
+    if (sinal.rating === 'nao-util'
+        && typeof sinal.reason === 'string'
+        && MOTIVOS_REGENERACAO.has(sinal.reason)) {
+        return { rating: 'nao-util', reason: sinal.reason };
+    }
+    throw new TypeError('O motivo da avaliação da Navi é inválido.');
+}
+
 async function lerJsonLimitado(request) {
     const contentLength = Number(request.headers.get('content-length'));
     if (Number.isFinite(contentLength) && contentLength > LIMITE_BYTES_FEEDBACK) {
@@ -1878,12 +2060,17 @@ async function lerJsonLimitado(request) {
     if (!json || typeof json !== 'object' || Array.isArray(json)) {
         throw new TypeError('O corpo precisa ser um objeto JSON.');
     }
-    if (Object.keys(json).some((chave) => !['category', 'message'].includes(chave))) {
+    if (Object.keys(json).some((chave) =>
+        !['category', 'message', 'advisorSignal'].includes(chave)
+    )) {
         throw new TypeError('O corpo contém campos não permitidos.');
     }
     if (!CATEGORIAS_FEEDBACK.has(json.category) || typeof json.message !== 'string') {
         throw new TypeError('Categoria ou mensagem inválida.');
     }
+    const advisorSignal = json.advisorSignal === undefined
+        ? null
+        : validarSinalFeedbackAdvisor(json.advisorSignal);
 
     const message = json.message.normalize('NFC').replace(/\r\n?/gu, '\n').trim();
     const quantidadeCaracteres = Array.from(message).length;
@@ -1895,7 +2082,7 @@ async function lerJsonLimitado(request) {
         throw new TypeError('A mensagem deve ter de 10 a 1000 caracteres e não conter controles inválidos.');
     }
 
-    return { category: json.category, message };
+    return { category: json.category, message, advisorSignal };
 }
 
 // Protege o feedback contra abuso e remove limites expirados com autorização.
@@ -1934,10 +2121,25 @@ async function limparLimitesExpirados(request) {
     }
 
     try {
-        const resultado = await obterPoolBanco().query(
+        const banco = obterPoolBanco();
+        const resultado = await banco.query(
             'DELETE FROM feedback_rate_limits WHERE expires_at <= NOW()'
         );
-        return responder(200, { removed: resultado.rowCount });
+        const tabelaAprendizado = await banco.query(
+            `SELECT to_regclass('public.advisor_feedback_daily') IS NOT NULL AS disponivel`
+        );
+        let sinaisAntigosRemovidos = 0;
+        if (tabelaAprendizado.rows[0]?.disponivel) {
+            const sinais = await banco.query(
+                `DELETE FROM advisor_feedback_daily
+                 WHERE signal_date < CURRENT_DATE - INTERVAL '89 days'`
+            );
+            sinaisAntigosRemovidos = sinais.rowCount;
+        }
+        return responder(200, {
+            removed: resultado.rowCount,
+            sinaisAntigosRemovidos
+        });
     } catch (error) {
         console.error('Falha ao remover limites de feedback expirados:', error);
         return responder(500, { error: 'Não foi possível concluir a limpeza.' });
@@ -2053,6 +2255,9 @@ async function receberAdvisor(request, origemPermitida) {
             motivoFeedback: entradaAdvisor.motivoFeedback,
             preferenciaResposta: entradaAdvisor.preferenciaResposta
         };
+        if (!opcoesGeracao.preferenciaResposta && process.env.GEMINI_API_KEY) {
+            opcoesGeracao.preferenciaResposta = await obterPreferenciaGlobalFeedback();
+        }
 
         if (conversaAtiva) {
             const tema = pedirDiagnosticoDeCusto(contextoConversa)
@@ -2525,10 +2730,59 @@ async function receberFeedback(request, origemPermitida) {
             'INSERT INTO feedback_entries (category, message) VALUES ($1, $2)',
             [payload.category, payload.message]
         );
+        let aprendizadoGlobal = null;
+        if (payload.advisorSignal) {
+            const disponibilidadeAprendizado = await cliente.query(
+                `SELECT
+                    to_regclass('public.advisor_feedback_daily') IS NOT NULL AS "exists",
+                    CASE
+                        WHEN to_regclass('public.advisor_feedback_daily') IS NULL THEN FALSE
+                        ELSE has_table_privilege(
+                            to_regclass('public.advisor_feedback_daily'),
+                            'SELECT'
+                        )
+                        AND has_table_privilege(
+                            to_regclass('public.advisor_feedback_daily'),
+                            'INSERT'
+                        )
+                        AND has_table_privilege(
+                            to_regclass('public.advisor_feedback_daily'),
+                            'UPDATE'
+                        )
+                        AND has_table_privilege(
+                            to_regclass('public.advisor_feedback_daily'),
+                            'DELETE'
+                        )
+                    END AS "ready"`
+            );
+            if (disponibilidadeAprendizado.rows[0]?.exists
+                && disponibilidadeAprendizado.rows[0]?.ready) {
+                await cliente.query(
+                    `DELETE FROM advisor_feedback_daily
+                     WHERE signal_date < CURRENT_DATE - INTERVAL '89 days'`
+                );
+                await cliente.query(
+                    `INSERT INTO advisor_feedback_daily (signal_date, rating, reason)
+                     VALUES (CURRENT_DATE, $1, $2)
+                     ON CONFLICT (signal_date, rating, reason) DO UPDATE SET
+                        signal_count = LEAST(advisor_feedback_daily.signal_count + 1, 1000000),
+                        updated_at = NOW()`,
+                    [payload.advisorSignal.rating, payload.advisorSignal.reason]
+                );
+                aprendizadoGlobal = 'registrado';
+            } else {
+                aprendizadoGlobal = 'aguardando_migracao';
+                if (!avisoTabelaAprendizadoAusente) {
+                    console.warn('Sinais globais da Navi não foram agregados: aplique a migração de feedback agregado e as permissões da API.');
+                    avisoTabelaAprendizadoAusente = true;
+                }
+            }
+        }
         await cliente.query('COMMIT');
         transacaoAberta = false;
         return responder(201, {
-            message: 'Feedback enviado. Obrigado por ajudar a melhorar o FinSlash!'
+            message: 'Feedback enviado. Obrigado por ajudar a melhorar o FinSlash!',
+            ...(payload.advisorSignal ? { aprendizadoGlobal } : {})
         }, cabecalhos);
     } catch (error) {
         if (transacaoAberta && cliente) {

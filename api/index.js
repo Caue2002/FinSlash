@@ -255,6 +255,11 @@ function pedirVisaoGeralServico(pergunta) {
         || /^(s3|ec2|rds|lambda|dynamodb|cloudwatch|iam|cloudfront|ebs|eks|ecs)\b/u.test(normalizada);
 }
 
+function pedirComparacaoServicos(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    return /\b(compare|comparar|comparacao|diferenca|diferencas|versus|vs)\b/u.test(normalizada);
+}
+
 function pedirDiagnosticoDeCusto(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
     return /\b(custo|custos|gasto|gastos|economi|reduzir|barato|mais caro|pagar menos|preco|orcamento|budget|saving|desconto|desperdicio|otimiz)\w*\b/u.test(normalizada);
@@ -464,6 +469,54 @@ Contexto: ${contextoSeguro}`;
         : typeof texto.resumo === 'string'
             ? texto.resumo
             : null;
+}
+
+async function responderComparacaoServicos(pergunta, contextos) {
+    const contextosSeguros = contextos.map((contexto) => ({
+        service: contexto.service,
+        topics: contexto.topics.slice(0, 8).map((topico) => ({
+            title: typeof topico.title === 'string' ? topico.title.slice(0, 180) : '',
+            summary: typeof topico.summary === 'string' ? topico.summary.slice(0, 1200) : ''
+        }))
+    }));
+    const systemInstruction = `Você é a Navi. Compare os serviços AWS solicitados usando
+exclusivamente os cenários publicados do FinSlash abaixo. Não invente recursos,
+preços, procedimentos, benefícios ou diferenças. Se o contexto não documentar
+uma diferença, diga claramente que ela não consta no catálogo. Faça uma comparação
+direta em português, em até 3 parágrafos curtos, e não trate os serviços como
+intercambiáveis sem evidência.
+Contextos: ${JSON.stringify(contextosSeguros)}`;
+    const texto = await chamarGemini({
+        systemInstruction,
+        prompt: pergunta,
+        json: true
+    });
+    if (!texto || typeof texto !== 'object') {
+        return null;
+    }
+    return typeof texto.resposta === 'string'
+        ? texto.resposta
+        : typeof texto.resumo === 'string'
+            ? texto.resumo
+            : null;
+}
+
+function fontesOficiaisDosContextos(contextos) {
+    const fontes = new Map();
+    contextos.forEach((contexto) => {
+        contexto.topics.flatMap((topico) => topico.sources || []).forEach((fonte) => {
+            if (typeof fonte.url === 'string'
+                && (fonte.url.startsWith('https://docs.aws.amazon.com/')
+                    || fonte.url.startsWith('https://aws.amazon.com/'))
+                && !fontes.has(fonte.url)) {
+                fontes.set(fonte.url, {
+                    title: fonte.title || 'Documentação AWS',
+                    url: fonte.url
+                });
+            }
+        });
+    });
+    return [...fontes.values()].slice(0, 8);
 }
 
 async function criarRespostaGeral(pergunta) {
@@ -1136,6 +1189,92 @@ async function receberAdvisor(request, origemPermitida) {
         if (!perguntaRelacionadoAoProjeto(pergunta)) {
             return responder(200, await criarRespostaGeral(pergunta), cabecalhos);
         }
+        if (pedirComparacaoServicos(pergunta)) {
+            const servicosMencionados = await listarServicosMencionadosNoBanco(pergunta);
+            if (servicosMencionados.length !== 2) {
+                const resposta = servicosMencionados.length > 2
+                    ? {
+                        ...criarRespostaAmbiguaServicos(servicosMencionados),
+                        resposta: `Posso comparar dois serviços por vez. Você mencionou ${servicosMencionados.slice(0, 4).join(', ')}; quais dois quer comparar?`
+                    }
+                    : {
+                        ...criarRespostaAmbiguaServicos(servicosMencionados),
+                        resposta: servicosMencionados.length === 1
+                            ? `Para comparar, preciso identificar dois serviços AWS no catálogo. Encontrei ${servicosMencionados[0]}; qual é o outro serviço?`
+                            : 'Para comparar com segurança, informe dois serviços AWS disponíveis no catálogo do FinSlash.'
+                    };
+                return responder(200, resposta, cabecalhos);
+            }
+
+            const contextos = await Promise.all(
+                servicosMencionados.map((servico) => obterContextoVisaoGeral(servico))
+            );
+            if (contextos.some((contexto) => !contexto)) {
+                return responder(200, {
+                    modo: 'conversacao',
+                    encontrado: false,
+                    diagnostico: 'Comparação indisponível',
+                    servico: servicosMencionados.join(' × '),
+                    resposta: 'Não encontrei contexto publicado para comparar esses serviços com segurança. Consulte os diagnósticos individuais no catálogo.',
+                    confianca: 0,
+                    fonte: 'banco-validado',
+                    validacao: {
+                        status: 'contexto-insuficiente',
+                        origem: 'PostgreSQL do FinSlash'
+                    },
+                    agente: {
+                        status: 'fallback-local',
+                        erro: null
+                    }
+                }, cabecalhos);
+            }
+
+            const fontes = fontesOficiaisDosContextos(contextos);
+            let respostaNatural = null;
+            try {
+                respostaNatural = await responderComparacaoServicos(pergunta, contextos);
+            } catch (erroComparacao) {
+                console.error('Falha ao gerar comparação de serviços pelo Gemini:', erroComparacao);
+            }
+            if (!respostaNatural) {
+                return responder(200, {
+                    modo: 'conversacao',
+                    encontrado: false,
+                    diagnostico: 'Comparação indisponível',
+                    servico: servicosMencionados.join(' × '),
+                    resposta: 'Não consegui gerar uma comparação segura agora. Consulte as fontes oficiais cadastradas abaixo ou tente novamente mais tarde.',
+                    sources: fontes,
+                    confianca: 0,
+                    fonte: 'banco-validado',
+                    validacao: {
+                        status: 'oficial-cadastrado',
+                        origem: 'PostgreSQL do FinSlash'
+                    },
+                    agente: {
+                        status: process.env.GEMINI_API_KEY ? 'erro' : 'indisponivel',
+                        erro: null
+                    }
+                }, cabecalhos);
+            }
+            return responder(200, {
+                modo: 'conversacao',
+                encontrado: true,
+                diagnostico: `Comparação: ${servicosMencionados.join(' × ')}`,
+                servico: servicosMencionados.join(' × '),
+                resposta: respostaNatural,
+                sources: fontes,
+                confianca: 0.9,
+                fonte: 'gemini+banco-validado',
+                validacao: {
+                    status: 'oficial-cadastrado',
+                    origem: 'PostgreSQL do FinSlash'
+                },
+                agente: {
+                    status: 'ativo',
+                    erro: null
+                }
+            }, cabecalhos);
+        }
         if (pedirVisaoGeralServico(pergunta)) {
             const servicosMencionados = await listarServicosMencionadosNoBanco(pergunta);
             if (servicosMencionados.length > 1) {
@@ -1433,7 +1572,12 @@ async function receberFeedback(request, origemPermitida) {
     }
 }
 
-export { ehSaudacao, perguntaRelacionadoAoProjeto, precisaEsclarecimento };
+export {
+    ehSaudacao,
+    pedirComparacaoServicos,
+    perguntaRelacionadoAoProjeto,
+    precisaEsclarecimento
+};
 
 // Mantém todos os endpoints em uma única função compatível com o Web Handler da Vercel.
 export default {

@@ -48,6 +48,7 @@ Quando existe um diagnóstico validado, a Navi apresenta:
 - Estado visual enquanto a Navi consulta os diagnósticos.
 - Detecção de consultas ambíguas entre vários serviços.
 - Perguntas de esclarecimento quando a mensagem não informa o serviço, o objetivo ou detalhes suficientes; a Navi aguarda contexto em vez de escolher um diagnóstico por suposição.
+- Comparações explícitas entre dois serviços publicados usam apenas os contextos do catálogo e exibem as fontes oficiais cadastradas; para mais de dois serviços, a Navi pede que o usuário escolha dois.
 
 Para evitar respostas AWS sem validação, perguntas que mencionam AWS, Amazon Web Services ou nomes reconhecidos de serviços seguem somente pelo fluxo de diagnósticos. O Gemini recebe apenas o contexto fechado do banco validado e pode reformular esses dados; título, resumo, etapas, confiança e documentação continuam vinculados ao PostgreSQL do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
 

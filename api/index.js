@@ -503,20 +503,30 @@ Contextos: ${JSON.stringify(contextosSeguros)}`;
 }
 
 function fontesOficiaisDosContextos(contextos) {
-    const fontes = new Map();
-    contextos.forEach((contexto) => {
+    const fontesPorServico = contextos.map((contexto) => {
+        const fontes = new Map();
         contexto.topics.flatMap((topico) => topico.sources || []).forEach((fonte) => {
             if (typeof fonte.url === 'string'
                 && (fonte.url.startsWith('https://docs.aws.amazon.com/')
                     || fonte.url.startsWith('https://aws.amazon.com/'))
                 && !fontes.has(fonte.url)) {
                 fontes.set(fonte.url, {
-                    title: fonte.title || 'Documentação AWS',
+                    title: typeof fonte.title === 'string' && fonte.title.trim()
+                        ? fonte.title
+                        : 'Documentação AWS',
                     url: fonte.url
                 });
             }
         });
+        return [...fontes.values()];
     });
+    const fontes = new Map();
+    fontesPorServico.forEach((servico) => {
+        if (servico[0]) {
+            fontes.set(servico[0].url, servico[0]);
+        }
+    });
+    fontesPorServico.flat().forEach((fonte) => fontes.set(fonte.url, fonte));
     return [...fontes.values()].slice(0, 8);
 }
 

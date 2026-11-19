@@ -77,10 +77,10 @@ test('compares two published services using their catalog contexts and official 
                 rows: [{
                     title: `Cenário de ${servico}`,
                     summary: `Informações publicadas sobre ${servico}.`,
-                    sources: [{
-                        title: `Documentação de ${servico}`,
-                        url: `https://docs.aws.amazon.com/${slug}/latest/ug/`
-                    }]
+                    sources: Array.from({ length: 10 }, (_, index) => ({
+                        title: `Documentação ${index + 1} de ${servico}`,
+                        url: `https://docs.aws.amazon.com/${slug}/latest/ug/${index + 1}`
+                    }))
                 }]
             };
         }
@@ -119,9 +119,11 @@ test('compares two published services using their catalog contexts and official 
     assert.equal(resultado.resposta, 'Comparação baseada no catálogo.');
     assert.equal(resultado.confianca, 0.9);
     assert.deepEqual(
-        resultado.sources.map((fonte) => fonte.title),
-        ['Documentação de Amazon Athena', 'Documentação de Amazon S3']
+        resultado.sources.slice(0, 2).map((fonte) => fonte.title),
+        ['Documentação 1 de Amazon Athena', 'Documentação 1 de Amazon S3']
     );
+    assert.equal(resultado.sources.length, 8);
+    assert.ok(resultado.sources.every((fonte) => fonte.url.startsWith('https://docs.aws.amazon.com/')));
     assert.match(instrucaoGemini, /Amazon Athena/u);
     assert.match(instrucaoGemini, /Amazon S3/u);
     assert.match(instrucaoGemini, /exclusivamente/u);

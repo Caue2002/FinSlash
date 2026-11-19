@@ -3244,6 +3244,21 @@ button.item-historico-perfil:focus-visible {
         align-items: flex-end;
     }
 
+    .popup-advisor.advisor-teclado {
+        top: var(--advisor-viewport-top, 0px);
+        height: var(--advisor-viewport-height, 100dvh);
+    }
+
+    .popup-advisor.advisor-teclado .painel-advisor {
+        height: 100%;
+        max-height: 100%;
+        overflow: hidden;
+    }
+
+    .popup-advisor.advisor-teclado .painel-advisor.advisor-digitando .boas-vindas-advisor {
+        display: none;
+    }
+
     .icone-advisor {
         width: 52px;
         height: 52px;

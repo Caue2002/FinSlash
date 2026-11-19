@@ -660,6 +660,17 @@ function rolarMensagensParaMaisRecente() {
     });
 }
 
+function atualizarViewportVisualAdvisor() {
+    const viewport = window.visualViewport;
+    const top = viewport?.offsetTop ?? 0;
+    const height = viewport?.height ?? window.innerHeight;
+    popupAdvisor.style.setProperty('--advisor-viewport-top', `${top}px`);
+    popupAdvisor.style.setProperty('--advisor-viewport-height', `${height}px`);
+    if (popupAdvisor.classList.contains('advisor-teclado')) {
+        rolarMensagensParaMaisRecente();
+    }
+}
+
 function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = true) {
     const mensagem = document.createElement('article');
     mensagem.className = `mensagem-advisor mensagem-advisor-${tipo}`;
@@ -3133,11 +3144,17 @@ campoAdvisor.addEventListener('input', () => {
     }
 });
 campoAdvisor.addEventListener('focus', () => {
+    atualizarViewportVisualAdvisor();
+    popupAdvisor.classList.add('advisor-teclado');
     campoAdvisor.closest('.painel-advisor')?.classList.add('advisor-digitando');
 });
 campoAdvisor.addEventListener('blur', () => {
+    popupAdvisor.classList.remove('advisor-teclado');
     campoAdvisor.closest('.painel-advisor')?.classList.remove('advisor-digitando');
 });
+window.visualViewport?.addEventListener('resize', atualizarViewportVisualAdvisor);
+window.visualViewport?.addEventListener('scroll', atualizarViewportVisualAdvisor);
+window.addEventListener('resize', atualizarViewportVisualAdvisor);
 campoAdvisor.addEventListener('keydown', event => {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();

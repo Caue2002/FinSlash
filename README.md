@@ -34,7 +34,7 @@ A Navi permite conversar sobre assuntos gerais e enviar dúvidas sobre serviços
 Configure `GEMINI_API_KEY` e, opcionalmente, `GEMINI_MODEL` nas variáveis de ambiente para habilitar respostas gerais. Quando configurado, o Gemini recebe a pergunta; evite enviar dados pessoais sensíveis. Para perguntas AWS, o Gemini opcional só pode reformular informações encontradas nos diagnósticos publicados e nas fontes oficiais cadastradas. Sem a chave, a Navi continua funcionando para AWS no modo local e informa que a conversa geral está indisponível.
 
 O histórico do chat fica somente na `sessionStorage` da aba atual: permanece ao fechar e reabrir a Navi ou recarregar a página, e é removido quando a aba é fechada. As mensagens não são enviadas ao servidor como histórico nem persistidas entre abas.
-Durante a conversa, o painel mantém a mensagem mais recente visível e rola até o fim após cada nova mensagem.
+Durante a conversa, o painel mantém a mensagem mais recente visível, rola até o fim após cada nova mensagem e se ajusta à área visível quando o teclado móvel é aberto.
 
 Saudações e perguntas gerais usam o Gemini quando disponível, com temperatura zero. O modo geral não fornece instruções ou dados específicos de AWS. Perguntas AWS continuam restritas ao fluxo de diagnósticos publicados e informações validadas no catálogo.
 

@@ -12,6 +12,7 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações, cuidados e links para documentação oficial da AWS.
 - Navi, agente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
+- O cabeçalho da Navi usa o personagem escolhido pela pessoa usuária com um selo de três brilhos representando IA.
 - Modo agente opcional com Gemini: o modelo gera respostas a partir dos diagnósticos publicados e das fontes oficiais cadastradas.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
 - Até três diagnósticos relacionados por consulta, além de sugestões de perguntas comuns.

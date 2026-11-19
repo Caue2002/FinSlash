@@ -12,7 +12,7 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações e cuidados; links oficiais da AWS aparecem quando solicitados.
 - Navi, agente do FinSlash: responde perguntas gerais com apoio da Pesquisa Google e cruza dúvidas AWS com os diagnósticos cadastrados no PostgreSQL.
-- Perguntas sobre data e hora usam o fuso do dispositivo; perguntas sobre clima pedem a cidade e consultam a previsão do Open-Meteo.
+- Perguntas sobre data e hora usam o fuso do dispositivo; perguntas sobre clima pedem a cidade e consultam as condições atuais e a previsão para hoje ou amanhã no Open-Meteo.
 - O cabeçalho da Navi usa a logo própria do agente.
 - Modo agente opcional com Gemini: o modelo gera respostas a partir dos diagnósticos publicados e das fontes oficiais cadastradas; a Pesquisa Google retorna fontes verificáveis para perguntas gerais.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
@@ -60,7 +60,7 @@ Quando existe um diagnóstico validado, a Navi apresenta:
 
 Para evitar respostas AWS sem validação, perguntas que mencionam AWS, Amazon Web Services ou nomes reconhecidos de serviços seguem somente pelo fluxo de diagnósticos. O contexto fechado do banco validado é a única fonte de fatos que o Gemini pode usar; perguntas anteriores do usuário podem ser enviadas apenas para resolver referências, nunca como evidência. Título, resumo, etapas, correspondência e documentação continuam vinculados ao PostgreSQL do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
 
-Nas consultas com diagnóstico encontrado, a mensagem digitada é enviada ao Gemini junto de um contexto fechado contendo o diagnóstico, suas etapas e as fontes AWS cadastradas. A resposta textual exibida no chat é gerada pelo modelo, mas metadados, correspondência, documentos e campos técnicos continuam vindo do banco validado.
+Nas consultas com diagnóstico encontrado, a mensagem digitada é enviada ao Gemini junto de um contexto fechado contendo o diagnóstico, suas etapas e as fontes AWS cadastradas. A resposta textual exibida no chat é gerada pelo modelo, mas metadados, correspondência, documentos e campos técnicos continuam vindo do banco validado. Se a geração falhar, a Navi mantém a resposta local validada e suas fontes oficiais; perguntas gerais sem citações confiáveis não são respondidas como fatos.
 
 A busca reconhece serviços e termos como EC2, S3, RDS, Lambda, CloudWatch, IAM, CloudFront, EBS, EKS, ECS, DynamoDB, NAT Gateway, AWS Budgets e Cost Explorer. O ranking considera correspondência com o serviço, título, resumo, slug e etapas cadastradas. A resposta principal vem acompanhada de até dois diagnósticos relacionados e sugestões da mesma área.
 

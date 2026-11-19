@@ -1,3 +1,4 @@
+// Cenários de aprendizado de máquina e processamento de fluxos de dados.
 (() => {
     const criarTopicos = linhas => linhas.trim().split('\n').map(linha => {
         const [titulo, descricao] = linha.split('\t');

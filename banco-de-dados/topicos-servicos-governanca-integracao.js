@@ -1,3 +1,4 @@
+// Cenários de governança, monitoramento e integração entre serviços.
 window.finSlashTopicos = Object.assign(window.finSlashTopicos || {}, {
     "Amazon API Gateway": {
         titulo: "API Gateway",

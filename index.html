@@ -182,6 +182,7 @@
 
     <button class="botao botao-voltar-selecionado botao-voltar-tela-topicos hidden" id="botao-voltar-tela-topicos" type="button">Voltar</button>
 
+    <!-- Barra fixa para navegar entre personagens, serviços, perfil e Navi -->
     <nav class="navegacao-app hidden" id="navegacao-app" aria-label="Navegação principal">
         <button class="botao-navegacao-app" id="botao-menu-app" type="button" aria-label="Voltar ao menu de personagens">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -221,6 +222,7 @@
         </button>
     </nav>
 
+    <!-- Conversa da Navi com histórico, fontes, avaliação e campo de envio -->
     <div
         class="popup popup-advisor hidden"
         id="popup-advisor"
@@ -238,7 +240,7 @@
             </div>
             <div class="boas-vindas-advisor" id="boas-vindas-advisor">
                 <h3>Por onde começamos?</h3>
-                <p class="aviso-privacidade-advisor">Quando configurado, o Gemini recebe sua pergunta. Evite enviar dados pessoais sensíveis; respostas AWS usam o catálogo validado.</p>
+                <p class="aviso-privacidade-advisor">Até 6 mensagens recentes podem ser enviadas à API e ao Gemini para manter o contexto. Perguntas gerais podem usar a Pesquisa Google; perguntas sobre o tempo enviam a cidade informada ao Open-Meteo, e o horário usa o fuso do dispositivo. Evite dados sensíveis. Respostas AWS usam o catálogo; a Navi não acessa sua conta. O servidor não salva a conversa.</p>
                 <div class="cenarios-advisor" id="cenarios-advisor" role="group" aria-label="Sugestões de início">
                     <button type="button" data-pergunta-advisor="Como reduzir custos com EC2">Reduzir custos com EC2</button>
                     <button type="button" data-pergunta-advisor="Me fale sobre o serviço S3">Conhecer o S3</button>
@@ -247,9 +249,9 @@
             </div>
             <div class="mensagens-advisor" id="mensagens-advisor" aria-live="polite"></div>
             <form class="formulario-advisor" id="formulario-advisor">
-                <label class="sr-only" for="campo-advisor">Sua dúvida sobre AWS</label>
+                <label class="sr-only" for="campo-advisor">Sua pergunta para a Navi</label>
                 <div class="acoes-advisor">
-                    <textarea id="campo-advisor" maxlength="300" rows="1" placeholder="Pergunte à Navi sobre AWS"></textarea>
+                    <textarea id="campo-advisor" maxlength="300" rows="1" placeholder="Pergunte à Navi"></textarea>
                     <button class="botao-enviar-advisor" id="botao-enviar-advisor" type="submit" aria-label="Enviar pergunta">↑</button>
                 </div>
                 <span class="contador-advisor" id="contador-advisor">0/300</span>
@@ -258,6 +260,7 @@
         </aside>
     </div>
 
+    <!-- Perfil com histórico de serviços, conquistas e envio de feedback -->
     <div
         class="popup popup-perfil hidden"
         id="popup-perfil"
@@ -322,6 +325,7 @@
         </aside>
     </div>
 
+    <!-- Celebração exibida ao explorar todos os serviços AWS -->
     <div
         class="popup popup-conquista-final hidden"
         id="popup-conquista-final"
@@ -349,6 +353,7 @@
         </section>
     </div>
 
+    <!-- Formulário modal para personalizar o nome do perfil -->
     <div
         class="popup popup-editar-nome-perfil hidden"
         id="popup-editar-nome-perfil"
@@ -376,6 +381,7 @@
         </form>
     </div>
 
+    <!-- Carrega os dados do catálogo antes da lógica da aplicação -->
     <script src="banco-de-dados/topicos-servicos.js"></script>
     <script src="banco-de-dados/topicos-servicos-dados.js"></script>
     <script src="banco-de-dados/topicos-servicos-armazenamento-e-ia.js"></script>

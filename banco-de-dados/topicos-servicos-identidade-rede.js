@@ -1,3 +1,4 @@
+// Cenários de identidade, permissões e proteção dos recursos AWS.
 window.finSlashTopicos = Object.assign(window.finSlashTopicos || {}, {
     "Amazon Cognito": {
         titulo: "Cognito",

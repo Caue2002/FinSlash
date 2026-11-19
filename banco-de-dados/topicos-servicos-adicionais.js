@@ -1,3 +1,4 @@
+// Cenários complementares que ampliam os diagnósticos por serviço.
 const topicosAdicionaisPorServico = {
     'AWS Lambda': {
         titulo: 'Falta de Observabilidade Distribuída com AWS X-Ray',

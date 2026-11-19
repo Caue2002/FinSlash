@@ -1,3 +1,4 @@
+// Cenários de armazenamento, inteligência artificial e serviços relacionados.
 window.finSlashTopicos = Object.assign(window.finSlashTopicos || {}, {
     'Amazon S3': {
         titulo: 'S3',

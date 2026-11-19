@@ -1,3 +1,4 @@
+// Cenários principais de custo e operação para serviços AWS do catálogo.
 window.finSlashTopicos = {
     'Amazon EKS': {
         titulo: 'EKS',

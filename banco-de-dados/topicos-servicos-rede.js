@@ -1,3 +1,4 @@
+// Cenários de conectividade, distribuição de conteúdo e proteção de rede.
 (() => {
     const criarTopicos = linhas => linhas.trim().split('\n').map(linha => {
         const [titulo, descricao] = linha.split('\t');

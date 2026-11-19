@@ -1,3 +1,4 @@
+// Cenários de análise, busca e processamento de dados na AWS.
 window.finSlashTopicos = Object.assign(window.finSlashTopicos || {}, {
     'AWS Glue': {
         titulo: 'Glue',

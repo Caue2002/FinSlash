@@ -1,3 +1,4 @@
+// Cenários de execução, computação e gerenciamento de contêineres.
 (() => {
     const criarTopicos = linhas => linhas.trim().split('\n').map(linha => {
         const [titulo, descricao] = linha.split('\t');

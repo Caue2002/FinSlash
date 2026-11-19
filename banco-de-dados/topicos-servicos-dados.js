@@ -1,3 +1,4 @@
+// Cenários de uso e custo para bancos de dados e serviços de cache.
 window.finSlashTopicos = Object.assign(window.finSlashTopicos || {}, {
     'Amazon DynamoDB': {
         titulo: 'DynamoDB',

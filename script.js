@@ -1,4 +1,4 @@
-// Dados dos personagens com cores imagens e gifs
+// Dados estáticos dos personagens, serviços AWS e diagnósticos cadastrados.
 const personagens = [
     { nome: 'Killua', cor: '#9ca3af', imagem: 'imagens/personagem1.webp', gif: 'imagens/gif1.gif' },
     { nome: 'Gon', cor: '#22c55e', imagem: 'imagens/personagem2.webp', gif: 'imagens/gif2.gif' },
@@ -171,11 +171,15 @@ const topicosEC2 = [
 const topicosPorServico = Object.assign(window.finSlashTopicos, {
     'Amazon EC2': { titulo: 'EC2', topicos: topicosEC2 }
 });
+
+// Limites e chaves usadas para salvar preferências e o histórico da Navi.
 const quantidadeIconesServico = 48;
 const chaveArmazenamentoAplicacao = 'finslash:preferencias';
 const chaveHistoricoAdvisor = 'finslash:historico-navi';
+const limiteMensagensHistoricoAdvisor = 40;
+const limiteMensagensContextoAdvisor = 6;
 
-// Variavel para armazenar o personagem selecionado
+// Estado compartilhado da navegação, das animações e das consultas atuais.
 let personagemSelecionado = null;
 const dadosPersistidos = carregarDadosPersistidos();
 let celebracaoAtiva = 0;
@@ -186,7 +190,7 @@ let alturaViewportAdvisorSemTeclado = null;
 let larguraViewportAdvisorSemTeclado = null;
 const gifsCelebracaoPrecarregados = new Map();
 
-// Elementos do DOM
+// Referências aos elementos da interface e aos controles principais.
 const cartaoCentral = document.getElementById('cartao-central');
 const popupPersonagens = document.getElementById('popup-personagens');
 const popupPersonagemSelecionado = document.getElementById('popup-personagem-selecionado');
@@ -284,6 +288,7 @@ const secoesPerfil = {
     feedback: document.getElementById('conteudo-feedback-perfil')
 };
 
+// Lê, valida e salva preferências locais sem interromper a navegação.
 function carregarDadosPersistidos() {
     try {
         const armazenado = window.localStorage.getItem(chaveArmazenamentoAplicacao);
@@ -415,6 +420,7 @@ function atualizarDisponibilidadePesquisaNavegacao() {
     botaoPesquisaApp.disabled = telaServicos.classList.contains('hidden') && !personagemDisponivel;
 }
 
+// Monta o perfil, o histórico de serviços e as conquistas da pessoa usuária.
 function renderizarHistoricoPerfil() {
     listaHistoricoPerfil.replaceChildren();
     if (!dadosPersistidos.historicoServicos.length) {
@@ -557,11 +563,13 @@ function fecharPerfil() {
     popupPerfil.classList.add('hidden');
 }
 
+// Abre e fecha a Navi, ajustando o foco e o histórico do navegador.
 function abrirAdvisor() {
     fecharPerfil();
     popupAdvisor.classList.remove('hidden');
     alturaViewportAdvisorSemTeclado = window.visualViewport?.height ?? window.innerHeight;
     larguraViewportAdvisorSemTeclado = window.innerWidth;
+    atualizarViewportVisualAdvisor();
     if (!mensagensAdvisor.childElementCount && dadosPersistidos.nomePerfil !== 'Meu perfil') {
         adicionarMensagemAdvisor(
             'assistant',
@@ -608,11 +616,13 @@ function fecharAdvisorVisual(retornarFoco = false) {
     }
 }
 
+// Filtra links apresentados pela Navi e impede endereços externos inválidos.
 function validarLinkAws(url) {
     try {
         const link = new URL(url);
-        return link.protocol === 'https:' && (
+        return link.protocol === 'https:' && !link.username && !link.password && (
             link.hostname === 'aws.amazon.com'
+            || link.hostname.endsWith('.aws.amazon.com')
             || link.hostname.endsWith('.amazonaws.com')
         );
     } catch (error) {
@@ -620,6 +630,190 @@ function validarLinkAws(url) {
     }
 }
 
+function validarLinkHttps(url) {
+    try {
+        const link = new URL(url);
+        const hostname = link.hostname.replace(/^\[|\]$/gu, '');
+        return link.protocol === 'https:'
+            && Boolean(link.hostname)
+            && !link.username
+            && !link.password
+            && !/^(\d{1,3}\.){3}\d{1,3}$/u.test(hostname)
+            && !hostname.includes(':')
+            && hostname !== 'localhost'
+            && !hostname.endsWith('.localhost');
+    } catch (error) {
+        return false;
+    }
+}
+
+function perguntaSolicitaLinksAdvisor(pergunta) {
+    const normalizada = pergunta
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/gu, '')
+        .toLowerCase();
+    return /\b(links?|urls?|fontes?|referencias?|documentacao)\b/u.test(normalizada)
+        || /\b(?:sites?|paginas?) oficiais?\b/u.test(normalizada)
+        || /\b(?:me )?(?:manda|mande|envia|envie|passa|passe|mostra|mostre|compartilha|compartilhe)\b.{0,50}\b(?:site|pagina)\b/u.test(normalizada)
+        || /\bonde (?:posso|consigo) (?:ler|encontrar|consultar|acessar)\b/u.test(normalizada);
+}
+
+function removerLinksAdvisor(texto) {
+    return texto
+        .replace(/\[([^\]]+)\]\((?:https?:\/\/|www\.)[^)\s]+\)/giu, '$1')
+        .replace(/\b(?:https?:\/\/|www\.)[^\s<>()]+/giu, '')
+        .replace(/[ \t]{2,}/gu, ' ')
+        .replace(/ *\n */gu, '\n')
+        .trim();
+}
+
+function respostaEstruturadaAdvisor(resultado) {
+    return removerLinksAdvisor([
+        typeof resultado.diagnostico === 'string' ? resultado.diagnostico : '',
+        typeof resultado.verificacao === 'string' ? `Verificação: ${resultado.verificacao}` : '',
+        typeof resultado.acao === 'string' ? `Como proceder: ${resultado.acao}` : '',
+        typeof resultado.cuidados === 'string' ? `Cuidados: ${resultado.cuidados}` : ''
+    ].filter(Boolean).join('\n\n'));
+}
+
+function respostaTerminaComReferenciaAdvisor(texto) {
+    const normalizada = texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/gu, '')
+        .toLowerCase();
+    return /^(?:consulte|acesse|veja|leia|confira|abra)(?:\s+(?:agora|a|o|os|as|na|no|nas|nos|fonte|fontes|documentacao|documento|link|site|pagina|aws|oficial|oficiais|para|mais|informacoes))*[\s.,!?;:…]*$/u.test(normalizada)
+        || /\b(?:consulte|acesse|veja|leia|confira|documentacao|fonte|referencia)\b[\s.,!?;:…]*$/u.test(normalizada);
+}
+
+// Prepara respostas, valida fontes e desenha os indicadores de origem.
+function obterRespostaAdvisor(resultado, mostrarLinks) {
+    const respostaEstruturada = respostaEstruturadaAdvisor(resultado);
+    const respostaOriginal = typeof resultado.resposta === 'string'
+        && resultado.resposta.trim()
+        ? resultado.resposta.trim()
+        : respostaEstruturada;
+    if (mostrarLinks) {
+        return respostaOriginal;
+    }
+
+    const respostaSemLinks = removerLinksAdvisor(respostaOriginal);
+    if (!respostaSemLinks || respostaTerminaComReferenciaAdvisor(respostaSemLinks)) {
+        return respostaEstruturada
+            || 'A Navi não recebeu detalhes suficientes para formular uma resposta completa sem o link. Reformule a pergunta ou peça a fonte.';
+    }
+    return respostaSemLinks;
+}
+
+function obterFontesAdvisor(resultado) {
+    const permiteFontesExternas = [
+        'gemini-geral-busca',
+        'open-meteo',
+        'horario-open-meteo'
+    ].includes(resultado.fonte);
+    const fontes = Array.isArray(resultado.sources)
+        ? resultado.sources
+            .filter((fonte) => fonte
+                && typeof fonte === 'object'
+                && typeof fonte.url === 'string'
+                && (validarLinkAws(fonte.url)
+                    || (permiteFontesExternas && validarLinkHttps(fonte.url))))
+            .map((fonte) => ({
+                title: typeof fonte.title === 'string' && fonte.title.trim()
+                    ? fonte.title.trim()
+                    : 'Fonte consultada',
+                url: fonte.url
+            }))
+        : [];
+    if (typeof resultado.documentacao === 'string'
+        && validarLinkAws(resultado.documentacao)
+        && !fontes.some((fonte) => fonte.url === resultado.documentacao)) {
+        fontes.push({
+            title: 'Documentação oficial da AWS',
+            url: resultado.documentacao
+        });
+    }
+    return fontes;
+}
+
+function criarFontesAdvisor(resultado, fontes) {
+    const origens = new Map();
+    fontes.forEach((fonte) => {
+        const url = new URL(fonte.url);
+        const ehAws = validarLinkAws(fonte.url);
+        const mostrarLink = resultado.mostrarLinks || !ehAws;
+        const chave = url.origin;
+        const dominio = url.hostname.replace(/^www\./u, '');
+        if (!origens.has(chave)) {
+            origens.set(chave, {
+                nome: ehAws ? 'AWS' : dominio,
+                logo: ehAws ? 'imagens/aws-logo.ico' : null,
+                inicial: dominio.charAt(0).toUpperCase(),
+                url: mostrarLink ? fonte.url : null,
+                titulo: fonte.title
+            });
+        }
+    });
+
+    const origemFinSlash = typeof resultado.validacao?.origem === 'string'
+        && resultado.validacao.origem.toLowerCase().includes('finslash');
+    const catalogoFinSlash = ['banco', 'banco-validado', 'gemini+banco-validado', 'orientacao_padrao']
+        .includes(resultado.fonte);
+    if (origemFinSlash || catalogoFinSlash) {
+        origens.set('finslash', {
+            nome: 'FinSlash',
+            logo: 'imagens/logo.webp',
+            inicial: 'F',
+            url: null,
+            titulo: 'FinSlash'
+        });
+    }
+    if (!origens.size) {
+        return null;
+    }
+
+    const secao = document.createElement('div');
+    secao.className = 'fontes-mensagem-advisor';
+    secao.setAttribute('role', 'group');
+    secao.setAttribute('aria-label', 'Fontes da resposta');
+    origens.forEach((origem) => {
+        const identificacao = document.createElement(origem.url ? 'a' : 'span');
+        identificacao.className = 'origem-mensagem-advisor';
+        if (origem.nome === 'FinSlash') {
+            identificacao.classList.add('origem-mensagem-advisor-finslash');
+        }
+        identificacao.title = origem.titulo || origem.nome;
+        if (origem.url) {
+            identificacao.href = origem.url;
+            identificacao.target = '_blank';
+            identificacao.rel = 'noopener noreferrer';
+            identificacao.setAttribute('aria-label', `Abrir fonte: ${origem.titulo}`);
+        } else {
+            identificacao.setAttribute('role', 'img');
+            identificacao.setAttribute('aria-label', origem.nome);
+        }
+        if (origem.logo) {
+            const logo = document.createElement('img');
+            logo.src = origem.logo;
+            logo.alt = '';
+            logo.loading = 'lazy';
+            logo.decoding = 'async';
+            logo.referrerPolicy = 'no-referrer';
+            logo.addEventListener('error', () => {
+                logo.hidden = true;
+            });
+            identificacao.appendChild(logo);
+        } else {
+            const inicial = document.createElement('span');
+            inicial.className = 'origem-mensagem-advisor-inicial';
+            inicial.textContent = origem.inicial;
+            identificacao.appendChild(inicial);
+        }
+        secao.appendChild(identificacao);
+    });
+    return secao;
+}
+
+// Mantém o contexto recente da Navi e adapta o painel ao teclado móvel.
 function salvarHistoricoAdvisor() {
     const historico = Array.from(mensagensAdvisor.children)
         .filter((mensagem) => !mensagem.classList.contains('mensagem-pensando-advisor'))
@@ -627,12 +821,38 @@ function salvarHistoricoAdvisor() {
             tipo: mensagem.dataset.tipo,
             texto: mensagem.querySelector('.texto-principal-mensagem-advisor')?.textContent || '',
             resultado: mensagem.resultadoAdvisor || null
-        }));
+        }))
+        .slice(-limiteMensagensHistoricoAdvisor);
     try {
         window.sessionStorage.setItem(chaveHistoricoAdvisor, JSON.stringify(historico));
     } catch (error) {
         console.error('Não foi possível manter o histórico da Navi nesta aba.', error);
     }
+}
+
+function obterContextoHistoricoAdvisor() {
+    const historico = Array.from(mensagensAdvisor.children)
+        .filter((mensagem) => !mensagem.classList.contains('mensagem-pensando-advisor')
+            && !mensagem.resultadoAdvisor?.repetirPergunta)
+        .map((mensagem) => ({
+            tipo: mensagem.dataset.tipo,
+            texto: Array.from(
+                mensagem.querySelector('.texto-principal-mensagem-advisor')?.textContent || ''
+            ).slice(0, 300).join(''),
+            resultado: mensagem.resultadoAdvisor || null
+        }))
+        .filter((mensagem) => ['user', 'assistant'].includes(mensagem.tipo) && mensagem.texto)
+        .slice(-limiteMensagensContextoAdvisor);
+    const ultimaMensagem = historico[historico.length - 1];
+    return historico.map((mensagem, indice) => ({
+        tipo: mensagem.tipo,
+        texto: mensagem.texto,
+        ...(indice === historico.length - 1
+            && ultimaMensagem?.tipo === 'assistant'
+            && mensagem.resultado?.conversa
+            ? { conversa: mensagem.resultado.conversa }
+            : {})
+    }));
 }
 
 function restaurarHistoricoAdvisor() {
@@ -645,6 +865,7 @@ function restaurarHistoricoAdvisor() {
         if (!Array.isArray(historico)) {
             throw new TypeError('O histórico da Navi precisa ser uma lista.');
         }
+        let historicoAtualizado = false;
         historico.forEach((item) => {
             const resultadoValido = item?.resultado === null
                 || (typeof item?.resultado === 'object' && !Array.isArray(item.resultado));
@@ -655,8 +876,21 @@ function restaurarHistoricoAdvisor() {
                 console.warn('Uma mensagem inválida do histórico da Navi foi ignorada.');
                 return;
             }
-            adicionarMensagemAdvisor(item.tipo, item.texto, item.resultado, false);
+            const textoAtualizado = item.tipo === 'assistant'
+                && item.resultado
+                && !item.resultado.repetirPergunta
+                && item.resultado.mostrarLinks === false
+                && (!item.texto.trim() || respostaTerminaComReferenciaAdvisor(item.texto))
+                ? obterRespostaAdvisor(item.resultado, false)
+                : item.texto;
+            if (textoAtualizado !== item.texto) {
+                historicoAtualizado = true;
+            }
+            adicionarMensagemAdvisor(item.tipo, textoAtualizado, item.resultado, false);
         });
+        if (historicoAtualizado) {
+            salvarHistoricoAdvisor();
+        }
         boasVindasAdvisor?.classList.toggle('hidden', mensagensAdvisor.childElementCount > 0);
     } catch (error) {
         console.error('Não foi possível restaurar o histórico da Navi nesta aba.', error);
@@ -694,10 +928,99 @@ function atualizarViewportVisualAdvisor() {
     }
 }
 
+// Registra feedback, cria as ações da resposta e envia novas perguntas.
+async function enviarAvaliacaoAdvisor(mensagem, resultado, avaliacao, status, motivo = null) {
+    if (mensagem.dataset.enviandoFeedback === 'true' || resultado.feedback?.enviado) {
+        return;
+    }
+
+    const botoes = Array.from(mensagem.querySelectorAll('[data-avaliacao-advisor]'));
+    const apiBase = typeof window.FINSLASH_API_BASE_URL === 'string'
+        ? window.FINSLASH_API_BASE_URL.trim().replace(/\/+$/u, '')
+        : window.location.origin;
+    const tema = resultado.servico || resultado.diagnostico || 'resposta geral';
+    const valorAvaliacao = avaliacao === 'util'
+        ? 'útil'
+        : 'não útil';
+    const motivoTexto = {
+        incompleta: 'faltou informação',
+        incorreta: 'pode conter erro',
+        confusa: 'ficou difícil de entender',
+        fora_da_pergunta: 'não respondeu ao pedido'
+    }[motivo];
+
+    mensagem.dataset.enviandoFeedback = 'true';
+    botoes.forEach((botao) => {
+        botao.disabled = true;
+    });
+    status.textContent = 'Enviando avaliação...';
+
+    try {
+        const resposta = await fetch(`${apiBase}/api/v1/feedback`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                category: 'content',
+                message: `Avaliação da Navi: resposta ${valorAvaliacao}. Tema: ${tema}.${motivoTexto ? ` Motivo: ${motivoTexto}.` : ''}`
+            })
+        });
+        let respostaFeedback;
+        try {
+            respostaFeedback = await resposta.json();
+        } catch (error) {
+            throw new TypeError('A API devolveu uma resposta inválida.');
+        }
+        if (!respostaFeedback || typeof respostaFeedback !== 'object') {
+            throw new TypeError('A API devolveu uma resposta inválida.');
+        }
+        if (!resposta.ok) {
+            throw new Error(typeof respostaFeedback.error === 'string'
+                ? respostaFeedback.error
+                : `A API respondeu com o status ${resposta.status}.`);
+        }
+
+        resultado.feedback = {
+            avaliacao,
+            ...(motivo ? { motivo } : {}),
+            enviado: true
+        };
+        botoes.forEach((botao) => {
+            const selecionado = botao.dataset.avaliacaoAdvisor === avaliacao;
+            botao.setAttribute('aria-pressed', String(selecionado));
+            botao.classList.toggle('acao-concluida', selecionado);
+        });
+        status.textContent = avaliacao === 'nao-util'
+            ? 'Avaliação enviada. Ao gerar outra resposta, a Navi vai considerar esse motivo.'
+            : 'Obrigado! Sua avaliação foi enviada sem incluir a conversa.';
+        salvarHistoricoAdvisor();
+    } catch (error) {
+        console.error('Não foi possível enviar a avaliação da Navi:', error);
+        status.textContent = error instanceof Error
+            ? `Não foi possível enviar. ${error.message}`
+            : 'Não foi possível enviar. Tente novamente mais tarde.';
+        mensagem.dataset.enviandoFeedback = 'false';
+        botoes.forEach((botao) => {
+            botao.disabled = false;
+        });
+    }
+}
+
 function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = true) {
     const mensagem = document.createElement('article');
     mensagem.className = `mensagem-advisor mensagem-advisor-${tipo}`;
     mensagem.dataset.tipo = tipo;
+    if (tipo === 'assistant' && resultado && !resultado.perguntaOriginal && !resultado.repetirPergunta) {
+        const perguntaAnterior = [...mensagensAdvisor.children]
+            .reverse()
+            .find((item) => item.dataset.tipo === 'user');
+        resultado.perguntaOriginal = perguntaAnterior
+            ?.querySelector('.texto-principal-mensagem-advisor')
+            ?.textContent
+            ?.trim() || '';
+    }
     mensagem.resultadoAdvisor = resultado;
 
     const bolha = document.createElement('div');
@@ -708,7 +1031,9 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = tru
     textoPrincipal.textContent = texto;
     bolha.appendChild(textoPrincipal);
 
-    if (tipo === 'assistant' && resultado) {
+    if (tipo === 'assistant' && resultado && !resultado.repetirPergunta) {
+        const fontesAdvisor = obterFontesAdvisor(resultado);
+        const painelFontes = criarFontesAdvisor(resultado, fontesAdvisor);
         if (Array.isArray(resultado.plan) && resultado.plan.length) {
             const plano = document.createElement('section');
             plano.className = 'plano-mensagem-advisor';
@@ -742,55 +1067,118 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = tru
             bolha.appendChild(checklist);
         }
 
-        if (Array.isArray(resultado.sources) && resultado.sources.length) {
-            const fontes = document.createElement('section');
-            fontes.className = 'fontes-mensagem-advisor';
-            const tituloFontes = document.createElement('h4');
-            tituloFontes.textContent = 'Fontes oficiais';
-            fontes.appendChild(tituloFontes);
-            resultado.sources.forEach((fonte) => {
-                if (typeof fonte.url !== 'string') {
-                    return;
-                }
-                const link = document.createElement('a');
-                link.href = fonte.url;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                link.textContent = fonte.title || 'Documentação AWS';
-                fontes.appendChild(link);
-            });
-            bolha.appendChild(fontes);
+        if (painelFontes) {
+            bolha.appendChild(painelFontes);
         }
 
-        const metadados = document.createElement('div');
-        metadados.className = 'metadados-mensagem-advisor';
-        const itens = [];
-        if (resultado.servico) {
-            itens.push(resultado.servico);
-        }
-        if (resultado.encontrado && Number.isFinite(resultado.confianca)) {
-            itens.push(`Confiança ${Math.round(resultado.confianca * 100)}%`);
-        }
-        metadados.textContent = itens.join(' · ');
-        if (metadados.textContent) {
-            bolha.appendChild(metadados);
-        }
-        const urlSegura = typeof resultado.documentacao === 'string'
-            && validarLinkAws(resultado.documentacao)
-            ? resultado.documentacao
-            : null;
-        if (urlSegura) {
-            const link = document.createElement('a');
-            link.className = 'documentacao-mensagem-advisor';
-            link.href = urlSegura;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            link.textContent = 'Documentação oficial da AWS';
-            bolha.appendChild(link);
+        if (Array.isArray(resultado.sugestoes) && resultado.sugestoes.length) {
+            const sugestoesValidas = resultado.sugestoes
+                .filter((sugestao) => typeof sugestao === 'string' && sugestao.trim())
+                .slice(0, 3);
+            if (sugestoesValidas.length) {
+                const sugestoes = document.createElement('div');
+                sugestoes.className = 'sugestoes-mensagem-advisor';
+                sugestoes.setAttribute('role', 'group');
+                sugestoes.setAttribute('aria-label', 'Sugestões de pergunta');
+                sugestoesValidas.forEach((sugestao) => {
+                    const botaoSugestao = document.createElement('button');
+                    botaoSugestao.type = 'button';
+                    botaoSugestao.textContent = sugestao.slice(0, 120);
+                    botaoSugestao.addEventListener('click', () => {
+                        void enviarPerguntaAdvisor(botaoSugestao.textContent);
+                    });
+                    sugestoes.appendChild(botaoSugestao);
+                });
+                bolha.appendChild(sugestoes);
+            }
         }
 
         const acoes = document.createElement('div');
         acoes.className = 'acoes-mensagem-advisor';
+        const statusAvaliacao = document.createElement('span');
+        statusAvaliacao.className = 'status-avaliacao-advisor';
+        statusAvaliacao.setAttribute('role', 'status');
+
+        const avaliarUtil = document.createElement('button');
+        avaliarUtil.type = 'button';
+        avaliarUtil.className = 'acao-mensagem-advisor acao-feedback-advisor';
+        avaliarUtil.dataset.avaliacaoAdvisor = 'util';
+        avaliarUtil.setAttribute('aria-label', 'Marcar resposta como útil');
+        avaliarUtil.setAttribute('aria-pressed', String(resultado.feedback?.avaliacao === 'util'));
+        avaliarUtil.title = 'Resposta útil';
+        avaliarUtil.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10v12"></path><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H7"></path><path d="M4 10h3v12H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path></svg>';
+        avaliarUtil.addEventListener('click', () => {
+            void enviarAvaliacaoAdvisor(mensagem, resultado, 'util', statusAvaliacao);
+        });
+        acoes.appendChild(avaliarUtil);
+
+        const avaliarNaoUtil = document.createElement('button');
+        avaliarNaoUtil.type = 'button';
+        avaliarNaoUtil.className = 'acao-mensagem-advisor acao-feedback-advisor';
+        avaliarNaoUtil.dataset.avaliacaoAdvisor = 'nao-util';
+        avaliarNaoUtil.setAttribute('aria-label', 'Marcar resposta como não útil');
+        avaliarNaoUtil.setAttribute('aria-pressed', String(resultado.feedback?.avaliacao === 'nao-util'));
+        avaliarNaoUtil.title = 'Resposta não útil';
+        avaliarNaoUtil.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 14V2"></path><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H17"></path><path d="M20 14h-3V2h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z"></path></svg>';
+
+        const opcoesFeedback = document.createElement('div');
+        opcoesFeedback.className = 'opcoes-feedback-advisor';
+        opcoesFeedback.hidden = true;
+        opcoesFeedback.setAttribute('role', 'group');
+        opcoesFeedback.setAttribute('aria-label', 'Motivo da avaliação');
+        [
+            ['incompleta', 'Faltou informação'],
+            ['incorreta', 'Pode conter um erro'],
+            ['confusa', 'Ficou difícil de entender'],
+            ['fora_da_pergunta', 'Não respondeu ao pedido']
+        ].forEach(([motivo, rotulo]) => {
+            const opcao = document.createElement('button');
+            opcao.type = 'button';
+            opcao.className = 'opcao-feedback-advisor';
+            opcao.dataset.motivoFeedback = motivo;
+            opcao.textContent = rotulo;
+            opcao.addEventListener('click', () => {
+                resultado.feedback = {
+                    avaliacao: 'nao-util',
+                    motivo,
+                    enviado: false
+                };
+                opcoesFeedback.hidden = true;
+                void enviarAvaliacaoAdvisor(
+                    mensagem,
+                    resultado,
+                    'nao-util',
+                    statusAvaliacao,
+                    motivo
+                );
+            });
+            opcoesFeedback.appendChild(opcao);
+        });
+        avaliarNaoUtil.addEventListener('click', () => {
+            if (resultado.feedback?.enviado) {
+                return;
+            }
+            opcoesFeedback.hidden = !opcoesFeedback.hidden;
+            statusAvaliacao.textContent = opcoesFeedback.hidden
+                ? ''
+                : 'O que não funcionou? A Navi usará esse motivo ao gerar outra resposta.';
+        });
+        acoes.appendChild(avaliarNaoUtil);
+
+        const regenerar = document.createElement('button');
+        regenerar.type = 'button';
+        regenerar.className = 'acao-mensagem-advisor';
+        regenerar.setAttribute('aria-label', 'Gerar outra resposta');
+        regenerar.title = 'Gerar outra resposta';
+        regenerar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"></path><path d="M4.93 9A8 8 0 0 1 18.36 5.64L20 7M4 17v-5h5"></path><path d="M19.07 15A8 8 0 0 1 5.64 18.36L4 17"></path></svg>';
+        regenerar.addEventListener('click', () => {
+            void enviarPerguntaAdvisor(resultado.perguntaOriginal, {
+                regenerar: true,
+                motivoFeedback: resultado.feedback?.motivo || null,
+                mensagemOrigem: mensagem
+            });
+        });
+        acoes.appendChild(regenerar);
 
         const copiar = document.createElement('button');
         copiar.type = 'button';
@@ -805,30 +1193,57 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = tru
                 window.setTimeout(() => {
                     copiar.classList.remove('acao-concluida');
                 }, 1600);
-            } catch {
-                copiar.setAttribute('aria-label', 'Não foi possível copiar');
+                statusAvaliacao.textContent = 'Resposta copiada.';
+            } catch (error) {
+                console.error('Não foi possível copiar a resposta da Navi:', error);
+                statusAvaliacao.textContent = 'Não foi possível copiar. Verifique a permissão do navegador.';
             }
         });
         acoes.appendChild(copiar);
 
+        const menuAcoes = document.createElement('div');
+        menuAcoes.className = 'menu-acoes-advisor';
+        const maisOpcoes = document.createElement('button');
+        maisOpcoes.type = 'button';
+        maisOpcoes.className = 'acao-mensagem-advisor';
+        maisOpcoes.setAttribute('aria-label', 'Mais opções');
+        maisOpcoes.setAttribute('aria-expanded', 'false');
+        maisOpcoes.title = 'Mais opções';
+        maisOpcoes.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg>';
+        const menu = document.createElement('div');
+        menu.className = 'menu-opcoes-advisor';
+        menu.hidden = true;
+        menu.setAttribute('role', 'group');
+        menu.setAttribute('aria-label', 'Opções da resposta');
+        menuAcoes.append(maisOpcoes, menu);
+        maisOpcoes.addEventListener('click', () => {
+            const abrir = menu.hidden;
+            document.querySelectorAll('.menu-opcoes-advisor').forEach((item) => {
+                item.hidden = true;
+                item.parentElement?.querySelector('[aria-expanded]')?.setAttribute('aria-expanded', 'false');
+            });
+            menu.hidden = !abrir;
+            maisOpcoes.setAttribute('aria-expanded', String(abrir));
+        });
+
         const exportar = document.createElement('button');
         exportar.type = 'button';
-        exportar.className = 'acao-mensagem-advisor';
-        exportar.setAttribute('aria-label', 'Exportar resposta');
-        exportar.title = 'Exportar resposta';
-        exportar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path><path d="M7 7v10h10"></path></svg>';
+        exportar.className = 'item-menu-advisor';
+        exportar.textContent = 'Exportar resposta';
         exportar.addEventListener('click', () => {
             const cabecalho = [
-                'Navi - Relatório de diagnóstico',
+                'Navi - Resposta',
                 '',
                 texto,
                 '',
                 resultado.servico ? `Serviço: ${resultado.servico}` : '',
                 resultado.diagnostico ? `Diagnóstico: ${resultado.diagnostico}` : '',
                 Number.isFinite(resultado.confianca)
-                    ? `Confiança: ${Math.round(resultado.confianca * 100)}%`
+                    ? `Correspondência no catálogo: ${Math.round(resultado.confianca * 100)}%`
                     : '',
-                urlSegura ? `Fonte oficial: ${urlSegura}` : ''
+                ...(resultado.mostrarLinks
+                    ? fontesAdvisor.map((fonte) => `Fonte oficial: ${fonte.url}`)
+                    : [])
             ].filter(Boolean).join('\n');
             const blob = new Blob([cabecalho], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -837,9 +1252,61 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = tru
             link.download = 'navi-relatorio.txt';
             link.click();
             URL.revokeObjectURL(url);
+            menu.hidden = true;
+            maisOpcoes.setAttribute('aria-expanded', 'false');
         });
-        acoes.appendChild(exportar);
+        menu.appendChild(exportar);
+
+        const listaFontes = document.createElement('div');
+        listaFontes.className = 'fontes-detalhadas-advisor';
+        listaFontes.hidden = true;
+        listaFontes.setAttribute('role', 'group');
+        listaFontes.setAttribute('aria-label', 'Fontes consultadas');
+        fontesAdvisor.forEach((fonte) => {
+            const linkFonte = document.createElement('a');
+            linkFonte.className = 'link-fonte-advisor';
+            linkFonte.href = fonte.url;
+            linkFonte.target = '_blank';
+            linkFonte.rel = 'noopener noreferrer';
+            linkFonte.textContent = fonte.title;
+            listaFontes.appendChild(linkFonte);
+        });
+        if (fontesAdvisor.length) {
+            const mostrarFontes = document.createElement('button');
+            mostrarFontes.type = 'button';
+            mostrarFontes.className = 'item-menu-advisor';
+            mostrarFontes.textContent = 'Abrir fontes consultadas';
+            mostrarFontes.addEventListener('click', () => {
+                listaFontes.hidden = !listaFontes.hidden;
+                menu.hidden = true;
+                maisOpcoes.setAttribute('aria-expanded', 'false');
+            });
+            menu.appendChild(mostrarFontes);
+        }
+        acoes.appendChild(menuAcoes);
         bolha.appendChild(acoes);
+        bolha.appendChild(opcoesFeedback);
+        bolha.appendChild(listaFontes);
+
+        if (resultado.feedback?.enviado) {
+            [avaliarUtil, avaliarNaoUtil].forEach((botao) => {
+                botao.disabled = true;
+            });
+            statusAvaliacao.textContent = resultado.feedback.avaliacao === 'nao-util'
+                ? 'Avaliação enviada. Ao gerar outra resposta, a Navi vai considerar esse motivo.'
+                : 'Avaliação enviada. Obrigado!';
+        }
+        bolha.appendChild(statusAvaliacao);
+    } else if (tipo === 'assistant' && resultado?.repetirPergunta) {
+        const tentarNovamente = document.createElement('button');
+        tentarNovamente.type = 'button';
+        tentarNovamente.className = 'tentar-novamente-advisor';
+        tentarNovamente.textContent = 'Tentar novamente';
+        tentarNovamente.addEventListener('click', () => {
+            tentarNovamente.remove();
+            void enviarPerguntaAdvisor(resultado.repetirPergunta);
+        });
+        bolha.appendChild(tentarNovamente);
     }
 
     mensagensAdvisor.appendChild(mensagem);
@@ -850,23 +1317,18 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = tru
     return mensagem;
 }
 
-function exibirResultadoAdvisor(resultado) {
-    const resposta = typeof resultado.resposta === 'string'
-        && resultado.resposta.trim()
-        ? resultado.resposta.trim()
-        : [
-            typeof resultado.diagnostico === 'string' ? resultado.diagnostico : '',
-            typeof resultado.verificacao === 'string' ? resultado.verificacao : '',
-            typeof resultado.acao === 'string' ? `Como proceder: ${resultado.acao}` : '',
-            typeof resultado.cuidados === 'string' ? `Cuidados: ${resultado.cuidados}` : ''
-        ].filter(Boolean).join('\n\n');
+function exibirResultadoAdvisor(resultado, pergunta) {
+    resultado.perguntaOriginal = pergunta;
+    resultado.mostrarLinks = perguntaSolicitaLinksAdvisor(pergunta);
+    const resposta = obterRespostaAdvisor(resultado, resultado.mostrarLinks);
     adicionarMensagemAdvisor('assistant', resposta, resultado);
 }
 
-async function enviarPerguntaAdvisor(pergunta) {
+async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
     const texto = typeof pergunta === 'string'
         ? pergunta.replace(/\s+/gu, ' ').trim()
         : '';
+    const regenerar = opcoes.regenerar === true;
     if (!texto) {
         statusAdvisor.textContent = 'Digite uma pergunta.';
         campoAdvisor.focus();
@@ -887,15 +1349,33 @@ async function enviarPerguntaAdvisor(pergunta) {
     }
 
     enviandoAdvisor = true;
+    const acoesOrigem = opcoes.mensagemOrigem
+        ? Array.from(opcoes.mensagemOrigem.querySelectorAll('button'))
+        : [];
+    acoesOrigem.forEach((botao) => {
+        botao.disabled = true;
+    });
+    const historico = obterContextoHistoricoAdvisor();
+    const ultimaMensagem = mensagensAdvisor.lastElementChild;
+    const perguntaRetentativa = ultimaMensagem?.resultadoAdvisor?.repetirPergunta === texto
+        && historico[historico.length - 1]?.tipo === 'user'
+        && historico[historico.length - 1]?.texto === texto;
+    if (perguntaRetentativa) {
+        historico.pop();
+    }
     botaoEnviarAdvisor.disabled = true;
     campoAdvisor.disabled = true;
-    statusAdvisor.textContent = 'A Navi está preparando uma resposta...';
+    statusAdvisor.textContent = regenerar
+        ? 'A Navi está preparando outra resposta...'
+        : 'A Navi está preparando uma resposta...';
     popupAdvisor.querySelector('.painel-advisor')?.classList.add('advisor-consulta');
     boasVindasAdvisor?.classList.add('hidden');
-    adicionarMensagemAdvisor('user', texto);
+    if (!regenerar) {
+        adicionarMensagemAdvisor('user', texto);
+    }
     const pensando = adicionarMensagemAdvisor(
         'assistant',
-        'Pensando...',
+        regenerar ? 'Gerando outra resposta...' : 'Pensando...',
         null,
         false
     );
@@ -904,18 +1384,30 @@ async function enviarPerguntaAdvisor(pergunta) {
     contadorAdvisor.textContent = '0/300';
 
     const controlador = new AbortController();
-    const timeout = window.setTimeout(() => controlador.abort(), 12000);
+    const timeout = window.setTimeout(() => controlador.abort(), 20000);
     try {
         const baseUrl = typeof window.FINSLASH_API_BASE_URL === 'string'
-            ? window.FINSLASH_API_BASE_URL.replace(/\/$/, '')
+            ? window.FINSLASH_API_BASE_URL.trim().replace(/\/+$/u, '')
             : window.location.origin;
+        let timezone = 'UTC';
+        try {
+            timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+        } catch (error) {
+            console.warn('Não foi possível detectar o fuso horário do navegador.', error);
+        }
         const resposta = await fetch(`${baseUrl}/api/v1/advisor`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ pergunta: texto }),
+            body: JSON.stringify({
+                pergunta: texto,
+                historico,
+                timezone,
+                regenerar,
+                motivoFeedback: opcoes.motivoFeedback || null
+            }),
             signal: controlador.signal
         });
 
@@ -944,6 +1436,14 @@ async function enviarPerguntaAdvisor(pergunta) {
             statusAdvisor.textContent = 'Resposta da Navi.';
         } else if (resultado.fonte === 'gemini-geral') {
             statusAdvisor.textContent = 'Resposta geral da Navi.';
+        } else if (resultado.fonte === 'gemini-geral-busca') {
+            statusAdvisor.textContent = 'Resposta geral verificada com Pesquisa Google.';
+        } else if (resultado.fonte === 'gemini-sem-fontes') {
+            statusAdvisor.textContent = 'A Navi não encontrou fontes confiáveis para confirmar a resposta.';
+        } else if (resultado.fonte === 'open-meteo') {
+            statusAdvisor.textContent = 'Condições meteorológicas consultadas no Open-Meteo.';
+        } else if (resultado.fonte === 'relogio-local' || resultado.fonte === 'horario-open-meteo') {
+            statusAdvisor.textContent = 'Data e hora calculadas para o fuso horário solicitado.';
         } else if (resultado.fonte === 'geral-indisponivel') {
             statusAdvisor.textContent = 'A conversa geral precisa do modo Gemini configurado.';
         } else if (resultado.encontrado) {
@@ -952,25 +1452,31 @@ async function enviarPerguntaAdvisor(pergunta) {
             statusAdvisor.textContent = 'Pergunta fora do alcance dos diagnósticos cadastrados.';
         }
         pensando.remove();
-        exibirResultadoAdvisor(resultado);
+        exibirResultadoAdvisor(resultado, texto);
     } catch (error) {
         let mensagemErro = 'A Navi não conseguiu responder agora. Tente novamente.';
         if (error.name === 'AbortError') {
-            mensagemErro = 'A resposta demorou demais. Tente novamente em alguns segundos.';
+            mensagemErro = 'A resposta demorou demais. Você pode tentar novamente.';
         } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
             mensagemErro = 'Não consegui conectar à Navi. Verifique sua conexão e tente novamente.';
+        } else if (error instanceof Error) {
+            mensagemErro = error.message;
         }
         statusAdvisor.textContent = '';
         pensando.remove();
-        adicionarMensagemAdvisor('assistant', mensagemErro);
+        adicionarMensagemAdvisor('assistant', mensagemErro, { repetirPergunta: texto });
     } finally {
         window.clearTimeout(timeout);
         enviandoAdvisor = false;
         botaoEnviarAdvisor.disabled = false;
         campoAdvisor.disabled = false;
+        acoesOrigem.forEach((botao) => {
+            botao.disabled = false;
+        });
     }
 }
 
+// Controla o perfil, as conquistas e a restauração das telas navegadas.
 function abrirPopupConquistaFinal() {
     popupConquistaFinal.classList.remove('hidden');
     botaoFecharConquistaFinal.focus();
@@ -1274,6 +1780,7 @@ class Onda {
 }
 
 // Funcao para inicializar o canvas de onda azul
+// Desenha e encerra as animações de onda usadas nos painéis da aplicação.
 function inicializarCanvasOnda() {
     if (animacaoOnda) {
         redimensionarCanvasOnda?.();
@@ -1480,6 +1987,7 @@ function definirAtividadeBuscaVoz(ativa) {
     popupBuscaVoz.classList.toggle('ouvindo-voz', ativa);
 }
 
+// Apresenta personagens, seleção visual e animações de celebração.
 function obterOrdemAleatoriaPersonagens() {
     const restantes = personagens.map((_, index) => index);
     const ordem = [];
@@ -1801,6 +2309,7 @@ function iniciarAnimacaoCelebracao() {
 }
 
 // Funcao para gerar os cartoes de servicos AWS
+// Renderiza o catálogo AWS e implementa as buscas por texto e por voz.
 function gerarCartoesServicos() {
     const cartoes = document.createDocumentFragment();
     
@@ -1985,6 +2494,7 @@ function similaridadePalavraBuscaVoz(palavraFalado, palavraTitulo) {
         : 0;
 }
 
+// Reconhece serviços e tópicos falados para sugerir resultados compatíveis.
 function localizarTopicoPorVoz(texto, nomeServicoRestrito = null) {
     const palavrasFaladas = normalizarPronunciaServico(texto)
         .replace(/[^a-z0-9]+/g, ' ')
@@ -2867,6 +3377,7 @@ function adicionarTextoDiagnostico(tag, classe, texto) {
     return elemento;
 }
 
+// Exibe diagnósticos, passos de verificação e ações seguras do catálogo.
 function renderizarDiagnosticoTopico(diagnostico) {
     const resumo = adicionarTextoDiagnostico('p', 'resumo-diagnostico-topico', diagnostico.summary);
     const etapas = document.createDocumentFragment();
@@ -3029,6 +3540,7 @@ function ocultarPopupCartaoServico() {
     cartaoAmpliadoServico.replaceChildren();
 }
 
+// Liga a seleção de resultados às telas, aos tópicos e aos detalhes do serviço.
 function selecionarResultadoBusca(event) {
     const resultadoRecente = event.target.closest('.resultado-busca-recente');
     if (resultadoRecente) {
@@ -3121,7 +3633,7 @@ function irParaJornada() {
     console.log('Personagem selecionado:', personagemSelecionado.imagem);
 }
 
-// Event Listeners
+// Eventos de interação, acessibilidade, pesquisa e envio de mensagens.
 cartaoCentral.addEventListener('click', abrirPopup);
 
 botaoMenuApp.addEventListener('click', () => {
@@ -3170,6 +3682,7 @@ campoAdvisor.addEventListener('focus', atualizarViewportVisualAdvisor);
 campoAdvisor.addEventListener('blur', () => {
     popupAdvisor.classList.remove('advisor-teclado');
     campoAdvisor.closest('.painel-advisor')?.classList.remove('advisor-digitando');
+    window.requestAnimationFrame(atualizarViewportVisualAdvisor);
 });
 window.visualViewport?.addEventListener('resize', atualizarViewportVisualAdvisor);
 window.visualViewport?.addEventListener('scroll', atualizarViewportVisualAdvisor);
@@ -3343,7 +3856,7 @@ popupPersonagemSelecionado.addEventListener('click', (event) => {
     }
 });
 
-// Inicializacao
+// Inicializa o histórico, os componentes visuais e os cartões da aplicação.
 document.addEventListener('DOMContentLoaded', () => {
     window.history.replaceState({ app: 'FinSlash', tela: 'inicio' }, '', window.location.href);
     restaurarHistoricoAdvisor();

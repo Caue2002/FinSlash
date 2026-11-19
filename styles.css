@@ -1318,6 +1318,7 @@ body.tela-servicos-ativa > .canvas-onda {
     transform: scale(0.99);
 }
 
+/* Apresenta opções, cartões e detalhes da busca por voz. */
 .opcao-sugestao-principal-busca-voz {
     border-color: #3b82f6;
     background: linear-gradient(135deg, #eff6ff, #ffffff);
@@ -1472,6 +1473,7 @@ body.tela-servicos-ativa > .canvas-onda {
     object-fit: cover;
 }
 
+/* Posiciona os controles fixos de navegação do aplicativo. */
 .navegacao-app {
     position: fixed;
     z-index: 1300;
@@ -1621,6 +1623,7 @@ body.tela-servicos-ativa > .canvas-onda {
     z-index: 1400;
 }
 
+/* Organiza o painel da Navi, as boas-vindas e o campo de pergunta. */
 .popup-advisor {
     z-index: 1450;
     justify-content: flex-end;
@@ -1758,7 +1761,8 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 .formulario-advisor {
-    margin-top: 10px;
+    flex: 0 0 auto;
+    margin-top: auto;
 }
 
 .acoes-advisor {
@@ -1834,6 +1838,7 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 .painel-advisor,
+/* Formata mensagens, fontes, avaliações e ações de cada resposta. */
 .mensagens-advisor {
     scrollbar-width: thin;
     scrollbar-color: #475569 #111827;
@@ -1873,7 +1878,8 @@ body.tela-servicos-ativa > .canvas-onda {
     overscroll-behavior-y: contain;
     overflow-anchor: none;
     margin-top: 12px;
-    padding-right: 2px;
+    padding: 0 2px 12px;
+    box-sizing: border-box;
 }
 
 .mensagem-advisor {
@@ -1924,21 +1930,8 @@ body.tela-servicos-ativa > .canvas-onda {
     overflow-wrap: anywhere;
 }
 
-.metadados-mensagem-advisor,
-.documentacao-mensagem-advisor {
-    margin-top: 5px;
-    color: #64748b;
-    font-size: 0.92rem;
-}
-
-.documentacao-mensagem-advisor {
-    color: #1d4ed8;
-    font-weight: 700;
-}
-
 .plano-mensagem-advisor,
-.checklist-mensagem-advisor,
-.fontes-mensagem-advisor {
+.checklist-mensagem-advisor {
     width: 100%;
     box-sizing: border-box;
     margin-top: 8px;
@@ -1951,8 +1944,7 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 .plano-mensagem-advisor h4,
-.checklist-mensagem-advisor h4,
-.fontes-mensagem-advisor h4 {
+.checklist-mensagem-advisor h4 {
     margin: 0 0 7px;
     color: #bfdbfe;
     font-size: 0.92rem;
@@ -1977,19 +1969,99 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 .fontes-mensagem-advisor {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    display: inline-flex;
+    max-width: 100%;
+    align-self: flex-start;
+    align-items: center;
+    gap: 0;
+    margin-top: 8px;
+    padding: 2px 5px;
+    border: 1px solid #334155;
+    border-radius: 999px;
+    background: #111827;
 }
 
-.fontes-mensagem-advisor a {
-    color: #93c5fd;
-    font-size: 0.92rem;
+.origem-mensagem-advisor {
+    display: inline-flex;
+    width: 23px;
+    height: 23px;
+    flex: 0 0 23px;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    margin-left: -5px;
+    overflow: hidden;
+    border: 2px solid #111827;
+    border-radius: 50%;
+    background: #f8fafc;
+    line-height: 0;
+    text-decoration: none;
+}
+
+.origem-mensagem-advisor:first-child {
+    margin-left: 0;
+}
+
+.origem-mensagem-advisor:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+.origem-mensagem-advisor img {
+    width: 17px;
+    height: 17px;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.origem-mensagem-advisor-inicial {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    background: #dbeafe;
+    color: #1e3a8a;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.origem-mensagem-advisor-finslash img {
+    width: 23px;
+    height: 23px;
+    object-fit: cover;
+}
+
+.sugestoes-mensagem-advisor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.sugestoes-mensagem-advisor button,
+.tentar-novamente-advisor {
+    border: 1px solid #475569;
+    border-radius: 999px;
+    padding: 6px 9px;
+    background: #0f172a;
+    color: #bfdbfe;
+    font: inherit;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sugestoes-mensagem-advisor button:hover,
+.tentar-novamente-advisor:hover {
+    border-color: #60a5fa;
+    background: #1e293b;
 }
 
 .acoes-mensagem-advisor {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 4px;
     margin-top: 9px;
 }
@@ -2007,9 +2079,133 @@ body.tela-servicos-ativa > .canvas-onda {
 }
 
 .acao-mensagem-advisor:hover,
-.acao-mensagem-advisor.acao-concluida {
+.acao-mensagem-advisor.acao-concluida,
+.acao-mensagem-advisor[aria-pressed="true"] {
     background: #334155;
     color: #e2e8f0;
+}
+
+.acao-feedback-advisor {
+    transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.acao-feedback-advisor svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+}
+
+.acao-feedback-advisor[data-avaliacao-advisor="util"] {
+    color: #38bdf8;
+}
+
+.acao-feedback-advisor[data-avaliacao-advisor="nao-util"] {
+    color: #fb7185;
+}
+
+.acao-feedback-advisor[data-avaliacao-advisor="util"]:hover,
+.acao-feedback-advisor[data-avaliacao-advisor="util"][aria-pressed="true"] {
+    background: rgba(56, 189, 248, 0.16);
+    color: #67e8f9;
+}
+
+.acao-feedback-advisor[data-avaliacao-advisor="nao-util"]:hover,
+.acao-feedback-advisor[data-avaliacao-advisor="nao-util"][aria-pressed="true"] {
+    background: rgba(251, 113, 133, 0.16);
+    color: #fda4af;
+}
+
+.acao-feedback-advisor:hover {
+    transform: translateY(-1px);
+}
+
+.acao-feedback-advisor:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.status-avaliacao-advisor {
+    display: block;
+    min-height: 1em;
+    margin-top: 4px;
+    color: #94a3b8;
+    font-size: 0.72rem;
+}
+
+.opcoes-feedback-advisor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.opcoes-feedback-advisor[hidden],
+.menu-opcoes-advisor[hidden],
+.fontes-detalhadas-advisor[hidden] {
+    display: none;
+}
+
+.opcao-feedback-advisor,
+.item-menu-advisor {
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 6px 9px;
+    background: #111827;
+    color: #cbd5e1;
+    font: inherit;
+    font-size: 0.75rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.opcao-feedback-advisor:hover,
+.item-menu-advisor:hover {
+    border-color: #60a5fa;
+    background: #1e293b;
+    color: #f8fafc;
+}
+
+.menu-acoes-advisor {
+    position: relative;
+    display: inline-flex;
+}
+
+.menu-opcoes-advisor {
+    position: absolute;
+    z-index: 4;
+    right: 0;
+    bottom: calc(100% + 5px);
+    display: grid;
+    min-width: 180px;
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    background: #0f172a;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.fontes-detalhadas-advisor {
+    display: grid;
+    gap: 5px;
+    margin-top: 7px;
+    padding: 8px;
+    border: 1px solid #334155;
+    border-radius: 9px;
+    background: #0f172a;
+}
+
+.link-fonte-advisor {
+    color: #bfdbfe;
+    font-size: 0.76rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.link-fonte-advisor:hover {
+    color: #fff;
 }
 
 .acao-mensagem-advisor svg {
@@ -2027,6 +2223,7 @@ body.tela-servicos-ativa > .canvas-onda {
     font-style: italic;
 }
 
+/* Estiliza cartões de diagnósticos e informações do catálogo. */
 .resultado-advisor {
     margin-top: 12px;
     padding: 16px;
@@ -2351,6 +2548,7 @@ button.item-historico-perfil:focus-visible {
     color: #1d4ed8;
 }
 
+/* Apresenta progresso de conquistas e campos de feedback do perfil. */
 .progresso-medalha-perfil {
     height: 6px;
     margin-top: 6px;
@@ -3221,9 +3419,10 @@ button.item-historico-perfil:focus-visible {
     .painel-advisor {
         width: 100%;
         max-width: 100vw;
-        height: calc(100dvh - 70px);
-        max-height: calc(100dvh - 70px);
+        height: max(0px, calc(var(--advisor-viewport-height, 100dvh) - 70px));
+        max-height: 100%;
         min-width: 0;
+        min-height: 0;
         margin: 0;
         overflow-x: hidden;
         border-right: 0;
@@ -3325,7 +3524,7 @@ button.item-historico-perfil:focus-visible {
         width: 100%;
         max-width: 100%;
         min-width: 0;
-        max-height: 48vh;
+        min-height: 0;
         margin-top: 8px;
         overflow-x: hidden;
     }
@@ -3339,11 +3538,6 @@ button.item-historico-perfil:focus-visible {
     .checklist-mensagem-advisor,
     .fontes-mensagem-advisor {
         font-size: 0.84rem;
-        overflow-wrap: anywhere;
-    }
-
-    .documentacao-mensagem-advisor,
-    .fontes-mensagem-advisor a {
         overflow-wrap: anywhere;
     }
 

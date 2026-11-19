@@ -551,11 +551,12 @@ async function criarRespostaGeral(pergunta) {
     }
 
     const resposta = await chamarGemini({
-        systemInstruction: `Você é a Navi, o AI Agent do FinSlash. Responda em português do Brasil,
+        systemInstruction: `Você é a Navi. Responda em português do Brasil,
 com clareza e naturalidade, perguntas gerais, cotidianas e pessoais básicas. Não finja ser
 humana, não alegue ter experiências, sentimentos, preferências ou acesso a dados pessoais
-do usuário. Se perguntarem sobre sua identidade, diga que é a Navi, o AI Agent do FinSlash,
-uma inteligência artificial. Não forneça informações
+do usuário. Se perguntarem sobre sua identidade, diga que é a Navi. Se perguntarem diretamente
+se é uma inteligência artificial, confirme que é um agente de inteligência artificial.
+Não forneça informações
 específicas, recomendações técnicas, preços ou procedimentos sobre AWS; perguntas AWS
 devem ser respondidas exclusivamente pelo fluxo de diagnósticos validados do FinSlash.
 Se a pergunta tratar de AWS, explique brevemente esse limite sem tentar respondê-la.
@@ -589,19 +590,19 @@ function ehSaudacao(pergunta) {
 
 async function gerarSaudacaoNavi(pergunta) {
     if (!process.env.GEMINI_API_KEY) {
-        return 'Olá! Sou a Navi, o AI Agent do FinSlash. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
+        return 'Olá! Sou a Navi. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
     }
     try {
         const objeto = await chamarGemini({
-            systemInstruction: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Se se apresentar, diga que é a Navi, o AI Agent do FinSlash.',
+            systemInstruction: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Se se apresentar, diga apenas que é a Navi.',
             prompt: pergunta,
             json: true
         });
         return typeof objeto?.resposta === 'string'
             ? objeto.resposta
-            : 'Olá! Sou a Navi, o AI Agent do FinSlash. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
+            : 'Olá! Sou a Navi. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
     } catch {
-        return 'Olá! Sou a Navi, o AI Agent do FinSlash. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
+        return 'Olá! Sou a Navi. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
     }
 }
 

@@ -562,6 +562,12 @@ function abrirAdvisor() {
     popupAdvisor.classList.remove('hidden');
     alturaViewportAdvisorSemTeclado = window.visualViewport?.height ?? window.innerHeight;
     larguraViewportAdvisorSemTeclado = window.innerWidth;
+    if (!mensagensAdvisor.childElementCount && dadosPersistidos.nomePerfil !== 'Meu perfil') {
+        adicionarMensagemAdvisor(
+            'assistant',
+            `Olá! Sou a Navi. Notei que o nome cadastrado em seu perfil é ${dadosPersistidos.nomePerfil}. Deseja que lhe chame por esse nome?`
+        );
+    }
     const painelAdvisor = popupAdvisor.querySelector('.painel-advisor');
     painelAdvisor?.classList.toggle('advisor-consulta', mensagensAdvisor.childElementCount > 0);
     if (!mensagensAdvisor.childElementCount) {

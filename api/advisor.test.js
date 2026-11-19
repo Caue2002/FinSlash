@@ -198,6 +198,14 @@ test('answers general questions with Gemini without requiring AWS diagnostics', 
     assert.match(chamadasGemini[0].url, /gemini-test/u);
     assert.match(
         chamadasGemini[0].body.systemInstruction.parts[0].text,
+        /Se perguntarem sobre sua identidade, diga que é a Navi/u
+    );
+    assert.match(
+        chamadasGemini[0].body.systemInstruction.parts[0].text,
+        /confirme que é um agente de inteligência artificial/u
+    );
+    assert.doesNotMatch(
+        chamadasGemini[0].body.systemInstruction.parts[0].text,
         /AI Agent do FinSlash/u
     );
 
@@ -234,5 +242,6 @@ test('answers general questions with Gemini without requiring AWS diagnostics', 
 
     assert.equal(saudacaoSemGemini.status, 200);
     assert.equal(resultadoSaudacao.fonte, 'saudaçao-local');
-    assert.match(resultadoSaudacao.resposta, /Navi, o AI Agent do FinSlash/u);
+    assert.match(resultadoSaudacao.resposta, /^Olá! Sou a Navi\./u);
+    assert.doesNotMatch(resultadoSaudacao.resposta, /agente de IA do FinSlash/u);
 });

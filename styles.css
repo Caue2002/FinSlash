@@ -1723,13 +1723,6 @@ body.tela-servicos-ativa > .canvas-onda {
     object-fit: contain;
 }
 
-.etiqueta-advisor {
-    margin: 0 0 2px;
-    color: #2563eb;
-    font-size: 0.78rem;
-    font-weight: 700;
-}
-
 .cabecalho-advisor h2 {
     margin: 0;
     color: #f8fafc;
@@ -3242,9 +3235,6 @@ button.item-historico-perfil:focus-visible {
 
     .popup-advisor {
         align-items: flex-end;
-    }
-
-    .popup-advisor.advisor-teclado {
         top: var(--advisor-viewport-top, 0px);
         height: var(--advisor-viewport-height, 100dvh);
     }

@@ -182,6 +182,8 @@ let celebracaoAtiva = 0;
 let timeoutCelebracao = null;
 let inicioGestoVoltar = null;
 let navegacaoVoltarPendente = false;
+let alturaViewportAdvisorSemTeclado = null;
+let larguraViewportAdvisorSemTeclado = null;
 const gifsCelebracaoPrecarregados = new Map();
 
 // Elementos do DOM
@@ -558,6 +560,8 @@ function fecharPerfil() {
 function abrirAdvisor() {
     fecharPerfil();
     popupAdvisor.classList.remove('hidden');
+    alturaViewportAdvisorSemTeclado = window.visualViewport?.height ?? window.innerHeight;
+    larguraViewportAdvisorSemTeclado = window.innerWidth;
     const painelAdvisor = popupAdvisor.querySelector('.painel-advisor');
     painelAdvisor?.classList.toggle('advisor-consulta', mensagensAdvisor.childElementCount > 0);
     if (!mensagensAdvisor.childElementCount) {
@@ -589,6 +593,10 @@ function fecharAdvisor(retornarFoco = true) {
 
 function fecharAdvisorVisual(retornarFoco = false) {
     popupAdvisor.classList.add('hidden');
+    popupAdvisor.classList.remove('advisor-teclado');
+    popupAdvisor.querySelector('.painel-advisor')?.classList.remove('advisor-digitando');
+    alturaViewportAdvisorSemTeclado = null;
+    larguraViewportAdvisorSemTeclado = null;
     if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
         botaoAdvisorApp.focus();
     }
@@ -664,9 +672,18 @@ function atualizarViewportVisualAdvisor() {
     const viewport = window.visualViewport;
     const top = viewport?.offsetTop ?? 0;
     const height = viewport?.height ?? window.innerHeight;
+    if (alturaViewportAdvisorSemTeclado === null
+        || Math.abs(window.innerWidth - larguraViewportAdvisorSemTeclado) > 100) {
+        alturaViewportAdvisorSemTeclado = height;
+        larguraViewportAdvisorSemTeclado = window.innerWidth;
+    }
     popupAdvisor.style.setProperty('--advisor-viewport-top', `${top}px`);
     popupAdvisor.style.setProperty('--advisor-viewport-height', `${height}px`);
-    if (popupAdvisor.classList.contains('advisor-teclado')) {
+    const tecladoVisivel = document.activeElement === campoAdvisor
+        && height < alturaViewportAdvisorSemTeclado - 120;
+    popupAdvisor.classList.toggle('advisor-teclado', tecladoVisivel);
+    popupAdvisor.querySelector('.painel-advisor')?.classList.toggle('advisor-digitando', tecladoVisivel);
+    if (tecladoVisivel) {
         rolarMensagensParaMaisRecente();
     }
 }
@@ -3143,11 +3160,7 @@ campoAdvisor.addEventListener('input', () => {
         statusAdvisor.textContent = '';
     }
 });
-campoAdvisor.addEventListener('focus', () => {
-    atualizarViewportVisualAdvisor();
-    popupAdvisor.classList.add('advisor-teclado');
-    campoAdvisor.closest('.painel-advisor')?.classList.add('advisor-digitando');
-});
+campoAdvisor.addEventListener('focus', atualizarViewportVisualAdvisor);
 campoAdvisor.addEventListener('blur', () => {
     popupAdvisor.classList.remove('advisor-teclado');
     campoAdvisor.closest('.painel-advisor')?.classList.remove('advisor-digitando');

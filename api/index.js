@@ -1211,29 +1211,34 @@ function criarRespostaDataHora(pergunta, fusoHorario, local = null) {
 
 function ehSaudacao(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
-    return /^(oi|ola|hello|hey|bom dia|boa tarde|boa noite|tudo bem|obrigado|obrigada|tchau|ate logo)( tudo bem)?$/u.test(normalizada);
+    return /^(?:navi )?(?:oi|ola|hello|hey|bom dia|boa tarde|boa noite|tudo bem|obrigado|obrigada|tchau|ate logo)(?: navi)?(?: tudo bem)?$/u
+        .test(normalizada);
 }
 
-async function gerarSaudacaoNavi(pergunta) {
-    if (!process.env.GEMINI_API_KEY) {
-        return 'Olá! Sou a Navi. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
+function gerarSaudacaoNavi(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    if (normalizada.includes('bom dia')) {
+        return 'Bom dia! Sou a Navi.';
     }
-    try {
-        const objeto = await chamarGemini({
-            systemInstruction: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Se se apresentar, diga apenas que é a Navi.',
-            prompt: pergunta,
-            json: true
-        });
-        return typeof objeto?.resposta === 'string'
-            ? objeto.resposta
-            : 'Olá! Sou a Navi. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
-    } catch (error) {
-        console.error('Falha ao gerar a saudação da Navi:', error);
-        return 'Olá! Sou a Navi. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
+    if (normalizada.includes('boa tarde')) {
+        return 'Boa tarde! Sou a Navi.';
     }
+    if (normalizada.includes('boa noite')) {
+        return 'Boa noite! Sou a Navi.';
+    }
+    if (normalizada.includes('obrigad')) {
+        return 'De nada! Estou por aqui.';
+    }
+    if (normalizada.includes('tchau') || normalizada.includes('ate logo')) {
+        return 'Até logo!';
+    }
+    if (normalizada.includes('tudo bem')) {
+        return 'Tudo certo por aqui! Sou a Navi.';
+    }
+    return 'Olá! Sou a Navi.';
 }
 
-async function criarRespostaBasica(pergunta) {
+function criarRespostaBasica(pergunta) {
     if (!ehSaudacao(pergunta)) {
         return null;
     }
@@ -1242,9 +1247,9 @@ async function criarRespostaBasica(pergunta) {
         encontrado: false,
         diagnostico: 'Saudação',
         servico: null,
-        resposta: await gerarSaudacaoNavi(pergunta),
+        resposta: gerarSaudacaoNavi(pergunta),
         confianca: 1,
-        fonte: 'resposta_fixa',
+        fonte: 'saudacao-local',
         validacao: null,
         resultados: [],
         sugestoes: []
@@ -1921,13 +1926,8 @@ async function receberAdvisor(request, origemPermitida) {
         if (respostaBasica) {
             return responder(200, {
                 ...respostaBasica,
-                fonte: process.env.GEMINI_API_KEY
-                    ? 'gemini-saudaçao'
-                    : 'saudaçao-local',
                 agente: {
-                    status: process.env.GEMINI_API_KEY
-                        ? 'ativo'
-                        : 'fallback-local',
+                    status: 'ativo',
                     erro: null
                 }
             }, cabecalhos);

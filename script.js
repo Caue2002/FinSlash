@@ -1432,8 +1432,8 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
 
         if (resultado.fonte === 'pergunta_ambigua') {
             statusAdvisor.textContent = 'A Navi precisa de mais contexto para responder com precisão.';
-        } else if (resultado.fonte === 'gemini-saudaçao') {
-            statusAdvisor.textContent = 'Resposta da Navi.';
+        } else if (resultado.fonte === 'saudacao-local') {
+            statusAdvisor.textContent = 'Saudação da Navi.';
         } else if (resultado.fonte === 'gemini-geral') {
             statusAdvisor.textContent = 'Resposta geral da Navi.';
         } else if (resultado.fonte === 'gemini-geral-busca') {

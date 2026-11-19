@@ -47,6 +47,55 @@ test('separates AWS questions from general and personal questions', () => {
     assert.equal(perguntaRelacionadoAoProjeto('Meu servidor está lento.'), false);
     assert.equal(ehSaudacao('Oi, tudo bem?'), true);
     assert.equal(ehSaudacao('Oi, como reduzir custos no Amazon S3?'), false);
+    assert.equal(ehSaudacao('Boa tarde, Navi!'), true);
+    assert.equal(ehSaudacao('Navi, bom dia.'), true);
+    assert.equal(ehSaudacao('Oi Navi, tudo bem?'), true);
+    assert.equal(ehSaudacao('Boa tarde, Navi, como reduzir custos no Amazon S3?'), false);
+});
+
+test('answers a greeting addressed to Navi without asking for clarification', async (context) => {
+    const chavesAmbiente = ['ALLOWED_ORIGIN', 'DATABASE_URL', 'GEMINI_API_KEY'];
+    const ambienteAnterior = Object.fromEntries(
+        chavesAmbiente.map((chave) => [chave, process.env[chave]])
+    );
+    const fetchAnterior = globalThis.fetch;
+    let chamadasGemini = 0;
+    context.after(() => {
+        chavesAmbiente.forEach((chave) => {
+            if (ambienteAnterior[chave] === undefined) {
+                delete process.env[chave];
+            } else {
+                process.env[chave] = ambienteAnterior[chave];
+            }
+        });
+        globalThis.fetch = fetchAnterior;
+    });
+
+    process.env.ALLOWED_ORIGIN = 'https://finslash.vercel.app';
+    delete process.env.DATABASE_URL;
+    process.env.GEMINI_API_KEY = 'test-key';
+    globalThis.fetch = async () => {
+        chamadasGemini += 1;
+        throw new Error('Uma saudação não deve chamar o Gemini.');
+    };
+    const response = await advisor.fetch(new Request(
+        'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Origin: 'https://finslash.vercel.app'
+            },
+            body: JSON.stringify({ pergunta: 'Boa tarde, Navi!' })
+        }
+    ));
+    const resultado = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(resultado.fonte, 'saudacao-local');
+    assert.equal(resultado.resposta, 'Boa tarde! Sou a Navi.');
+    assert.equal(resultado.conversa, undefined);
+    assert.equal(chamadasGemini, 0);
 });
 
 test('resolves short follow-ups from the last AWS question without reusing unrelated context', () => {
@@ -622,7 +671,7 @@ test('answers general questions with Gemini without requiring AWS diagnostics', 
     const resultadoSaudacao = await saudacaoSemGemini.json();
 
     assert.equal(saudacaoSemGemini.status, 200);
-    assert.equal(resultadoSaudacao.fonte, 'saudaçao-local');
+    assert.equal(resultadoSaudacao.fonte, 'saudacao-local');
     assert.match(resultadoSaudacao.resposta, /^Olá! Sou a Navi\./u);
     assert.doesNotMatch(resultadoSaudacao.resposta, /agente de IA do FinSlash/u);
     assert.equal(chamadasGemini.length, 2);

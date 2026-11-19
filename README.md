@@ -11,14 +11,14 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Perfil com histórico de serviços, medalhas e envio de feedback sem cadastro.
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações, cuidados e links para documentação oficial da AWS.
-- Navi, agente gratuito que cruza dúvidas em linguagem natural com os diagnósticos cadastrados no PostgreSQL.
-- O cabeçalho da Navi usa o personagem escolhido pela pessoa usuária com um selo de três brilhos representando IA.
+- Navi, agente gratuito que responde perguntas gerais e cruza dúvidas AWS com os diagnósticos cadastrados no PostgreSQL.
+- O cabeçalho da Navi usa a logo própria do agente.
 - Modo agente opcional com Gemini: o modelo gera respostas a partir dos diagnósticos publicados e das fontes oficiais cadastradas.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
 - Até três diagnósticos relacionados por consulta, além de sugestões de perguntas comuns.
 - Painel mobile em formato de cartão inferior, cenários rápidos em grade, resposta principal destacada e detalhes verificáveis em cards expansíveis.
 - O modo compacto oculta descrições e cenários após a consulta para manter o diagnóstico legível em telas pequenas.
-- Privacidade por padrão: sem `GEMINI_API_KEY`, perguntas não são enviadas a IA externa e não são persistidas no servidor ou no navegador.
+- Privacidade por padrão: sem `GEMINI_API_KEY`, perguntas gerais não são enviadas a IA externa; o histórico permanece apenas na sessão da aba atual.
 - Barra inferior com atalhos para o menu, pesquisa de serviços e perfil; navegação de retorno compatível com dispositivos móveis.
 - Botão voltar do aparelho ou do navegador e gesto de arrastar para a direita.
 - Interface adaptável a diferentes tamanhos de tela.
@@ -29,13 +29,13 @@ A interface não requer compilação. Para explorar as telas, abra `index.html` 
 
 ## Navi
 
-A Navi permite enviar dúvidas sobre custos e uso da AWS por um painel integrado à barra de navegação. Por padrão, ela usa busca local com normalização, sinônimos e consultas parametrizadas aos diagnósticos publicados no PostgreSQL.
+A Navi permite conversar sobre assuntos gerais e enviar dúvidas sobre serviços, custos e uso da AWS por um painel integrado à barra de navegação. Perguntas gerais usam o Gemini quando configurado. Perguntas sobre AWS passam pelo catálogo publicado no PostgreSQL e não são respondidas pelo modo geral.
 
-Opcionalmente, uma chave do Google AI Studio ativa o Gemini. Configure `GEMINI_API_KEY` e `GEMINI_MODEL` nas variáveis de ambiente. A API envia a pergunta e um contexto fechado com diagnóstico, etapas e fontes cadastradas. Sem `GEMINI_API_KEY`, a Navi continua funcionando integralmente no modo local.
+Configure `GEMINI_API_KEY` e, opcionalmente, `GEMINI_MODEL` nas variáveis de ambiente para habilitar respostas gerais. Quando configurado, o Gemini recebe a pergunta; evite enviar dados pessoais sensíveis. Para perguntas AWS, o Gemini opcional só pode reformular informações encontradas nos diagnósticos publicados e nas fontes oficiais cadastradas. Sem a chave, a Navi continua funcionando para AWS no modo local e informa que a conversa geral está indisponível.
 
-O painel não mantém nem envia histórico de mensagens ao servidor. Cada consulta é tratada isoladamente e as mensagens desaparecem ao fechar a Navi.
+O histórico do chat fica somente na `sessionStorage` da aba atual: permanece ao fechar e reabrir a Navi ou recarregar a página, e é removido quando a aba é fechada. As mensagens não são enviadas ao servidor como histórico nem persistidas entre abas.
 
-Saudações e respostas AWS usam o Gemini quando disponível, com temperatura zero. Perguntas fora do escopo são bloqueadas antes da geração. A barra de rolagem do painel acompanha o tema escuro do chat.
+Saudações e perguntas gerais usam o Gemini quando disponível, com temperatura zero. O modo geral não fornece instruções ou dados específicos de AWS. Perguntas AWS continuam restritas ao fluxo de diagnósticos publicados e informações validadas no catálogo.
 
 Quando existe um diagnóstico validado, a Navi apresenta:
 
@@ -46,11 +46,10 @@ Quando existe um diagnóstico validado, a Navi apresenta:
 - Exportação da resposta em arquivo de texto.
 - Copiar a resposta para a área de transferência.
 - Estado visual enquanto a Navi consulta os diagnósticos.
-- Botão para limpar todas as mensagens temporárias do painel.
 - Detecção de consultas ambíguas entre vários serviços.
 - Perguntas de esclarecimento quando a mensagem não informa o serviço, o objetivo ou detalhes suficientes; a Navi aguarda contexto em vez de escolher um diagnóstico por suposição.
 
-Para evitar alucinações, o Gemini recebe somente o contexto fechado do banco validado. A resposta final usa somente título, resumo, etapas, confiança e documentação retornados pelo PostgreSQL do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
+Para evitar respostas AWS sem validação, perguntas que mencionam AWS, Amazon Web Services ou nomes reconhecidos de serviços seguem somente pelo fluxo de diagnósticos. O Gemini recebe apenas o contexto fechado do banco validado e pode reformular esses dados; título, resumo, etapas, confiança e documentação continuam vinculados ao PostgreSQL do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
 
 Nas consultas com diagnóstico encontrado, a mensagem digitada é enviada ao Gemini junto de um contexto fechado contendo o diagnóstico, suas etapas e as fontes AWS cadastradas. A resposta textual exibida no chat é gerada pelo modelo, mas metadados, confiança, documentos e campos técnicos continuam vindo do banco validado.
 
@@ -84,7 +83,7 @@ Resposta encontrada:
 }
 ```
 
-Quando a mensagem é genérica ou ambígua, o endpoint retorna uma pergunta de esclarecimento com `fonte: "pergunta_ambigua"` e `agente.status: "aguardando_esclarecimento"` antes de consultar diagnósticos. Quando não existe correspondência confiável para uma pergunta objetiva, retorna uma orientação padrão segura com `encontrado: false` e até três sugestões. O servidor e o navegador não persistem perguntas.
+Perguntas gerais seguem para o Gemini quando configurado e retornam com `fonte: "gemini-geral"`; sem a chave, a API informa que esse modo está indisponível. Perguntas AWS nunca usam esse fluxo geral: se estiverem ambíguas, o endpoint pede contexto com `fonte: "pergunta_ambigua"`; se não houver diagnóstico confiável, retorna uma orientação segura com `encontrado: false` e até três sugestões. O servidor não persiste as perguntas; o navegador mantém o histórico temporariamente na sessão da aba atual.
 
 A Navi usa `DATABASE_URL` e `ALLOWED_ORIGIN`, já necessárias pela API existente. A interface usa `window.FINSLASH_API_BASE_URL` e não fixa uma URL externa. O modo `file://` mostra instruções para abrir o projeto pela API ou pela publicação na Vercel.
 
@@ -115,7 +114,7 @@ FinSlash/
 ├── LICENSE                 # Licença MIT
 ├── README.md               # Documentação do projeto
 └── imagens/
-    ├── logo-advisor.png    # Identidade visual da Navi
+    ├── logo-navi.svg       # Identidade visual própria da Navi
     └── ...                 # Imagens e animações
 ```
 

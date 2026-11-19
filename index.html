@@ -217,7 +217,7 @@
             aria-haspopup="dialog"
             aria-controls="popup-advisor"
         >
-            <img class="icone-logo-advisor-nav" src="imagens/logo-advisor.png" alt="" />
+            <img class="icone-logo-advisor-nav" src="imagens/logo-navi.svg" alt="" />
         </button>
     </nav>
 
@@ -231,24 +231,15 @@
         <aside class="painel-advisor">
             <button class="fechar-advisor" id="fechar-advisor" type="button" aria-label="Fechar Navi">×</button>
             <div class="cabecalho-advisor">
-                <div class="montagem-navi" id="montagem-navi" aria-label="Avatar da Navi">
-                    <img class="icone-advisor-personagem" id="icone-advisor-personagem" src="imagens/personagem1.webp" alt="" />
-                    <span class="selo-ia-navi" aria-label="IA" title="IA">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 2l1.45 5.05L18.5 8.5l-5.05 1.45L12 15l-1.45-5.05L5.5 8.5l5.05-1.45L12 2z"></path>
-                            <path d="M18.5 14l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"></path>
-                            <path d="M5.5 14l.55 1.95L8 16.5l-1.95.55L5.5 19l-.55-1.95L3 16.5l1.95-.55L5.5 14z"></path>
-                        </svg>
-                    </span>
-                </div>
+                <img class="icone-advisor" src="imagens/logo-navi.svg" alt="Logo da Navi" />
                 <div>
                     <p class="etiqueta-advisor">Assistente gratuito</p>
                     <h2 id="titulo-advisor">Navi</h2>
                 </div>
-                <button class="limpar-chat-advisor" id="limpar-chat-advisor" type="button" title="Limpar conversa" aria-label="Limpar conversa">Limpar</button>
             </div>
             <div class="boas-vindas-advisor" id="boas-vindas-advisor">
                 <h3>Por onde começamos?</h3>
+                <p class="aviso-privacidade-advisor">Quando configurado, o Gemini recebe sua pergunta. Evite enviar dados pessoais sensíveis; respostas AWS usam o catálogo validado.</p>
                 <div class="cenarios-advisor" id="cenarios-advisor" role="group" aria-label="Sugestões de início">
                     <button type="button" data-pergunta-advisor="Como reduzir custos com EC2">Reduzir custos com EC2</button>
                     <button type="button" data-pergunta-advisor="Me fale sobre o serviço S3">Conhecer o S3</button>

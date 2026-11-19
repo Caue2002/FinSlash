@@ -173,6 +173,7 @@ const topicosPorServico = Object.assign(window.finSlashTopicos, {
 });
 const quantidadeIconesServico = 48;
 const chaveArmazenamentoAplicacao = 'finslash:preferencias';
+const chaveHistoricoAdvisor = 'finslash:historico-navi';
 
 // Variavel para armazenar o personagem selecionado
 let personagemSelecionado = null;
@@ -248,9 +249,6 @@ const botaoEnviarAdvisor = document.getElementById('botao-enviar-advisor');
 const statusAdvisor = document.getElementById('status-advisor');
 const cenariosAdvisor = document.getElementById('cenarios-advisor');
 const mensagensAdvisor = document.getElementById('mensagens-advisor');
-const limparChatAdvisor = document.getElementById('limpar-chat-advisor');
-const montagemNavi = document.getElementById('montagem-navi');
-const iconeAdvisorPersonagem = document.getElementById('icone-advisor-personagem');
 const boasVindasAdvisor = document.getElementById('boas-vindas-advisor');
 let enviandoAdvisor = false;
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
@@ -355,20 +353,6 @@ function salvarPersonagemSelecionado(index) {
     dadosPersistidos.indicePersonagem = index;
     salvarDadosPersistidos();
     atualizarAvatarNavegacao();
-    atualizarAvatarNavi();
-}
-
-function atualizarAvatarNavi() {
-    const personagem = personagens[dadosPersistidos.indicePersonagem];
-    if (!personagem || !iconeAdvisorPersonagem) {
-        return;
-    }
-    iconeAdvisorPersonagem.src = personagem.imagem;
-    iconeAdvisorPersonagem.alt = personagem.nome;
-    montagemNavi?.setAttribute(
-        'aria-label',
-        `Navi, representada por ${personagem.nome}`
-    );
 }
 
 function registrarBuscaRecente(busca) {
@@ -575,16 +559,6 @@ function abrirAdvisor() {
     fecharPerfil();
     popupAdvisor.classList.remove('hidden');
     popupAdvisor.querySelector('.painel-advisor')?.classList.remove('advisor-consulta');
-    const personagemNavi = personagemSelecionado
-        || personagens[dadosPersistidos.indicePersonagem];
-    if (personagemNavi && iconeAdvisorPersonagem) {
-        iconeAdvisorPersonagem.src = personagemNavi.imagem;
-        iconeAdvisorPersonagem.alt = personagemNavi.nome;
-        montagemNavi?.setAttribute(
-            'aria-label',
-            `Navi, representada por ${personagemNavi.nome}`
-        );
-    }
     if (!mensagensAdvisor.childElementCount) {
         boasVindasAdvisor?.classList.remove('hidden');
     } else {
@@ -606,8 +580,6 @@ function fecharAdvisor(retornarFoco = true) {
         return;
     }
     popupAdvisor.classList.add('hidden');
-    mensagensAdvisor?.replaceChildren();
-    boasVindasAdvisor?.classList.remove('hidden');
     if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
         botaoAdvisorApp.focus();
     }
@@ -615,8 +587,6 @@ function fecharAdvisor(retornarFoco = true) {
 
 function fecharAdvisorVisual(retornarFoco = false) {
     popupAdvisor.classList.add('hidden');
-    mensagensAdvisor?.replaceChildren();
-    boasVindasAdvisor?.classList.remove('hidden');
     if (retornarFoco && !botaoAdvisorApp.closest('.hidden')) {
         botaoAdvisorApp.focus();
     }
@@ -634,9 +604,59 @@ function validarLinkAws(url) {
     }
 }
 
-function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
+function salvarHistoricoAdvisor() {
+    const historico = Array.from(mensagensAdvisor.children)
+        .filter((mensagem) => !mensagem.classList.contains('mensagem-pensando-advisor'))
+        .map((mensagem) => ({
+            tipo: mensagem.dataset.tipo,
+            texto: mensagem.querySelector('.texto-principal-mensagem-advisor')?.textContent || '',
+            resultado: mensagem.resultadoAdvisor || null
+        }));
+    try {
+        window.sessionStorage.setItem(chaveHistoricoAdvisor, JSON.stringify(historico));
+    } catch (error) {
+        console.error('Não foi possível manter o histórico da Navi nesta aba.', error);
+    }
+}
+
+function restaurarHistoricoAdvisor() {
+    try {
+        const armazenado = window.sessionStorage.getItem(chaveHistoricoAdvisor);
+        if (!armazenado) {
+            return;
+        }
+        const historico = JSON.parse(armazenado);
+        if (!Array.isArray(historico)) {
+            throw new TypeError('O histórico da Navi precisa ser uma lista.');
+        }
+        historico.forEach((item) => {
+            const resultadoValido = item?.resultado === null
+                || (typeof item?.resultado === 'object' && !Array.isArray(item.resultado));
+            if (!item
+                || !['user', 'assistant'].includes(item.tipo)
+                || typeof item.texto !== 'string'
+                || !resultadoValido) {
+                console.warn('Uma mensagem inválida do histórico da Navi foi ignorada.');
+                return;
+            }
+            adicionarMensagemAdvisor(item.tipo, item.texto, item.resultado, false);
+        });
+        boasVindasAdvisor?.classList.toggle('hidden', mensagensAdvisor.childElementCount > 0);
+    } catch (error) {
+        console.error('Não foi possível restaurar o histórico da Navi nesta aba.', error);
+        try {
+            window.sessionStorage.removeItem(chaveHistoricoAdvisor);
+        } catch (erroRemocao) {
+            console.error('Não foi possível remover o histórico inválido da Navi.', erroRemocao);
+        }
+    }
+}
+
+function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = true) {
     const mensagem = document.createElement('article');
     mensagem.className = `mensagem-advisor mensagem-advisor-${tipo}`;
+    mensagem.dataset.tipo = tipo;
+    mensagem.resultadoAdvisor = resultado;
 
     const bolha = document.createElement('div');
     bolha.className = 'bolha-mensagem-advisor';
@@ -781,6 +801,9 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null) {
     }
 
     mensagensAdvisor.appendChild(mensagem);
+    if (persistir) {
+        salvarHistoricoAdvisor();
+    }
     mensagensAdvisor.scrollTop = mensagensAdvisor.scrollHeight;
     return mensagem;
 }
@@ -824,10 +847,15 @@ async function enviarPerguntaAdvisor(pergunta) {
     enviandoAdvisor = true;
     botaoEnviarAdvisor.disabled = true;
     campoAdvisor.disabled = true;
-    statusAdvisor.textContent = 'Consultando diagnósticos...';
+    statusAdvisor.textContent = 'A Navi está preparando uma resposta...';
     boasVindasAdvisor?.classList.add('hidden');
     adicionarMensagemAdvisor('user', texto);
-    const pensando = adicionarMensagemAdvisor('assistant', 'Consultando os diagnósticos validados...');
+    const pensando = adicionarMensagemAdvisor(
+        'assistant',
+        'Pensando...',
+        null,
+        false
+    );
     pensando.classList.add('mensagem-pensando-advisor');
     campoAdvisor.value = '';
     contadorAdvisor.textContent = '0/300';
@@ -858,7 +886,7 @@ async function enviarPerguntaAdvisor(pergunta) {
         if (!resposta.ok) {
             throw new Error(typeof resultado.error === 'string'
                 ? resultado.error
-                : 'A Navi não conseguiu consultar os diagnósticos agora. Tente novamente.');
+                : 'A Navi não conseguiu responder agora. Tente novamente.');
         }
         if (!resultado
             || typeof resultado !== 'object'
@@ -867,17 +895,23 @@ async function enviarPerguntaAdvisor(pergunta) {
             throw new TypeError('O resultado da Navi está incompleto.');
         }
 
-        statusAdvisor.textContent = resultado.fonte === 'pergunta_ambigua'
-            ? 'A Navi precisa de mais contexto para responder com precisão.'
-            : resultado.fonte === 'gemini-saudaçao'
-                ? 'Resposta da Navi.'
-            : resultado.encontrado
-                ? 'Resposta baseada em diagnóstico AWS validado.'
-                : 'Pergunta fora do alcance dos diagnósticos cadastrados.';
+        if (resultado.fonte === 'pergunta_ambigua') {
+            statusAdvisor.textContent = 'A Navi precisa de mais contexto para responder com precisão.';
+        } else if (resultado.fonte === 'gemini-saudaçao') {
+            statusAdvisor.textContent = 'Resposta da Navi.';
+        } else if (resultado.fonte === 'gemini-geral') {
+            statusAdvisor.textContent = 'Resposta geral da Navi.';
+        } else if (resultado.fonte === 'geral-indisponivel') {
+            statusAdvisor.textContent = 'A conversa geral precisa do modo Gemini configurado.';
+        } else if (resultado.encontrado) {
+            statusAdvisor.textContent = 'Resposta baseada em diagnóstico AWS validado.';
+        } else {
+            statusAdvisor.textContent = 'Pergunta fora do alcance dos diagnósticos cadastrados.';
+        }
         pensando.remove();
         exibirResultadoAdvisor(resultado);
     } catch (error) {
-        let mensagemErro = 'A Navi não conseguiu consultar os diagnósticos agora. Tente novamente.';
+        let mensagemErro = 'A Navi não conseguiu responder agora. Tente novamente.';
         if (error.name === 'AbortError') {
             mensagemErro = 'A resposta demorou demais. Tente novamente em alguns segundos.';
         } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
@@ -3078,12 +3112,6 @@ botaoPerfilApp.addEventListener('click', abrirPerfil);
 botaoFecharPerfil.addEventListener('click', fecharPerfil);
 botaoAdvisorApp.addEventListener('click', abrirAdvisor);
 botaoFecharAdvisor.addEventListener('click', () => fecharAdvisor());
-limparChatAdvisor?.addEventListener('click', () => {
-    mensagensAdvisor.replaceChildren();
-    boasVindasAdvisor?.classList.remove('hidden');
-    statusAdvisor.textContent = '';
-    campoAdvisor.focus();
-});
 popupAdvisor.addEventListener('click', event => {
     if (event.target === popupAdvisor) {
         fecharAdvisor();
@@ -3273,6 +3301,7 @@ popupPersonagemSelecionado.addEventListener('click', (event) => {
 // Inicializacao
 document.addEventListener('DOMContentLoaded', () => {
     window.history.replaceState({ app: 'FinSlash', tela: 'inicio' }, '', window.location.href);
+    restaurarHistoricoAdvisor();
     atualizarAvatarNavegacao();
     atualizarDisponibilidadePesquisaNavegacao();
     gerarCartoesPersonagens();

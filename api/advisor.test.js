@@ -51,9 +51,10 @@ test('separates AWS questions from general and personal questions', () => {
     assert.equal(ehSaudacao('Navi, bom dia.'), true);
     assert.equal(ehSaudacao('Oi Navi, tudo bem?'), true);
     assert.equal(ehSaudacao('Boa tarde, Navi, como reduzir custos no Amazon S3?'), false);
+    assert.equal(ehSaudacao('Oi, Navi, tenho uma dúvida sobre AWS.'), false);
 });
 
-test('answers a greeting addressed to Navi without asking for clarification', async (context) => {
+test('answers greetings locally and offers help without asking for clarification', async (context) => {
     const chavesAmbiente = ['ALLOWED_ORIGIN', 'DATABASE_URL', 'GEMINI_API_KEY'];
     const ambienteAnterior = Object.fromEntries(
         chavesAmbiente.map((chave) => [chave, process.env[chave]])
@@ -78,23 +79,35 @@ test('answers a greeting addressed to Navi without asking for clarification', as
         chamadasGemini += 1;
         throw new Error('Uma saudação não deve chamar o Gemini.');
     };
-    const response = await advisor.fetch(new Request(
-        'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Origin: 'https://finslash.vercel.app'
-            },
-            body: JSON.stringify({ pergunta: 'Boa tarde, Navi!' })
-        }
-    ));
-    const resultado = await response.json();
+    const saudacoes = [
+        ['Boa tarde, Navi!', 'Boa tarde! Sou a Navi. Como posso ajudar?'],
+        ['Navi, bom dia.', 'Bom dia! Sou a Navi. Como posso ajudar?'],
+        ['Oi Navi, tudo bem?', 'Tudo certo por aqui! Sou a Navi. Como posso ajudar?'],
+        ['Obrigada, Navi', 'De nada! Se precisar de ajuda, estou por aqui.'],
+        ['Tchau, Navi', 'Até logo! Se precisar de ajuda, estarei por aqui.'],
+        ['Oi', 'Olá! Sou a Navi. Como posso ajudar?']
+    ];
 
-    assert.equal(response.status, 200);
-    assert.equal(resultado.fonte, 'saudacao-local');
-    assert.equal(resultado.resposta, 'Boa tarde! Sou a Navi.');
-    assert.equal(resultado.conversa, undefined);
+    for (const [pergunta, respostaEsperada] of saudacoes) {
+        const response = await advisor.fetch(new Request(
+            'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Origin: 'https://finslash.vercel.app'
+                },
+                body: JSON.stringify({ pergunta })
+            }
+        ));
+        const resultado = await response.json();
+
+        assert.equal(response.status, 200);
+        assert.equal(resultado.fonte, 'saudacao-local');
+        assert.equal(resultado.resposta, respostaEsperada);
+        assert.equal(resultado.conversa, undefined);
+    }
+
     assert.equal(chamadasGemini, 0);
 });
 

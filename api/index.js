@@ -1218,24 +1218,24 @@ function ehSaudacao(pergunta) {
 function gerarSaudacaoNavi(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
     if (normalizada.includes('bom dia')) {
-        return 'Bom dia! Sou a Navi.';
+        return 'Bom dia! Sou a Navi. Como posso ajudar?';
     }
     if (normalizada.includes('boa tarde')) {
-        return 'Boa tarde! Sou a Navi.';
+        return 'Boa tarde! Sou a Navi. Como posso ajudar?';
     }
     if (normalizada.includes('boa noite')) {
-        return 'Boa noite! Sou a Navi.';
+        return 'Boa noite! Sou a Navi. Como posso ajudar?';
     }
     if (normalizada.includes('obrigad')) {
-        return 'De nada! Estou por aqui.';
+        return 'De nada! Se precisar de ajuda, estou por aqui.';
     }
     if (normalizada.includes('tchau') || normalizada.includes('ate logo')) {
-        return 'Até logo!';
+        return 'Até logo! Se precisar de ajuda, estarei por aqui.';
     }
     if (normalizada.includes('tudo bem')) {
-        return 'Tudo certo por aqui! Sou a Navi.';
+        return 'Tudo certo por aqui! Sou a Navi. Como posso ajudar?';
     }
-    return 'Olá! Sou a Navi.';
+    return 'Olá! Sou a Navi. Como posso ajudar?';
 }
 
 function criarRespostaBasica(pergunta) {

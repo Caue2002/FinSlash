@@ -249,6 +249,8 @@ const statusAdvisor = document.getElementById('status-advisor');
 const cenariosAdvisor = document.getElementById('cenarios-advisor');
 const mensagensAdvisor = document.getElementById('mensagens-advisor');
 const limparChatAdvisor = document.getElementById('limpar-chat-advisor');
+const montagemNavi = document.getElementById('montagem-navi');
+const iconeAdvisorPersonagem = document.getElementById('icone-advisor-personagem');
 const boasVindasAdvisor = document.getElementById('boas-vindas-advisor');
 let enviandoAdvisor = false;
 const avatarNavegacaoApp = document.getElementById('avatar-navegacao-app');
@@ -353,6 +355,20 @@ function salvarPersonagemSelecionado(index) {
     dadosPersistidos.indicePersonagem = index;
     salvarDadosPersistidos();
     atualizarAvatarNavegacao();
+    atualizarAvatarNavi();
+}
+
+function atualizarAvatarNavi() {
+    const personagem = personagens[dadosPersistidos.indicePersonagem];
+    if (!personagem || !iconeAdvisorPersonagem) {
+        return;
+    }
+    iconeAdvisorPersonagem.src = personagem.imagem;
+    iconeAdvisorPersonagem.alt = personagem.nome;
+    montagemNavi?.setAttribute(
+        'aria-label',
+        `Navi, representada por ${personagem.nome}`
+    );
 }
 
 function registrarBuscaRecente(busca) {
@@ -559,6 +575,16 @@ function abrirAdvisor() {
     fecharPerfil();
     popupAdvisor.classList.remove('hidden');
     popupAdvisor.querySelector('.painel-advisor')?.classList.remove('advisor-consulta');
+    const personagemNavi = personagemSelecionado
+        || personagens[dadosPersistidos.indicePersonagem];
+    if (personagemNavi && iconeAdvisorPersonagem) {
+        iconeAdvisorPersonagem.src = personagemNavi.imagem;
+        iconeAdvisorPersonagem.alt = personagemNavi.nome;
+        montagemNavi?.setAttribute(
+            'aria-label',
+            `Navi, representada por ${personagemNavi.nome}`
+        );
+    }
     if (!mensagensAdvisor.childElementCount) {
         boasVindasAdvisor?.classList.remove('hidden');
     } else {

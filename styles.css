@@ -1704,6 +1704,48 @@ body.tela-servicos-ativa > .canvas-onda {
     background: #ffffff;
 }
 
+.montagem-navi {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    flex: 0 0 76px;
+}
+
+.icone-advisor-personagem {
+    width: 76px;
+    height: 76px;
+    box-sizing: border-box;
+    object-fit: cover;
+    object-position: center 20%;
+    border: 2px solid #60a5fa;
+    border-radius: 22px;
+    background: linear-gradient(145deg, #dbeafe, #ffffff);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.28);
+}
+
+.selo-ia-navi {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border: 2px solid #0f172a;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #2563eb;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.35);
+}
+
+.selo-ia-navi svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 0.3;
+}
+
 .icone-logo-advisor-nav {
     width: 42px;
     height: 42px;

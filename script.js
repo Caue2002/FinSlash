@@ -565,7 +565,7 @@ function abrirAdvisor() {
     if (!mensagensAdvisor.childElementCount && dadosPersistidos.nomePerfil !== 'Meu perfil') {
         adicionarMensagemAdvisor(
             'assistant',
-            `Olá! Sou a Navi. Notei que o nome cadastrado em seu perfil é ${dadosPersistidos.nomePerfil}. Deseja que lhe chame por esse nome?`
+            `Olá! Sou a Navi. Notei que o nome cadastrado em seu perfil é ${dadosPersistidos.nomePerfil}. Deseja que eu lhe chame por esse nome?`
         );
     }
     const painelAdvisor = popupAdvisor.querySelector('.painel-advisor');

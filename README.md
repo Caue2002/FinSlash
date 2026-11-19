@@ -48,6 +48,7 @@ Quando existe um diagnóstico validado, a Navi apresenta:
 - Estado visual enquanto a Navi consulta os diagnósticos.
 - Botão para limpar todas as mensagens temporárias do painel.
 - Detecção de consultas ambíguas entre vários serviços.
+- Perguntas de esclarecimento quando a mensagem não informa o serviço, o objetivo ou detalhes suficientes; a Navi aguarda contexto em vez de escolher um diagnóstico por suposição.
 
 Para evitar alucinações, o Gemini recebe somente o contexto fechado do banco validado. A resposta final usa somente título, resumo, etapas, confiança e documentação retornados pelo PostgreSQL do FinSlash. Se não houver diagnóstico confiável, o sistema informa a ausência em vez de inventar uma causa.
 
@@ -83,7 +84,7 @@ Resposta encontrada:
 }
 ```
 
-Quando não existe correspondência confiável, o endpoint retorna uma orientação padrão segura com `encontrado: false` e até três sugestões. O servidor e o navegador não persistem perguntas.
+Quando a mensagem é genérica ou ambígua, o endpoint retorna uma pergunta de esclarecimento com `fonte: "pergunta_ambigua"` e `agente.status: "aguardando_esclarecimento"` antes de consultar diagnósticos. Quando não existe correspondência confiável para uma pergunta objetiva, retorna uma orientação padrão segura com `encontrado: false` e até três sugestões. O servidor e o navegador não persistem perguntas.
 
 A Navi usa `DATABASE_URL` e `ALLOWED_ORIGIN`, já necessárias pela API existente. A interface usa `window.FINSLASH_API_BASE_URL` e não fixa uma URL externa. O modo `file://` mostra instruções para abrir o projeto pela API ou pela publicação na Vercel.
 

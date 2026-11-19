@@ -212,6 +212,58 @@ function pedirDiagnosticoDeCusto(pergunta) {
     return /\b(custo|custos|gasto|gastos|economi|reduzir|barato|mais caro|pagar menos|preco|orcamento|budget|saving|desconto|desperdicio|otimiz)\w*\b/u.test(normalizada);
 }
 
+function precisaEsclarecimento(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    const servicos = identificarServicosAmbiguos(pergunta);
+    const mencionaProjeto = perguntaRelacionadoAoProjeto(pergunta)
+        || /\b(aws|amazon|finslash)\b/u.test(normalizada);
+    const mencionaCusto = pedirDiagnosticoDeCusto(pergunta);
+    const descricaoVaga = /\b(ajuda|ajudar|duvida|duvidas|problema|problemas|erro|erros|falha|falhando|parou|caiu|lento|lenta|caro|cara|alto|alta|estranho|estranha|ruim|melhorar|nao funciona|nao sei|deu ruim|fora do ar)\b/u.test(normalizada);
+    const detalheConcreto = /\b(4\d\d|5\d\d|timeout|timed out|throttl\w*|permiss\w*|lifecycle|glacier|transfer\w*|armazen\w*|consulta|query|cpu|memoria|latencia|desde|depois|apos|quando|porque|por causa)\b/u.test(normalizada);
+    const temIntencao = /\b(o que|como|qual|quais|quanto|onde|quando|por que|porque|explique|fale sobre|conte sobre|resumo|visao geral|configurar|corrigir|resolver|monitorar|comparar|analisar|verificar|reduzir|economizar|otimizar)\b/u.test(normalizada);
+
+    if (descricaoVaga && !detalheConcreto) {
+        return true;
+    }
+    if (!mencionaProjeto && !mencionaCusto) {
+        return descricaoVaga || !temIntencao;
+    }
+    if (!servicos.length && (mencionaCusto || descricaoVaga || mencionaProjeto || !temIntencao)) {
+        return true;
+    }
+    return mencionaProjeto && !temIntencao && servicos.length <= 1;
+}
+
+function criarRespostaEsclarecimento(pergunta) {
+    const servicos = identificarServicosAmbiguos(pergunta);
+    let resposta;
+    if (servicos.length > 1) {
+        resposta = `Para eu não assumir o foco errado, qual serviço você quer analisar: ${servicos.slice(0, 4).join(', ')} ou outro? E qual resultado você busca?`;
+    } else if (servicos.length === 1) {
+        resposta = `Quero entender melhor antes de sugerir algo sobre ${servicos[0]}. O que você quer descobrir ou resolver — custos, desempenho, configuração ou algum erro? Se puder, conte também o que aconteceu e desde quando.`;
+    } else if (pedirDiagnosticoDeCusto(pergunta)) {
+        resposta = 'Entendi que sua dúvida envolve custos, mas ainda não sei qual situação analisar. Qual serviço ou recurso AWS está envolvido, o que mudou e em que período você percebeu isso?';
+    } else {
+        resposta = 'Quero entender o que você precisa antes de sugerir uma solução. Isso é sobre AWS/FinSlash? Se sim, qual serviço está envolvido e o que você quer descobrir ou resolver?';
+    }
+    return {
+        modo: 'conversacao',
+        encontrado: false,
+        diagnostico: 'Preciso de mais contexto para responder com precisão.',
+        servico: servicos.length === 1 ? servicos[0] : null,
+        resposta,
+        confianca: 0,
+        fonte: 'pergunta_ambigua',
+        validacao: null,
+        resultados: [],
+        sugestoes: [],
+        agente: {
+            status: 'aguardando_esclarecimento',
+            erro: null
+        }
+    };
+}
+
 function identificarServicosAmbiguos(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
     const encontrados = [];
@@ -967,6 +1019,9 @@ async function receberAdvisor(request, origemPermitida) {
                 }
             }, cabecalhos);
         }
+        if (precisaEsclarecimento(pergunta)) {
+            return responder(200, criarRespostaEsclarecimento(pergunta), cabecalhos);
+        }
         if (!perguntaRelacionadoAoProjeto(pergunta)) {
             const resultadoForaDoEscopo = criarResultadoForaDoEscopo();
             return responder(200, {
@@ -1281,6 +1336,8 @@ async function receberFeedback(request, origemPermitida) {
         }
     }
 }
+
+export { precisaEsclarecimento };
 
 // Mantém todos os endpoints em uma única função compatível com o Web Handler da Vercel.
 export default {

@@ -867,8 +867,10 @@ async function enviarPerguntaAdvisor(pergunta) {
             throw new TypeError('O resultado da Navi está incompleto.');
         }
 
-        statusAdvisor.textContent = resultado.fonte === 'gemini-saudaçao'
-            ? 'Resposta da Navi.'
+        statusAdvisor.textContent = resultado.fonte === 'pergunta_ambigua'
+            ? 'A Navi precisa de mais contexto para responder com precisão.'
+            : resultado.fonte === 'gemini-saudaçao'
+                ? 'Resposta da Navi.'
             : resultado.encontrado
                 ? 'Resposta baseada em diagnóstico AWS validado.'
                 : 'Pergunta fora do alcance dos diagnósticos cadastrados.';

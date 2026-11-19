@@ -125,6 +125,7 @@ test('compares two published services using their catalog contexts and official 
     assert.match(instrucaoGemini, /Amazon Athena/u);
     assert.match(instrucaoGemini, /Amazon S3/u);
     assert.match(instrucaoGemini, /exclusivamente/u);
+    assert.match(instrucaoGemini, /\{"resposta":"texto da comparação"\}/u);
 
     const responseAmbigua = await advisor.fetch(new Request(
         'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',

@@ -474,9 +474,9 @@ Contexto: ${contextoSeguro}`;
 async function responderComparacaoServicos(pergunta, contextos) {
     const contextosSeguros = contextos.map((contexto) => ({
         service: contexto.service,
-        topics: contexto.topics.slice(0, 8).map((topico) => ({
+        topics: contexto.topics.slice(0, 4).map((topico) => ({
             title: typeof topico.title === 'string' ? topico.title.slice(0, 180) : '',
-            summary: typeof topico.summary === 'string' ? topico.summary.slice(0, 1200) : ''
+            summary: typeof topico.summary === 'string' ? topico.summary.slice(0, 600) : ''
         }))
     }));
     const systemInstruction = `Você é a Navi. Compare os serviços AWS solicitados usando
@@ -484,7 +484,8 @@ exclusivamente os cenários publicados do FinSlash abaixo. Não invente recursos
 preços, procedimentos, benefícios ou diferenças. Se o contexto não documentar
 uma diferença, diga claramente que ela não consta no catálogo. Faça uma comparação
 direta em português, em até 3 parágrafos curtos, e não trate os serviços como
-intercambiáveis sem evidência.
+intercambiáveis sem evidência. Retorne somente JSON válido no formato
+{"resposta":"texto da comparação"}.
 Contextos: ${JSON.stringify(contextosSeguros)}`;
     const texto = await chamarGemini({
         systemInstruction,

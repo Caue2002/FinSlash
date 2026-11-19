@@ -15,8 +15,24 @@ const LIMITE_CONTEXTO_CONVERSA_ADVISOR = 1800;
 const LIMITE_ENVIOS_POR_HORA = 5;
 const CATEGORIAS_FEEDBACK = new Set(['suggestion', 'issue', 'content']);
 const MOTIVOS_REGENERACAO = new Set(['incompleta', 'incorreta', 'confusa', 'fora_da_pergunta']);
+const PREFERENCIAS_RESPOSTA_ADVISOR = new Set([
+    'estilo_aprovado',
+    'mais_completa',
+    'mais_verificada',
+    'mais_simples',
+    'mais_direta'
+]);
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_MODEL = 'gemini-2.5-flash';
+const DIRETRIZES_CONVERSA_NAVI = `Conduza a conversa para resolver o pedido atual.
+Considere a mensagem atual e o contexto recente antes de responder: não repita perguntas já respondidas,
+não trate respostas anteriores da Navi como fonte factual e não confunda uma saudação isolada com uma dúvida.
+Se a pessoa juntar uma saudação a uma pergunta, priorize a pergunta. Responda diretamente quando houver
+informação suficiente; se faltar um dado essencial, faça apenas uma pergunta curta e específica por vez.
+Use cada resposta da pessoa para avançar, reconheça o que já entendeu e não reinicie a conversa.
+Quando puder entregar uma solução confiável, apresente-a com os próximos passos e limitações relevantes,
+sem prolongar a conversa com esclarecimentos desnecessários. Em uma saudação, ofereça ajuda; depois
+de uma resposta completa, encerre com uma oferta breve de continuidade quando isso for útil.`;
 const FONTE_OPEN_METEO = {
     title: 'Open-Meteo',
     url: 'https://open-meteo.com/en/docs'
@@ -85,17 +101,28 @@ function criarConteudoGemini(prompt, historico = []) {
     return contents;
 }
 
-function ajustarPromptParaRegeneracao(prompt, regenerar, motivo) {
-    if (!regenerar) {
-        return prompt;
-    }
+function ajustarPromptParaRegeneracao(prompt, regenerar, motivo, preferenciaResposta = null) {
     const instrucoes = {
         incompleta: 'A resposta anterior ficou incompleta. Cubra o ponto que faltou sem inventar fatos.',
         incorreta: 'A resposta anterior pode conter erro. Verifique os fatos com as fontes disponíveis, corrija o que não puder confirmar e assuma qualquer incerteza.',
         confusa: 'A resposta anterior ficou confusa. Explique de forma mais simples, direta e organizada.',
         fora_da_pergunta: 'A resposta anterior não respondeu ao pedido. Responda diretamente ao que foi perguntado.'
     };
-    return `${prompt}\n\nGere uma nova resposta, diferente da anterior. ${instrucoes[motivo] || 'Mantenha os fatos verificados e seja mais útil e direta.'}`;
+    const preferencias = {
+        estilo_aprovado: 'A pessoa avaliou positivamente o estilo da resposta anterior. Preserve seu nível de clareza e detalhe quando isso combinar com o pedido atual, sem repetir o conteúdo.',
+        mais_completa: 'Na conversa atual, cubra os passos essenciais e explicite qualquer dado que ainda impeça uma solução segura.',
+        mais_verificada: 'Na conversa atual, diferencie fatos confirmados de hipóteses, verifique as fontes disponíveis e declare incertezas.',
+        mais_simples: 'Na conversa atual, prefira linguagem simples, frases diretas e explique termos técnicos necessários.',
+        mais_direta: 'Na conversa atual, responda primeiro ao pedido exato e evite desvios ou informações que não ajudem a resolvê-lo.'
+    };
+    const ajustes = [];
+    if (regenerar) {
+        ajustes.push(`Gere uma nova resposta, diferente da anterior. ${instrucoes[motivo] || 'Mantenha os fatos verificados e seja mais útil e direta.'}`);
+    }
+    if (PREFERENCIAS_RESPOSTA_ADVISOR.has(preferenciaResposta)) {
+        ajustes.push(preferencias[preferenciaResposta]);
+    }
+    return ajustes.length ? `${prompt}\n\n${ajustes.join('\n')}` : prompt;
 }
 
 async function chamarGemini({
@@ -766,7 +793,14 @@ async function obterContextoVisaoGeral(nomeServico) {
     };
 }
 
-async function responderVisaoGeralServico(pergunta, historico, contexto, regenerar = false, motivo = null) {
+async function responderVisaoGeralServico(
+    pergunta,
+    historico,
+    contexto,
+    regenerar = false,
+    motivo = null,
+    preferenciaResposta = null
+) {
     const contextoSeguro = JSON.stringify(contexto).slice(0, 18000);
     const systemInstruction = `Você é a Navi, o AI Agent do FinSlash. Explique o serviço AWS em texto natural.
 Use exclusivamente o contexto cadastrado abaixo. Não invente recursos, preços,
@@ -774,10 +808,16 @@ procedimentos, benefícios ou links. Não escolha um único diagnóstico quando 
 pessoa pediu uma visão geral. Responda em português, em 2 ou 3 parágrafos curtos.
 Use o histórico apenas para entender referências da pergunta atual; ele não é fonte de
 fatos. Se houver conflito, priorize exclusivamente o contexto cadastrado.
+${DIRETRIZES_CONVERSA_NAVI}
 Contexto: ${contextoSeguro}`;
     const texto = await chamarGemini({
         systemInstruction,
-        prompt: ajustarPromptParaRegeneracao(pergunta, regenerar, motivo),
+        prompt: ajustarPromptParaRegeneracao(
+            pergunta,
+            regenerar,
+            motivo,
+            preferenciaResposta
+        ),
         historico: historico.filter((mensagem) => mensagem.tipo === 'user'),
         json: true
     });
@@ -796,7 +836,8 @@ async function responderComparacaoServicos(
     contextos,
     historico = [],
     regenerar = false,
-    motivo = null
+    motivo = null,
+    preferenciaResposta = null
 ) {
     const contextosSeguros = contextos.map((contexto) => ({
         service: contexto.service,
@@ -814,10 +855,16 @@ intercambiáveis sem evidência. Retorne somente JSON válido no formato
 {"resposta":"texto da comparação"}.
 Use o histórico apenas para resolver referências da pergunta atual; ele não é fonte
 de fatos.
+${DIRETRIZES_CONVERSA_NAVI}
 Contextos: ${JSON.stringify(contextosSeguros)}`;
     const texto = await chamarGemini({
         systemInstruction,
-        prompt: ajustarPromptParaRegeneracao(pergunta, regenerar, motivo),
+        prompt: ajustarPromptParaRegeneracao(
+            pergunta,
+            regenerar,
+            motivo,
+            preferenciaResposta
+        ),
         historico: historico.filter((mensagem) => mensagem.tipo === 'user'),
         json: true
     });
@@ -892,7 +939,8 @@ async function criarRespostaGeral(pergunta, historico = [], contextoAnterior = '
     const prompt = ajustarPromptParaRegeneracao(
         promptBase,
         opcoes.regenerar === true,
-        opcoes.motivoFeedback
+        opcoes.motivoFeedback,
+        opcoes.preferenciaResposta
     );
     const respostaGemini = await chamarGemini({
         systemInstruction: `Você é a Navi. Responda em português do Brasil,
@@ -909,6 +957,7 @@ contexto atual ou especializado. Use a Pesquisa Google para verificar fatos atua
 e priorize fontes primárias oficiais, governamentais, acadêmicas ou reconhecidas. Não baseie
 afirmações em redes sociais, fóruns ou páginas sem autoria verificável. Se faltar informação para
 responder com segurança, faça uma pergunta objetiva de esclarecimento.
+${DIRETRIZES_CONVERSA_NAVI}
 Retorne somente JSON válido no formato {"resposta":"texto","precisa_esclarecimento":boolean}.`,
         prompt,
         historico,
@@ -1318,7 +1367,7 @@ async function lerJsonAdvisor(request) {
         throw new TypeError('O corpo precisa ser um objeto JSON.');
     }
     if (Object.keys(json).some((chave) =>
-        !['pergunta', 'historico', 'timezone', 'regenerar', 'motivoFeedback'].includes(chave))) {
+        !['pergunta', 'historico', 'timezone', 'regenerar', 'motivoFeedback', 'preferenciaResposta'].includes(chave))) {
         throw new TypeError('O corpo contém campos não permitidos.');
     }
     if (typeof json.pergunta !== 'string') {
@@ -1348,9 +1397,15 @@ async function lerJsonAdvisor(request) {
     }
     const regenerar = json.regenerar === undefined ? false : json.regenerar;
     const motivoFeedback = json.motivoFeedback === undefined ? null : json.motivoFeedback;
+    const preferenciaResposta = json.preferenciaResposta === undefined
+        ? null
+        : json.preferenciaResposta;
     if (typeof regenerar !== 'boolean'
         || !(motivoFeedback === null
-            || (typeof motivoFeedback === 'string' && MOTIVOS_REGENERACAO.has(motivoFeedback)))) {
+            || (typeof motivoFeedback === 'string' && MOTIVOS_REGENERACAO.has(motivoFeedback)))
+        || !(preferenciaResposta === null
+            || (typeof preferenciaResposta === 'string'
+                && PREFERENCIAS_RESPOSTA_ADVISOR.has(preferenciaResposta)))) {
         throw new TypeError('As opções para gerar outra resposta são inválidas.');
     }
 
@@ -1386,7 +1441,7 @@ async function lerJsonAdvisor(request) {
                 : {})
         };
     });
-    return { pergunta, historico, timezone, regenerar, motivoFeedback };
+    return { pergunta, historico, timezone, regenerar, motivoFeedback, preferenciaResposta };
 }
 
 // Localiza diagnósticos AWS e monta respostas a partir das fontes cadastradas.
@@ -1659,7 +1714,8 @@ async function gerarRespostaNaviGemini(
     contexto,
     historico = [],
     regenerar = false,
-    motivo = null
+    motivo = null,
+    preferenciaResposta = null
 ) {
     if (!process.env.GEMINI_API_KEY) {
         return null;
@@ -1677,8 +1733,14 @@ Adapte o texto à pergunta específica do usuário. Use linguagem natural, não 
 template do diagnóstico e não repita literalmente os rótulos "Como proceder" ou "Cuidados".
 Responda somente com JSON válido no formato {"resposta":"texto"}.
 Use as perguntas anteriores apenas para resolver referências; elas não são fonte de fatos.
+${DIRETRIZES_CONVERSA_NAVI}
 Contexto: ${contextoSeguro}`,
-        prompt: ajustarPromptParaRegeneracao(pergunta, regenerar, motivo),
+        prompt: ajustarPromptParaRegeneracao(
+            pergunta,
+            regenerar,
+            motivo,
+            preferenciaResposta
+        ),
         historico: historico.filter((mensagem) => mensagem.tipo === 'user'),
         json: true
     });
@@ -1988,7 +2050,8 @@ async function receberAdvisor(request, origemPermitida) {
 
         const opcoesGeracao = {
             regenerar: entradaAdvisor.regenerar,
-            motivoFeedback: entradaAdvisor.motivoFeedback
+            motivoFeedback: entradaAdvisor.motivoFeedback,
+            preferenciaResposta: entradaAdvisor.preferenciaResposta
         };
 
         if (conversaAtiva) {
@@ -2116,7 +2179,8 @@ async function receberAdvisor(request, origemPermitida) {
                     contextos,
                     historico,
                     opcoesGeracao.regenerar,
-                    opcoesGeracao.motivoFeedback
+                    opcoesGeracao.motivoFeedback,
+                    opcoesGeracao.preferenciaResposta
                 );
             } catch (erroComparacao) {
                 console.error('Falha ao gerar comparação de serviços pelo Gemini:', erroComparacao);
@@ -2181,7 +2245,8 @@ async function receberAdvisor(request, origemPermitida) {
                             historico,
                             contexto,
                             opcoesGeracao.regenerar,
-                            opcoesGeracao.motivoFeedback
+                            opcoesGeracao.motivoFeedback,
+                            opcoesGeracao.preferenciaResposta
                         );
                     } catch (erroVisao) {
                         console.error('Falha ao gerar visão geral pelo Gemini:', erroVisao);
@@ -2263,7 +2328,8 @@ async function receberAdvisor(request, origemPermitida) {
                         historico,
                         contexto,
                         opcoesGeracao.regenerar,
-                        opcoesGeracao.motivoFeedback
+                        opcoesGeracao.motivoFeedback,
+                        opcoesGeracao.preferenciaResposta
                     );
                 } catch (erroVisao) {
                     console.error('Falha ao gerar visão geral pelo Gemini:', erroVisao);
@@ -2338,7 +2404,8 @@ async function receberAdvisor(request, origemPermitida) {
                         resultado,
                         historico,
                         opcoesGeracao.regenerar,
-                        opcoesGeracao.motivoFeedback
+                        opcoesGeracao.motivoFeedback,
+                        opcoesGeracao.preferenciaResposta
                     );
                     if (!respostaGerada) {
                         throw new Error('Gemini não devolveu uma resposta textual.');

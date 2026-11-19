@@ -34,7 +34,7 @@ A Navi permite conversar sobre assuntos gerais e enviar dúvidas sobre serviços
 
 Configure `GEMINI_API_KEY` e, opcionalmente, `GEMINI_MODEL` nas variáveis de ambiente para habilitar respostas gerais com Pesquisa Google. O grounding de pesquisa pode ter cobrança por consulta conforme o plano Google AI Studio. O Gemini recebe a pergunta atual e até seis mensagens recentes para manter o contexto. Evite enviar dados pessoais sensíveis. Para perguntas AWS, o Gemini opcional só pode reformular informações encontradas nos diagnósticos publicados e nas fontes oficiais cadastradas. A Navi não acessa a conta AWS do usuário. Sem a chave, a Navi continua funcionando para AWS no modo local e informa que a conversa geral está indisponível.
 
-O histórico completo do chat fica somente na `sessionStorage` da aba atual, limitado às 40 mensagens mais recentes: permanece ao fechar e reabrir a Navi ou recarregar a página, e é removido quando a aba é fechada. A cada pergunta, até seis mensagens recentes podem ser enviadas à API para resolver acompanhamentos; enquanto a Navi esclarece uma dúvida, o estado inclui um resumo limitado a 1.800 caracteres. O servidor não persiste esses dados. Com Gemini configurado, esse contexto também pode ser encaminhado ao provedor para gerar a resposta. Perguntas gerais podem ser enviadas à Pesquisa Google. Perguntas sobre o tempo enviam ao Open-Meteo somente a localidade informada; a data e hora usam o fuso do dispositivo.
+O histórico completo do chat fica somente na `sessionStorage` da aba atual, limitado às 40 mensagens mais recentes: permanece ao fechar e reabrir a Navi ou recarregar a página, e é removido quando a aba é fechada. A cada pergunta, até seis mensagens recentes podem ser enviadas à API para resolver acompanhamentos; enquanto a Navi esclarece uma dúvida, o estado inclui um resumo limitado a 1.800 caracteres. O servidor não persiste as mensagens. O endpoint existente armazena avaliações com tema e motivo, sem o texto da conversa; a preferência de resposta (por exemplo, explicar de forma mais simples) fica na `sessionStorage` e somente esse valor controlado é enviado nas próximas chamadas. Isso não altera os pesos do Gemini. Com Gemini configurado, o contexto também pode ser encaminhado ao provedor para gerar a resposta. Perguntas gerais podem ser enviadas à Pesquisa Google. Perguntas sobre o tempo enviam ao Open-Meteo somente a localidade informada; a data e hora usam o fuso do dispositivo.
 Durante a conversa, o painel mantém a mensagem mais recente visível, rola até o fim após cada nova mensagem e se ajusta à área visível quando o teclado móvel é aberto.
 
 Cumprimentos simples são reconhecidos e respondidos localmente, sem depender do Gemini, com um convite para a pessoa dizer como a Navi pode ajudar. Se a mensagem combinar uma saudação com uma dúvida, ela segue para o fluxo normal da pergunta. Perguntas gerais usam o Gemini com grounding do Google Search e fontes quando disponível, com temperatura zero. O modo geral não fornece instruções ou dados específicos de AWS. Perguntas AWS continuam restritas ao fluxo de diagnósticos publicados e informações validadas no catálogo.
@@ -50,7 +50,7 @@ Quando existe um diagnóstico validado, a Navi apresenta:
 - Gerar outra resposta, usando o motivo enviado na avaliação negativa como orientação de revisão.
 - Menu para abrir as fontes consultadas ou exportar a resposta.
 - Sugestões de perguntas relacionadas, com botões para continuar a conversa.
-- Avaliação útil/não útil para ajudar a revisar as respostas; em uma resposta negativa, o motivo também orienta a regeneração. As avaliações não treinam o modelo automaticamente e não incluem o texto da conversa.
+- Avaliação útil/não útil para ajudar a revisar as respostas; em uma resposta negativa, o motivo também orienta a regeneração e define o estilo das próximas respostas da mesma aba. A preferência não treina os pesos do modelo e o feedback não inclui o texto da conversa.
 - Botão para repetir uma pergunta quando a API falhar.
 - Estado visual enquanto a Navi consulta os diagnósticos.
 - Detecção de consultas ambíguas entre vários serviços.
@@ -75,6 +75,7 @@ Content-Type: application/json
   "timezone": "America/Sao_Paulo",
   "regenerar": false,
   "motivoFeedback": null,
+  "preferenciaResposta": "mais_simples",
   "historico": [
     { "tipo": "user", "texto": "Como reduzir custos com EC2?" },
     {
@@ -91,7 +92,7 @@ Content-Type: application/json
 }
 ```
 
-`historico` é opcional, aceita até seis mensagens (`user`/`assistant`) com até 300 caracteres cada e é validado no servidor. `timezone` aceita um fuso IANA, como `America/Sao_Paulo`. `regenerar` indica que o usuário solicitou outra versão; `motivoFeedback` aceita `incompleta`, `incorreta`, `confusa` ou `fora_da_pergunta`. O campo `conversa` é opcional e permitido somente em mensagens do assistente; contém `tema`, `etapa`, `servico` e `contexto` para continuar uma pergunta de esclarecimento. O contexto acumulado tem limite de 1.800 caracteres. A Navi usa o histórico para resolver acompanhamentos, sem permitir que respostas anteriores substituam as fontes do catálogo.
+`historico` é opcional, aceita até seis mensagens (`user`/`assistant`) com até 300 caracteres cada e é validado no servidor. `timezone` aceita um fuso IANA, como `America/Sao_Paulo`. `regenerar` indica que o usuário solicitou outra versão; `motivoFeedback` aceita `incompleta`, `incorreta`, `confusa` ou `fora_da_pergunta`. `preferenciaResposta` aceita `estilo_aprovado`, `mais_completa`, `mais_verificada`, `mais_simples` ou `mais_direta`; a interface define essa preferência pelo feedback e a mantém somente na sessão da aba. O campo `conversa` é opcional e permitido somente em mensagens do assistente; contém `tema`, `etapa`, `servico` e `contexto` para continuar uma pergunta de esclarecimento. O contexto acumulado tem limite de 1.800 caracteres. A Navi usa o histórico para resolver acompanhamentos, sem permitir que respostas anteriores substituam as fontes do catálogo.
 
 Resposta encontrada:
 

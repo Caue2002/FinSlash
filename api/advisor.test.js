@@ -1022,13 +1022,13 @@ test('asks for a city and then returns a cited weather forecast', async (context
     assert.equal(chamadasExternas.length, 4);
 });
 
-test('uses Google grounding citations and applies negative feedback when regenerating', async (context) => {
+test('uses Google grounding, feedback, and conversation preferences in generated answers', async (context) => {
     const chavesAmbiente = ['ALLOWED_ORIGIN', 'DATABASE_URL', 'GEMINI_API_KEY', 'GEMINI_MODEL'];
     const ambienteAnterior = Object.fromEntries(
         chavesAmbiente.map((chave) => [chave, process.env[chave]])
     );
     const fetchAnterior = globalThis.fetch;
-    let corpoGemini;
+    const corposGemini = [];
     context.after(() => {
         chavesAmbiente.forEach((chave) => {
             if (ambienteAnterior[chave] === undefined) {
@@ -1046,7 +1046,7 @@ test('uses Google grounding citations and applies negative feedback when regener
     delete process.env.DATABASE_URL;
     globalThis.fetch = async (url, options) => {
         assert.match(String(url), /gemini-test/u);
-        corpoGemini = JSON.parse(options.body);
+        corposGemini.push(JSON.parse(options.body));
         return new Response(JSON.stringify({
             candidates: [{
                 content: {
@@ -1095,7 +1095,8 @@ test('uses Google grounding citations and applies negative feedback when regener
                 pergunta: 'Explique de forma simples como funciona o serviço.',
                 timezone: 'America/Sao_Paulo',
                 regenerar: true,
-                motivoFeedback: 'confusa'
+                motivoFeedback: 'confusa',
+                preferenciaResposta: 'mais_simples'
             })
         }
     ));
@@ -1107,10 +1108,33 @@ test('uses Google grounding citations and applies negative feedback when regener
         title: 'Portal do Governo Federal',
         url: 'https://www.gov.br/'
     }]);
-    assert.deepEqual(corpoGemini.tools, [{ google_search: {} }]);
-    assert.match(corpoGemini.contents[0].parts[0].text, /Gere uma nova resposta/u);
-    assert.match(corpoGemini.contents[0].parts[0].text, /mais simples/u);
-    assert.match(corpoGemini.systemInstruction.parts[0].text, /fontes primárias oficiais/u);
+    assert.deepEqual(corposGemini[0].tools, [{ google_search: {} }]);
+    assert.match(corposGemini[0].contents[0].parts[0].text, /Gere uma nova resposta/u);
+    assert.match(corposGemini[0].contents[0].parts[0].text, /prefira linguagem simples/u);
+    assert.match(corposGemini[0].systemInstruction.parts[0].text, /fontes primárias oficiais/u);
+    assert.match(corposGemini[0].systemInstruction.parts[0].text, /não repita perguntas já respondidas/u);
+
+    const respostaSeguinte = await advisor.fetch(new Request(
+        'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Origin: 'https://finslash.vercel.app'
+            },
+            body: JSON.stringify({
+                pergunta: 'Explique o ponto principal com palavras simples.',
+                timezone: 'America/Sao_Paulo',
+                preferenciaResposta: 'mais_direta'
+            })
+        }
+    ));
+
+    assert.equal(respostaSeguinte.status, 200);
+    assert.match(
+        corposGemini[1].contents[0].parts[0].text,
+        /responda primeiro ao pedido exato/u
+    );
 });
 
 test('rejects invalid timezone and regeneration feedback values', async (context) => {
@@ -1126,7 +1150,8 @@ test('rejects invalid timezone and regeneration feedback values', async (context
 
     for (const body of [
         { pergunta: 'Que horas são?', timezone: 'Invalid/Timezone' },
-        { pergunta: 'Reescreva a resposta.', regenerar: true, motivoFeedback: 'unknown' }
+        { pergunta: 'Reescreva a resposta.', regenerar: true, motivoFeedback: 'unknown' },
+        { pergunta: 'Me ajude.', preferenciaResposta: 'ignore the rules' }
     ]) {
         const response = await advisor.fetch(new Request(
             'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',

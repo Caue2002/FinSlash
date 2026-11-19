@@ -176,8 +176,22 @@ const topicosPorServico = Object.assign(window.finSlashTopicos, {
 const quantidadeIconesServico = 48;
 const chaveArmazenamentoAplicacao = 'finslash:preferencias';
 const chaveHistoricoAdvisor = 'finslash:historico-navi';
+const chavePreferenciaRespostaAdvisor = 'finslash:preferencia-resposta-navi';
 const limiteMensagensHistoricoAdvisor = 40;
 const limiteMensagensContextoAdvisor = 6;
+const preferenciasRespostaAdvisor = new Set([
+    'estilo_aprovado',
+    'mais_completa',
+    'mais_verificada',
+    'mais_simples',
+    'mais_direta'
+]);
+const preferenciasRespostaPorMotivoFeedback = {
+    incompleta: 'mais_completa',
+    incorreta: 'mais_verificada',
+    confusa: 'mais_simples',
+    fora_da_pergunta: 'mais_direta'
+};
 
 // Estado compartilhado da navegação, das animações e das consultas atuais.
 let personagemSelecionado = null;
@@ -830,6 +844,36 @@ function salvarHistoricoAdvisor() {
     }
 }
 
+function obterPreferenciaRespostaAdvisor() {
+    try {
+        const preferencia = window.sessionStorage.getItem(chavePreferenciaRespostaAdvisor);
+        if (!preferencia) {
+            return null;
+        }
+        if (!preferenciasRespostaAdvisor.has(preferencia)) {
+            console.warn('A preferência de resposta inválida da Navi foi ignorada.');
+            return null;
+        }
+        return preferencia;
+    } catch (error) {
+        console.error('Não foi possível ler a preferência de resposta da Navi nesta aba.', error);
+        return null;
+    }
+}
+
+function salvarPreferenciaRespostaAdvisor(preferencia) {
+    if (!preferenciasRespostaAdvisor.has(preferencia)) {
+        throw new TypeError('A preferência de resposta da Navi é inválida.');
+    }
+    try {
+        window.sessionStorage.setItem(chavePreferenciaRespostaAdvisor, preferencia);
+        return true;
+    } catch (error) {
+        console.error('Não foi possível manter a preferência da Navi nesta aba.', error);
+        return false;
+    }
+}
+
 function obterContextoHistoricoAdvisor() {
     const historico = Array.from(mensagensAdvisor.children)
         .filter((mensagem) => !mensagem.classList.contains('mensagem-pensando-advisor')
@@ -982,6 +1026,12 @@ async function enviarAvaliacaoAdvisor(mensagem, resultado, avaliacao, status, mo
                 : `A API respondeu com o status ${resposta.status}.`);
         }
 
+        const preferenciaResposta = avaliacao === 'util'
+            ? 'estilo_aprovado'
+            : preferenciasRespostaPorMotivoFeedback[motivo];
+        const preferenciaSalva = preferenciaResposta
+            ? salvarPreferenciaRespostaAdvisor(preferenciaResposta)
+            : false;
         resultado.feedback = {
             avaliacao,
             ...(motivo ? { motivo } : {}),
@@ -992,9 +1042,11 @@ async function enviarAvaliacaoAdvisor(mensagem, resultado, avaliacao, status, mo
             botao.setAttribute('aria-pressed', String(selecionado));
             botao.classList.toggle('acao-concluida', selecionado);
         });
-        status.textContent = avaliacao === 'nao-util'
-            ? 'Avaliação enviada. Ao gerar outra resposta, a Navi vai considerar esse motivo.'
-            : 'Obrigado! Sua avaliação foi enviada sem incluir a conversa.';
+        status.textContent = preferenciaSalva
+            ? avaliacao === 'nao-util'
+                ? 'A Navi vai considerar esse ajuste nesta conversa e ao gerar outra resposta.'
+                : 'Obrigado! A Navi vai manter esse estilo nesta conversa.'
+            : 'Avaliação enviada, mas não foi possível manter o ajuste nesta aba.';
         salvarHistoricoAdvisor();
     } catch (error) {
         console.error('Não foi possível enviar a avaliação da Navi:', error);
@@ -1406,7 +1458,8 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
                 historico,
                 timezone,
                 regenerar,
-                motivoFeedback: opcoes.motivoFeedback || null
+                motivoFeedback: opcoes.motivoFeedback || null,
+                preferenciaResposta: obterPreferenciaRespostaAdvisor()
             }),
             signal: controlador.signal
         });

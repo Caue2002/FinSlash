@@ -451,7 +451,7 @@ async function obterContextoVisaoGeral(nomeServico) {
 
 async function responderVisaoGeralServico(pergunta, historico, contexto) {
     const contextoSeguro = JSON.stringify(contexto).slice(0, 18000);
-    const systemInstruction = `Você é a Navi. Explique o serviço AWS em texto natural.
+    const systemInstruction = `Você é a Navi, o AI Agent do FinSlash. Explique o serviço AWS em texto natural.
 Use exclusivamente o contexto cadastrado abaixo. Não invente recursos, preços,
 procedimentos, benefícios ou links. Não escolha um único diagnóstico quando a
 pessoa pediu uma visão geral. Responda em português, em 2 ou 3 parágrafos curtos.
@@ -479,7 +479,7 @@ async function responderComparacaoServicos(pergunta, contextos) {
             summary: typeof topico.summary === 'string' ? topico.summary.slice(0, 600) : ''
         }))
     }));
-    const systemInstruction = `Você é a Navi. Compare os serviços AWS solicitados usando
+    const systemInstruction = `Você é a Navi, o AI Agent do FinSlash. Compare os serviços AWS solicitados usando
 exclusivamente os cenários publicados do FinSlash abaixo. Não invente recursos,
 preços, procedimentos, benefícios ou diferenças. Se o contexto não documentar
 uma diferença, diga claramente que ela não consta no catálogo. Faça uma comparação
@@ -551,10 +551,11 @@ async function criarRespostaGeral(pergunta) {
     }
 
     const resposta = await chamarGemini({
-        systemInstruction: `Você é a Navi, assistente do FinSlash. Responda em português do Brasil,
+        systemInstruction: `Você é a Navi, o AI Agent do FinSlash. Responda em português do Brasil,
 com clareza e naturalidade, perguntas gerais, cotidianas e pessoais básicas. Não finja ser
 humana, não alegue ter experiências, sentimentos, preferências ou acesso a dados pessoais
-do usuário. Se perguntarem sobre você, explique que é uma IA. Não forneça informações
+do usuário. Se perguntarem sobre sua identidade, diga que é a Navi, o AI Agent do FinSlash,
+uma inteligência artificial. Não forneça informações
 específicas, recomendações técnicas, preços ou procedimentos sobre AWS; perguntas AWS
 devem ser respondidas exclusivamente pelo fluxo de diagnósticos validados do FinSlash.
 Se a pergunta tratar de AWS, explique brevemente esse limite sem tentar respondê-la.
@@ -588,19 +589,19 @@ function ehSaudacao(pergunta) {
 
 async function gerarSaudacaoNavi(pergunta) {
     if (!process.env.GEMINI_API_KEY) {
-        return 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
+        return 'Olá! Sou a Navi, o AI Agent do FinSlash. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
     }
     try {
         const objeto = await chamarGemini({
-            systemInstruction: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Identifique-se apenas como Navi se fizer sentido.',
+            systemInstruction: 'Responda uma saudação curta em português de forma natural. Não invente diagnósticos, serviços, preços ou links. Se se apresentar, diga que é a Navi, o AI Agent do FinSlash.',
             prompt: pergunta,
             json: true
         });
         return typeof objeto?.resposta === 'string'
             ? objeto.resposta
-            : 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
+            : 'Olá! Sou a Navi, o AI Agent do FinSlash. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
     } catch {
-        return 'Olá. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados no FinSlash.';
+        return 'Olá! Sou a Navi, o AI Agent do FinSlash. Posso ajudar com serviços, custos e diagnósticos AWS cadastrados.';
     }
 }
 
@@ -943,7 +944,7 @@ async function gerarRespostaNaviGemini(pergunta, contexto) {
         diagnostico: contexto
     }).slice(0, 18000);
     const objeto = await chamarGemini({
-        systemInstruction: `Você é a Navi. Gere uma resposta dinâmica em português.
+        systemInstruction: `Você é a Navi, o AI Agent do FinSlash. Gere uma resposta dinâmica em português.
 Use exclusivamente o contexto abaixo. Ele contém dados validados e fontes oficiais AWS
 cadastradas no projeto. Não invente recursos, preços, procedimentos, dados da conta,
 estimativas reais ou URLs. Explique a situação, como verificar, como agir e os cuidados.

@@ -1645,6 +1645,10 @@ body.tela-servicos-ativa > .canvas-onda {
     animation: deslizar-painel-advisor 0.22s ease-out;
 }
 
+.painel-advisor.advisor-consulta {
+    overflow: hidden;
+}
+
 @keyframes deslizar-painel-advisor {
     from {
         transform: translateY(16px);
@@ -1873,6 +1877,8 @@ body.tela-servicos-ativa > .canvas-onda {
     flex-direction: column;
     gap: 10px;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
+    overflow-anchor: none;
     margin-top: 12px;
     padding-right: 2px;
 }

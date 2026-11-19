@@ -196,6 +196,10 @@ test('answers general questions with Gemini without requiring AWS diagnostics', 
     assert.equal(resultado.resposta, 'Uma caminhada pode ser um bom começo.');
     assert.equal(chamadasGemini.length, 1);
     assert.match(chamadasGemini[0].url, /gemini-test/u);
+    assert.match(
+        chamadasGemini[0].body.systemInstruction.parts[0].text,
+        /AI Agent do FinSlash/u
+    );
 
     delete process.env.GEMINI_API_KEY;
     const respostaSemGemini = await advisor.fetch(new Request(
@@ -214,4 +218,21 @@ test('answers general questions with Gemini without requiring AWS diagnostics', 
     assert.equal(respostaSemGemini.status, 200);
     assert.equal(resultadoSemGemini.fonte, 'geral-indisponivel');
     assert.equal(chamadasGemini.length, 1);
+
+    const saudacaoSemGemini = await advisor.fetch(new Request(
+        'https://api.finslash.test/?route=%2Fapi%2Fv1%2Fadvisor',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Origin: 'https://finslash.vercel.app'
+            },
+            body: JSON.stringify({ pergunta: 'Oi' })
+        }
+    ));
+    const resultadoSaudacao = await saudacaoSemGemini.json();
+
+    assert.equal(saudacaoSemGemini.status, 200);
+    assert.equal(resultadoSaudacao.fonte, 'saudaçao-local');
+    assert.match(resultadoSaudacao.resposta, /Navi, o AI Agent do FinSlash/u);
 });

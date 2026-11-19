@@ -558,12 +558,14 @@ function fecharPerfil() {
 function abrirAdvisor() {
     fecharPerfil();
     popupAdvisor.classList.remove('hidden');
-    popupAdvisor.querySelector('.painel-advisor')?.classList.remove('advisor-consulta');
+    const painelAdvisor = popupAdvisor.querySelector('.painel-advisor');
+    painelAdvisor?.classList.toggle('advisor-consulta', mensagensAdvisor.childElementCount > 0);
     if (!mensagensAdvisor.childElementCount) {
         boasVindasAdvisor?.classList.remove('hidden');
     } else {
         boasVindasAdvisor?.classList.add('hidden');
     }
+    rolarMensagensParaMaisRecente();
     if (window.history.state?.app === 'FinSlash' && window.history.state.tela !== 'advisor') {
         atualizarHistoricoAplicacao('advisor', {
             telaAnterior: window.history.state.tela
@@ -650,6 +652,12 @@ function restaurarHistoricoAdvisor() {
             console.error('Não foi possível remover o histórico inválido da Navi.', erroRemocao);
         }
     }
+}
+
+function rolarMensagensParaMaisRecente() {
+    window.requestAnimationFrame(() => {
+        mensagensAdvisor.scrollTop = mensagensAdvisor.scrollHeight;
+    });
 }
 
 function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = true) {
@@ -804,7 +812,7 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = tru
     if (persistir) {
         salvarHistoricoAdvisor();
     }
-    mensagensAdvisor.scrollTop = mensagensAdvisor.scrollHeight;
+    rolarMensagensParaMaisRecente();
     return mensagem;
 }
 
@@ -848,6 +856,7 @@ async function enviarPerguntaAdvisor(pergunta) {
     botaoEnviarAdvisor.disabled = true;
     campoAdvisor.disabled = true;
     statusAdvisor.textContent = 'A Navi está preparando uma resposta...';
+    popupAdvisor.querySelector('.painel-advisor')?.classList.add('advisor-consulta');
     boasVindasAdvisor?.classList.add('hidden');
     adicionarMensagemAdvisor('user', texto);
     const pensando = adicionarMensagemAdvisor(

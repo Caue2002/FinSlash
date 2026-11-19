@@ -11,7 +11,7 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 - Perfil com histórico de serviços, medalhas e envio de feedback sem cadastro.
 - Visualização ampliada de um serviço selecionado.
 - Diagnósticos objetivos com verificações, ações, cuidados e links para documentação oficial da AWS.
-- Navi, agente gratuito que responde perguntas gerais e cruza dúvidas AWS com os diagnósticos cadastrados no PostgreSQL.
+- Navi, AI Agent do FinSlash: responde perguntas gerais e cruza dúvidas AWS com os diagnósticos cadastrados no PostgreSQL.
 - O cabeçalho da Navi usa a logo própria do agente.
 - Modo agente opcional com Gemini: o modelo gera respostas a partir dos diagnósticos publicados e das fontes oficiais cadastradas.
 - Busca inteligente local com normalização, sinônimos AWS, correspondência por palavras e ranking por relevância.
@@ -27,13 +27,14 @@ FinSlash é um projeto acadêmico de portfólio com uma interface interativa par
 
 A interface não requer compilação. Para explorar as telas, abra `index.html` no navegador. Para usar diagnósticos e feedback, a API requer Node.js e PostgreSQL configurados.
 
-## Navi
+## Navi — AI Agent do FinSlash
 
 A Navi permite conversar sobre assuntos gerais e enviar dúvidas sobre serviços, custos e uso da AWS por um painel integrado à barra de navegação. Perguntas gerais usam o Gemini quando configurado. Perguntas sobre AWS passam pelo catálogo publicado no PostgreSQL e não são respondidas pelo modo geral.
 
 Configure `GEMINI_API_KEY` e, opcionalmente, `GEMINI_MODEL` nas variáveis de ambiente para habilitar respostas gerais. Quando configurado, o Gemini recebe a pergunta; evite enviar dados pessoais sensíveis. Para perguntas AWS, o Gemini opcional só pode reformular informações encontradas nos diagnósticos publicados e nas fontes oficiais cadastradas. Sem a chave, a Navi continua funcionando para AWS no modo local e informa que a conversa geral está indisponível.
 
 O histórico do chat fica somente na `sessionStorage` da aba atual: permanece ao fechar e reabrir a Navi ou recarregar a página, e é removido quando a aba é fechada. As mensagens não são enviadas ao servidor como histórico nem persistidas entre abas.
+Durante a conversa, o painel mantém a mensagem mais recente visível e rola até o fim após cada nova mensagem.
 
 Saudações e perguntas gerais usam o Gemini quando disponível, com temperatura zero. O modo geral não fornece instruções ou dados específicos de AWS. Perguntas AWS continuam restritas ao fluxo de diagnósticos publicados e informações validadas no catálogo.
 

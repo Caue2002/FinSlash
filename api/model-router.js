@@ -9,31 +9,28 @@
 // minuto sao cobertos pelo fallback em 429. GEMINI_MODEL_LIMITS permite
 // ajustar o RPD de cada modelo com os valores reais do projeto.
 
+// Fila verificada ao vivo (2026-11): gemini-3.5-flash-lite e
+// gemini-flash-lite-latest responderam 200; os flash 3.x retornam 503
+// intermitente (demanda alta, nao e cota); a familia 2.5 retorna 404
+// "no longer available to new users" — removida da fila.
 const MODELOS_GEMINI_PADRAO = [
+    'gemini-3.5-flash-lite',
+    'gemini-flash-lite-latest',
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash',
     'gemini-3.8-flash',
     'gemini-3.6-flash',
-    'gemini-3.5-flash',
+    'gemini-3.7-flash',
     'gemini-3-flash-preview',
-    'gemini-3.5-flash-lite',
-    'gemini-3.1-flash-lite',
-    'gemini-2.5-pro',
-    'gemini-2.5-flash',
-    'gemini-2.5-flash-lite',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite'
+    'gemini-flash-latest'
 ];
 
-// Estimativas conservadoras de RPD free tier publicadas historicamente pela
-// Google para a familia 2.x. Modelos 3.x e desconhecidos usam o padrao.
-// Ajuste com GEMINI_MODEL_LIMITS usando os valores reais do AI Studio.
+// Estimativas conservadoras de RPD free tier. A familia 2.5 esta fora da
+// fila padrao (404 para contas novas); modelos 3.x e desconhecidos usam
+// o padrao ate os limites reais serem confirmados no AI Studio.
+// Ajuste com GEMINI_MODEL_LIMITS usando os valores reais do projeto.
 const LIMITE_REQUISICOES_PADRAO_MODELO = 500;
-const LIMITE_REQUISICOES_POR_MODELO = {
-    'gemini-2.5-pro': 100,
-    'gemini-2.5-flash': 250,
-    'gemini-2.5-flash-lite': 1000,
-    'gemini-2.0-flash': 1500,
-    'gemini-2.0-flash-lite': 1500
-};
+const LIMITE_REQUISICOES_POR_MODELO = {};
 
 // Teto diario de tokens e opcional: tokens/dia nao e uma cota publicada pela
 // Google. Sem GEMINI_MODEL_TOKEN_LIMIT, fica desligado (Infinity).

@@ -156,6 +156,13 @@ function obterBancoGeminiOpcional() {
     }
 }
 
+// Google Search grounding tem cota propria e muito menor que a de
+// generateContent: quando estoura, TODA chamada com a tool volta 429 e a
+// conversa geral inteira caia no fallback. Este bloqueio temporario pula a
+// tool por 10 minutos depois da primeira falha e religa sozinho.
+let bloqueioGroundingAte = 0;
+const BLOQUEIO_GROUNDING_MS = 10 * 60 * 1000;
+
 async function chamarGemini({
     systemInstruction,
     prompt,
@@ -196,12 +203,16 @@ async function chamarGemini({
                     : corpoBase),
                 signal: AbortSignal.timeout(timeoutMs)
             });
-            let groundingAtivo = googleSearch;
+            // Sem grounding enquanto o bloqueio estiver ativo: a cota da tool
+            // e separada e estoura rapido; insistir so queima requisicoes
+            let groundingAtivo = googleSearch && Date.now() >= bloqueioGroundingAte;
             let resposta = await chamarModelo(groundingAtivo);
-            // Alguns modelos nao aceitam a tool google_search (400/INVALID_ARGUMENT):
-            // repete a mesma chamada sem grounding em vez de queimar a fila inteira
-            if (!resposta.ok && groundingAtivo && resposta.status === 400) {
-                console.warn(`Modelo ${modelo} rejeitou google_search; repetindo sem grounding.`);
+            // Modelo rejeita a tool (400) ou a cota de grounding estourou (429):
+            // bloqueia temporariamente e repete a mesma chamada sem grounding
+            // em vez de queimar a fila inteira ou cair no fallback
+            if (!resposta.ok && groundingAtivo && (resposta.status === 400 || resposta.status === 429)) {
+                console.warn(`Grounding indisponivel no modelo ${modelo} (HTTP ${resposta.status}); repetindo sem busca por 10min.`);
+                bloqueioGroundingAte = Date.now() + BLOQUEIO_GROUNDING_MS;
                 groundingAtivo = false;
                 resposta = await chamarModelo(false);
             }

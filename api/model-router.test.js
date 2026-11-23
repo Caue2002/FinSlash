@@ -37,7 +37,7 @@ test('resolve a fila de modelos por GEMINI_MODELS, GEMINI_MODEL ou padrao', (con
     delete process.env.GEMINI_MODEL;
     const padrao = obterFilaModelosGemini();
     assert.ok(padrao.length >= 5);
-    assert.equal(padrao[0], 'gemini-3.8-flash');
+    assert.equal(padrao[0], 'gemini-3.5-flash-lite');
     assert.equal(new Set(padrao).size, padrao.length);
 
     process.env.GEMINI_MODEL = 'gemini-2.5-flash';
@@ -54,7 +54,7 @@ test('resolve a fila de modelos por GEMINI_MODELS, GEMINI_MODEL ou padrao', (con
 
     delete process.env.GEMINI_MODEL_LIMITS;
     delete process.env.GEMINI_MODEL_REQUEST_LIMIT;
-    assert.equal(obterLimiteRequisicoesModelo('gemini-2.5-flash'), 250);
+    assert.equal(obterLimiteRequisicoesModelo('gemini-3.5-flash-lite'), 500);
     assert.equal(obterLimiteRequisicoesModelo('modelo-desconhecido'), 500);
 
     process.env.GEMINI_MODEL_LIMITS = 'gemini-2.5-flash:42, outro:7';

@@ -1693,14 +1693,15 @@ body.tela-servicos-ativa > .canvas-onda {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding-right: 44px;
+    padding-right: 108px;
 }
 
 .botao-novo-chat-advisor {
-    flex: 0 0 auto;
-    width: 36px;
-    height: 36px;
-    margin-left: auto;
+    position: absolute;
+    top: 14px;
+    right: 60px;
+    width: 38px;
+    height: 38px;
     border: 1px solid #334155;
     border-radius: 50%;
     background: #1e293b;
@@ -2137,27 +2138,65 @@ body.tela-servicos-ativa > .canvas-onda {
 .acoes-mensagem-advisor {
     display: flex;
     justify-content: flex-start;
-    gap: 4px;
+    gap: 6px;
     margin-top: 9px;
 }
 
 .acao-mensagem-advisor {
     display: inline-grid;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     place-items: center;
-    border: 0;
-    border-radius: 7px;
-    background: transparent;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 9px;
+    background: rgba(148, 163, 184, 0.08);
     color: #94a3b8;
     cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+        color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.acao-mensagem-advisor:hover,
+.acao-mensagem-advisor:hover {
+    border-color: rgba(96, 165, 250, 0.55);
+    background: rgba(96, 165, 250, 0.14);
+    color: #e2e8f0;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.35);
+}
+
+.acao-mensagem-advisor:active {
+    transform: translateY(0);
+}
+
 .acao-mensagem-advisor.acao-concluida,
 .acao-mensagem-advisor[aria-pressed="true"] {
-    background: #334155;
+    border-color: rgba(96, 165, 250, 0.55);
+    background: rgba(96, 165, 250, 0.16);
     color: #e2e8f0;
+}
+
+.acao-mensagem-advisor.acao-concluida {
+    border-color: rgba(52, 211, 153, 0.55);
+    background: rgba(52, 211, 153, 0.14);
+    color: #6ee7b7;
+}
+
+.acao-mensagem-advisor:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+}
+
+.acao-mensagem-advisor:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+.acao-mensagem-advisor:disabled:hover {
+    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(148, 163, 184, 0.08);
+    color: #94a3b8;
+    transform: none;
+    box-shadow: none;
 }
 
 .acao-feedback-advisor {

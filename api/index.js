@@ -463,7 +463,32 @@ function contemTermoAdvisor(textoNormalizado, termo) {
     return ` ${textoNormalizado} `.includes(` ${normalizarTextoAdvisor(termo)} `);
 }
 
+// Reconhece mensagens que descartam o contexto AWS ("não tenho dúvida aws",
+// "nada a ver com a amazon", "muda de assunto") para que sigam a conversa geral
+// em vez de cair no fluxo de diagnóstico ou no esclarecimento fixo.
+function perguntaDescartaContextoAws(pergunta) {
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    const correspondenciaAws = /\b(?:aws|amazon|finslash)\b/u.exec(normalizada);
+    if (!correspondenciaAws) {
+        return false;
+    }
+    const posicaoAws = correspondenciaAws.index;
+    const negacaoAntes = /\bnao\s+(?:tenho|preciso|quero|tou|to|estou|anda|tem|e|eh|foi|sera|vai)\b[^]{0,60}?\b(?:duvida|duvidas|pergunta|assunto|tema|contexto|questao|nada|lugar|momento|interesse|foco|sobre|problema)\b/u.exec(normalizada);
+    if (negacaoAntes && negacaoAntes.index < posicaoAws) {
+        return true;
+    }
+    return /\bsem\s+(?:nenhuma\s+|nenhum\s+)?(?:duvida|duvidas|pergunta|assunto|tema|nada|interesse)\b/u.test(normalizada)
+        || /\bnada\s+(?:de|sobre|relacionado\s+a|a\s+ver\s+com|do|da)\b[^]{0,50}?\b(?:aws|amazon|finslash|assunto|contexto|projeto)\b/u.test(normalizada)
+        || /\b(?:aws|amazon|finslash)\b[^]{0,50}?\b(?:nao\s+(?:e|eh|tem|interessa|serve|faz\s+sentido)|fora\s+d[eo]|alheio|nada\s+a\s+ver)\b/u.test(normalizada)
+        || /\b(?:esquece|esqueca|dispensa|tira|deixa|fora)\b[^]{0,50}?\b(?:aws|amazon|finslash|assunto|contexto|projeto|custo)\b/u.test(normalizada)
+        || /\b(?:muda|troca|volta|pula|sai)\s+de\s+assunto\b/u.test(normalizada)
+        || /\b(?:outro|novo|diferente|outros)\s+assunto\b/u.test(normalizada);
+}
+
 function perguntaRelacionadoAoProjeto(pergunta) {
+    if (perguntaDescartaContextoAws(pergunta)) {
+        return false;
+    }
     const normalizada = normalizarTextoAdvisor(pergunta);
     if (!normalizada) {
         return false;
@@ -564,7 +589,8 @@ function ehPerguntaIndependenteAdvisor(pergunta, conversa) {
         return true;
     }
     if (ehPerguntaClima(pergunta)
-        || Object.values(identificarPedidoDataHora(pergunta)).some(Boolean)) {
+        || Object.values(identificarPedidoDataHora(pergunta)).some(Boolean)
+        || perguntaDescartaContextoAws(pergunta)) {
         return true;
     }
     const indicioAcompanhamento = /^(e\b|isso\b|esse\b|essa\b|nesse\b|nessa\b|naquele\b|naquela\b|no caso\b|minha\b|minhas\b|meu\b|meus\b|o problema\b|a questao\b|o custo\b|a cobranca\b|a fatura\b|desde\b|depois\b|apos\b|sim\b|nao\b|qual deles\b|qual delas\b|qual servico\b|sobre isso\b|em relacao a isso\b)/u.test(normalizada);
@@ -575,6 +601,9 @@ function ehPerguntaIndependenteAdvisor(pergunta, conversa) {
 }
 
 function precisaEsclarecimento(pergunta) {
+    if (perguntaDescartaContextoAws(pergunta)) {
+        return false;
+    }
     const normalizada = normalizarTextoAdvisor(pergunta);
     const mencionaProjeto = perguntaRelacionadoAoProjeto(pergunta)
         || /\b(aws|amazon|finslash)\b/u.test(normalizada);
@@ -1088,6 +1117,8 @@ consegue fazer, como funciona ou como "pensa" — devem ser respondidas diretame
 com naturalidade, sem pedir esclarecimento genérico. O mesmo vale para qualquer
 pergunta casual, informal ou pessoal: entenda a intenção pela conversa e responda,
 só peça esclarecimento quando realmente faltar um dado essencial para responder.
+Se a pessoa disser que não tem dúvida, quiser mudar de assunto ou estiver só
+conversando, responda com naturalidade e ofereça ajuda quando fizer sentido.
 Marque precisa_fontes como true apenas quando a resposta afirmar fatos externos que
 podem mudar ou exigir precisão — notícias, preços atuais, dados de pessoas, eventos
 recentes ou estatísticas específicas. Para conversa casual, opiniões, conselhos,
@@ -2415,7 +2446,9 @@ async function receberAdvisor(request, origemPermitida) {
                 ? 'custo'
                 : perguntaRelacionadoAoProjeto(perguntaOriginal) ? 'aws' : 'geral';
             const servicos = await obterServicosParaConversa(perguntaOriginal, tema);
-            const respostaEsclarecimento = criarRespostaEsclarecimento(perguntaOriginal, { servicos });
+            const respostaEsclarecimento = tema === 'geral' && process.env.GEMINI_API_KEY
+                ? null
+                : criarRespostaEsclarecimento(perguntaOriginal, { servicos });
             if (respostaEsclarecimento) {
                 return responder(200, await naturalizarEsclarecimentoNavi(
                     respostaEsclarecimento,
@@ -2593,7 +2626,12 @@ async function receberAdvisor(request, origemPermitida) {
             }
         }
         if (!conversaAtiva && precisaEsclarecimento(pergunta)) {
-            const respostaEsclarecimento = criarRespostaEsclarecimento(pergunta);
+            const temaPergunta = pedirDiagnosticoDeCusto(pergunta)
+                ? 'custo'
+                : perguntaRelacionadoAoProjeto(pergunta) ? 'aws' : 'geral';
+            const respostaEsclarecimento = temaPergunta === 'geral' && process.env.GEMINI_API_KEY
+                ? null
+                : criarRespostaEsclarecimento(pergunta);
             if (respostaEsclarecimento) {
                 return responder(200, await naturalizarEsclarecimentoNavi(
                     respostaEsclarecimento,

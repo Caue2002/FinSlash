@@ -49,6 +49,14 @@ test('does not interrupt informal or personal questions with a clarification pro
     assert.equal(precisaEsclarecimento('o painel está diferente'), true);
 });
 
+test('treats messages that discard the AWS context as general conversation', () => {
+    assert.equal(perguntaRelacionadoAoProjeto('Não tenho nenhuma dúvida AWS.'), false);
+    assert.equal(perguntaRelacionadoAoProjeto('Nada a ver com a Amazon.'), false);
+    assert.equal(perguntaRelacionadoAoProjeto('Quero falar sobre AWS S3.'), true);
+    assert.equal(precisaEsclarecimento('Não tenho nenhuma dúvida AWS.'), false);
+    assert.equal(precisaEsclarecimento('Tenho uma dúvida sobre AWS S3.'), true);
+});
+
 test('separates AWS questions from general and personal questions', () => {
     assert.equal(perguntaRelacionadoAoProjeto('Como reduzir custos no Amazon S3?'), true);
     assert.equal(perguntaRelacionadoAoProjeto('Me fale sobre AWS Athena.'), true);

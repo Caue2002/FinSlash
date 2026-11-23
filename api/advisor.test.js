@@ -127,6 +127,8 @@ test('sends greetings through the model with opening rules instead of fixed repl
     const instrucaoPrimeira = chamadasGemini[0].body.systemInstruction.parts[0].text;
     assert.match(instrucaoPrimeira, /primeira mensagem da conversa/u);
     assert.match(instrucaoPrimeira, /Eu sou a Navi/u);
+    assert.match(instrucaoPrimeira, /pergunta de acompanhamento/u);
+    assert.match(instrucaoPrimeira, /confirmar que o problema foi resolvido/u);
 
     const saudacao = await enviar('Boa tarde, Navi!');
     assert.equal(saudacao.response.status, 200);

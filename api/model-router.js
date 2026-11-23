@@ -233,19 +233,38 @@ function erroRetryavelGemini(erro) {
     return Number.isInteger(erro?.status) && STATUS_RETRY_AVEL_GEMINI.has(erro.status);
 }
 
-// Percorre a fila do modelo mais capaz ao mais leve. `executar(modelo)` deve
-// retornar { resultado, usage } ou lancar erro; qualquer falha retryavel (ou
-// qualquer falha de geracao, como resposta vazia/JSON invalido) passa para o
-// proximo modelo. Retorna o resultado do primeiro modelo saudavel.
-async function chamarGeminiComFallback({ banco = null, executar }) {
+// Percorre a fila do modelo mais capaz ao mais leve. `executar(modelo,
+// timeoutMs)` deve retornar { resultado, usage } ou lancar erro; qualquer
+// falha (ou geracao invalida) passa para o proximo modelo. Retorna o
+// resultado do primeiro modelo saudavel.
+//
+// Orcamento total: o frontend desiste em ~20s, entao a fila inteira tem um
+// teto de tempo (GEMINI_FILA_TIMEOUT_MS, padrao 16s). Sem isso, uma sequencia
+// de modelos lentos/travados estourava o timeout do cliente antes da API
+// conseguir responder — o usuario via "nao conseguiu responder" mesmo com
+// modelos saudaveis mais atras na fila.
+async function chamarGeminiComFallback({ banco = null, executar, orcamentoMs }) {
     const fila = obterFilaModelosGemini();
     const limiteTokens = obterLimiteTokensModelo();
+    const inicio = Date.now();
+    const orcamento = Number.isFinite(orcamentoMs) && orcamentoMs > 0
+        ? orcamentoMs
+        : 16000;
+    // A leitura de consumo tambem consome o orcamento: banco lento nao pode
+    // deixar a fila comear ja estourada
     const consumoPersistido = await obterConsumoDiario(banco);
     const consumo = consumoPersistido || new Map(
         fila.map((modelo) => [modelo, consumoMemoriaModelo(modelo)])
     );
     let ultimoErro = null;
     for (const modelo of fila) {
+        const restante = orcamento - (Date.now() - inicio);
+        // Menos de ~2s restantes nao da tempo nem de handshake: encerra a
+        // fila e deixa o chamador usar o fallback local
+        if (restante < 2000) {
+            console.warn('Orçamento da fila Gemini esgotado; encerrando tentativas.');
+            break;
+        }
         const { tokens: consumidoTokens, requests: consumidoRequests } = consumo.get(modelo)
             || { tokens: 0, requests: 0 };
         const limiteRequests = obterLimiteRequisicoesModelo(modelo);
@@ -257,7 +276,10 @@ async function chamarGeminiComFallback({ banco = null, executar }) {
             continue;
         }
         try {
-            const { resultado, usage } = await executar(modelo);
+            // Timeout por tentativa limitado ao orcamento restante: um modelo
+            // pendurado nao pode consumir a fila inteira
+            const timeoutTentativa = Math.min(12000, restante);
+            const { resultado, usage } = await executar(modelo, timeoutTentativa);
             await registrarConsumoModelo(banco, modelo, usage);
             return resultado;
         } catch (erro) {

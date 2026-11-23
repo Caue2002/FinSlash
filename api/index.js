@@ -171,7 +171,8 @@ async function chamarGemini({
     const banco = obterBancoGeminiOpcional();
     return chamarGeminiComFallback({
         banco,
-        executar: async (modelo) => {
+        orcamentoMs: Number(process.env.GEMINI_FILA_TIMEOUT_MS) || 16000,
+        executar: async (modelo, timeoutMs = 12000) => {
             const url = `${GEMINI_API_URL}/${encodeURIComponent(modelo)}:generateContent?key=${encodeURIComponent(chave)}`;
             const generationConfig = {
                 temperature,
@@ -193,7 +194,7 @@ async function chamarGemini({
                 body: JSON.stringify(comBusca
                     ? { ...corpoBase, tools: [{ google_search: {} }] }
                     : corpoBase),
-                signal: AbortSignal.timeout(15000)
+                signal: AbortSignal.timeout(timeoutMs)
             });
             let groundingAtivo = googleSearch;
             let resposta = await chamarModelo(groundingAtivo);
@@ -232,9 +233,11 @@ async function chamarGemini({
                         throw new Error('Gemini devolveu JSON inválido.');
                     }
                 }
-                resultado = groundingAtivo ? { ...resultado, sources } : resultado;
+                resultado = groundingAtivo
+                    ? { ...resultado, sources, fontesDisponiveis: true }
+                    : { ...resultado, fontesDisponiveis: false };
             } else {
-                resultado = groundingAtivo ? { texto, sources } : texto;
+                resultado = groundingAtivo ? { texto, sources, fontesDisponiveis: true } : texto;
             }
             return { resultado, usage: payload.usageMetadata };
         }
@@ -1213,7 +1216,12 @@ Retorne somente JSON válido no formato {"resposta":"texto","precisa_esclarecime
     }
 
     const precisaEsclarecimento = respostaGemini.precisa_esclarecimento;
-    const precisaFontes = respostaGemini.precisa_fontes !== false;
+    // Fontes so sao exigidas quando o grounding estava ativo: se o modelo
+    // rejeitou google_search e a chamada seguiu sem a tool, sources e sempre
+    // vazio e exigir fontes aqui reprovaria toda resposta — era a causa do
+    // "dificuldade de responder" em perguntas gerais
+    const precisaFontes = respostaGemini.precisa_fontes !== false
+        && respostaGemini.fontesDisponiveis === true;
     const fontesGoogle = Array.isArray(respostaGemini.sources) ? respostaGemini.sources : [];
     if (!precisaEsclarecimento && precisaFontes && fontesGoogle.length === 0) {
         return {

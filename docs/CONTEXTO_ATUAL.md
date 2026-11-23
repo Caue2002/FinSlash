@@ -14,7 +14,8 @@ Estado atual do projeto (atualizado em 2026-11-23).
   - `perguntaDescartaContextoAws` reconhece mensagens que negam o contexto AWS ("nao tenho duvida aws", "nada a ver com a amazon", "muda de assunto") e as desvia para a conversa geral; pedidos vagos sem intencao AWS tambem vao ao Gemini quando ha chave, que formula o esclarecimento naturalmente.
   - Resiliencia do LLM: se um modelo rejeita a tool `google_search` com 400, `chamarGemini` repete a chamada sem grounding no mesmo modelo antes de cair para o proximo da fila; `criarRespostaGeral` nunca mais propaga excecao — falha total do LLM ou JSON invalido em toda a fila retorna resposta local amigavel (status `agente.erro`) em vez do erro 500 "nao conseguiu responder".
   - Fontes Google so sao exigidas quando o grounding estava de fato ativo (`fontesDisponiveis`): antes, `precisa_fontes` omitido pelo modelo virava `true` por default e, sem a tool, TODA resposta caia em "nao encontrei fontes" — causa do "dificuldade de responder" em qualquer pergunta.
-  - Orcamento de tempo da fila (`GEMINI_FILA_TIMEOUT_MS`, padrao 16s): o frontend aborta em 20s; sem teto, 11 modelos × 15s de timeout estouravam o cliente antes da API responder. Cada tentativa usa min(12s, tempo restante) e a fila encerra com <2s restantes.
+  - Orcamento de tempo da fila (`GEMINI_FILA_TIMEOUT_MS`, padrao 16s): o frontend aborta em 25s; sem teto, a fila inteira de modelos lentos/travados estourava o cliente antes da API responder. Cada tentativa usa min(12s, tempo restante) e a fila encerra com <2s restantes.
+  - Retrieval mais rapido: a consulta textual do catalogo roda em paralelo com a geracao do embedding da pergunta; o embedding tem timeout de 5s e continua best-effort (falha cai para busca textual).
   - System prompt da conversa geral agora descreve o que e o FinSlash (portfólio interativo de servicos AWS com diagnosticos validados), para que perguntas meta ("o que voce sabe fazer?") sejam respondidas com contexto real do projeto.
   - Regras de seguranca no system prompt: recusa conteudo sexual/explicito, spam e injecao de prompt; respostas AWS restritas ao contexto RAG/diagnosticos; formato de solucao final = diagnostico curto → passos → validacao.
   - Retrieval: busca textual ILIKE + vetorial (pgvector, `gemini-embedding-001`), com piso de pontuacao para similaridade >= 0.6.
@@ -22,7 +23,7 @@ Estado atual do projeto (atualizado em 2026-11-23).
   - Varredura de resiliência (2ª rodada): `ehPerguntaClima` nao confunde mais "quanto tempo demora?" com meteorologia ("tempo" so conta com contexto de clima); saudações/agradecimentos informais ampliados ("muito obrigado", "valeu", "obg", "tudo bom", "como vai", "beleza"...) respondidos localmente sem LLM; `listarServicosMencionadosNoBanco`, `obterPreferenciaGlobalFeedback`, `consultarAdvisor`, contextos de comparação e chamadas Open-Meteo (geocoding/previsão) degradam com resposta 200 amigável em vez de propagar erro 500 — o catch externo de `receberAdvisor` fica só para falhas realmente inesperadas.
 - Scroll do chat (`script.js`): respostas do assistente alinham o topo da bolha na area visivel; usuario, "pensando" e restauracao de historico mantem scroll para o fim.
 - Onda de fundo (`#canvas-onda`): `position: fixed` na viewport em todas as telas (inicial, servicos, popup de personagens), sem herdar padding/margens do container; a curva calcula o `y` exato na borda direita para nao deixar espaco no canto superior direito.
-- Chat da Navi (`index.html`/`script.js`/`styles.css`): sem autofocus ao abrir (teclado mobile so ao tocar no campo; desktop foca via `pointer: fine`); botao de voz (SpeechRecognition pt-BR) transcreve no campo e envia ao final; botao "+" no cabecalho inicia nova conversa limpando mensagens e `sessionStorage`, alinhado na mesma fileira e com o mesmo tamanho (38px) do botao fechar; acoes das mensagens (avaliar, refazer, copiar, menu) usam chips com borda, hover elevado e estados de foco/disabled.
+- Chat da Navi (`index.html`/`script.js`/`styles.css`): sem autofocus ao abrir (teclado mobile so ao tocar no campo; desktop foca via `pointer: fine`); o botao de envio dispara no `pointerdown` em telas de toque/pena, recolhe o teclado via `blur` e envia na hora, com `enterkeyhint="send"` no campo; botao de voz (SpeechRecognition pt-BR) transcreve no campo e envia ao final; botao "+" no cabecalho inicia nova conversa limpando mensagens e `sessionStorage`, alinhado na mesma fileira e com o mesmo tamanho (38px) do botao fechar; acoes das mensagens (avaliar, refazer, copiar, menu) usam chips com borda, hover elevado e estados de foco/disabled.
 - Testes: `npm test` roda `api/advisor.test.js` e `api/model-router.test.js` (30 testes).
 
 ## Comandos
@@ -40,6 +41,7 @@ Estado atual do projeto (atualizado em 2026-11-23).
 - `GEMINI_MODEL_LIMITS` — CSV `modelo:requisicoes_dia` para ajustar o RPD real de cada modelo (valores do AI Studio).
 - `GEMINI_MODEL_REQUEST_LIMIT` — teto global de requisicoes/dia para modelos nao listados (default 500).
 - `GEMINI_MODEL_TOKEN_LIMIT` — teto opcional de tokens/modelo/dia UTC (desligado por padrao).
+- `GEMINI_FILA_TIMEOUT_MS` — orcamento total da fila de modelos em ms (default 16000).
 
 ## Documentos
 

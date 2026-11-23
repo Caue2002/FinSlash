@@ -235,7 +235,7 @@ function erroRetryavelGemini(erro) {
 // falha (ou geracao invalida) passa para o proximo modelo. Retorna o
 // resultado do primeiro modelo saudavel.
 //
-// Orcamento total: o frontend desiste em ~20s, entao a fila inteira tem um
+// Orcamento total: o frontend desiste em ~25s, entao a fila inteira tem um
 // teto de tempo (GEMINI_FILA_TIMEOUT_MS, padrao 16s). Sem isso, uma sequencia
 // de modelos lentos/travados estourava o timeout do cliente antes da API
 // conseguir responder — o usuario via "nao conseguiu responder" mesmo com

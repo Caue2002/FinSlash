@@ -1187,11 +1187,22 @@ prestativa, não como um formulário. Conduza a conversa: reaja ao que a pessoa 
 fique à vontade para fazer perguntas de acompanhamento quando isso ajudar, use humor
 sutil quando couber e adapte o tamanho da resposta ao momento — curta em papo casual,
 mais completa quando pedirem detalhe ou explicação.
+Varie sempre a forma de responder: não repita aberturas, estruturas, exemplos ou
+fórmulas prontas de respostas anteriores — nem as suas nem as do histórico. Para
+perguntas gerais parecidas ("o que você sabe fazer", "como pode ajudar", "o que é
+você"), responda de jeitos diferentes a cada vez, usando todo o contexto do projeto
+(o que é o FinSlash, quem é a Navi, os serviços AWS explorados e a redução de custos)
+como base, mas sem decorar um texto fixo.
+Não se apresente de novo: se a conversa já começou ou a pessoa já sabe quem você é,
+não repita "sou a Navi" nem "assistente do FinSlash" — responda a pergunta direto.
+Só use a apresentação completa quando perguntarem explicitamente sobre sua
+identidade pela primeira vez.
 Sobre o FinSlash: é um portfólio interativo que ajuda pessoas a explorar serviços da
 Amazon Web Services (AWS) e a reduzir custos. A Navi responde perguntas gerais e cruza
 dúvidas de AWS com diagnósticos validados do catálogo. Quando perguntarem o que você
 sabe fazer ou como pode ajudar, responda em poucas frases com essa descrição e sugira
-exemplos práticos (por exemplo, "como reduzir custos com EC2").
+exemplos práticos variados (por exemplo, "como reduzir custos com EC2", "comparar
+S3 e EBS", "entender o que é Lambda") — escolha exemplos diferentes a cada resposta.
 Você tem autonomia para conversar sobre qualquer assunto: dúvidas aleatórias, curiosidades,
 conselhos, opiniões leves, matemática, explicações e cultura geral. Use seu próprio
 conhecimento para responder com confiança no que é estável e deixe claro quando algo
@@ -1559,35 +1570,72 @@ function ehSaudacao(pergunta) {
 
 function gerarSaudacaoNavi(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
+    const escolher = (opcoes) => opcoes[Math.floor(Math.random() * opcoes.length)];
     if (normalizada.includes('bom dia')) {
-        return 'Bom dia! Sou a Navi. Como posso ajudar?';
+        return escolher([
+            'Bom dia! Como posso ajudar?',
+            'Bom dia! Tudo certo por aqui. No que posso te ajudar?',
+            'Bom dia! Em que posso ser útil?'
+        ]);
     }
     if (normalizada.includes('boa tarde')) {
-        return 'Boa tarde! Sou a Navi. Como posso ajudar?';
+        return escolher([
+            'Boa tarde! Como posso ajudar?',
+            'Boa tarde! Em que posso te ajudar hoje?',
+            'Boa tarde! Me conta o que você precisa.'
+        ]);
     }
     if (normalizada.includes('boa noite')) {
-        return 'Boa noite! Sou a Navi. Como posso ajudar?';
+        return escolher([
+            'Boa noite! Como posso ajudar?',
+            'Boa noite! Tudo bem? No que posso ajudar?',
+            'Noite! Em que posso ser útil?'
+        ]);
     }
     if (normalizada.includes('obrigad')
         || normalizada.includes('valeu')
         || normalizada.includes('brigad')
         || /\b(obg|vlw|mto)\b/u.test(normalizada)) {
-        return 'De nada! Se precisar de ajuda, estou por aqui.';
+        return escolher([
+            'De nada! Se precisar de ajuda, estou por aqui.',
+            'Imagina! Qualquer coisa, é só chamar.',
+            'Por nada! Quando quiser, estou por aqui.'
+        ]);
     }
     if (normalizada.includes('tchau') || normalizada.includes('ate logo') || normalizada.includes('ate mais') || normalizada === 'fui') {
-        return 'Até logo! Se precisar de ajuda, estarei por aqui.';
+        return escolher([
+            'Até logo! Se precisar de ajuda, estarei por aqui.',
+            'Tchau! Quando quiser, é só chamar.',
+            'Até mais! Estarei por aqui se precisar.'
+        ]);
     }
     if (normalizada.includes('tudo bem') || normalizada.includes('tudo bom')) {
-        return 'Tudo certo por aqui! Sou a Navi. Como posso ajudar?';
+        return escolher([
+            'Tudo certo por aqui! Como posso ajudar?',
+            'Tudo ótimo! E você, no que posso ajudar?',
+            'Por aqui tudo bem! Me conta o que você precisa.'
+        ]);
     }
     if (normalizada.includes('beleza') || normalizada.includes('blz') || normalizada.includes('show')
         || normalizada.includes('perfeito') || normalizada.includes('otimo') || normalizada.includes('maravilha')) {
-        return 'Que bom! Sou a Navi. Como posso ajudar?';
+        return escolher([
+            'Que bom! Como posso ajudar?',
+            'Boa! Me conta o que você precisa.',
+            'Ótimo! No que posso te ajudar?'
+        ]);
     }
     if (normalizada.includes('como vai') || normalizada.includes('opa') || normalizada.includes('e ai') || normalizada.includes('eae')) {
-        return 'Oi! Tudo bem por aqui. Sou a Navi. Como posso ajudar?';
+        return escolher([
+            'Oi! Tudo bem por aqui. Como posso ajudar?',
+            'Oi! Tudo joia por aqui. No que posso ajudar?',
+            'E aí! Por aqui tudo certo. Em que posso ser útil?'
+        ]);
     }
-    return 'Olá! Sou a Navi. Como posso ajudar?';
+    return escolher([
+        'Olá! Como posso ajudar?',
+        'Olá! Em que posso te ajudar?',
+        'Oi! No que posso ser útil?'
+    ]);
 }
 
 function criarRespostaBasica(pergunta) {
@@ -1790,7 +1838,7 @@ async function gerarEmbeddingConsulta(pergunta, banco) {
                 taskType: 'RETRIEVAL_QUERY',
                 outputDimensionality: DIMENSOES_EMBEDDING_ADVISOR
             }),
-            signal: AbortSignal.timeout(10000)
+            signal: AbortSignal.timeout(5000)
         }
     );
     if (!resposta.ok) {
@@ -1849,15 +1897,6 @@ async function consultarAdvisor(pergunta) {
     }
 
     const banco = obterPoolBanco();
-    let embeddingConsulta = null;
-    if (process.env.GEMINI_API_KEY) {
-        try {
-            embeddingConsulta = await gerarEmbeddingConsulta(pergunta, banco);
-        } catch (error) {
-            console.error('Falha ao gerar embedding da pergunta; usando busca textual:', error);
-        }
-    }
-
     const colunasCenario = `scenario.id,
             service.slug AS "serviceSlug",
             service.name AS "serviceName",
@@ -1889,7 +1928,7 @@ async function consultarAdvisor(pergunta) {
             ), '[]'::json) AS sources`;
     const relacoesCenario = `FROM cost_scenarios AS scenario
         JOIN aws_services AS service ON service.id = scenario.service_id`;
-    const resultado = await banco.query(
+    const consultaTexto = banco.query(
         `SELECT ${colunasCenario}, NULL::double precision AS "vectorSimilarity"
          ${relacoesCenario}
          WHERE scenario.is_published = TRUE
@@ -1897,6 +1936,16 @@ async function consultarAdvisor(pergunta) {
          LIMIT 30`,
         parametros
     );
+    const consultaEmbedding = process.env.GEMINI_API_KEY
+        ? gerarEmbeddingConsulta(pergunta, banco).catch((error) => {
+            console.error('Falha ao gerar embedding da pergunta; usando busca textual:', error);
+            return null;
+        })
+        : Promise.resolve(null);
+    const [resultado, embeddingConsulta] = await Promise.all([
+        consultaTexto,
+        consultaEmbedding
+    ]);
     const candidatosPorId = new Map(
         resultado.rows.map((linha) => [String(linha.id), linha])
     );

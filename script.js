@@ -1467,7 +1467,7 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
     contadorAdvisor.textContent = '0/300';
 
     const controlador = new AbortController();
-    const timeout = window.setTimeout(() => controlador.abort(), 20000);
+    const timeout = window.setTimeout(() => controlador.abort(), 25000);
     try {
         const baseUrl = typeof window.FINSLASH_API_BASE_URL === 'string'
             ? window.FINSLASH_API_BASE_URL.trim().replace(/\/+$/u, '')
@@ -3936,6 +3936,30 @@ campoAdvisor.addEventListener('keydown', event => {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
         formularioAdvisor.requestSubmit();
+    }
+});
+let ultimoEnvioAdvisorPorToque = 0;
+function enviarAdvisorPorToque() {
+    const agora = Date.now();
+    if (enviandoAdvisor || agora - ultimoEnvioAdvisorPorToque < 500) {
+        return;
+    }
+    ultimoEnvioAdvisorPorToque = agora;
+    if (campoAdvisor.value.trim()) {
+        campoAdvisor.blur();
+    }
+    formularioAdvisor.requestSubmit();
+}
+botaoEnviarAdvisor.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'mouse' || event.button !== 0) {
+        return;
+    }
+    event.preventDefault();
+    enviarAdvisorPorToque();
+});
+botaoEnviarAdvisor.addEventListener('click', event => {
+    if (Date.now() - ultimoEnvioAdvisorPorToque < 500) {
+        event.preventDefault();
     }
 });
 formularioAdvisor.addEventListener('submit', event => {

@@ -1177,6 +1177,17 @@ async function criarRespostaGeral(pergunta, historico = [], contextoAnterior = '
         opcoes.motivoFeedback,
         opcoes.preferenciaResposta
     );
+    const instrucaoAbertura = opcoes.primeiraMensagem === true
+        ? `Esta é a primeira mensagem da conversa. Cumprimente a pessoa de forma calorosa
+e variada e apresente-se uma única vez começando com "Eu sou a Navi" — por
+exemplo, "Eu sou a Navi, a assistente do FinSlash" — e depois atenda à mensagem.
+A saudação e a apresentação precisam ser formuladas de novo a cada conversa:
+nada de texto decorado, fórmula pronta ou cumprimento repetido.`
+        : `A conversa já está em andamento: nunca cumprimente, nunca se apresente e
+nunca comece a resposta com saudações como "olá", "oi", "opa", "bom dia",
+"boa tarde" ou "boa noite". Só responda a uma saudação ou despedida quando a
+própria pessoa a tiver enviado; mesmo assim, responda à cortesia diretamente,
+sem se apresentar de novo e sem fórmulas prontas.`;
     let respostaGemini;
     try {
         respostaGemini = await chamarGemini({
@@ -1193,10 +1204,7 @@ perguntas gerais parecidas ("o que você sabe fazer", "como pode ajudar", "o que
 você"), responda de jeitos diferentes a cada vez, usando todo o contexto do projeto
 (o que é o FinSlash, quem é a Navi, os serviços AWS explorados e a redução de custos)
 como base, mas sem decorar um texto fixo.
-Não se apresente de novo: se a conversa já começou ou a pessoa já sabe quem você é,
-não repita "sou a Navi" nem "assistente do FinSlash" — responda a pergunta direto.
-Só use a apresentação completa quando perguntarem explicitamente sobre sua
-identidade pela primeira vez.
+${instrucaoAbertura}
 Sobre o FinSlash: é um portfólio interativo que ajuda pessoas a explorar serviços da
 Amazon Web Services (AWS) e a reduzir custos. A Navi responde perguntas gerais e cruza
 dúvidas de AWS com diagnósticos validados do catálogo. Quando perguntarem o que você
@@ -1555,104 +1563,6 @@ function criarRespostaDataHora(pergunta, fusoHorario, local = null) {
             status: 'ativo',
             erro: null
         }
-    };
-}
-
-function ehSaudacao(pergunta) {
-    const normalizada = normalizarTextoAdvisor(pergunta);
-    if (/^(?:navi )?(?:oi|ola|hello|hey|opa|e ai|eae|bom dia|boa tarde|boa noite|tudo bem|tudo bom|como vai|como vai voce|tudo joia|muito obrigado|muito obrigada|mto obrigado|mto obrigada|valeu|valeu demais|brigado|brigada|obg|vlw|flw|tchau|ate logo|ate mais|fui|beleza|blz|show|perfeito|otimo|maravilha)(?: navi)?(?: tudo bem)?[!.? ]*$/u
-        .test(normalizada)
-        || /^(?:navi )?obrigad[oa](?: por tudo| pela ajuda| pelo help| navi)?[!.? ]*$/u.test(normalizada)) {
-        return true;
-    }
-    return false;
-}
-
-function gerarSaudacaoNavi(pergunta) {
-    const normalizada = normalizarTextoAdvisor(pergunta);
-    const escolher = (opcoes) => opcoes[Math.floor(Math.random() * opcoes.length)];
-    if (normalizada.includes('bom dia')) {
-        return escolher([
-            'Bom dia! Como posso ajudar?',
-            'Bom dia! Tudo certo por aqui. No que posso te ajudar?',
-            'Bom dia! Em que posso ser útil?'
-        ]);
-    }
-    if (normalizada.includes('boa tarde')) {
-        return escolher([
-            'Boa tarde! Como posso ajudar?',
-            'Boa tarde! Em que posso te ajudar hoje?',
-            'Boa tarde! Me conta o que você precisa.'
-        ]);
-    }
-    if (normalizada.includes('boa noite')) {
-        return escolher([
-            'Boa noite! Como posso ajudar?',
-            'Boa noite! Tudo bem? No que posso ajudar?',
-            'Noite! Em que posso ser útil?'
-        ]);
-    }
-    if (normalizada.includes('obrigad')
-        || normalizada.includes('valeu')
-        || normalizada.includes('brigad')
-        || /\b(obg|vlw|mto)\b/u.test(normalizada)) {
-        return escolher([
-            'De nada! Se precisar de ajuda, estou por aqui.',
-            'Imagina! Qualquer coisa, é só chamar.',
-            'Por nada! Quando quiser, estou por aqui.'
-        ]);
-    }
-    if (normalizada.includes('tchau') || normalizada.includes('ate logo') || normalizada.includes('ate mais') || normalizada === 'fui') {
-        return escolher([
-            'Até logo! Se precisar de ajuda, estarei por aqui.',
-            'Tchau! Quando quiser, é só chamar.',
-            'Até mais! Estarei por aqui se precisar.'
-        ]);
-    }
-    if (normalizada.includes('tudo bem') || normalizada.includes('tudo bom')) {
-        return escolher([
-            'Tudo certo por aqui! Como posso ajudar?',
-            'Tudo ótimo! E você, no que posso ajudar?',
-            'Por aqui tudo bem! Me conta o que você precisa.'
-        ]);
-    }
-    if (normalizada.includes('beleza') || normalizada.includes('blz') || normalizada.includes('show')
-        || normalizada.includes('perfeito') || normalizada.includes('otimo') || normalizada.includes('maravilha')) {
-        return escolher([
-            'Que bom! Como posso ajudar?',
-            'Boa! Me conta o que você precisa.',
-            'Ótimo! No que posso te ajudar?'
-        ]);
-    }
-    if (normalizada.includes('como vai') || normalizada.includes('opa') || normalizada.includes('e ai') || normalizada.includes('eae')) {
-        return escolher([
-            'Oi! Tudo bem por aqui. Como posso ajudar?',
-            'Oi! Tudo joia por aqui. No que posso ajudar?',
-            'E aí! Por aqui tudo certo. Em que posso ser útil?'
-        ]);
-    }
-    return escolher([
-        'Olá! Como posso ajudar?',
-        'Olá! Em que posso te ajudar?',
-        'Oi! No que posso ser útil?'
-    ]);
-}
-
-function criarRespostaBasica(pergunta) {
-    if (!ehSaudacao(pergunta)) {
-        return null;
-    }
-    return {
-        modo: 'conversacao',
-        encontrado: false,
-        diagnostico: 'Saudação',
-        servico: null,
-        resposta: gerarSaudacaoNavi(pergunta),
-        confianca: 1,
-        fonte: 'saudacao-local',
-        validacao: null,
-        resultados: [],
-        sugestoes: []
     };
 }
 
@@ -2484,16 +2394,6 @@ async function receberAdvisor(request, origemPermitida) {
         let pergunta = conversaAtiva
             ? contextoConversa
             : criarPerguntaComContexto(perguntaOriginal, historico);
-        const respostaBasica = await criarRespostaBasica(perguntaOriginal);
-        if (respostaBasica) {
-            return responder(200, {
-                ...respostaBasica,
-                agente: {
-                    status: 'ativo',
-                    erro: null
-                }
-            }, cabecalhos);
-        }
 
         const pedidoDataHora = identificarPedidoDataHora(perguntaOriginal);
         if (pedidoDataHora.hora || pedidoDataHora.data) {
@@ -2606,7 +2506,8 @@ async function receberAdvisor(request, origemPermitida) {
         const opcoesGeracao = {
             regenerar: entradaAdvisor.regenerar,
             motivoFeedback: entradaAdvisor.motivoFeedback,
-            preferenciaResposta: entradaAdvisor.preferenciaResposta
+            preferenciaResposta: entradaAdvisor.preferenciaResposta,
+            primeiraMensagem: historicoRecebido.length === 0
         };
         if (!opcoesGeracao.preferenciaResposta && process.env.GEMINI_API_KEY) {
             opcoesGeracao.preferenciaResposta = await obterPreferenciaGlobalFeedback();
@@ -3227,7 +3128,6 @@ async function receberFeedback(request, origemPermitida) {
 
 export {
     criarPerguntaComContexto,
-    ehSaudacao,
     pedirComparacaoServicos,
     perguntaRelacionadoAoProjeto,
     precisaEsclarecimento

@@ -3945,10 +3945,11 @@ function enviarAdvisorPorToque() {
         return;
     }
     ultimoEnvioAdvisorPorToque = agora;
-    if (campoAdvisor.value.trim()) {
+    const texto = campoAdvisor.value;
+    if (texto.trim()) {
         campoAdvisor.blur();
     }
-    formularioAdvisor.requestSubmit();
+    enviarPerguntaAdvisor(texto);
 }
 botaoEnviarAdvisor.addEventListener('pointerdown', event => {
     if (event.pointerType === 'mouse' || event.button !== 0) {
@@ -3957,8 +3958,14 @@ botaoEnviarAdvisor.addEventListener('pointerdown', event => {
     event.preventDefault();
     enviarAdvisorPorToque();
 });
+botaoEnviarAdvisor.addEventListener('touchend', event => {
+    if (event.cancelable) {
+        event.preventDefault();
+    }
+    enviarAdvisorPorToque();
+}, { passive: false });
 botaoEnviarAdvisor.addEventListener('click', event => {
-    if (Date.now() - ultimoEnvioAdvisorPorToque < 500) {
+    if (Date.now() - ultimoEnvioAdvisorPorToque < 800) {
         event.preventDefault();
     }
 });

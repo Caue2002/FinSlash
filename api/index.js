@@ -206,8 +206,26 @@ async function chamarGemini({
                 resposta = await chamarModelo(false);
             }
             if (!resposta.ok) {
-                const erroStatus = new Error(`Gemini respondeu com o status ${resposta.status}.`);
+                // O corpo do erro do Google traz o motivo real (chave invalida,
+                // modelo inexistente, cota): sem ele o log so diz "status 400"
+                const corpoErro = await resposta.text().catch(() => '');
+                let motivoErro = '';
+                try {
+                    const jsonErro = JSON.parse(corpoErro);
+                    motivoErro = jsonErro?.error?.message || '';
+                } catch {
+                    motivoErro = corpoErro.slice(0, 200);
+                }
+                const erroStatus = new Error(
+                    `Gemini respondeu com o status ${resposta.status}${motivoErro ? `: ${motivoErro.slice(0, 200)}` : '.'}`
+                );
                 erroStatus.status = resposta.status;
+                // Chave invalida/revogada afeta TODOS os modelos da fila:
+                // aborta na hora em vez de queimar o orcamento inteiro
+                if (/api[_ ]key|chave|credential|permission|forbidden/iu.test(motivoErro)
+                    && /invalid|not valid|revoked|denied|expired|incorrect/iu.test(motivoErro)) {
+                    erroStatus.fatal = true;
+                }
                 throw erroStatus;
             }
             const payload = await resposta.json();

@@ -284,6 +284,12 @@ async function chamarGeminiComFallback({ banco = null, executar, orcamentoMs }) 
             return resultado;
         } catch (erro) {
             ultimoErro = erro;
+            // Erro fatal (ex.: chave de API invalida) atinge todos os modelos
+            // igualmente: parar a fila na primeira ocorrencia
+            if (erro?.fatal) {
+                console.error('Erro fatal na fila Gemini; encerrando tentativas.', erro?.message || erro);
+                break;
+            }
             if (!erroRetryavelGemini(erro)) {
                 continue;
             }

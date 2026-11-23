@@ -584,12 +584,6 @@ function abrirAdvisor() {
     alturaViewportAdvisorSemTeclado = window.visualViewport?.height ?? window.innerHeight;
     larguraViewportAdvisorSemTeclado = window.innerWidth;
     atualizarViewportVisualAdvisor();
-    if (!mensagensAdvisor.childElementCount && dadosPersistidos.nomePerfil !== 'Meu perfil') {
-        adicionarMensagemAdvisor(
-            'assistant',
-            `Olá! Sou a Navi. Notei que o nome cadastrado em seu perfil é ${dadosPersistidos.nomePerfil}. Deseja que eu lhe chame por esse nome?`
-        );
-    }
     const painelAdvisor = popupAdvisor.querySelector('.painel-advisor');
     painelAdvisor?.classList.toggle('advisor-consulta', mensagensAdvisor.childElementCount > 0);
     if (!mensagensAdvisor.childElementCount) {
@@ -949,6 +943,19 @@ function restaurarHistoricoAdvisor() {
 function rolarMensagensParaMaisRecente() {
     window.requestAnimationFrame(() => {
         mensagensAdvisor.scrollTop = mensagensAdvisor.scrollHeight;
+    });
+}
+
+// Alinha o topo da bolha do assistente na area visivel do container, para que
+// respostas longas comecem visiveis em vez de exigir rolar para cima.
+function rolarParaInicioMensagem(mensagem) {
+    window.requestAnimationFrame(() => {
+        const estiloContainer = window.getComputedStyle(mensagensAdvisor);
+        const paddingTopo = Number.parseFloat(estiloContainer.paddingTop) || 0;
+        const deslocamento = mensagem.getBoundingClientRect().top
+            - mensagensAdvisor.getBoundingClientRect().top
+            - paddingTopo;
+        mensagensAdvisor.scrollTop += deslocamento;
     });
 }
 
@@ -1375,7 +1382,11 @@ function adicionarMensagemAdvisor(tipo, texto, resultado = null, persistir = tru
     if (persistir) {
         salvarHistoricoAdvisor();
     }
-    rolarMensagensParaMaisRecente();
+    if (tipo === 'assistant' && resultado && persistir) {
+        rolarParaInicioMensagem(mensagem);
+    } else {
+        rolarMensagensParaMaisRecente();
+    }
     return mensagem;
 }
 

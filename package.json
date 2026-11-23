@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test api/advisor.test.js",
+    "test": "node --test api/advisor.test.js api/model-router.test.js",
     "embeddings:sync": "node banco-de-dados/gerar-embeddings-catalogo.js"
   },
   "engines": {

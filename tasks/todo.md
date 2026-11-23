@@ -1,0 +1,22 @@
+# Tasks
+
+- [x] T1: `api/model-router.js` — fila, limites, persistencia Postgres/memoria, fallback por erro
+  - Acceptance: ordem da fila respeitada; modelo >= teto pulado; 429/500/503/timeout/rede/vazio tenta proximo; sucesso registra usageMetadata; todos falham -> erro propagado
+  - Verify: `node --test api/model-router.test.js` — 5 testes passando
+  - Files: api/model-router.js, api/model-router.test.js, banco-de-dados/gemini-model-usage-postgresql.sql, package.json
+- [x] T2: `api/index.js` — `chamarGemini` delega ao router
+  - Acceptance: assinatura publica inalterada; `GEMINI_MODEL` segue como fila unitaria; embedContent nao usa fila
+  - Verify: `npm test` — 28/28
+  - Files: api/index.js
+- [x] T3: `api/index.js` — prompts/orquestracao do agente
+  - Acceptance: diretrizes de seguranca + AWS estrito + formato conciso; `precisa_fontes` em criarRespostaGeral; esclarecimentos naturalizados via LLM com fallback; piso de similaridade vetorial
+  - Verify: `npm test` — 28/28
+  - Files: api/index.js
+- [x] T4: `script.js` — scroll para o topo da bolha do assistente
+  - Acceptance: resposta do agente exibe o inicio; user/pensando/restore mantem comportamento
+  - Verify: implementado `rolarParaInicioMensagem`; checagem manual recomendada
+  - Files: script.js
+- [x] T5: `.env.example` + docs (`docs/CONTEXTO_ATUAL.md`, `docs/DECISOES.md`)
+  - Acceptance: novas envs documentadas; estado atual reflete as mudancas
+  - Verify: arquivos criados/atualizados
+  - Files: .env.example, docs/*, README.md

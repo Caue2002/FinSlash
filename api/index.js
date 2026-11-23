@@ -48,6 +48,9 @@ nunca invente comandos, serviços, preços, configurações ou dados da conta. F
 fluxo, converse com naturalidade sobre qualquer assunto. Ao entregar a solução final
 de um problema AWS, seja objetiva e fácil de escanear: diagnóstico curto, passos
 objetivos e uma validação rápida, sem blocos longos de texto corrido.`;
+const REGRA_SEM_ABERTURA_SOCIAL_NAVI = `Nunca comece a resposta com saudações, cumprimentos ou
+apresentações — nada de "olá", "oi", "opa", "bom dia", "boa tarde", "boa noite"
+ou "eu sou a Navi" no início do texto: vá direto ao conteúdo pedido.`;
 const FONTE_OPEN_METEO = {
     title: 'Open-Meteo',
     url: 'https://open-meteo.com/en/docs'
@@ -776,6 +779,7 @@ async function naturalizarEsclarecimentoNavi(respostaBase, pergunta, historico =
 acolhedora e direta, como uma pessoa faria numa conversa. Faça no máximo uma pergunta curta e
 específica por vez. Preserve o sentido e os dados essenciais do rascunho; não adicione fatos,
 não repita o que o usuário já respondeu e não liste menus de opções desnecessários.
+${REGRA_SEM_ABERTURA_SOCIAL_NAVI}
 Responda somente com JSON válido no formato {"resposta":"texto"}.`,
             prompt: `Pergunta do usuário: ${pergunta}\nRascunho do esclarecimento: ${respostaBase.resposta}`,
             historico: historico.filter((mensagem) => mensagem.tipo === 'user'),
@@ -1019,6 +1023,7 @@ procedimentos, benefícios ou links. Não escolha um único diagnóstico quando 
 pessoa pediu uma visão geral. Responda em português, em 2 ou 3 parágrafos curtos.
 Use o histórico apenas para entender referências da pergunta atual; ele não é fonte de
 fatos. Se houver conflito, priorize exclusivamente o contexto cadastrado.
+${REGRA_SEM_ABERTURA_SOCIAL_NAVI}
 ${DIRETRIZES_CONVERSA_NAVI}
 Contexto: ${contextoSeguro}`;
     const texto = await chamarGemini({
@@ -1066,6 +1071,7 @@ intercambiáveis sem evidência. Retorne somente JSON válido no formato
 {"resposta":"texto da comparação"}.
 Use o histórico apenas para resolver referências da pergunta atual; ele não é fonte
 de fatos.
+${REGRA_SEM_ABERTURA_SOCIAL_NAVI}
 ${DIRETRIZES_CONVERSA_NAVI}
 Contextos: ${JSON.stringify(contextosSeguros)}`;
     const texto = await chamarGemini({
@@ -2103,6 +2109,7 @@ base de conhecimento em vez de supor. Ao entregar a solução final, organize de
 de escanear: diagnóstico curto, passos objetivos e validação rápida.
 Responda somente com JSON válido no formato {"resposta":"texto"}.
 Use as perguntas anteriores apenas para resolver referências; elas não são fonte de fatos.
+${REGRA_SEM_ABERTURA_SOCIAL_NAVI}
 ${DIRETRIZES_CONVERSA_NAVI}
 Contexto: ${contextoSeguro}`,
         prompt: ajustarPromptParaRegeneracao(

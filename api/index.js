@@ -571,7 +571,7 @@ function ehPerguntaIndependenteAdvisor(pergunta, conversa) {
     if (indicioAcompanhamento || pedirDiagnosticoDeCusto(pergunta)) {
         return false;
     }
-    return /^(o que|como|qual|quais|quem|onde|quando|por que|compare|explique|me fale|fale sobre|resuma|pode falar|pode explicar|me diga|me conte)\b/u.test(normalizada);
+    return /^(o que|oq|como|qual|quais|quem|onde|quando|por que|pq|por q|porqe|de onde|aonde|compare|explique|me fale|me fala|me conte|me conta|me diga|fale sobre|fala sobre|resuma|pode falar|pode explicar|pode me|poderia|consegue|sabe)\b/u.test(normalizada);
 }
 
 function precisaEsclarecimento(pergunta) {
@@ -584,7 +584,7 @@ function precisaEsclarecimento(pergunta) {
         : identificarServicosAmbiguos(pergunta);
     const descricaoVaga = /\b(ajuda|ajudar|duvida|duvidas|problema|problemas|erro|erros|falha|falhando|parou|caiu|lento|lenta|caro|cara|alto|alta|estranho|estranha|ruim|melhorar|nao funciona|nao sei|deu ruim|fora do ar)\b/u.test(normalizada);
     const detalheConcreto = temDetalheTecnicoAdvisor(pergunta);
-    const temIntencao = /\b(o que|como|qual|quais|quanto|onde|quando|por que|porque|explique|fale sobre|conte sobre|resumo|visao geral|configurar|corrigir|resolver|monitorar|comparar|analisar|verificar|reduzir|economizar|otimizar)\b/u.test(normalizada);
+    const temIntencao = /\b(o que|oq|como|qual|quais|quanto|onde|quando|quem|por que|porque|pq|por q|porqe|de onde|aonde|pra que|explique|explica|fale sobre|fala sobre|conte sobre|conta|me fala|me conta|me diga|me explique|resumo|visao geral|configurar|corrigir|resolver|monitorar|comparar|analisar|verificar|reduzir|economizar|otimizar|sabe|consegue|pode|poderia|gosta|curte|quer|diz|vc e|voce e|vc se chama|voce se chama)\b/u.test(normalizada);
 
     if (mencionaCusto) {
         return obterEtapaDiagnosticoCusto(pergunta, servicos) !== null;
@@ -1083,6 +1083,11 @@ conhecimento para responder com confiança no que é estável e deixe claro quan
 depender de informação atual ou especializada. Não finja ser humana e não alegue ter
 experiências, sentimentos, preferências ou acesso a dados pessoais; se perguntarem
 sobre sua identidade, diga que é a Navi, um agente de inteligência artificial.
+Perguntas sobre você — nome, por que se chama Navi, o que é, para que serve, o que
+consegue fazer, como funciona ou como "pensa" — devem ser respondidas diretamente e
+com naturalidade, sem pedir esclarecimento genérico. O mesmo vale para qualquer
+pergunta casual, informal ou pessoal: entenda a intenção pela conversa e responda,
+só peça esclarecimento quando realmente faltar um dado essencial para responder.
 Marque precisa_fontes como true apenas quando a resposta afirmar fatos externos que
 podem mudar ou exigir precisão — notícias, preços atuais, dados de pessoas, eventos
 recentes ou estatísticas específicas. Para conversa casual, opiniões, conselhos,

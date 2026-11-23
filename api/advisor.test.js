@@ -39,6 +39,16 @@ test('does not interrupt a specific question with a clarification prompt', () =>
     );
 });
 
+test('does not interrupt informal or personal questions with a clarification prompt', () => {
+    assert.equal(precisaEsclarecimento('pq vc se chama navi?'), false);
+    assert.equal(precisaEsclarecimento('como vc pensa?'), false);
+    assert.equal(precisaEsclarecimento('quem te criou?'), false);
+    assert.equal(precisaEsclarecimento('vc sabe o que é uma fintech?'), false);
+    assert.equal(precisaEsclarecimento('me conta uma curiosidade'), false);
+    assert.equal(precisaEsclarecimento('pq o céu é azul?'), false);
+    assert.equal(precisaEsclarecimento('o painel está diferente'), true);
+});
+
 test('separates AWS questions from general and personal questions', () => {
     assert.equal(perguntaRelacionadoAoProjeto('Como reduzir custos no Amazon S3?'), true);
     assert.equal(perguntaRelacionadoAoProjeto('Me fale sobre AWS Athena.'), true);

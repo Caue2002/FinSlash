@@ -2001,17 +2001,21 @@ class Onda {
     }
 
     desenhar(ctx, tempo, intensidade = 1, intervalo = 5) {
+        const largura = this.canvas.width;
+        const altura = this.canvas.height;
+        const calcularY = (x) => this.alturaBase +
+            Math.sin(x * this.frequencia + tempo * this.velocidade + this.fase) * this.amplitude * intensidade +
+            Math.sin(x * this.frequencia * 2 + tempo * this.velocidade * 1.5) * this.amplitude * 0.5 * intensidade;
+
         ctx.beginPath();
-        ctx.moveTo(0, this.canvas.height);
-        
-        for (let x = 0; x <= this.canvas.width; x += intervalo) {
-            const y = this.alturaBase + 
-                      Math.sin(x * this.frequencia + tempo * this.velocidade + this.fase) * this.amplitude * intensidade +
-                      Math.sin(x * this.frequencia * 2 + tempo * this.velocidade * 1.5) * this.amplitude * 0.5 * intensidade;
-            ctx.lineTo(x, y);
+        ctx.moveTo(0, altura);
+
+        for (let x = 0; x < largura; x += intervalo) {
+            ctx.lineTo(x, calcularY(x));
         }
-        
-        ctx.lineTo(this.canvas.width, this.canvas.height);
+
+        ctx.lineTo(largura, calcularY(largura));
+        ctx.lineTo(largura, altura);
         ctx.closePath();
         ctx.fillStyle = this.cor;
         ctx.fill();

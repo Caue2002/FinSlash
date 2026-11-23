@@ -297,7 +297,23 @@ const campoFeedbackPerfil = document.getElementById('campo-feedback-perfil');
 const categoriaFeedbackPerfil = document.getElementById('categoria-feedback-perfil');
 const botaoEnviarFeedback = document.getElementById('botao-enviar-feedback');
 const statusFeedbackPerfil = document.getElementById('status-feedback-perfil');
+const alertaErroApp = document.getElementById('alerta-erro-app');
 let enviandoFeedback = false;
+let timeoutAlertaErroApp = null;
+
+// Exibe um alerta amarelo pequeno no topo da tela quando a API falha;
+// some sozinho depois de 3 segundos.
+function exibirAlertaErroApp(mensagem) {
+    if (!alertaErroApp) {
+        return;
+    }
+    alertaErroApp.textContent = mensagem;
+    alertaErroApp.classList.remove('hidden');
+    window.clearTimeout(timeoutAlertaErroApp);
+    timeoutAlertaErroApp = window.setTimeout(() => {
+        alertaErroApp.classList.add('hidden');
+    }, 3000);
+}
 const secoesPerfil = {
     historico: document.getElementById('conteudo-historico-perfil'),
     medalhas: document.getElementById('conteudo-medalhas-perfil'),
@@ -1076,9 +1092,11 @@ async function enviarAvaliacaoAdvisor(mensagem, resultado, avaliacao, status, mo
         salvarHistoricoAdvisor();
     } catch (error) {
         console.error('Não foi possível enviar a avaliação da Navi:', error);
-        status.textContent = error instanceof Error
+        const mensagemErro = error instanceof Error
             ? `Não foi possível enviar. ${error.message}`
             : 'Não foi possível enviar. Tente novamente mais tarde.';
+        status.textContent = mensagemErro;
+        exibirAlertaErroApp(mensagemErro);
         mensagem.dataset.enviandoFeedback = 'false';
         botoes.forEach((botao) => {
             botao.disabled = false;
@@ -1549,6 +1567,7 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
         statusAdvisor.textContent = '';
         pensando.remove();
         adicionarMensagemAdvisor('assistant', mensagemErro, { repetirPergunta: texto });
+        exibirAlertaErroApp(mensagemErro);
     } finally {
         window.clearTimeout(timeout);
         enviandoAdvisor = false;
@@ -1813,9 +1832,11 @@ async function enviarFeedbackPerfil() {
         statusFeedbackPerfil.textContent = resultado.message || 'Feedback enviado. Obrigado por ajudar a melhorar o FinSlash!';
     } catch (error) {
         console.error('Falha ao enviar feedback:', error);
-        statusFeedbackPerfil.textContent = error instanceof Error
+        const mensagemErro = error instanceof Error
             ? error.message
             : 'Não foi possível enviar agora. Tente novamente mais tarde.';
+        statusFeedbackPerfil.textContent = mensagemErro;
+        exibirAlertaErroApp(mensagemErro);
     } finally {
         enviandoFeedback = false;
         botaoEnviarFeedback.disabled = false;
@@ -3740,9 +3761,11 @@ async function carregarDiagnosticoTopicoServico() {
             return;
         }
         console.error('Falha ao carregar o diagnóstico do tópico:', error);
-        statusDiagnosticoTopico.textContent = error instanceof Error
+        const mensagemErro = error instanceof Error
             ? error.message
             : 'Não foi possível carregar o diagnóstico agora.';
+        statusDiagnosticoTopico.textContent = mensagemErro;
+        exibirAlertaErroApp(mensagemErro);
     } finally {
         if (requisicao === requisicaoDiagnosticoAtual) {
             painelDiagnosticoTopico.setAttribute('aria-busy', 'false');

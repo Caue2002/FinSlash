@@ -1906,6 +1906,48 @@ body.tela-servicos-ativa > .canvas-onda {
     }
 }
 
+.alerta-erro-app {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1600;
+    box-sizing: border-box;
+    width: max-content;
+    max-width: min(92vw, 420px);
+    padding: 9px 16px;
+    border-radius: 12px;
+    background: #facc15;
+    color: #1c1917;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    animation: surgir-alerta-erro 0.18s ease-out;
+}
+
+.alerta-erro-app.hidden {
+    display: none;
+}
+
+@keyframes surgir-alerta-erro {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -8px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .alerta-erro-app {
+        animation: none;
+    }
+}
+
 .status-advisor {
     min-height: 20px;
     margin: 9px 0 0;

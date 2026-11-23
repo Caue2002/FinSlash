@@ -301,6 +301,59 @@ const alertaErroApp = document.getElementById('alerta-erro-app');
 let enviandoFeedback = false;
 let timeoutAlertaErroApp = null;
 
+// Erros da API agrupados em mensagens curtas e informais para o alerta.
+const ERROS_API_APP = {
+    timeout: { codigo: 'ERR-01', mensagem: 'A resposta demorou demais. Tenta de novo!' },
+    rede: { codigo: 'ERR-02', mensagem: 'Tô sem conexão com a Navi. Confere a internet!' },
+    saturacao: { codigo: 'ERR-03', mensagem: 'A Navi tá cheia de mensagens. Tenta daqui a pouquinho!' },
+    servidor: { codigo: 'ERR-04', mensagem: 'O servidor da Navi quebrou. Tenta em instantes!' },
+    requisicao: { codigo: 'ERR-05', mensagem: 'Não entendi direito o pedido. Tenta de outro jeito!' },
+    respostaInvalida: { codigo: 'ERR-06', mensagem: 'A Navi respondeu algo estranho. Tenta de novo!' },
+    naoEncontrado: { codigo: 'ERR-07', mensagem: 'Não achei isso por aqui. Tenta outro caminho!' },
+    generico: { codigo: 'ERR-99', mensagem: 'Deu ruim por aqui. Tenta de novo!' }
+};
+
+// Cria um Error HTTP carregando o status para a classificacao do alerta.
+function criarErroApiApp(mensagem, status) {
+    const erro = new Error(mensagem);
+    erro.status = status;
+    return erro;
+}
+
+// Traduz qualquer falha de API em uma mensagem amigavel com codigo de erro.
+function classificarErroApiApp(error) {
+    if (error?.name === 'AbortError') {
+        return ERROS_API_APP.timeout;
+    }
+    const status = Number(error?.status);
+    if (status === 429) {
+        return ERROS_API_APP.saturacao;
+    }
+    if (status === 404) {
+        return ERROS_API_APP.naoEncontrado;
+    }
+    if (status >= 500) {
+        return ERROS_API_APP.servidor;
+    }
+    if (status >= 400) {
+        return ERROS_API_APP.requisicao;
+    }
+    const detalhe = error instanceof Error ? error.message : '';
+    if (/fetch|rede|network|conex/i.test(detalhe)) {
+        return ERROS_API_APP.rede;
+    }
+    if (/inválid|incomplet|json|token|sintaxe|unexpected/i.test(detalhe)) {
+        return ERROS_API_APP.respostaInvalida;
+    }
+    return ERROS_API_APP.generico;
+}
+
+// Exibe o alerta amarelo com a versao amigavel do erro; some em 3s.
+function exibirAlertaErroApiApp(error) {
+    const erro = classificarErroApiApp(error);
+    exibirAlertaErroApp(`${erro.mensagem} (${erro.codigo})`);
+}
+
 // Exibe um alerta amarelo pequeno no topo da tela quando a API falha;
 // some sozinho depois de 3 segundos.
 function exibirAlertaErroApp(mensagem) {
@@ -1057,9 +1110,9 @@ async function enviarAvaliacaoAdvisor(mensagem, resultado, avaliacao, status, mo
             throw new TypeError('A API devolveu uma resposta inválida.');
         }
         if (!resposta.ok) {
-            throw new Error(typeof respostaFeedback.error === 'string'
+            throw criarErroApiApp(typeof respostaFeedback.error === 'string'
                 ? respostaFeedback.error
-                : `A API respondeu com o status ${resposta.status}.`);
+                : `A API respondeu com o status ${resposta.status}.`, resposta.status);
         }
 
         const preferenciaResposta = avaliacao === 'util'
@@ -1096,7 +1149,7 @@ async function enviarAvaliacaoAdvisor(mensagem, resultado, avaliacao, status, mo
             ? `Não foi possível enviar. ${error.message}`
             : 'Não foi possível enviar. Tente novamente mais tarde.';
         status.textContent = mensagemErro;
-        exibirAlertaErroApp(mensagemErro);
+        exibirAlertaErroApiApp(error);
         mensagem.dataset.enviandoFeedback = 'false';
         botoes.forEach((botao) => {
             botao.disabled = false;
@@ -1521,9 +1574,9 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
         }
 
         if (!resposta.ok) {
-            throw new Error(typeof resultado.error === 'string'
+            throw criarErroApiApp(typeof resultado.error === 'string'
                 ? resultado.error
-                : 'A Navi não conseguiu responder agora. Tente novamente.');
+                : 'A Navi não conseguiu responder agora. Tente novamente.', resposta.status);
         }
         if (!resultado
             || typeof resultado !== 'object'
@@ -1567,7 +1620,7 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
         statusAdvisor.textContent = '';
         pensando.remove();
         adicionarMensagemAdvisor('assistant', mensagemErro, { repetirPergunta: texto });
-        exibirAlertaErroApp(mensagemErro);
+        exibirAlertaErroApiApp(error);
     } finally {
         window.clearTimeout(timeout);
         enviandoAdvisor = false;
@@ -1826,7 +1879,7 @@ async function enviarFeedbackPerfil() {
         });
         const resultado = await resposta.json();
         if (!resposta.ok) {
-            throw new Error(resultado.error || `A API respondeu com o status ${resposta.status}.`);
+            throw criarErroApiApp(resultado.error || `A API respondeu com o status ${resposta.status}.`, resposta.status);
         }
         campoFeedbackPerfil.value = '';
         statusFeedbackPerfil.textContent = resultado.message || 'Feedback enviado. Obrigado por ajudar a melhorar o FinSlash!';
@@ -1836,7 +1889,7 @@ async function enviarFeedbackPerfil() {
             ? error.message
             : 'Não foi possível enviar agora. Tente novamente mais tarde.';
         statusFeedbackPerfil.textContent = mensagemErro;
-        exibirAlertaErroApp(mensagemErro);
+        exibirAlertaErroApiApp(error);
     } finally {
         enviandoFeedback = false;
         botaoEnviarFeedback.disabled = false;
@@ -3733,7 +3786,7 @@ async function carregarDiagnosticoTopicoServico() {
         const resposta = await fetch(url, { headers: { Accept: 'application/json' } });
         const diagnostico = await resposta.json();
         if (!resposta.ok) {
-            throw new Error(diagnostico.error || `A API respondeu com o status ${resposta.status}.`);
+            throw criarErroApiApp(diagnostico.error || `A API respondeu com o status ${resposta.status}.`, resposta.status);
         }
         if (
             typeof diagnostico.summary !== 'string'
@@ -3765,7 +3818,7 @@ async function carregarDiagnosticoTopicoServico() {
             ? error.message
             : 'Não foi possível carregar o diagnóstico agora.';
         statusDiagnosticoTopico.textContent = mensagemErro;
-        exibirAlertaErroApp(mensagemErro);
+        exibirAlertaErroApiApp(error);
     } finally {
         if (requisicao === requisicaoDiagnosticoAtual) {
             painelDiagnosticoTopico.setAttribute('aria-busy', 'false');

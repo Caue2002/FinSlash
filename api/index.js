@@ -2150,6 +2150,55 @@ function obterRota(url) {
     return rotasReescritas[0];
 }
 
+// Gera o slug de um cenario a partir do titulo, no mesmo formato usado no
+// frontend (sem acentos, minusculo, palavras unidas por hifen).
+function gerarSlugCenarioApi(texto) {
+    return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/gu, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/gu, '-')
+        .replace(/^-|-$/gu, '');
+}
+
+const CONSULTA_CENARIO_PUBLICADO = `
+    SELECT
+        scenario.id,
+        service.slug AS "serviceSlug",
+        service.name AS "serviceName",
+        scenario.slug,
+        scenario.title,
+        scenario.summary,
+        COALESCE((
+            SELECT json_agg(json_build_object(
+                'type', step.step_type,
+                'title', step.title,
+                'content', step.content
+            ) ORDER BY
+                CASE step.step_type
+                    WHEN 'check' THEN 1
+                    WHEN 'action' THEN 2
+                    ELSE 3
+                END,
+                step.position)
+            FROM scenario_steps AS step
+            WHERE step.scenario_id = scenario.id
+        ), '[]'::json) AS steps,
+        COALESCE((
+            SELECT json_agg(json_build_object(
+                'title', reference.title,
+                'url', reference.url,
+                'reviewedAt', reference.reviewed_at
+            ) ORDER BY reference.title)
+            FROM scenario_sources AS reference
+            WHERE reference.scenario_id = scenario.id
+        ), '[]'::json) AS sources
+    FROM cost_scenarios AS scenario
+    JOIN aws_services AS service ON service.id = scenario.service_id
+    WHERE service.slug = $1
+        AND scenario.slug = $2
+        AND scenario.is_published = TRUE`;
+
 async function obterDiagnostico(serviceSlug, scenarioSlug) {
     if (!process.env.DATABASE_URL) {
         console.error('DATABASE_URL não foi configurada para a API de diagnósticos.');
@@ -2157,45 +2206,27 @@ async function obterDiagnostico(serviceSlug, scenarioSlug) {
     }
 
     try {
-        const resultado = await obterPoolBanco().query(
-            `SELECT
-                scenario.id,
-                service.slug AS "serviceSlug",
-                service.name AS "serviceName",
-                scenario.slug,
-                scenario.title,
-                scenario.summary,
-                COALESCE((
-                    SELECT json_agg(json_build_object(
-                        'type', step.step_type,
-                        'title', step.title,
-                        'content', step.content
-                    ) ORDER BY
-                        CASE step.step_type
-                            WHEN 'check' THEN 1
-                            WHEN 'action' THEN 2
-                            ELSE 3
-                        END,
-                        step.position)
-                    FROM scenario_steps AS step
-                    WHERE step.scenario_id = scenario.id
-                ), '[]'::json) AS steps,
-                COALESCE((
-                    SELECT json_agg(json_build_object(
-                        'title', reference.title,
-                        'url', reference.url,
-                        'reviewedAt', reference.reviewed_at
-                    ) ORDER BY reference.title)
-                    FROM scenario_sources AS reference
-                    WHERE reference.scenario_id = scenario.id
-                ), '[]'::json) AS sources
-            FROM cost_scenarios AS scenario
-            JOIN aws_services AS service ON service.id = scenario.service_id
-            WHERE service.slug = $1
-                AND scenario.slug = $2
-                AND scenario.is_published = TRUE`,
-            [serviceSlug, scenarioSlug]
-        );
+        const pool = obterPoolBanco();
+        let resultado = await pool.query(CONSULTA_CENARIO_PUBLICADO, [serviceSlug, scenarioSlug]);
+
+        if (resultado.rowCount === 0) {
+            // Fallback: o slug pedido pode divergir do cadastrado (titulo
+            // ligeiramente diferente). Procura um cenario publicado do mesmo
+            // servico cujo titulo gere o mesmo slug antes de desistir.
+            const candidatos = await pool.query(
+                `SELECT scenario.slug, scenario.title
+                 FROM cost_scenarios AS scenario
+                 JOIN aws_services AS service ON service.id = scenario.service_id
+                 WHERE service.slug = $1 AND scenario.is_published = TRUE`,
+                [serviceSlug]
+            );
+            const slugEquivalente = candidatos.rows.find(
+                (candidato) => gerarSlugCenarioApi(candidato.title) === scenarioSlug
+            )?.slug;
+            if (slugEquivalente) {
+                resultado = await pool.query(CONSULTA_CENARIO_PUBLICADO, [serviceSlug, slugEquivalente]);
+            }
+        }
 
         if (resultado.rowCount === 0) {
             return responder(404, { error: 'Este diagnóstico ainda não está disponível.' });

@@ -301,16 +301,16 @@ const alertaErroApp = document.getElementById('alerta-erro-app');
 let enviandoFeedback = false;
 let timeoutAlertaErroApp = null;
 
-// Erros da API agrupados em mensagens curtas e informais para o alerta.
+// Erros da API agrupados por causa real, em mensagens diretas para o alerta.
 const ERROS_API_APP = {
-    timeout: { codigo: 'ERR-01', mensagem: 'A resposta demorou demais. Tenta de novo!' },
-    rede: { codigo: 'ERR-02', mensagem: 'Tô sem conexão com a Navi. Confere a internet!' },
-    saturacao: { codigo: 'ERR-03', mensagem: 'A Navi tá cheia de mensagens. Tenta daqui a pouquinho!' },
-    servidor: { codigo: 'ERR-04', mensagem: 'O servidor da Navi quebrou. Tenta em instantes!' },
-    requisicao: { codigo: 'ERR-05', mensagem: 'Não entendi direito o pedido. Tenta de outro jeito!' },
-    respostaInvalida: { codigo: 'ERR-06', mensagem: 'A Navi respondeu algo estranho. Tenta de novo!' },
-    naoEncontrado: { codigo: 'ERR-07', mensagem: 'Não achei isso por aqui. Tenta outro caminho!' },
-    generico: { codigo: 'ERR-99', mensagem: 'Deu ruim por aqui. Tenta de novo!' }
+    timeout: { codigo: 'ERR-01', mensagem: 'Tempo limite excedido. Tente novamente.' },
+    rede: { codigo: 'ERR-02', mensagem: 'Falha de conexão. Verifique sua internet.' },
+    saturacao: { codigo: 'ERR-03', mensagem: 'Limite de envios por hora atingido. Aguarde.' },
+    servidor: { codigo: 'ERR-04', mensagem: 'Erro interno do servidor. Tente novamente.' },
+    requisicao: { codigo: 'ERR-05', mensagem: 'Pedido inválido rejeitado pela API.' },
+    respostaInvalida: { codigo: 'ERR-06', mensagem: 'A API retornou formato de resposta inválido.' },
+    naoEncontrado: { codigo: 'ERR-07', mensagem: 'Item não encontrado no catálogo da API.' },
+    generico: { codigo: 'ERR-99', mensagem: 'Erro inesperado. Tente novamente.' }
 };
 
 // Cria um Error HTTP carregando o status para a classificacao do alerta.
@@ -1479,7 +1479,10 @@ function exibirResultadoAdvisor(resultado, pergunta) {
 
 async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
     const texto = typeof pergunta === 'string'
-        ? pergunta.replace(/\s+/gu, ' ').trim()
+        ? pergunta
+            .replace(/\p{Cc}/gu, '')
+            .replace(/\s+/gu, ' ')
+            .trim()
         : '';
     const regenerar = opcoes.regenerar === true;
     if (!texto) {
@@ -1549,28 +1552,41 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
         } catch (error) {
             console.warn('Não foi possível detectar o fuso horário do navegador.', error);
         }
-        const resposta = await fetch(`${baseUrl}/api/v1/advisor`, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                pergunta: texto,
-                historico,
-                timezone,
-                regenerar,
-                motivoFeedback: opcoes.motivoFeedback || null,
-                preferenciaResposta: obterPreferenciaRespostaAdvisor()
-            }),
-            signal: controlador.signal
+        const corpoRequisicao = JSON.stringify({
+            pergunta: texto,
+            historico,
+            timezone,
+            regenerar,
+            motivoFeedback: opcoes.motivoFeedback || null,
+            preferenciaResposta: obterPreferenciaRespostaAdvisor()
         });
-
+        let resposta;
         let resultado;
-        try {
-            resultado = await resposta.json();
-        } catch (error) {
-            throw new TypeError('A API devolveu uma resposta inválida.');
+        for (let tentativa = 0; tentativa < 2; tentativa += 1) {
+            try {
+                resposta = await fetch(`${baseUrl}/api/v1/advisor`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: corpoRequisicao,
+                    signal: controlador.signal
+                });
+                try {
+                    resultado = await resposta.json();
+                } catch (error) {
+                    throw new TypeError('A API devolveu uma resposta inválida.');
+                }
+                break;
+            } catch (erroRequisicao) {
+                // Uma segunda chance apenas para falha de rede ou JSON
+                // quebrado; timeout, 4xx e 5xx nao se repetem.
+                if (tentativa === 0 && erroRequisicao instanceof TypeError) {
+                    continue;
+                }
+                throw erroRequisicao;
+            }
         }
 
         if (!resposta.ok) {

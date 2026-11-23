@@ -1,0 +1,4134 @@
+{
+ "amazon-eks": [
+  {
+   "slug": "superdimensionamento-de-nos-do-cluster-node-over-provisioning",
+   "titulo": "Superdimensionamento de Nós do Cluster (Node Over-provisioning)"
+  },
+  {
+   "slug": "falta-de-configuracao-de-horizontal-pod-autoscaler-hpa-e-cluster-autoscaler",
+   "titulo": "Falta de Configuração de Horizontal Pod Autoscaler (HPA) e Cluster Autoscaler"
+  },
+  {
+   "slug": "ausencia-de-definicoes-de-requests-e-limits-nos-pods",
+   "titulo": "Ausência de Definições de Requests e Limits nos Pods"
+  },
+  {
+   "slug": "uso-exclusivo-de-instancias-on-demand-nos-nos-do-eks",
+   "titulo": "Uso Exclusivo de Instâncias On-Demand nos Nós do EKS"
+  },
+  {
+   "slug": "cargas-de-homologacao-e-testes-rodando-24-7",
+   "titulo": "Cargas de Homologação e Testes Rodando 24/7"
+  },
+  {
+   "slug": "trafego-de-rede-excessivo-entre-pods-de-zonas-diferentes-cross-az",
+   "titulo": "Tráfego de Rede Excessivo Entre Pods de Zonas Diferentes (Cross-AZ)"
+  },
+  {
+   "slug": "sobrecarga-e-acumulo-de-logs-no-fluentbit-cloudwatch",
+   "titulo": "Sobrecarga e Acúmulo de Logs no Fluentbit / CloudWatch"
+  },
+  {
+   "slug": "ociosidade-em-load-balancers-aws-load-balancer-controller",
+   "titulo": "Ociosidade em Load Balancers (AWS Load Balancer Controller)"
+  },
+  {
+   "slug": "versoes-desatualizadas-do-kubernetes-com-custos-de-suporte-estendidos",
+   "titulo": "Versões Desatualizadas do Kubernetes com Custos de Suporte Estendidos"
+  },
+  {
+   "slug": "falta-de-otimizacao-da-control-plane-com-eks-auto-mode-ou-fargate",
+   "titulo": "Falta de Otimização da Control Plane com EKS Auto Mode ou Fargate"
+  },
+  {
+   "slug": "uso-de-tipos-de-instancias-incompativeis-com-a-arquitetura-da-aplicacao",
+   "titulo": "Uso de Tipos de Instâncias Incompatíveis com a Arquitetura da Aplicação"
+  },
+  {
+   "slug": "falta-de-uso-de-spot-instances-para-workers-de-processamento-em-lote",
+   "titulo": "Falta de Uso de Spot Instances para Workers de Processamento em Lote"
+  },
+  {
+   "slug": "provisionamento-ineficiente-de-volumes-persistentes-ebs-pvcs",
+   "titulo": "Provisionamento Ineficiente de Volumes Persistentes (EBS PVCs)"
+  },
+  {
+   "slug": "escalonamento-incorreto-de-daemonsets",
+   "titulo": "Escalonamento Incorreto de DaemonSets"
+  },
+  {
+   "slug": "excesso-de-monitoramento-com-container-insights-sem-filtros",
+   "titulo": "Excesso de Monitoramento com Container Insights Sem Filtros"
+  },
+  {
+   "slug": "falta-de-governanca-em-namespaces-de-desenvolvedores",
+   "titulo": "Falta de Governança em Namespaces de Desenvolvedores"
+  },
+  {
+   "slug": "configuracao-excessiva-de-replicas-por-falta-de-teste-de-carga",
+   "titulo": "Configuração Excessiva de Réplicas por Falta de Teste de Carga"
+  },
+  {
+   "slug": "acumulo-de-imagens-de-conteineres-orfas-nos-nos",
+   "titulo": "Acúmulo de Imagens de Contêineres Órfãs nos Nós"
+  },
+  {
+   "slug": "duplicacao-de-componentes-de-rede-e-service-mesh-pesados",
+   "titulo": "Duplicação de Componentes de Rede e Service Mesh Pesados"
+  },
+  {
+   "slug": "trafego-de-saida-excessivo-via-nat-gateway-a-partir-dos-pods",
+   "titulo": "Tráfego de Saída Excessivo via NAT Gateway a partir dos Pods"
+  },
+  {
+   "slug": "ausencia-de-pod-disruption-budgets-pdbs-em-pods-criticos",
+   "titulo": "Ausência de Pod Disruption Budgets (PDBs) em Pods Críticos"
+  }
+ ],
+ "amazon-dynamodb": [
+  {
+   "slug": "dimensionamento-de-capacidade-provisionada-sem-auto-scaling-provisioned-throughput",
+   "titulo": "Dimensionamento de Capacidade Provisionada sem Auto Scaling (Provisioned Throughput)"
+  },
+  {
+   "slug": "uso-incorreto-de-modo-on-demand-em-tabelas-com-trafego-alto-e-previsivel",
+   "titulo": "Uso Incorreto de Modo On-Demand em Tabelas com Tráfego Alto e Previsível"
+  },
+  {
+   "slug": "falta-de-uso-do-dynamodb-standard-infrequent-access-standard-ia",
+   "titulo": "Falta de Uso do DynamoDB Standard-Infrequent Access (Standard-IA)"
+  },
+  {
+   "slug": "hot-partitions-por-escolha-ruim-de-chave-de-particao-partition-key",
+   "titulo": "Hot Partitions por Escolha Ruim de Chave de Partição (Partition Key)"
+  },
+  {
+   "slug": "projecao-excessiva-de-atributos-em-indices-secundarios-globais-gsis",
+   "titulo": "Projeção Excessiva de Atributos em Índices Secundários Globais (GSIs)"
+  },
+  {
+   "slug": "leitura-consistente-forte-strongly-consistent-reads-sem-necessidade",
+   "titulo": "Leitura Consistente Forte (Strongly Consistent Reads) sem Necessidade"
+  },
+  {
+   "slug": "consultas-com-scan-em-vez-de-query-em-tabelas-grandes",
+   "titulo": "Consultas com Scan em Vez de Query em Tabelas Grandes"
+  },
+  {
+   "slug": "falta-de-filtros-pre-invocacao-em-dynamodb-streams-com-aws-lambda",
+   "titulo": "Falta de Filtros Pré-Invocação em DynamoDB Streams com AWS Lambda"
+  },
+  {
+   "slug": "ausencia-de-politica-de-time-to-live-ttl-para-limpeza-automatica-de-dados",
+   "titulo": "Ausência de Política de Time To Live (TTL) para Limpeza Automática de Dados"
+  },
+  {
+   "slug": "tamanho-excessivo-dos-itens-item-size-overhead",
+   "titulo": "Tamanho Excessivo dos Itens (Item Size Overhead)"
+  },
+  {
+   "slug": "escrita-individual-em-lote-em-vez-de-operacoes-batch-batchwriteitem",
+   "titulo": "Escrita Individual em Lote em Vez de Operações Batch (BatchWriteItem)"
+  },
+  {
+   "slug": "global-tables-multi-regiao-ativas-sem-necessidade-regulatoria",
+   "titulo": "Global Tables Multi-Região Ativas sem Necessidade Regulatória"
+  },
+  {
+   "slug": "snapshots-e-point-in-time-recovery-pitr-mantidos-em-ambientes-de-testes",
+   "titulo": "Snapshots e Point-In-Time Recovery (PITR) Mantidos em Ambientes de Testes"
+  },
+  {
+   "slug": "filtros-na-aplicacao-filter-expressions-consumindo-rcus-em-excesso",
+   "titulo": "Filtros na Aplicação (Filter Expressions) Consumindo RCUs em Excesso"
+  },
+  {
+   "slug": "gravacoes-transacionais-transactwriteitems-sem-necessidade",
+   "titulo": "Gravações Transacionais (TransactWriteItems) sem Necessidade"
+  },
+  {
+   "slug": "indices-secundarios-globais-gsis-orfaos-ou-sem-uso",
+   "titulo": "Índices Secundários Globais (GSIs) Órfãos ou Sem Uso"
+  },
+  {
+   "slug": "leitura-ineficiente-de-historico-sem-paging-limit",
+   "titulo": "Leitura Ineficiente de Histórico sem Paging (Limit)"
+  },
+  {
+   "slug": "replicacao-manual-de-cache-no-dynamodb-em-vez-de-usar-dax",
+   "titulo": "Replicação manual de Cache no DynamoDB em Vez de usar DAX"
+  },
+  {
+   "slug": "armazenamento-de-binarios-arquivos-grandes-no-item-do-dynamodb",
+   "titulo": "Armazenamento de Binários/Arquivos Grandes no Item do DynamoDB"
+  },
+  {
+   "slug": "falta-de-restricao-em-testes-de-carga-automatizados-stress-test",
+   "titulo": "Falta de Restrição em Testes de Carga Automatizados (Stress Test)"
+  },
+  {
+   "slug": "falta-de-uso-do-dynamodb-accelerator-dax-para-altissima-frequencia",
+   "titulo": "Falta de Uso do DynamoDB Accelerator (DAX) para Altissima Frequência"
+  }
+ ],
+ "amazon-rds": [
+  {
+   "slug": "ambientes-de-desenvolvimento-e-homologacao-rodando-24-7",
+   "titulo": "Ambientes de Desenvolvimento e Homologação Rodando 24/7"
+  },
+  {
+   "slug": "instancias-de-banco-de-dados-superdimensionadas-over-provisioning",
+   "titulo": "Instâncias de Banco de Dados Superdimensionadas (Over-provisioning)"
+  },
+  {
+   "slug": "frotas-estaveis-pagando-preco-on-demand-sem-instancias-reservadas",
+   "titulo": "Frotas Estáveis Pagando Preço On-Demand sem Instâncias Reservadas"
+  },
+  {
+   "slug": "provisionamento-excessivo-de-iops-alocado-io1-io2",
+   "titulo": "Provisionamento Excessivo de IOPS alocado (io1/io2)"
+  },
+  {
+   "slug": "replicacao-multi-az-ativada-em-ambientes-nao-criticos",
+   "titulo": "Replicação Multi-AZ Ativada em Ambientes Não Críticos"
+  },
+  {
+   "slug": "snapshots-manuais-de-banco-de-dados-acumulados-orphaned-snapshots",
+   "titulo": "Snapshots Manuais de Banco de Dados Acumulados (Orphaned Snapshots)"
+  },
+  {
+   "slug": "manutencao-de-discos-no-padrao-antigo-gp2-em-vez-do-gp3",
+   "titulo": "Manutenção de Discos no Padrão Antigo gp2 em Vez do gp3"
+  },
+  {
+   "slug": "falta-de-uso-do-rds-proxy-para-conexoes-de-microsservicos-e-lambda",
+   "titulo": "Falta de Uso do RDS Proxy para Conexões de Microsserviços e Lambda"
+  },
+  {
+   "slug": "instancias-orfas-criadas-para-projetos-descontinuados",
+   "titulo": "Instâncias Órfãs Criadas para Projetos Descontinuados"
+  },
+  {
+   "slug": "escrita-e-leitura-nao-separadas-falta-de-read-replicas",
+   "titulo": "Escrita e Leitura Não Separadas (Falta de Read Replicas)"
+  },
+  {
+   "slug": "instancias-de-replica-de-leitura-read-replicas-superdimensionadas",
+   "titulo": "Instâncias de Réplica de Leitura (Read Replicas) Superdimensionadas"
+  },
+  {
+   "slug": "janelas-de-manutencao-automatica-maintenance-windows-mal-agendadas",
+   "titulo": "Janelas de Manutenção Automática (Maintenance Windows) Mal Agendadas"
+  },
+  {
+   "slug": "prazos-de-retencao-de-backups-automaticos-exagerados-em-ambientes-de-teste",
+   "titulo": "Prazos de Retenção de Backups Automáticos Exagerados em Ambientes de Teste"
+  },
+  {
+   "slug": "crescimento-descontrolado-do-disco-por-falta-de-storage-auto-scaling-limite",
+   "titulo": "Crescimento Descontrolado do Disco por Falta de Storage Auto-Scaling Limite"
+  },
+  {
+   "slug": "logs-de-ingestao-de-auditoria-e-queries-lentas-enviados-sem-filtro",
+   "titulo": "Logs de Ingestão de Auditoria e Queries Lentas Enviados sem Filtro"
+  },
+  {
+   "slug": "uso-de-familias-de-instancias-antigas-ex-db-m4-ou-db-r4",
+   "titulo": "Uso de Famílias de Instâncias Antigas (ex: db.m4 ou db.r4)"
+  },
+  {
+   "slug": "armazenamento-de-historico-e-logs-antigos-sem-purge-ou-arquivamento",
+   "titulo": "Armazenamento de Histórico e Logs Antigos sem Purge ou Arquivamento"
+  },
+  {
+   "slug": "consultas-analiticas-ineficientes-sem-indices-adequados",
+   "titulo": "Consultas Analíticas Ineficientes sem Índices Adequados"
+  },
+  {
+   "slug": "trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer",
+   "titulo": "Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ Data Transfer)"
+  },
+  {
+   "slug": "retencao-prolongada-de-bancos-convertidos-de-migracao-dms",
+   "titulo": "Retenção Prolongada de Bancos Convertidos de Migração (DMS)"
+  },
+  {
+   "slug": "configuracoes-de-parametros-de-memoria-buffer-pool-desajustadas",
+   "titulo": "Configurações de Parâmetros de Memória (Buffer Pool) Desajustadas"
+  }
+ ],
+ "amazon-s3": [
+  {
+   "slug": "manutencao-de-todos-os-arquivos-na-classe-s3-standard-24-7",
+   "titulo": "Manutenção de Todos os Arquivos na Classe S3 Standard 24/7"
+  },
+  {
+   "slug": "retencao-de-terabytes-de-uploads-incompletos-multipart-uploads",
+   "titulo": "Retenção de Terabytes de Uploads Incompletos (Multipart Uploads)"
+  },
+  {
+   "slug": "transferencia-de-dados-via-internet-em-vez-de-vpc-endpoints-gateway",
+   "titulo": "Transferência de Dados via Internet em Vez de VPC Endpoints (Gateway)"
+  },
+  {
+   "slug": "versionamento-ativado-sem-expiracao-de-versoes-antigas-noncurrent-versions",
+   "titulo": "Versionamento Ativado Sem Expiração de Versões Antigas (Noncurrent Versions)"
+  },
+  {
+   "slug": "falta-de-uso-ou-uso-incorreto-do-s3-intelligent-tiering",
+   "titulo": "Falta de Uso ou Uso Incorreto do S3 Intelligent-Tiering"
+  },
+  {
+   "slug": "armazenamento-de-milhoes-de-arquivos-minusculos-sem-compactacao",
+   "titulo": "Armazenamento de Milhões de Arquivos Minúsculos sem Compactação"
+  },
+  {
+   "slug": "taxas-de-leitura-e-resgate-inesperadas-nas-classes-glacier",
+   "titulo": "Taxas de Leitura e Resgate Inesperadas nas Classes Glacier"
+  },
+  {
+   "slug": "leitura-direta-de-arquivos-brutos-em-data-lakes-sem-particionamento",
+   "titulo": "Leitura Direta de Arquivos Brutos em Data Lakes sem Particionamento"
+  },
+  {
+   "slug": "falta-de-ativacao-do-s3-object-lock-para-arquivos-de-compliance",
+   "titulo": "Falta de Ativação do S3 Object Lock para Arquivos de Compliance"
+  },
+  {
+   "slug": "erros-de-aplicacao-gerando-loops-infinitos-de-requisicoes-http-4xx-5xx",
+   "titulo": "Erros de Aplicação Gerando Loops Infinitos de Requisições HTTP (4xx/5xx)"
+  },
+  {
+   "slug": "replica-de-buckets-cross-region-crr-desnecessaria-em-ambientes-de-teste",
+   "titulo": "Réplica de Buckets Cross-Region (CRR) Desnecessária em Ambientes de Teste"
+  },
+  {
+   "slug": "ausencia-de-transicao-para-glacier-instant-retrieval-ou-deep-archive",
+   "titulo": "Ausência de Transição para Glacier Instant Retrieval ou Deep Archive"
+  },
+  {
+   "slug": "buckets-de-backups-e-snapshots-sem-regras-de-limpeza",
+   "titulo": "Buckets de Backups e Snapshots sem Regras de Limpeza"
+  },
+  {
+   "slug": "ativacao-de-s3-request-metrics-e-cloudwatch-logging-excessivos",
+   "titulo": "Ativação de S3 Request Metrics e CloudWatch Logging Excessivos"
+  },
+  {
+   "slug": "download-direto-de-imagens-e-estaticos-sem-cdn-cloudfront",
+   "titulo": "Download Direto de Imagens e Estáticos sem CDN (CloudFront)"
+  },
+  {
+   "slug": "sobrecarga-de-requisicoes-por-falta-de-s3-express-one-zone-ou-caching",
+   "titulo": "Sobrecarga de Requisições por Falta de S3 Express One Zone ou Caching"
+  },
+  {
+   "slug": "desativacao-do-block-public-access-e-custos-por-trafego-indevido",
+   "titulo": "Desativação do Block Public Access e Custos por Tráfego Indevido"
+  },
+  {
+   "slug": "duplicacao-de-buckets-para-diferentes-equipes-de-ti",
+   "titulo": "Duplicação de Buckets para Diferentes Equipes de TI"
+  },
+  {
+   "slug": "faltas-de-regras-de-expiracao-para-arquivos-temporarios-de-importacao",
+   "titulo": "Faltas de Regras de Expiração para Arquivos Temporários de Importação"
+  },
+  {
+   "slug": "transicoes-de-ciclo-de-vida-ineficientes-com-custos-de-taxa-por-objeto",
+   "titulo": "Transições de Ciclo de Vida Ineficientes com Custos de Taxa por Objeto"
+  },
+  {
+   "slug": "uso-de-criptografia-kms-sse-kms-sem-bucket-keys-em-alta-escala",
+   "titulo": "Uso de Criptografia KMS (SSE-KMS) sem Bucket Keys em Alta Escala"
+  }
+ ],
+ "amazon-ebs": [
+  {
+   "slug": "discos-ebs-orfaos-sem-instancia-conectada-unattached-volumes",
+   "titulo": "Discos EBS Órfãos sem Instância Conectada (Unattached Volumes)"
+  },
+  {
+   "slug": "provisionamento-excessivo-de-iops-em-discos-de-alto-desempenho-io1-io2",
+   "titulo": "Provisionamento Excessivo de IOPS em Discos de Alto Desempenho (io1/io2)"
+  },
+  {
+   "slug": "snapshots-manuais-antigos-sem-politica-de-expiracao-orphaned-snapshots",
+   "titulo": "Snapshots Manuais Antigos sem Política de Expiração (Orphaned Snapshots)"
+  },
+  {
+   "slug": "manutencao-de-discos-no-tipo-legado-gp2-em-vez-do-gp3",
+   "titulo": "Manutenção de Discos no Tipo Legado gp2 em Vez do gp3"
+  },
+  {
+   "slug": "sobredimensionamento-do-tamanho-do-disco-over-provisioning-storage",
+   "titulo": "Sobredimensionamento do Tamanho do Disco (Over-provisioning Storage)"
+  },
+  {
+   "slug": "retencao-prolongada-de-backups-automaticos-do-amazon-data-lifecycle-manager-dlm",
+   "titulo": "Retenção Prolongada de Backups Automáticos do Amazon Data Lifecycle Manager (DLM)"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-iops-e-latencia-de-disco-volumequeuelength",
+   "titulo": "Falta de Monitoramento de IOPS e Latência de Disco (VolumeQueueLength)"
+  },
+  {
+   "slug": "ausencia-de-redimensionamento-dinamico-elastic-volumes",
+   "titulo": "Ausência de Redimensionamento Dinâmico (Elastic Volumes)"
+  },
+  {
+   "slug": "discos-de-instancias-desativadas-stopped-instances-cobrados-continuamente",
+   "titulo": "Discos de Instâncias Desativadas (Stopped Instances) Cobrados Continuamente"
+  },
+  {
+   "slug": "faltas-de-alertas-de-capacidade-de-espaco-em-disco-free-space-alarms",
+   "titulo": "Faltas de Alertas de Capacidade de Espaço em Disco (FreeSpace Alarms)"
+  },
+  {
+   "slug": "espelhamento-de-ambientes-de-staging-com-discos-identicos-aos-de-producao",
+   "titulo": "Espelhamento de Ambientes de Staging com Discos Idênticos aos de Produção"
+  },
+  {
+   "slug": "falta-de-uso-de-compressao-em-logs-armazenados-diretamente-em-disco",
+   "titulo": "Falta de Uso de Compressão em Logs Armazenados Diretamente em Disco"
+  },
+  {
+   "slug": "discos-de-dados-temporarios-scratch-space-alocados-permanentemente",
+   "titulo": "Discos de Dados Temporários (Scratch Space) Alocados Permanentemente"
+  },
+  {
+   "slug": "clones-de-bancos-de-dados-legados-mantidos-em-discos-separados",
+   "titulo": "Clones de Bancos de Dados Legados Mantidos em Discos Separados"
+  },
+  {
+   "slug": "falta-de-criptografia-em-discos-antigos-impedindo-otimizacoes-de-copia",
+   "titulo": "Falta de Criptografia em Discos Antigos (Impedindo Otimizações de Cópia)"
+  },
+  {
+   "slug": "uso-de-tipos-de-instancias-ec2-que-exigem-volumes-ebs-dedicados-extras",
+   "titulo": "Uso de Tipos de Instâncias EC2 que Exigem Volumes EBS Dedicados Extras"
+  },
+  {
+   "slug": "fragmentacao-de-multiplos-discos-pequenos-em-vez-de-um-volume-otimizado",
+   "titulo": "Fragmentação de Múltiplos Discos Pequenos em Vez de Um Volume Otimizado"
+  },
+  {
+   "slug": "snapshots-incrementais-inflados-por-alteracoes-constantes-de-blocos",
+   "titulo": "Snapshots Incrementais Inflados por Alterações Constantes de Blocos"
+  },
+  {
+   "slug": "uso-de-ebs-em-vez-de-amazon-efs-para-arquivos-compartilhados-entre-instancias",
+   "titulo": "Uso de EBS em Vez de Amazon EFS para Arquivos Compartilhados Entre Instâncias"
+  },
+  {
+   "slug": "replicas-e-backups-cruzados-entre-regioes-sem-necessidade-regulatoria",
+   "titulo": "Réplicas e Backups Cruzados entre Regiões sem Necessidade Regulatória"
+  },
+  {
+   "slug": "ausencia-de-automacao-de-snapshots-via-amazon-dlm",
+   "titulo": "Ausência de Automação de Snapshots via Amazon DLM"
+  },
+  {
+   "slug": "faltas-de-alertas-de-capacidade-de-espaco-em-disco-freespace-alarms",
+   "titulo": "Faltas de Alertas de Capacidade de Espaço em Disco (FreeSpace Alarms)"
+  }
+ ],
+ "nat-gateway": [
+  {
+   "slug": "trafego-para-s3-e-dynamodb-passando-pelo-nat-gateway",
+   "titulo": "Tráfego para S3 e DynamoDB Passando pelo NAT Gateway"
+  },
+  {
+   "slug": "transferencia-massiva-de-dados-de-analytics-logs-pelo-nat-gateway",
+   "titulo": "Transferência Massiva de Dados de Analytics/Logs pelo NAT Gateway"
+  },
+  {
+   "slug": "provisionamento-de-nat-gateways-em-multiplas-azs-para-ambientes-de-testes",
+   "titulo": "Provisionamento de NAT Gateways em Múltiplas AZs para Ambientes de Testes"
+  },
+  {
+   "slug": "falta-de-uso-de-vpc-interface-endpoints-privatelink-para-servicos-aws",
+   "titulo": "Falta de Uso de VPC Interface Endpoints (PrivateLink) para Serviços AWS"
+  },
+  {
+   "slug": "nat-gateways-orfaos-em-vpcs-sem-instancias-ativas",
+   "titulo": "NAT Gateways Órfãos em VPCs Sem Instâncias Ativas"
+  },
+  {
+   "slug": "comunicacao-inter-vpc-roteada-pela-internet-publica",
+   "titulo": "Comunicação Inter-VPC Roteada pela Internet Pública"
+  },
+  {
+   "slug": "downloads-de-atualizacoes-de-pacotes-os-updates-sem-servidor-local-cache",
+   "titulo": "Downloads de Atualizações de Pacotes (OS Updates) sem Servidor Local/Cache"
+  },
+  {
+   "slug": "trafego-de-comunicacao-com-data-center-on-premises-via-nat-gateway",
+   "titulo": "Tráfego de Comunicação com Data Center On-Premises via NAT Gateway"
+  },
+  {
+   "slug": "falta-de-monitoramento-das-metricas-bytesoutfromdestination-e-bytesouttosource",
+   "titulo": "Falta de Monitoramento das Métricas BytesOutFromDestination e BytesOutToSource"
+  },
+  {
+   "slug": "aplicacoes-de-web-scraping-ou-polling-externo-em-loop-pelo-nat",
+   "titulo": "Aplicações de Web Scraping ou Polling Externo em Loop pelo NAT"
+  },
+  {
+   "slug": "uso-de-nat-gateway-em-vez-de-instancia-nat-nat-instance-para-cenarios-leves",
+   "titulo": "Uso de NAT Gateway em Vez de Instância NAT (NAT Instance) para Cenários Leves"
+  },
+  {
+   "slug": "ausencia-de-restricao-de-egress-no-security-group",
+   "titulo": "Ausência de Restrição de Egress no Security Group"
+  },
+  {
+   "slug": "falta-de-centralizacao-de-saida-de-internet-em-arquiteturas-multi-vpc",
+   "titulo": "Falta de Centralização de Saída de Internet em Arquiteturas Multi-VPC"
+  },
+  {
+   "slug": "trafego-cruzado-entre-zonas-de-disponibilidade-no-nat-gateway",
+   "titulo": "Tráfego Cruzado Entre Zonas de Disponibilidade no NAT Gateway"
+  },
+  {
+   "slug": "envio-de-metrics-e-tracing-opentelemetry-datadog-via-nat-gateway",
+   "titulo": "Envio de Metrics e Tracing (OpenTelemetry/Datadog) via NAT Gateway"
+  },
+  {
+   "slug": "falta-de-alarmes-cloudwatch-no-aws-budgets-para-nat-data-processing",
+   "titulo": "Falta de Alarmes CloudWatch no AWS Budgets para NAT Data Processing"
+  },
+  {
+   "slug": "retencao-de-arquivos-de-build-de-ci-cd-baixados-da-internet",
+   "titulo": "Retenção de Arquivos de Build de CI/CD Baixados da Internet"
+  },
+  {
+   "slug": "uso-de-nat-gateway-para-comunicacao-de-aplicacoes-com-o-cloudfront",
+   "titulo": "Uso de NAT Gateway para Comunicação de Aplicações com o CloudFront"
+  },
+  {
+   "slug": "nao-limpeza-de-elastic-ips-desassociados-do-nat-gateway",
+   "titulo": "Não Limpeza de Elastic IPs Desassociados do NAT Gateway"
+  },
+  {
+   "slug": "falta-de-analise-de-vpc-flow-logs-para-identificacao-de-offenders",
+   "titulo": "Falta de Análise de VPC Flow Logs para Identificação de Offenders"
+  },
+  {
+   "slug": "concentracao-de-saida-de-internet-em-uma-unica-zona-de-disponibilidade",
+   "titulo": "Concentração de Saída de Internet em uma Única Zona de Disponibilidade"
+  }
+ ],
+ "aws-lambda": [
+  {
+   "slug": "provisionamento-excessivo-de-memoria-ram-over-provisioning",
+   "titulo": "Provisionamento Excessivo de Memória RAM (Over-provisioning)"
+  },
+  {
+   "slug": "retencao-prolongada-e-indefinida-de-logs-no-cloudwatch-log-groups",
+   "titulo": "Retenção Prolongada e Indefinida de Logs no CloudWatch (Log Groups)"
+  },
+  {
+   "slug": "falta-de-configuracao-de-limites-de-concorrencia-reserved-concurrency",
+   "titulo": "Falta de Configuração de Limites de Concorrência (Reserved Concurrency)"
+  },
+  {
+   "slug": "erros-de-inicializacao-a-frio-cold-starts-em-rotas-criticas-de-baixa-latencia",
+   "titulo": "Erros de Inicialização a Frio (Cold Starts) em Rotas Críticas de Baixa Latência"
+  },
+  {
+   "slug": "falta-de-uso-de-provisioned-concurrency-para-funcoes-criticas-de-banco",
+   "titulo": "Falta de Uso de Provisioned Concurrency para Funções Críticas de Banco"
+  },
+  {
+   "slug": "uso-de-lambdas-para-tarefas-de-longa-duracao-15-minutos",
+   "titulo": "Uso de Lambdas para Tarefas de Longa Duração (> 15 minutos)"
+  },
+  {
+   "slug": "falta-de-tratamento-de-retentativas-assincronas-e-ausencia-de-dlq",
+   "titulo": "Falta de Tratamento de Retentativas Assíncronas e Ausência de DLQ"
+  },
+  {
+   "slug": "conexoes-de-banco-de-dados-nao-pooladas-abertas-a-cada-execucao",
+   "titulo": "Conexões de Banco de Dados Não Pooladas Abertas a Cada Execução"
+  },
+  {
+   "slug": "trafego-de-rede-roteado-ineficientemente-via-nat-gateway",
+   "titulo": "Tráfego de Rede Roteado Ineficientemente via NAT Gateway"
+  },
+  {
+   "slug": "inclusao-de-dados-sensiveis-pii-diretamente-nos-logs-de-execucao",
+   "titulo": "Inclusão de Dados Sensíveis (PII) Diretamente nos Logs de Execução"
+  },
+  {
+   "slug": "falta-de-otimizacao-do-pacote-de-deployment-deployment-package-bloat",
+   "titulo": "Falta de Otimização do Pacote de Deployment (Deployment Package Bloat)"
+  },
+  {
+   "slug": "uso-de-versoes-desatualizadas-de-runtimes-node-js-python-java",
+   "titulo": "Uso de Versões Desatualizadas de Runtimes (Node.js, Python, Java)"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-falhas-e-erros-invocationsfailed-errors",
+   "titulo": "Falta de Monitoramento de Falhas e Erros (InvocationsFailed / Errors)"
+  },
+  {
+   "slug": "duplicacao-de-funcoes-lambda-para-logicas-semelhantes",
+   "titulo": "Duplicação de Funções Lambda para Lógicas Semelhantes"
+  },
+  {
+   "slug": "uso-de-lambda-para-processamento-continuo-24-7-de-fila-polling-continuo",
+   "titulo": "Uso de Lambda para Processamento Contínuo 24/7 de Fila (Polling Contínuo)"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-para-execucoes-descontroladas-invocation-storms",
+   "titulo": "Falta de Alertas de Custo para Execuções Descontroladas (Invocation Storms)"
+  },
+  {
+   "slug": "criacao-de-variaveis-de-ambiente-com-segredos-em-texto-plano",
+   "titulo": "Criação de Variáveis de Ambiente com Segredos em Texto Plano"
+  },
+  {
+   "slug": "falta-de-configuracao-de-arquitetura-de-processador-otimizada-x86-em-vez-de-arm-graviton",
+   "titulo": "Falta de Configuração de Arquitetura de Processador Otimizada (x86 em vez de ARM Graviton)"
+  },
+  {
+   "slug": "execucao-de-consultas-pesadas-de-athena-s3-sincronas-bloqueantes",
+   "titulo": "Execução de Consultas pesadas de Athena/S3 Síncronas Bloqueantes"
+  },
+  {
+   "slug": "falta-de-testes-de-carga-de-concorrencia-em-ambientes-isolados",
+   "titulo": "Falta de Testes de Carga de Concorrência em Ambientes Isolados"
+  },
+  {
+   "slug": "falta-de-observabilidade-distribuida-com-aws-x-ray",
+   "titulo": "Falta de Observabilidade Distribuída com AWS X-Ray"
+  }
+ ],
+ "amazon-ec2": [
+  {
+   "slug": "instancias-superdimensionadas-over-provisioning",
+   "titulo": "Instâncias Superdimensionadas (Over-provisioning)"
+  },
+  {
+   "slug": "compra-de-savings-plan-antes-do-rightsizing",
+   "titulo": "Compra de Savings Plan antes do Rightsizing"
+  },
+  {
+   "slug": "ambientes-de-staging-hml-rodando-24-7",
+   "titulo": "Ambientes de Staging/HML Rodando 24/7"
+  },
+  {
+   "slug": "discos-ebs-nao-excluidos-ao-terminar-a-instancia",
+   "titulo": "Discos EBS Não Excluídos ao Terminar a Instância"
+  },
+  {
+   "slug": "rodando-cargas-continuas-no-preco-on-demand",
+   "titulo": "Rodando Cargas Contínuas no Preço On-Demand"
+  },
+  {
+   "slug": "execucao-de-banco-de-dados-relacional-em-ec2",
+   "titulo": "Execução de Banco de Dados Relacional em EC2"
+  },
+  {
+   "slug": "ignorar-familias-de-instancias-da-nova-geracao",
+   "titulo": "Ignorar Famílias de Instâncias da Nova Geração"
+  },
+  {
+   "slug": "processamento-de-lotes-batch-em-instancias-dedicadas",
+   "titulo": "Processamento de Lotes (Batch) em Instâncias Dedicadas"
+  },
+  {
+   "slug": "subutilizacao-por-falta-de-auto-scaling-de-reducao-scale-in",
+   "titulo": "Subutilização por Falta de Auto Scaling de Redução (Scale-In)"
+  },
+  {
+   "slug": "arquivos-de-log-armazenados-em-discos-locais-ebs",
+   "titulo": "Arquivos de Log Armazenados em Discos Locais (EBS)"
+  },
+  {
+   "slug": "uso-do-processador-x86-em-vez-de-arquitetura-arm-graviton",
+   "titulo": "Uso do Processador x86 em Vez de Arquitetura ARM (Graviton)"
+  },
+  {
+   "slug": "instancias-zumbis-orphaned-instances",
+   "titulo": "Instâncias \"Zumbis\" (Orphaned Instances)"
+  },
+  {
+   "slug": "enderecos-de-ip-publico-elastic-ip-nao-associados",
+   "titulo": "Endereços de IP Público (Elastic IP) Não Associados"
+  },
+  {
+   "slug": "agendamento-de-trabalhos-cronjobs-em-servidores-permanentes",
+   "titulo": "Agendamento de Trabalhos (Cronjobs) em Servidores Permanentes"
+  },
+  {
+   "slug": "hospedagem-de-front-end-websites-estaticos-em-ec2",
+   "titulo": "Hospedagem de Front-end/Websites Estáticos em EC2"
+  },
+  {
+   "slug": "tipo-de-armazenamento-de-disco-desatualizado-gp2-vs-gp3",
+   "titulo": "Tipo de Armazenamento de Disco Desatualizado (gp2 vs gp3)"
+  },
+  {
+   "slug": "excesso-de-discos-provisionados-com-iops-altos-io1-io2",
+   "titulo": "Excesso de Discos Provisionados com IOPS Altos (io1/io2)"
+  },
+  {
+   "slug": "falta-de-restricao-em-testes-de-load-testing",
+   "titulo": "Falta de Restrição em Testes de Load Testing"
+  },
+  {
+   "slug": "trafego-cruzado-entre-zonas-de-disponibilidade-cross-az",
+   "titulo": "Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ)"
+  },
+  {
+   "slug": "snapshots-de-disco-sem-politica-de-retencao-ebs-snapshots",
+   "titulo": "Snapshots de Disco sem Política de Retenção (EBS Snapshots)"
+  },
+  {
+   "slug": "falta-de-adesao-a-planos-de-savings-plans-ou-instancias-reservadas",
+   "titulo": "Falta de Adesão a Planos de Savings Plans ou Instâncias Reservadas"
+  }
+ ],
+ "amazon-ecs": [
+  {
+   "slug": "uso-de-tarefas-fargate-superdimensionadas-sem-alinhamento-de-carga",
+   "titulo": "Uso de Tarefas Fargate Superdimensionadas sem Alinhamento de Carga"
+  },
+  {
+   "slug": "manutencao-de-ambientes-de-ecs-fargate-ativos-24-7-sem-escala-automatica",
+   "titulo": "Manutenção de Ambientes de ECS Fargate Ativos 24/7 sem Escala Automática"
+  },
+  {
+   "slug": "falta-de-uso-de-fargate-spot-para-cargas-tolerantes-a-falhas",
+   "titulo": "Falta de Uso de Fargate Spot para Cargas Tolerantes a Falhas"
+  },
+  {
+   "slug": "falta-de-configuracao-de-auto-scaling-baseado-em-metricas-reais-target-tracking-scaling",
+   "titulo": "Falta de Configuração de Auto Scaling Baseado em Métricas Reais (Target Tracking Scaling)"
+  },
+  {
+   "slug": "uso-de-instancias-ec2-em-modo-managed-instances-sem-otimizacao-de-empacotamento-bin-packing",
+   "titulo": "Uso de Instâncias EC2 em Modo Managed Instances sem Otimização de Empacotamento (Bin Packing)"
+  },
+  {
+   "slug": "falta-de-configuracao-de-limites-de-recursos-resource-limits-nas-definicoes-de-tarefa",
+   "titulo": "Falta de Configuração de Limites de Recursos (Resource Limits) nas Definições de Tarefa"
+  },
+  {
+   "slug": "imagens-docker-gigantes-e-nao-otimizadas",
+   "titulo": "Imagens Docker Gigantes e Não Otimizadas"
+  },
+  {
+   "slug": "trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-task-placement",
+   "titulo": "Tráfego de Rede Cruzado entre Zonas de Disponibilidade (Cross-AZ Task Placement)"
+  },
+  {
+   "slug": "retencao-descontrolada-de-logs-de-containers-no-cloudwatch",
+   "titulo": "Retenção Descontrolada de Logs de Containers no CloudWatch"
+  },
+  {
+   "slug": "falta-de-health-checks-adequados-configurados-no-application-load-balancer-alb",
+   "titulo": "Falta de Health Checks Adequados Configurados no Application Load Balancer (ALB)"
+  },
+  {
+   "slug": "falta-de-criptografia-e-gerenciamento-seguro-de-variaveis-de-ambiente",
+   "titulo": "Falta de Criptografia e Gerenciamento Seguro de Variáveis de Ambiente"
+  },
+  {
+   "slug": "uso-de-armazenamento-ebs-ou-efs-em-conflito-com-a-filosofia-efemera-de-containers",
+   "titulo": "Uso de Armazenamento EBS ou EFS em Conflito com a Filosofia Efêmera de Containers"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-utilizacao-de-cpu-e-memoria-dos-servicos-ecs",
+   "titulo": "Falta de Monitoramento de Utilização de CPU e Memória dos Serviços ECS"
+  },
+  {
+   "slug": "uso-de-registros-de-imagens-ecr-sem-politicas-de-ciclo-de-vida-lifecycle-policies",
+   "titulo": "Uso de Registros de Imagens ECR sem Políticas de Ciclo de Vida (Lifecycle Policies)"
+  },
+  {
+   "slug": "trafego-de-entrada-saida-roteado-via-nat-gateway-sem-endpoints",
+   "titulo": "Tráfego de Entrada/Saída Roteado via NAT Gateway sem Endpoints"
+  },
+  {
+   "slug": "falta-de-atualizacao-de-agentes-e-runtimes-do-ecs-nas-instancias-ec2",
+   "titulo": "Falta de Atualização de Agentes e Runtimes do ECS nas Instâncias EC2"
+  },
+  {
+   "slug": "duplicacao-de-clusters-ecs-por-unidades-de-negocio-sem-governanca",
+   "titulo": "Duplicação de Clusters ECS por Unidades de Negócio Sem Governança"
+  },
+  {
+   "slug": "falta-de-testes-de-resiliencia-e-recuperacao-de-tarefas-task-recovery",
+   "titulo": "Falta de Testes de Resiliência e Recuperação de Tarefas (Task Recovery)"
+  },
+  {
+   "slug": "ausencia-de-alertas-de-custo-para-escalabilidade-descontrolada-de-fargate",
+   "titulo": "Ausência de Alertas de Custo para Escalabilidade Descontrolada de Fargate"
+  },
+  {
+   "slug": "estrategias-de-deploy-sem-capacidade-reserva-rolling-update-ineficiente",
+   "titulo": "Estratégias de Deploy sem Capacidade Reserva (Rolling Update Ineficiente)"
+  },
+  {
+   "slug": "servicos-ecs-orfaos-de-versoes-anteriores-de-deploy-nao-removidos",
+   "titulo": "Serviços ECS Órfãos de Versões Anteriores de Deploy Não Removidos"
+  }
+ ],
+ "amazon-cloudwatch": [
+  {
+   "slug": "falta-de-definicao-de-politicas-de-retencao-retention-period-em-log-groups",
+   "titulo": "Falta de Definição de Políticas de Retenção (Retention Period) em Log Groups"
+  },
+  {
+   "slug": "ingestao-excessiva-de-logs-de-aplicacao-sem-filtro-de-severidade",
+   "titulo": "Ingestão Excessiva de Logs de Aplicação sem Filtro de Severidade"
+  },
+  {
+   "slug": "criacao-de-milhoes-de-metricas-customizadas-sem-governanca",
+   "titulo": "Criação de Milhões de Métricas Customizadas sem Governança"
+  },
+  {
+   "slug": "uso-de-continous-metric-streams-sem-ajuste-de-amostragem",
+   "titulo": "Uso de Continous Metric Streams sem Ajuste de Amostragem"
+  },
+  {
+   "slug": "consultas-de-logs-pesadas-e-ineficientes-no-cloudwatch-logs-insights",
+   "titulo": "Consultas de Logs Pesadas e Ineficientes no CloudWatch Logs Insights"
+  },
+  {
+   "slug": "falta-de-limpeza-de-log-groups-orfaos-de-recursos-descontinuados",
+   "titulo": "Falta de Limpeza de Log Groups Órfãos de Recursos Descontinuados"
+  },
+  {
+   "slug": "alarmes-do-cloudwatch-com-periodos-de-avaliacao-excessivamente-curtos",
+   "titulo": "Alarmes do CloudWatch com Períodos de Avaliação Excessivamente Curtos"
+  },
+  {
+   "slug": "uso-de-synthetics-canaries-em-frequencia-excessiva",
+   "titulo": "Uso de Synthetics Canaries em Frequência Excessiva"
+  },
+  {
+   "slug": "falta-de-uso-de-aws-systems-manager-agent-para-coleta-unificada",
+   "titulo": "Falta de Uso de AWS Systems Manager Agent para Coleta Unificada"
+  },
+  {
+   "slug": "retencao-prolongada-de-exportacoes-para-o-s3-sem-ciclo-de-vida",
+   "titulo": "Retenção Prolongada de Exportações para o S3 Sem Ciclo de Vida"
+  },
+  {
+   "slug": "logs-de-acesso-de-balanceadores-alb-sem-retencao-curta",
+   "titulo": "Logs de Acesso de Balanceadores (ALB) sem Retenção Curta"
+  },
+  {
+   "slug": "configuracao-incorreta-de-alvos-de-notificacao-de-alarme-sns-topics-orfaos",
+   "titulo": "Configuração Incorreta de Alvos de Notificação de Alarme (SNS Topics Órfãos)"
+  },
+  {
+   "slug": "falta-de-uso-de-contributor-insights-para-identificar-gargalos-de-rede",
+   "titulo": "Falta de Uso de Contributor Insights para Identificar Gargalos de Rede"
+  },
+  {
+   "slug": "alarmes-de-custos-desconfigurados-no-aws-budgets-cloudwatch-cost-anomaly",
+   "titulo": "Alarmes de Custos Desconfigurados no AWS Budgets / CloudWatch Cost Anomaly"
+  },
+  {
+   "slug": "ausencia-de-alerta-para-o-custo-acumulado-diario-do-cloudwatch",
+   "titulo": "Ausência de Alerta para o Custo Acumulado Diário do CloudWatch"
+  },
+  {
+   "slug": "monitoramento-de-conteineres-com-container-insights-habilitado-desnecessariamente",
+   "titulo": "Monitoramento de Contêineres com Container Insights Habilitado Desnecessariamente"
+  },
+  {
+   "slug": "duplicacao-de-coleta-de-metricas-entre-promoters-e-cloudwatch",
+   "titulo": "Duplicação de Coleta de Métricas entre Promoters e CloudWatch"
+  },
+  {
+   "slug": "criacao-manual-de-dashboards-redundantes-por-equipes",
+   "titulo": "Criação Manual de Dashboards Redundantes por Equipes"
+  },
+  {
+   "slug": "falta-de-agrupamento-de-logs-por-aplicacao-log-streams-desestruturados",
+   "titulo": "Falta de Agrupamento de Logs por Aplicação (Log Streams Desestruturados)"
+  },
+  {
+   "slug": "alarmes-sem-acoes-automatizadas-apenas-notificacoes-por-e-mail",
+   "titulo": "Alarmes Sem Ações Automatizadas (Apenas Notificações por E-mail)"
+  },
+  {
+   "slug": "ausencia-de-alarmes-compostos-composite-alarms",
+   "titulo": "Ausência de Alarmes Compostos (Composite Alarms)"
+  }
+ ],
+ "amazon-cloudfront": [
+  {
+   "slug": "servindo-arquivos-estaticos-direto-do-s3-ec2-sem-cache",
+   "titulo": "Servindo Arquivos Estáticos Direto do S3/EC2 sem Cache"
+  },
+  {
+   "slug": "ausencia-de-cabecalhos-de-seguranca-essenciais-na-borda",
+   "titulo": "Ausência de Cabeçalhos de Segurança Essenciais na Borda"
+  },
+  {
+   "slug": "uso-da-classe-de-preco-padrao-price-class-all-sem-necessidade",
+   "titulo": "Uso da Classe de Preço Padrão (Price Class All) sem Necessidade"
+  },
+  {
+   "slug": "invalidacoes-de-cache-em-massa-em-alta-frequencia",
+   "titulo": "Invalidações de Cache em Massa (*) em Alta Frequência"
+  },
+  {
+   "slug": "respostas-dinamicas-de-api-sem-cache-de-curta-duracao",
+   "titulo": "Respostas Dinâmicas de API sem Cache de Curta Duração"
+  },
+  {
+   "slug": "repasses-ineficientes-de-headers-query-strings-e-cookies",
+   "titulo": "Repasses Ineficientes de Headers, Query Strings e Cookies"
+  },
+  {
+   "slug": "entregando-midias-e-comprovantes-sem-compressao-automatica",
+   "titulo": "Entregando Mídias e Comprovantes sem Compressão Automática"
+  },
+  {
+   "slug": "ausencia-de-uso-de-cloudfront-functions-edge-lambda-para-tarefas-simples",
+   "titulo": "Ausência de Uso de CloudFront Functions / Edge@Lambda para Tarefas Simples"
+  },
+  {
+   "slug": "uso-de-lambda-edge-para-logicas-simples-em-vez-de-cloudfront-functions",
+   "titulo": "Uso de Lambda@Edge para Lógicas Simples em Vez de CloudFront Functions"
+  },
+  {
+   "slug": "falta-de-configuracao-do-origin-shield",
+   "titulo": "Falta de Configuração do Origin Shield"
+  },
+  {
+   "slug": "falta-de-integracao-otimizada-com-o-aws-waf",
+   "titulo": "Falta de Integração Otimizada com o AWS WAF"
+  },
+  {
+   "slug": "transferencia-de-origem-cloudfront-para-s3-alb-em-regioes-diferentes",
+   "titulo": "Transferência de Origem (CloudFront para S3/ALB) em Regiões Diferentes"
+  },
+  {
+   "slug": "distribuicoes-orfas-de-ambientes-de-testes-descontinuados",
+   "titulo": "Distribuições Órfãs de Ambientes de Testes Descontinuados"
+  },
+  {
+   "slug": "upload-de-arquivos-grandes-via-cloudfront-sem-multipart-direto-ao-s3",
+   "titulo": "Upload de Arquivos Grandes via CloudFront sem Multipart Direto ao S3"
+  },
+  {
+   "slug": "ausencia-de-certificados-ssl-tls-gratuitos-do-aws-certificate-manager-acm",
+   "titulo": "Ausência de Certificados SSL/TLS Gratuitos do AWS Certificate Manager (ACM)"
+  },
+  {
+   "slug": "configuracao-de-ttls-inadequados-ttl-minimo-maximo-zerado",
+   "titulo": "Configuração de TTLs Inadequados (TTL Mínimo/Máximo zerado)"
+  },
+  {
+   "slug": "falta-de-uso-do-cloudfront-security-savings-bundle",
+   "titulo": "Falta de Uso do CloudFront Security Savings Bundle"
+  },
+  {
+   "slug": "acesso-direto-a-origem-nao-bloqueado-falta-de-oac-oai",
+   "titulo": "Acesso Direto à Origem Não Bloqueado (Falta de OAC/OAI)"
+  },
+  {
+   "slug": "logs-de-acesso-em-tempo-real-real-time-logs-ativados-sem-filtro",
+   "titulo": "Logs de Acesso em Tempo Real (Real-time Logs) Ativados sem Filtro"
+  },
+  {
+   "slug": "requisicoes-de-preflight-http-options-passando-para-a-origem",
+   "titulo": "Requisições de Preflight HTTP OPTIONS Passando para a Origem"
+  },
+  {
+   "slug": "monitoramento-com-alarmes-falsos-gerando-testes-de-carga-na-borda",
+   "titulo": "Monitoramento com Alarmes Falsos Gerando Testes de Carga na Borda"
+  }
+ ],
+ "aws-waf": [
+  {
+   "slug": "excesso-de-regras-personalizadas-sem-necessidade-cost-per-rule",
+   "titulo": "Excesso de Regras Personalizadas sem Necessidade (Cost per Rule)"
+  },
+  {
+   "slug": "inspecao-de-requisicoes-de-ativos-estaticos-sem-filtro-de-escopo",
+   "titulo": "Inspeção de Requisições de Ativos Estáticos sem Filtro de Escopo"
+  },
+  {
+   "slug": "uso-indiscriminado-de-regras-gerenciadas-pagas-aws-managed-rules-marketplace",
+   "titulo": "Uso Indiscriminado de Regras Gerenciadas Pagas (AWS Managed Rules / Marketplace)"
+  },
+  {
+   "slug": "uso-da-regra-de-protecao-contra-bots-bot-control-no-nivel-avancado-para-todo-o-trafego",
+   "titulo": "Uso da Regra de Proteção contra Bots (Bot Control) no Nível Avançado para Todo o Tráfego"
+  },
+  {
+   "slug": "protecao-contra-restauracao-de-credenciais-account-takeover-prevention-atp-desnecessaria-em-apis-internas",
+   "titulo": "Proteção contra Restauração de Credenciais (Account Takeover Prevention - ATP) Desnecessária em APIs Internas"
+  },
+  {
+   "slug": "web-acls-duplicadas-em-ambientes-de-testes-e-homologacao",
+   "titulo": "Web ACLs Duplicadas em Ambientes de Testes e Homologação"
+  },
+  {
+   "slug": "falta-de-uso-da-regra-de-restricao-de-taxa-rate-based-rules-na-origem",
+   "titulo": "Falta de Uso da Regra de Restrição de Taxa (Rate-based Rules) na Origem"
+  },
+  {
+   "slug": "logging-de-requisicoes-do-waf-no-cloudwatch-sem-filtro-waf-full-logging",
+   "titulo": "Logging de Requisições do WAF no CloudWatch sem Filtro (WAF Full Logging)"
+  },
+  {
+   "slug": "falta-de-aproveitamento-do-cloudfront-security-savings-bundle",
+   "titulo": "Falta de Aproveitamento do CloudFront Security Savings Bundle"
+  },
+  {
+   "slug": "aplicacoes-de-regras-do-waf-no-alb-em-vez-do-cloudfront",
+   "titulo": "Aplicações de Regras do WAF no ALB em Vez do CloudFront"
+  },
+  {
+   "slug": "regras-de-inspecao-de-body-de-requisicao-com-limites-elevados",
+   "titulo": "Regras de Inspeção de Body de Requisição com Limites Elevados"
+  },
+  {
+   "slug": "falta-de-uso-do-aws-shield-standard-incluso-nativamente",
+   "titulo": "Falta de Uso do AWS Shield Standard (Incluso Nativamente)"
+  },
+  {
+   "slug": "inspecao-de-requisicoes-bloqueadas-em-etapas-posteriores",
+   "titulo": "Inspeção de Requisições Bloqueadas em Etapas Posteriores"
+  },
+  {
+   "slug": "web-acls-orfas-nao-associadas-a-nenhum-recurso",
+   "titulo": "Web ACLs Órfãs Não Associadas a Nenhum Recurso"
+  },
+  {
+   "slug": "uso-da-regra-de-protecao-contra-fraude-de-contas-account-creation-fraud-prevention-sem-escopo",
+   "titulo": "Uso da Regra de Proteção contra Fraude de Contas (Account Creation Fraud Prevention) sem Escopo"
+  },
+  {
+   "slug": "regras-com-expressoes-regulares-regex-ineficientes",
+   "titulo": "Regras com Expressões Regulares (Regex) Ineficientes"
+  },
+  {
+   "slug": "falta-de-integracao-com-o-aws-firewall-manager",
+   "titulo": "Falta de Integração com o AWS Firewall Manager"
+  },
+  {
+   "slug": "nao-utilizacao-de-acoes-de-desafio-challenge-captcha-eficientes",
+   "titulo": "Não Utilização de Ações de Desafio (Challenge / CAPTCHA) Eficientes"
+  },
+  {
+   "slug": "inspecao-de-trafego-interno-de-vpcs-via-waf",
+   "titulo": "Inspeção de Tráfego Interno de VPCs via WAF"
+  },
+  {
+   "slug": "falta-de-testes-no-modo-de-contagem-count-mode-antes-do-deploy",
+   "titulo": "Falta de Testes no Modo de Contagem (Count Mode) Antes do Deploy"
+  },
+  {
+   "slug": "falta-de-validacao-de-regras-no-modo-de-contagem-count-mode",
+   "titulo": "Falta de Validação de Regras no Modo de Contagem (Count Mode)"
+  }
+ ],
+ "amazon-sns": [
+  {
+   "slug": "publicacao-de-alertas-sensiveis-sem-criptografia-em-transito-repouso",
+   "titulo": "Publicação de Alertas Sensíveis sem Criptografia em Trânsito/Repouso"
+  },
+  {
+   "slug": "uso-de-topicos-sns-para-entrega-direta-de-alta-frequencia-a-clientes-finais",
+   "titulo": "Uso de Tópicos SNS para Entrega Direta de Alta Frequência a Clientes Finais"
+  },
+  {
+   "slug": "falta-de-uso-de-filtros-de-assinatura-subscription-filter-policies",
+   "titulo": "Falta de Uso de Filtros de Assinatura (Subscription Filter Policies)"
+  },
+  {
+   "slug": "topicos-sns-orfaos-sem-assinantes-ativos-dead-topics",
+   "titulo": "Tópicos SNS \"Órfãos\" sem Assinantes Ativos (Dead Topics)"
+  },
+  {
+   "slug": "falta-de-configuracao-de-dlq-para-entregas-http-s-de-webhooks",
+   "titulo": "Falta de Configuração de DLQ para Entregas HTTP/S de Webhooks"
+  },
+  {
+   "slug": "uso-de-sns-standard-para-eventos-que-exigem-ordem-estrita-de-entrega",
+   "titulo": "Uso de SNS Standard para Eventos que Exigem Ordem Estrita de Entrega"
+  },
+  {
+   "slug": "exposicao-de-dados-sensiveis-pii-financeiros-em-mensagens-nao-criptografadas",
+   "titulo": "Exposição de Dados Sensíveis (PII/Financeiros) em Mensagens Não Criptografadas"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-taxas-de-falha-de-entrega-numberofnotificationsfailed",
+   "titulo": "Falta de Monitoramento de Taxas de Falha de Entrega (NumberOfNotificationsFailed)"
+  },
+  {
+   "slug": "duplicacao-de-topicos-para-eventos-semelhantes-entre-sistemas",
+   "titulo": "Duplicação de Tópicos para Eventos Semelhantes entre Sistemas"
+  },
+  {
+   "slug": "uso-de-sns-para-comunicacao-interna-ponto-a-ponto-point-to-point",
+   "titulo": "Uso de SNS para Comunicação Interna Ponto a Ponto (Point-to-Point)"
+  },
+  {
+   "slug": "falta-de-configuracao-de-delivery-status-logging-para-auditoria",
+   "titulo": "Falta de Configuração de Delivery Status Logging para Auditoria"
+  },
+  {
+   "slug": "disparos-em-massa-de-sms-sem-validacao-de-custos-previos",
+   "titulo": "Disparos em Massa de SMS sem Validação de Custos Prévios"
+  },
+  {
+   "slug": "uso-de-assinaturas-de-e-mail-smtp-para-alertas-de-producao-em-escala",
+   "titulo": "Uso de Assinaturas de E-mail (SMTP) para Alertas de Produção em Escala"
+  },
+  {
+   "slug": "falta-de-restricao-de-permissoes-de-publicacao-nas-politicas-do-topico-access-policy",
+   "titulo": "Falta de Restrição de Permissões de Publicação nas Políticas do Tópico (Access Policy)"
+  },
+  {
+   "slug": "uso-de-sns-fifo-com-configuracoes-inadecoradas-de-message-deduplication-id",
+   "titulo": "Uso de SNS FIFO com Configurações Inadecoradas de Message Deduplication ID"
+  },
+  {
+   "slug": "trafego-de-publicacao-roteado-via-internet-publica-sem-vpc-endpoints",
+   "titulo": "Tráfego de Publicação Roteado via Internet Pública sem VPC Endpoints"
+  },
+  {
+   "slug": "falta-de-limpeza-de-assinaturas-inativas-ou-endpoints-http-inexistentes",
+   "titulo": "Falta de Limpeza de Assinaturas Inativas ou Endpoints HTTP Inexistentes"
+  },
+  {
+   "slug": "uso-de-sns-para-logs-de-aplicacao-de-baixo-valor",
+   "titulo": "Uso de SNS para Logs de Aplicação de Baixo Valor"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-para-chamadas-de-api-e-sms-excedentes",
+   "titulo": "Falta de Alertas de Custo para Chamadas de API e SMS Excedentes"
+  },
+  {
+   "slug": "ausencia-de-tratamento-de-excecoes-de-throttling-na-publicacao",
+   "titulo": "Ausência de Tratamento de Exceções de Throttling na Publicação"
+  },
+  {
+   "slug": "falta-de-documentacao-dos-formatos-de-notificacao-publicados",
+   "titulo": "Falta de Documentação dos Formatos de Notificação Publicados"
+  }
+ ],
+ "amazon-sqs": [
+  {
+   "slug": "falta-de-monitoramento-do-tempo-de-permanencia-na-fila-oldest-message-age",
+   "titulo": "Falta de Monitoramento do Tempo de Permanência na Fila (Oldest Message Age)"
+  },
+  {
+   "slug": "uso-exclusivo-de-standard-queues-em-vez-de-fifo-para-transacoes-criticas",
+   "titulo": "Uso Exclusivo de Standard Queues em Vez de FIFO para Transações Críticas"
+  },
+  {
+   "slug": "falta-de-configuracao-de-dead-letter-queues-dlq-para-mensagens-falhas",
+   "titulo": "Falta de Configuração de Dead Letter Queues (DLQ) para Mensagens Falhas"
+  },
+  {
+   "slug": "consultas-de-fila-vazia-excessivas-long-polling-desconfigurado",
+   "titulo": "Consultas de Fila Vazia Excessivas (Long Polling Desconfigurado)"
+  },
+  {
+   "slug": "visibilidade-excessiva-visibility-timeout-mal-dimensionada-para-tarefas-longas",
+   "titulo": "Visibilidade Excessiva (Visibility Timeout) Mal Dimensionada para Tarefas Longas"
+  },
+  {
+   "slug": "tamanho-de-payload-inadequado-tentativa-de-enviar-arquivos-grandes-no-sqs",
+   "titulo": "Tamanho de Payload Inadequado (Tentativa de Enviar Arquivos Grandes no SQS)"
+  },
+  {
+   "slug": "falta-de-agrupamento-de-mensagens-em-lotes-batching-operations",
+   "titulo": "Falta de Agrupamento de Mensagens em Lotes (Batching Operations)"
+  },
+  {
+   "slug": "filas-sqs-orfas-de-sistemas-antigos-acumulando-mensagens",
+   "titulo": "Filas SQS \"Órfãs\" de Sistemas Antigos Acumulando Mensagens"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-mensagens-atrasadas-na-fila-approximatenumberofmessagesvisible",
+   "titulo": "Falta de Monitoramento de Mensagens Atrasadas na Fila (ApproximateNumberOfMessagesVisible)"
+  },
+  {
+   "slug": "uso-de-filas-sqs-standard-para-eventos-de-alta-concorrencia-sem-tratamento-de-idempotencia",
+   "titulo": "Uso de Filas SQS Standard para Eventos de Alta Concorrência sem Tratamento de Idempotência"
+  },
+  {
+   "slug": "retencao-de-mensagens-exagerada-4-dias-a-14-dias-em-filas-de-teste",
+   "titulo": "Retenção de Mensagens Exagerada (4 Dias a 14 Dias) em Filas de Teste"
+  },
+  {
+   "slug": "falta-de-criptografia-com-kms-em-filas-que-tratam-dados-pessoais-lgpd-compliance",
+   "titulo": "Falta de Criptografia com KMS em Filas que Tratam Dados Pessoais (LGPD/Compliance)"
+  },
+  {
+   "slug": "uso-de-sqs-fifo-com-message-group-id-inadequado-gargalo-de-concorrencia",
+   "titulo": "Uso de SQS FIFO com Message Group ID Inadequado (Gargalo de Concorrência)"
+  },
+  {
+   "slug": "trafego-de-mensagens-roteado-pela-internet-publica-sem-vpc-endpoints",
+   "titulo": "Tráfego de Mensagens Roteado pela Internet Pública sem VPC Endpoints"
+  },
+  {
+   "slug": "processamento-sincrono-bloqueante-em-vez-de-consumo-assincrono-otimizado",
+   "titulo": "Processamento Síncrono Bloqueante em Vez de Consumo Assíncrono Otimizado"
+  },
+  {
+   "slug": "falta-de-limpeza-de-mensagens-na-dlq-dead-letter-queue-accumulation",
+   "titulo": "Falta de Limpeza de Mensagens na DLQ (Dead Letter Queue Accumulation)"
+  },
+  {
+   "slug": "duplicacao-de-filas-por-microsservicos-para-a-mesma-finalidade-de-negocio",
+   "titulo": "Duplicação de Filas por Microsserviços para a Mesma Finalidade de Negócio"
+  },
+  {
+   "slug": "falta-de-configuracao-de-retentativas-maxreceivecount-adequadas-na-dlq",
+   "titulo": "Falta de Configuração de Retentativas (MaxReceiveCount) Adequadas na DLQ"
+  },
+  {
+   "slug": "uso-de-sqs-para-logs-de-baixo-valor-operacional",
+   "titulo": "Uso de SQS para Logs de Baixo Valor Operacional"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-para-uso-excessivo-de-requisicoes-de-sqs-api-requests",
+   "titulo": "Falta de Alertas de Custo para Uso Excessivo de Requisições de SQS (API Requests)"
+  },
+  {
+   "slug": "ausencia-de-documentacao-dos-contratos-de-mensagem-payload-schemas",
+   "titulo": "Ausência de Documentação dos Contratos de Mensagem (Payload Schemas)"
+  }
+ ],
+ "amazon-vpc": [
+  {
+   "slug": "manutencao-de-rotas-estaticas-incorretas-para-o-internet-gateway",
+   "titulo": "Manutenção de Rotas Estáticas Incorretas para o Internet Gateway"
+  },
+  {
+   "slug": "uso-de-blocos-cidr-de-ip-sobrepostos-com-a-rede-on-premises-ip-overlap",
+   "titulo": "Uso de Blocos CIDR de IP Sobrepostos com a Rede On-Premises (IP Overlap)"
+  },
+  {
+   "slug": "superdimensionamento-de-subredes-subnet-cidr-over-provisioning",
+   "titulo": "Superdimensionamento de Subredes (Subnet CIDR Over-provisioning)"
+  },
+  {
+   "slug": "falta-de-uso-de-vpc-endpoints-gateway-e-interface-para-servicos-aws",
+   "titulo": "Falta de Uso de VPC Endpoints (Gateway e Interface) para Serviços AWS"
+  },
+  {
+   "slug": "subredes-publicas-utilizadas-para-hospedar-bancos-de-dados-ou-backend",
+   "titulo": "Subredes Públicas Utilizadas para Hospedar Bancos de Dados ou Backend"
+  },
+  {
+   "slug": "grupos-de-seguranca-security-groups-com-regras-permissivas-0-0-0-0-0",
+   "titulo": "Grupos de Segurança (Security Groups) com Regras Permissivas (0.0.0.0/0)"
+  },
+  {
+   "slug": "uso-de-network-acls-nacls-complexas-e-ingerenciaveis-em-vez-de-security-groups",
+   "titulo": "Uso de Network ACLs (NACLs) Complexas e Ingerenciáveis em Vez de Security Groups"
+  },
+  {
+   "slug": "trafego-de-dados-cruzado-entre-zonas-de-disponibilidade-cross-az-traffic",
+   "titulo": "Tráfego de Dados Cruzado entre Zonas de Disponibilidade (Cross-AZ Traffic)"
+  },
+  {
+   "slug": "falta-de-habilitacao-do-vpc-flow-logs-para-auditoria-de-rede",
+   "titulo": "Falta de Habilitação do VPC Flow Logs para Auditoria de Rede"
+  },
+  {
+   "slug": "gravacao-de-vpc-flow-logs-sem-filtro-e-sem-retencao-curta-no-cloudwatch",
+   "titulo": "Gravação de VPC Flow Logs sem Filtro e sem Retenção Curta no CloudWatch"
+  },
+  {
+   "slug": "acumulo-de-elastic-ips-eips-desassociados-e-ociosos",
+   "titulo": "Acúmulo de Elastic IPs (EIPs) Desassociados e Ociosos"
+  },
+  {
+   "slug": "alocacao-de-subredes-pequenas-com-escassez-de-ips-para-clusters-eks-containers",
+   "titulo": "Alocação de Subredes Pequenas com Escassez de IPs para Clusters EKS/Containers"
+  },
+  {
+   "slug": "uso-de-vpc-peering-em-grande-escala-sem-transit-gateway-malha-mesh-ingerenciavel",
+   "titulo": "Uso de VPC Peering em Grande Escala sem Transit Gateway (Malha Mesh Ingerenciável)"
+  },
+  {
+   "slug": "falta-de-configuracao-do-dns-resolution-hostnames-na-vpc",
+   "titulo": "Falta de Configuração do DNS Resolution / Hostnames na VPC"
+  },
+  {
+   "slug": "manutencao-de-vpcs-padrao-default-vpcs-ativas-e-nao-utilizadas",
+   "titulo": "Manutenção de VPCs Padrão (Default VPCs) Ativas e Não Utilizadas"
+  },
+  {
+   "slug": "uso-de-internet-gateways-igw-em-vpcs-estritamente-privadas",
+   "titulo": "Uso de Internet Gateways (IGW) em VPCs Estritamente Privadas"
+  },
+  {
+   "slug": "falta-de-uso-do-aws-network-firewall-para-inspecao-avancada-de-trafego",
+   "titulo": "Falta de Uso do AWS Network Firewall para Inspeção Avançada de Tráfego"
+  },
+  {
+   "slug": "desalinhamento-de-tabelas-de-roteamento-route-tables-entre-subredes",
+   "titulo": "Desalinhamento de Tabelas de Roteamento (Route Tables) entre Subredes"
+  },
+  {
+   "slug": "falta-de-monitoramento-da-metrica-peeringbytesingress-egress",
+   "titulo": "Falta de Monitoramento da Métrica PeeringBytesIngress / Egress"
+  },
+  {
+   "slug": "vpcs-orfas-criadas-por-testes-de-engenheiros-que-nunca-foram-excluidas",
+   "titulo": "VPCs Órfãs Criadas por Testes de Engenheiros que Nunca Foram Excluídas"
+  },
+  {
+   "slug": "falta-de-automacao-para-criacao-de-vpcs-padronizadas-infraestrutura-como-codigo",
+   "titulo": "Falta de Automação para Criação de VPCs Padronizadas (Infraestrutura como Código)"
+  }
+ ],
+ "amazon-api-gateway": [
+  {
+   "slug": "exposicao-de-pilhas-de-excecao-cruas-de-backend-gateway-responses",
+   "titulo": "Exposição de Pilhas de Exceção Cruas de Backend (Gateway Responses)"
+  },
+  {
+   "slug": "uso-de-http-apis-em-vez-de-rest-apis-para-cenarios-simples",
+   "titulo": "Uso de HTTP APIs em Vez de REST APIs para Cenários Simples"
+  },
+  {
+   "slug": "falta-de-ativacao-de-cache-no-api-gateway",
+   "titulo": "Falta de Ativação de Cache no API Gateway"
+  },
+  {
+   "slug": "trafego-excessivo-de-logs-de-execucao-no-cloudwatch-execution-logs",
+   "titulo": "Tráfego Excessivo de Logs de Execução no CloudWatch (Execution Logs)"
+  },
+  {
+   "slug": "falta-de-uso-de-vpc-links-para-apis-privadas",
+   "titulo": "Falta de Uso de VPC Links para APIs Privadas"
+  },
+  {
+   "slug": "chamadas-de-apis-sem-autorizadores-personalizados-ou-aws-iam",
+   "titulo": "Chamadas de APIs sem Autorizadores Personalizados ou AWS IAM"
+  },
+  {
+   "slug": "invocacoes-massivas-por-erros-de-retry-de-clientes-retry-storms",
+   "titulo": "Invocações Massivas por Erros de Retry de Clientes (Retry Storms)"
+  },
+  {
+   "slug": "apis-orfas-de-ambientes-de-teste-descontinuados",
+   "titulo": "APIs \"Órfãs\" de Ambientes de Teste Descontinuados"
+  },
+  {
+   "slug": "falta-de-configuracao-de-limites-de-taxa-throttling-rate-limiting",
+   "titulo": "Falta de Configuração de Limites de Taxa (Throttling / Rate Limiting)"
+  },
+  {
+   "slug": "uso-de-api-gateway-para-transferencia-de-arquivos-grandes",
+   "titulo": "Uso de API Gateway para Transferência de Arquivos Grandes"
+  },
+  {
+   "slug": "respostas-de-erro-sem-cache-na-borda",
+   "titulo": "Respostas de Erro sem Cache na Borda"
+  },
+  {
+   "slug": "configuracao-de-mappings-complexos-no-api-gateway-em-vez-de-logica-no-backend",
+   "titulo": "Configuração de Mappings Complexos no API Gateway em Vez de Lógica no Backend"
+  },
+  {
+   "slug": "uso-de-websockets-do-api-gateway-mantidos-abertos-indefinidamente",
+   "titulo": "Uso de WebSockets do API Gateway Mantidos Abertos Indefinidamente"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-latencia-de-integracao-integrationlatency",
+   "titulo": "Falta de Monitoramento de Latência de Integração (IntegrationLatency)"
+  },
+  {
+   "slug": "duplicacao-de-apis-por-diferentes-unidades-de-negocio",
+   "titulo": "Duplicação de APIs por Diferentes Unidades de Negócio"
+  },
+  {
+   "slug": "uso-de-custom-domain-names-sem-certificados-acm-validos-associados",
+   "titulo": "Uso de Custom Domain Names sem Certificados ACM Válidos Associados"
+  },
+  {
+   "slug": "falta-de-uso-de-waf-integrado-para-protecao-de-endpoints-criticos",
+   "titulo": "Falta de Uso de WAF Integrado para Proteção de Endpoints Críticos"
+  },
+  {
+   "slug": "ambientes-de-homologacao-com-throttling-liberado-sem-limites",
+   "titulo": "Ambientes de Homologação com Throttling Liberado sem Limites"
+  },
+  {
+   "slug": "inclusao-de-dados-sensiveis-em-query-strings-de-logs",
+   "titulo": "Inclusão de Dados Sensíveis em Query Strings de Logs"
+  },
+  {
+   "slug": "falta-de-uso-de-aws-privatelink-para-integracao-com-load-balancers-internos",
+   "titulo": "Falta de Uso de AWS PrivateLink para Integração com Load Balancers Internos"
+  },
+  {
+   "slug": "ausencia-de-alertas-de-custo-para-chamadas-de-api-excedentes",
+   "titulo": "Ausência de Alertas de Custo para Chamadas de API Excedentes"
+  }
+ ],
+ "amazon-eventbridge": [
+  {
+   "slug": "falta-de-padronizacao-e-versionamento-dos-schemas-de-eventos",
+   "titulo": "Falta de Padronização e Versionamento dos Schemas de Eventos"
+  },
+  {
+   "slug": "uso-de-eventos-customizados-sem-schema-registry-ativo",
+   "titulo": "Uso de Eventos Customizados sem Schema Registry Ativo"
+  },
+  {
+   "slug": "criacao-de-multiplos-barramentos-customizados-desnecessarios",
+   "titulo": "Criação de Múltiplos Barramentos Customizados Desnecessários"
+  },
+  {
+   "slug": "regras-do-eventbridge-com-padroes-de-evento-event-patterns-excessivamente-amplos",
+   "titulo": "Regras do EventBridge com Padrões de Evento (Event Patterns) Excessivamente Amplos"
+  },
+  {
+   "slug": "falta-de-configuracao-de-dlq-para-alvos-de-regras-do-eventbridge",
+   "titulo": "Falta de Configuração de DLQ para Alvos de Regras do EventBridge"
+  },
+  {
+   "slug": "uso-de-eventbridge-para-ingestao-de-dados-de-alta-frequencia-e-baixo-valor",
+   "titulo": "Uso de EventBridge para Ingestão de Dados de Alta Frequência e Baixo Valor"
+  },
+  {
+   "slug": "barramentos-orfaos-de-aplicacoes-descontinuadas-custando-tarifa-fixa",
+   "titulo": "Barramentos \"Órfãos\" de Aplicações Descontinuadas Custando Tarifa Fixa"
+  },
+  {
+   "slug": "falta-de-roteamento-eficiente-com-parametros-de-transformacao-de-entrada-input-transformer",
+   "titulo": "Falta de Roteamento Eficiente com Parâmetros de Transformação de Entrada (Input Transformer)"
+  },
+  {
+   "slug": "trafego-inter-conta-mal-configurado-em-barramentos-de-eventos",
+   "titulo": "Tráfego Inter-Conta Mal Configurado em Barramentos de Eventos"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-invocacao-de-alvos-com-falha-invocationsfailed",
+   "titulo": "Falta de Monitoramento de Invocação de Alvos com Falha (InvocationsFailed)"
+  },
+  {
+   "slug": "uso-de-eventbridge-scheduler-sem-politica-de-limpeza-de-tarefas-executadas",
+   "titulo": "Uso de EventBridge Scheduler sem Política de Limpeza de Tarefas Executadas"
+  },
+  {
+   "slug": "duplicacao-de-regras-para-o-mesmo-padrao-de-evento",
+   "titulo": "Duplicação de Regras para o Mesmo Padrão de Evento"
+  },
+  {
+   "slug": "uso-de-polling-e-rotinas-cron-complexas-em-vez-de-eventbridge-scheduler",
+   "titulo": "Uso de Polling e Rotinas Cron complexas em Vez de EventBridge Scheduler"
+  },
+  {
+   "slug": "falta-de-criptografia-com-chaves-kms-personalizadas-em-barramentos-customizados",
+   "titulo": "Falta de Criptografia com Chaves KMS Personalizadas em Barramentos Customizados"
+  },
+  {
+   "slug": "inclusao-de-dados-sensiveis-pii-diretamente-nos-atributos-de-eventos",
+   "titulo": "Inclusão de Dados Sensíveis (PII) Diretamente nos Atributos de Eventos"
+  },
+  {
+   "slug": "falta-de-tratamento-de-throttling-em-alvos-de-lambda-disparados-pelo-eventbridge",
+   "titulo": "Falta de Tratamento de Throttling em Alvos de Lambda Disparados pelo EventBridge"
+  },
+  {
+   "slug": "uso-de-padroes-de-expressao-cron-incorretos-no-scheduler",
+   "titulo": "Uso de Padrões de Expressão Cron Incorretos no Scheduler"
+  },
+  {
+   "slug": "falta-de-integracao-com-apis-de-terceiros-via-partner-event-sources-configurada-corretamente",
+   "titulo": "Falta de Integração com APIs de Terceiros via Partner Event Sources Configurada Corretamente"
+  },
+  {
+   "slug": "ausencia-de-alertas-de-custo-para-contagem-de-eventos-publicados",
+   "titulo": "Ausência de Alertas de Custo para Contagem de Eventos Publicados"
+  },
+  {
+   "slug": "uso-de-eventbridge-para-comunicacao-sincrona-bloqueante",
+   "titulo": "Uso de EventBridge para Comunicação Síncrona Bloqueante"
+  },
+  {
+   "slug": "falta-de-documentacao-de-versionamento-de-schemas-de-eventos",
+   "titulo": "Falta de Documentação de Versionamento de Schemas de Eventos"
+  }
+ ],
+ "amazon-athena": [
+  {
+   "slug": "falta-de-uso-de-formatadores-modernos-como-apache-iceberg-no-s3",
+   "titulo": "Falta de Uso de Formatadores Modernos como Apache Iceberg no S3"
+  },
+  {
+   "slug": "consultas-a-arquivos-brutos-nao-particionados-no-s3-full-scans",
+   "titulo": "Consultas a Arquivos Brutos Não Particionados no S3 (Full Scans)"
+  },
+  {
+   "slug": "falta-de-conversao-de-dados-para-formatos-colunares-compactados-parquet-orc",
+   "titulo": "Falta de Conversão de Dados para Formatos Colunares Compactados (Parquet/ORC)"
+  },
+  {
+   "slug": "uso-de-consultas-sem-clausula-limit-ou-filtros-de-particao-em-tabelas-gigantescas",
+   "titulo": "Uso de Consultas sem Cláusula LIMIT ou Filtros de Partição em Tabelas Gigantescas"
+  },
+  {
+   "slug": "falta-de-limpeza-de-resultados-temporarios-de-consultas-no-s3",
+   "titulo": "Falta de Limpeza de Resultados Temporários de Consultas no S3"
+  },
+  {
+   "slug": "uso-do-athena-para-relatorios-operacionais-transacionais-de-alta-frequencia",
+   "titulo": "Uso do Athena para Relatórios Operacionais/Transacionais de Alta Frequência"
+  },
+  {
+   "slug": "falta-de-uso-de-workgroups-com-limites-de-custo-de-consulta-query-result-location-data-scanned-limits",
+   "titulo": "Falta de Uso de Workgroups com Limites de Custo de Consulta (Query Result Location / Data Scanned Limits)"
+  },
+  {
+   "slug": "consultas-complexas-com-join-e-subqueries-aninhadas-sem-otimizacao-de-ordem",
+   "titulo": "Consultas Complexas com JOIN e Subqueries Aninhadas sem Otimização de Ordem"
+  },
+  {
+   "slug": "falta-de-utilizacao-de-particoes-automaticas-via-glue-data-catalog-msck-repair-table",
+   "titulo": "Falta de Utilização de Partições Automáticas via Glue Data Catalog (MSCK REPAIR TABLE)"
+  },
+  {
+   "slug": "uso-de-contas-de-cientistas-de-dados-sem-governanca-de-workgroups-isolados",
+   "titulo": "Uso de Contas de Cientistas de Dados sem Governança de Workgroups Isolados"
+  },
+  {
+   "slug": "duplicacao-de-consultas-identicas-sem-estrategia-de-caching-de-resultados",
+   "titulo": "Duplicação de Consultas Idênticas sem Estratégia de Caching de Resultados"
+  },
+  {
+   "slug": "falta-de-particionamento-por-hashing-ou-bucketing-em-tabelas-massivas",
+   "titulo": "Falta de Particionamento por Hashing ou Bucketing em Tabelas Massivas"
+  },
+  {
+   "slug": "uso-do-athena-para-tarefas-de-etl-pesadas-que-deveriam-rodar-no-glue-spark",
+   "titulo": "Uso do Athena para Tarefas de ETL Pesadas que Deveriam Rodar no Glue/Spark"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-falhas-de-consulta-queryfailed",
+   "titulo": "Falta de Monitoramento de Falhas de Consulta (QueryFailed)"
+  },
+  {
+   "slug": "trafego-de-resultados-de-consulta-roteado-ineficientemente",
+   "titulo": "Tráfego de Resultados de Consulta Roteado Ineficientemente"
+  },
+  {
+   "slug": "uso-de-tipos-de-dados-inflados-em-tabelas-externas-do-s3-ex-string-em-vez-de-int-timestamp",
+   "titulo": "Uso de Tipos de Dados Inflados em Tabelas Externas do S3 (ex: STRING em vez de INT/TIMESTAMP)"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-diario-para-o-consumo-do-athena",
+   "titulo": "Falta de Alertas de Custo Diário para o Consumo do Athena"
+  },
+  {
+   "slug": "criacao-de-vistas-views-complexas-aninhadas-em-cascata",
+   "titulo": "Criação de Vistas (Views) Complexas Aninhadas em Cascata"
+  },
+  {
+   "slug": "falta-de-uso-de-athena-prepared-statements-para-consultas-repetitivas",
+   "titulo": "Falta de Uso de Athena Prepared Statements para Consultas Repetitivas"
+  },
+  {
+   "slug": "uso-de-athena-com-permissoes-iam-excessivas-para-usuarios-finais",
+   "titulo": "Uso de Athena com Permissões IAM Excessivas para Usuários Finais"
+  },
+  {
+   "slug": "ausencia-de-documentacao-do-dicionario-de-dados-das-tabelas-externas",
+   "titulo": "Ausência de Documentação do Dicionário de Dados das Tabelas Externas"
+  }
+ ],
+ "amazon-cognito": [
+  {
+   "slug": "falta-de-restricao-de-taxa-em-apis-de-recuperacao-de-senha",
+   "titulo": "Falta de Restrição de Taxa em APIs de Recuperação de Senha"
+  },
+  {
+   "slug": "uso-de-user-pools-provisionados-para-milhares-de-usuarios-inativos",
+   "titulo": "Uso de User Pools Provisionados para Milhares de Usuários Inativos"
+  },
+  {
+   "slug": "ativacao-inadequada-de-recursos-avancados-de-seguranca-advanced-security-features",
+   "titulo": "Ativação Inadequada de Recursos Avançados de Segurança (Advanced Security Features)"
+  },
+  {
+   "slug": "envio-masivo-de-sms-de-verificacao-otp-sem-otimizacao-de-custos",
+   "titulo": "Envio Masivo de SMS de Verificação/OTP sem Otimização de Custos"
+  },
+  {
+   "slug": "falta-de-validacao-de-permissoes-no-identity-pool-tokens-iam-nao-restritos",
+   "titulo": "Falta de Validação de Permissões no Identity Pool (Tokens IAM Não Restritos)"
+  },
+  {
+   "slug": "configuracao-incorreta-de-tokens-de-acesso-access-id-tokens-com-ttls-longos",
+   "titulo": "Configuração Incorreta de Tokens de Acesso (Access / ID Tokens) com TTLs Longos"
+  },
+  {
+   "slug": "falta-de-uso-de-cognito-triggers-para-bloqueio-de-cadastros-falsos",
+   "titulo": "Falta de Uso de Cognito Triggers para Bloqueio de Cadastros Falsos"
+  },
+  {
+   "slug": "personalizacao-ineficiente-da-interface-de-login-hosted-ui",
+   "titulo": "Personalização Ineficiente da Interface de Login (Hosted UI)"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-tentativas-de-forca-bruta-signinthrottling",
+   "titulo": "Falta de Monitoramento de Tentativas de Força Bruta (SignInThrottling)"
+  },
+  {
+   "slug": "federacao-saml-oidc-sem-mapeamento-incorreto-de-atributos",
+   "titulo": "Federação SAML/OIDC sem Mapeamento Incorreto de Atributos"
+  },
+  {
+   "slug": "trafego-de-autenticacao-roteado-ineficientemente-sem-cdn",
+   "titulo": "Tráfego de Autenticação Roteado Ineficientemente sem CDN"
+  },
+  {
+   "slug": "falta-de-criptografia-e-protecao-de-atributos-personalizados-custom-attributes",
+   "titulo": "Falta de Criptografia e Proteção de Atributos Personalizados (Custom Attributes)"
+  },
+  {
+   "slug": "uso-do-cognito-em-vez-de-provedores-especificos-para-integracoes-b2b",
+   "titulo": "Uso do Cognito em Vez de Provedores Específicos para Integrações B2B"
+  },
+  {
+   "slug": "falta-de-limpeza-de-usuarios-nao-confirmados-unconfirmed-users",
+   "titulo": "Falta de Limpeza de Usuários Não Confirmados (Unconfirmed Users)"
+  },
+  {
+   "slug": "duplicacao-de-user-pools-por-silos-de-aplicacao",
+   "titulo": "Duplicação de User Pools por Silos de Aplicação"
+  },
+  {
+   "slug": "ausencia-de-logs-de-auditoria-habilitados-para-alteracoes-de-perfil",
+   "titulo": "Ausência de Logs de Auditoria Habilitados para Alterações de Perfil"
+  },
+  {
+   "slug": "falta-de-suporte-a-multi-fator-flexivel-mfa-obrigatorio-sem-excecao-de-dispositivo-confioso",
+   "titulo": "Falta de Suporte a Multi-Fator Flexível (MFA Obrigatório sem Exceção de Dispositivo Confioso)"
+  },
+  {
+   "slug": "migracao-ineficiente-de-usuarios-de-bases-legadas-user-migration-lambda-trigger",
+   "titulo": "Migração Ineficiente de Usuários de Bases Legadas (User Migration Lambda Trigger)"
+  },
+  {
+   "slug": "uso-de-e-mail-sms-para-recuperacao-de-senha-sem-restricao-de-taxa",
+   "titulo": "Uso de E-mail/SMS para Recuperação de Senha sem Restrição de Taxa"
+  },
+  {
+   "slug": "falta-de-rotacao-de-segredos-em-clientes-de-aplicacao-app-client-secrets",
+   "titulo": "Falta de Rotação de Segredos em Clientes de Aplicação (App Client Secrets)"
+  },
+  {
+   "slug": "ausencia-de-alertas-de-custo-para-ultrapassagem-da-faixa-gratuita-de-mau",
+   "titulo": "Ausência de Alertas de Custo para Ultrapassagem da Faixa Gratuita de MAU"
+  }
+ ],
+ "aws-cloudtrail": [
+  {
+   "slug": "falta-de-replicacao-de-logs-em-uma-conta-de-auditoria-isolada-log-archive",
+   "titulo": "Falta de Replicação de Logs em uma Conta de Auditoria Isolada (Log Archive)"
+  },
+  {
+   "slug": "criacao-de-multiplas-trilhas-multi-region-trails-redundantes-na-mesma-conta",
+   "titulo": "Criação de Múltiplas Trilhas (Multi-Region Trails) Redundantes na Mesma Conta"
+  },
+  {
+   "slug": "inclusao-de-eventos-de-dados-data-events-sem-filtragem-em-buckets-s3-de-alto-trafego",
+   "titulo": "Inclusão de Eventos de Dados (Data Events) sem Filtragem em Buckets S3 de Alto Tráfego"
+  },
+  {
+   "slug": "inclusao-desnecessaria-de-eventos-de-gestao-de-leitura-read-only-management-events",
+   "titulo": "Inclusão Desnecessária de Eventos de Gestão de Leitura (Read-only Management Events)"
+  },
+  {
+   "slug": "retencao-prolongada-de-logs-do-cloudtrail-no-s3-sem-politicas-de-ciclo-de-vida",
+   "titulo": "Retenção Prolongada de Logs do CloudTrail no S3 sem Políticas de Ciclo de Vida"
+  },
+  {
+   "slug": "falta-de-integracao-com-cloudwatch-logs-para-alertas-em-tempo-real",
+   "titulo": "Falta de Integração com CloudWatch Logs para Alertas em Tempo Real"
+  },
+  {
+   "slug": "armazenamento-de-trilhas-em-buckets-s3-sem-criptografia-e-bloqueio-de-acesso-publico",
+   "titulo": "Armazenamento de Trilhas em Buckets S3 sem Criptografia e Bloqueio de Acesso Público"
+  },
+  {
+   "slug": "falta-de-uso-de-trail-insights-para-deteccao-de-anomalias",
+   "titulo": "Falta de Uso de Trail Insights para Detecção de Anomalias"
+  },
+  {
+   "slug": "trilhas-cloudtrail-isoladas-em-contas-de-desenvolvimento-sem-governanca",
+   "titulo": "Trilhas CloudTrail Isoladas em Contas de Desenvolvimento sem Governança"
+  },
+  {
+   "slug": "falta-de-verificacao-de-integridade-de-logs-log-file-validation",
+   "titulo": "Falta de Verificação de Integridade de Logs (Log File Validation)"
+  },
+  {
+   "slug": "consultas-de-auditoria-pesadas-e-sem-particionamento-no-amazon-athena",
+   "titulo": "Consultas de Auditoria Pesadas e Sem Particionamento no Amazon Athena"
+  },
+  {
+   "slug": "duplicacao-de-logs-entre-cloudtrail-e-aws-config",
+   "titulo": "Duplicação de Logs entre CloudTrail e AWS Config"
+  },
+  {
+   "slug": "falta-de-exclusao-de-contas-desativadas-das-trilhas-organizacionais",
+   "titulo": "Falta de Exclusão de Contas Desativadas das Trilhas Organizacionais"
+  },
+  {
+   "slug": "uso-de-chaves-kms-customizadas-com-custos-elevados-para-criptografia-de-logs",
+   "titulo": "Uso de Chaves KMS Customizadas com Custos Elevados para Criptografia de Logs"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-falhas-de-gravacao-de-log-cloudtrail-lake-s3-delivery-failures",
+   "titulo": "Falta de Monitoramento de Falhas de Gravação de Log (CloudTrail Lake / S3 Delivery Failures)"
+  },
+  {
+   "slug": "uso-do-cloudtrail-lake-para-armazenamento-de-dados-de-aplicacao",
+   "titulo": "Uso do CloudTrail Lake para Armazenamento de Dados de Aplicação"
+  },
+  {
+   "slug": "falta-de-alertas-para-alteracoes-nas-configuracoes-das-proprias-trilhas",
+   "titulo": "Falta de Alertas para Alterações nas Configurações das Próprias Trilhas"
+  },
+  {
+   "slug": "retencao-descontrolada-de-arquivos-temporarios-de-query-do-athena-no-s3",
+   "titulo": "Retenção Descontrolada de Arquivos Temporários de Query do Athena no S3"
+  },
+  {
+   "slug": "inclusao-de-eventos-de-gestao-de-conteineres-sem-necessidade",
+   "titulo": "Inclusão de Eventos de Gestão de Contêineres sem Necessidade"
+  },
+  {
+   "slug": "falta-de-treinamento-e-automacao-para-resposta-a-incidentes-baseada-em-cloudtrail",
+   "titulo": "Falta de Treinamento e Automação para Resposta a Incidentes Baseada em CloudTrail"
+  },
+  {
+   "slug": "ausencia-de-orcamento-para-custos-de-ingestao-e-armazenamento-do-cloudtrail",
+   "titulo": "Ausência de Orçamento para Custos de Ingestão e Armazenamento do CloudTrail"
+  }
+ ],
+ "amazon-aurora": [
+  {
+   "slug": "falta-de-auto-scaling-em-replicas-de-leitura",
+   "titulo": "Falta de Auto Scaling em Réplicas de Leitura"
+  },
+  {
+   "slug": "instancias-aurora-serverless-v2-dimensionadas-com-acus-minimas-elevadas",
+   "titulo": "Instâncias Aurora Serverless v2 dimensionadas com ACUs Mínimas Elevadas"
+  },
+  {
+   "slug": "uso-exclusivo-de-instancias-provisionadas-aurora-server-vcpu-fixo-24-7",
+   "titulo": "Uso Exclusivo de Instâncias Provisionadas Aurora Server vCPU Fixo 24/7"
+  },
+  {
+   "slug": "falta-de-configuracao-de-leitura-em-replicas-aurora-replicas-desnecessarias",
+   "titulo": "Falta de Configuração de Leitura em Réplicas (Aurora Replicas) Desnecessárias"
+  },
+  {
+   "slug": "ausencia-de-otimizacao-em-consultas-pesadas-falta-de-indices-adequados",
+   "titulo": "Ausência de Otimização em Consultas Pesadas (Falta de Índices Adequados)"
+  },
+  {
+   "slug": "custos-elevados-de-e-s-aurora-i-o-optimized-vs-standard",
+   "titulo": "Custos Elevados de E/S (Aurora I/O-Optimized vs Standard)"
+  },
+  {
+   "slug": "ambientes-de-staging-homologation-e-qa-ativos-24-7-com-instancias-de-producao",
+   "titulo": "Ambientes de Staging, Homologation e QA Ativos 24/7 com Instâncias de Produção"
+  },
+  {
+   "slug": "armazenamento-fantasma-e-acumulo-de-dados-historicos-sem-politica-de-arquivamento",
+   "titulo": "Armazenamento Fantasma e Acúmulo de Dados Históricos Sem Política de Arquivamento"
+  },
+  {
+   "slug": "falta-de-aproveitamento-de-reserved-instances-ri-para-aurora",
+   "titulo": "Falta de Aproveitamento de Reserved Instances (RI) para Aurora"
+  },
+  {
+   "slug": "conexoes-de-banco-de-dados-nao-pooladas-connection-spikes",
+   "titulo": "Conexões de Banco de Dados Não Pooladas (Connection Spikes)"
+  },
+  {
+   "slug": "uso-desnecessario-de-multi-region-aurora-global-database-em-ambientes-secundarios",
+   "titulo": "Uso Desnecessário de Multi-Region (Aurora Global Database) em Ambientes Secundários"
+  },
+  {
+   "slug": "snapshots-de-banco-de-dados-sem-politica-de-retencao-automated-manual-snapshots",
+   "titulo": "Snapshots de Banco de Dados Sem Política de Retenção (Automated & Manual Snapshots)"
+  },
+  {
+   "slug": "trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az-i-o",
+   "titulo": "Tráfego de Rede Cruzado entre Zonas de Disponibilidade (Cross-AZ I/O)"
+  },
+  {
+   "slug": "uso-de-familias-de-instancias-antigas-ex-geracoes-db-r4-ou-db-r5",
+   "titulo": "Uso de Famílias de Instâncias Antigas (Ex: Gerações db.r4 ou db.r5)"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-performance-via-performance-insights-desajustado",
+   "titulo": "Falta de Monitoramento de Performance via Performance Insights Desajustado"
+  },
+  {
+   "slug": "consultas-select-e-carregamento-de-payloads-gigantes-na-memoria",
+   "titulo": "Consultas SELECT * e Carregamento de Payloads Gigantes na Memória"
+  },
+  {
+   "slug": "duplicacao-de-bancos-de-dados-por-falta-de-isolamento-por-schema",
+   "titulo": "Duplicação de Bancos de Dados por Falta de Isolamento por Schema"
+  },
+  {
+   "slug": "uso-de-aurora-postgresql-mysql-com-configuracoes-de-log-excessivas",
+   "titulo": "Uso de Aurora PostgreSQL/MySQL com Configurações de Log Excessivas"
+  },
+  {
+   "slug": "falta-de-uso-de-reader-endpoints-para-consultas-analiticas",
+   "titulo": "Falta de Uso de Reader Endpoints para Consultas Analíticas"
+  },
+  {
+   "slug": "migracoes-de-dados-incompletas-com-recursos-orfaos-ativos",
+   "titulo": "Migrações de Dados Incompletas com Recursos Órfãos Ativos"
+  },
+  {
+   "slug": "ausencia-de-limites-de-alocacao-de-memoria-buffer-pool-size",
+   "titulo": "Ausência de Limites de Alocação de Memória (Buffer Pool Size)"
+  }
+ ],
+ "amazon-elasticache": [
+  {
+   "slug": "cluster-redis-sem-criptografia-em-transito-e-repouso",
+   "titulo": "Cluster Redis sem Criptografia em Trânsito e Repouso"
+  },
+  {
+   "slug": "instancias-de-elasticache-superdimensionadas-over-provisioning",
+   "titulo": "Instâncias de ElastiCache Superdimensionadas (Over-provisioning)"
+  },
+  {
+   "slug": "uso-exclusivo-de-preco-on-demand-sem-reserved-nodes",
+   "titulo": "Uso Exclusivo de Preço On-Demand sem Reserved Nodes"
+  },
+  {
+   "slug": "falta-de-configuracao-de-politica-de-expiracao-de-chaves-eviction-policy",
+   "titulo": "Falta de Configuração de Política de Expiração de Chaves (Eviction Policy)"
+  },
+  {
+   "slug": "ambientes-de-homologacao-e-testes-staging-rodando-24-7",
+   "titulo": "Ambientes de Homologação e Testes (Staging) Rodando 24/7"
+  },
+  {
+   "slug": "configuracao-inadequada-de-multi-az-com-replica-groups-desnecessarios",
+   "titulo": "Configuração Inadequada de Multi-AZ com Replica Groups Desnecessários"
+  },
+  {
+   "slug": "armazenamento-de-payloads-gigantes-e-desestruturados-no-cache",
+   "titulo": "Armazenamento de Payloads Gigantes e Desestruturados no Cache"
+  },
+  {
+   "slug": "uso-de-instancias-de-geracoes-antigas-ex-familias-cache-m4-ou-cache-r4",
+   "titulo": "Uso de Instâncias de Gerações Antigas (Ex: Famílias cache.m4 ou cache.r4)"
+  },
+  {
+   "slug": "conexoes-de-clientes-nao-reutilizadas-connection-storms",
+   "titulo": "Conexões de Clientes Não Reutilizadas (Connection Storms)"
+  },
+  {
+   "slug": "trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az",
+   "titulo": "Tráfego de Rede Cruzado entre Zonas de Disponibilidade (Cross-AZ)"
+  },
+  {
+   "slug": "uso-do-motor-memcached-sem-necessidade-de-arquitetura-especifica",
+   "titulo": "Uso do Motor Memcached sem Necessidade de Arquitetura Específica"
+  },
+  {
+   "slug": "clusters-de-elasticache-orfaos-de-migracoes-antigas",
+   "titulo": "Clusters de ElastiCache Órfãos de Migrações Antigas"
+  },
+  {
+   "slug": "falta-de-uso-de-cluster-mode-em-volumes-massivos-de-dados",
+   "titulo": "Falta de Uso de Cluster Mode em Volumes Massivos de Dados"
+  },
+  {
+   "slug": "snapshots-e-backups-automaticos-exagerados-em-ambientes-de-teste",
+   "titulo": "Snapshots e Backups Automáticos Exagerados em Ambientes de Teste"
+  },
+  {
+   "slug": "ausencia-de-monitoramento-de-uso-de-memoria-via-cloudwatch",
+   "titulo": "Ausência de Monitoramento de Uso de Memória via CloudWatch"
+  },
+  {
+   "slug": "duplicacao-de-chaves-e-caching-redundante-entre-microsservicos",
+   "titulo": "Duplicação de Chaves e Caching Redundante entre Microsserviços"
+  },
+  {
+   "slug": "monitoramento-com-metricas-avancadas-excessivas-e-sem-limite",
+   "titulo": "Monitoramento com Métricas Avançadas Excessivas e Sem Limite"
+  },
+  {
+   "slug": "falta-de-politica-de-auto-scaling-de-elasticache-redis",
+   "titulo": "Falta de Política de Auto Scaling de ElastiCache Redis"
+  },
+  {
+   "slug": "uso-de-redis-para-armazenamento-de-dados-de-longo-prazo",
+   "titulo": "Uso de Redis para Armazenamento de Dados de Longo Prazo"
+  },
+  {
+   "slug": "fragmentacao-de-memoria-elevada-sem-planejamento-de-reinicializacao",
+   "titulo": "Fragmentação de Memória Elevada sem Planejamento de Reinicialização"
+  },
+  {
+   "slug": "trafego-de-dados-nao-criptografados-ou-sem-restricao-de-rede-security-groups",
+   "titulo": "Tráfego de Dados Não Criptografados ou Sem Restrição de Rede (Security Groups)"
+  }
+ ],
+ "amazon-documentdb": [
+  {
+   "slug": "falta-de-indices-compostos-em-colecoes-nosql-de-alta-consulta",
+   "titulo": "Falta de Índices Compostos em Coleções NoSQL de Alta Consulta"
+  },
+  {
+   "slug": "uso-de-instancias-provisionadas-excessivas-sem-auto-scaling-de-leitura",
+   "titulo": "Uso de Instâncias Provisionadas Excessivas sem Auto Scaling de Leitura"
+  },
+  {
+   "slug": "falta-de-criacao-de-indices-adequados-para-consultas-frequentes-missing-indexes",
+   "titulo": "Falta de Criação de Índices Adequados para Consultas Frequentes (Missing Indexes)"
+  },
+  {
+   "slug": "manutencao-de-ambientes-de-teste-e-staging-rodando-24-7",
+   "titulo": "Manutenção de Ambientes de Teste e Staging Rodando 24/7"
+  },
+  {
+   "slug": "uso-de-instancias-de-geracoes-antigas-ex-db-r5-em-vez-de-db-r6g-graviton",
+   "titulo": "Uso de Instâncias de Gerações Antigas (ex: db.r5 em Vez de db.r6g Graviton)"
+  },
+  {
+   "slug": "retencao-prolongada-de-snapshots-e-backups-automaticos-exagerados",
+   "titulo": "Retenção Prolongada de Snapshots e Backups Automáticos Exagerados"
+  },
+  {
+   "slug": "falta-de-uso-de-instancias-reservadas-para-frotas-de-producao-estaveis",
+   "titulo": "Falta de Uso de Instâncias Reservadas para Frotas de Produção Estáveis"
+  },
+  {
+   "slug": "conexoes-de-aplicacao-nao-pooladas-estourando-o-limite-do-banco",
+   "titulo": "Conexões de Aplicação Não Pooladas Estourando o Limite do Banco"
+  },
+  {
+   "slug": "trafego-de-rede-cruzado-entre-zonas-de-disponibilidade-cross-az",
+   "titulo": "Tráfego de Rede Cruzado entre Zonas de Disponibilidade (Cross-AZ)"
+  },
+  {
+   "slug": "armazenamento-de-payloads-gigantes-e-desestruturados-sem-limpeza",
+   "titulo": "Armazenamento de Payloads Gigantes e Desestruturados sem Limpeza"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-metricas-de-cpu-e-memoria-cpuutilization-freeablememory",
+   "titulo": "Falta de Monitoramento de Métricas de CPU e Memória (CPUUtilization / FreeableMemory)"
+  },
+  {
+   "slug": "clusters-orfaos-de-migracoes-antigas-esquecidos-na-conta",
+   "titulo": "Clusters \"Órfãos\" de Migrações Antigas Esquecidos na Conta"
+  },
+  {
+   "slug": "execucao-de-consultas-analiticas-pesadas-na-instancia-primaria-de-producao",
+   "titulo": "Execução de Consultas Analíticas Pesadas na Instância Primária de Produção"
+  },
+  {
+   "slug": "falta-de-criptografia-em-repouso-com-chaves-adequadas",
+   "titulo": "Falta de Criptografia em Repouso com Chaves Adequadas"
+  },
+  {
+   "slug": "uso-de-documentdb-para-transacoes-financeiras-estritamente-relacionais",
+   "titulo": "Uso de DocumentDB para Transações Financeiras Estritamente Relacionais"
+  },
+  {
+   "slug": "falta-de-configuracao-de-alertas-de-custo-para-armazenamento-alocado-dinamicamente",
+   "titulo": "Falta de Configuração de Alertas de Custo para Armazenamento Alocado Dinamicamente"
+  },
+  {
+   "slug": "exportacoes-e-importacoes-massivas-via-mongodump-ineficientes",
+   "titulo": "Exportações e Importações Massivas via mongodump Ineficientes"
+  },
+  {
+   "slug": "falta-de-testes-de-failover-multi-az-em-horario-comercial",
+   "titulo": "Falta de Testes de Failover Multi-AZ em Horário Comercial"
+  },
+  {
+   "slug": "uso-de-parametros-de-cluster-padrao-sem-ajuste-de-memoria-parameter-groups",
+   "titulo": "Uso de Parâmetros de Cluster Padrão sem Ajuste de Memória (Parameter Groups)"
+  },
+  {
+   "slug": "duplicacao-de-bases-de-dados-entre-equipes-sem-isolamento-por-collection",
+   "titulo": "Duplicação de Bases de Dados entre Equipes sem Isolamento por Collection"
+  },
+  {
+   "slug": "ausencia-de-logs-de-auditoria-habilitados-para-compliance-audit-logs",
+   "titulo": "Ausência de Logs de Auditoria Habilitados para Compliance (Audit Logs)"
+  }
+ ],
+ "amazon-efs": [
+  {
+   "slug": "falta-de-monitoramento-de-estouro-de-banda-em-gravadores-simultaneos",
+   "titulo": "Falta de Monitoramento de Estouro de Banda em Gravadores Simultâneos"
+  },
+  {
+   "slug": "uso-da-classe-de-armazenamento-padrao-efs-standard-para-dados-frios",
+   "titulo": "Uso da Classe de Armazenamento Padrão (EFS Standard) para Dados Frios"
+  },
+  {
+   "slug": "configuracao-inadequada-da-politica-de-ciclo-de-vida-lifecycle-policy",
+   "titulo": "Configuração Inadequada da Política de Ciclo de Vida (Lifecycle Policy)"
+  },
+  {
+   "slug": "modo-de-desempenho-performance-mode-dimensionado-incorretamente",
+   "titulo": "Modo de Desempenho (Performance Mode) Dimensionado Incorretamente"
+  },
+  {
+   "slug": "modo-de-taxa-de-transferencia-provisionada-provisioned-throughput-excessiva",
+   "titulo": "Modo de Taxa de Transferência Provisionada (Provisioned Throughput) Excessiva"
+  },
+  {
+   "slug": "montagem-do-efs-em-zonas-de-disponibilidade-desnecessarias-cross-az",
+   "titulo": "Montagem do EFS em Zonas de Disponibilidade Desnecessárias (Cross-AZ)"
+  },
+  {
+   "slug": "armazenamento-de-arquivos-de-logs-e-temporarios-de-alta-frequencia-de-gravacao",
+   "titulo": "Armazenamento de Arquivos de Logs e Temporários de Alta Frequência de Gravação"
+  },
+  {
+   "slug": "falta-de-limpeza-de-arquivos-temporarios-de-importacao-de-lotes",
+   "titulo": "Falta de Limpeza de Arquivos Temporários de Importação de Lotes"
+  },
+  {
+   "slug": "uso-de-efs-em-vez-de-armazenamento-local-ebs-ou-nvme-para-bancos-de-dados",
+   "titulo": "Uso de EFS em Vez de Armazenamento Local (EBS ou NVMe) para Bancos de Dados"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-creditos-de-i-o-burstcreditsbalance",
+   "titulo": "Falta de Monitoramento de Créditos de I/O (BurstCreditsBalance)"
+  },
+  {
+   "slug": "sistemas-de-arquivos-efs-orfaos-de-aplicacoes-descontinuadas",
+   "titulo": "Sistemas de Arquivos EFS Órfãos de Aplicações Descontinuadas"
+  },
+  {
+   "slug": "espelhamento-de-efs-de-producao-em-ambientes-de-homologacao",
+   "titulo": "Espelhamento de EFS de Produção em Ambientes de Homologação"
+  },
+  {
+   "slug": "backup-automatico-do-efs-aws-backup-com-retencao-exagerada",
+   "titulo": "Backup Automático do EFS (AWS Backup) com Retenção Exagerada"
+  },
+  {
+   "slug": "duplicacao-de-arquivos-entre-servidores-em-vez-de-compartilhamento-real",
+   "titulo": "Duplicação de Arquivos Entre Servidores em Vez de Compartilhamento Real"
+  },
+  {
+   "slug": "compartilhamento-de-efs-unico-para-multiplos-dominios-de-negocio-nao-relacionados",
+   "titulo": "Compartilhamento de EFS Único para Múltiplos Domínios de Negócio não Relacionados"
+  },
+  {
+   "slug": "ausencia-de-uso-de-efs-access-points-para-isolamento-de-aplicacoes",
+   "titulo": "Ausência de Uso de EFS Access Points para Isolamento de Aplicações"
+  },
+  {
+   "slug": "criptografia-com-chaves-kms-personalizadas-sem-rotacao-adequada",
+   "titulo": "Criptografia com Chaves KMS Personalizadas sem Rotação Adequada"
+  },
+  {
+   "slug": "uso-de-instancias-ec2-pequenas-com-gargalo-de-rede-no-acesso-ao-efs",
+   "titulo": "Uso de Instâncias EC2 Pequenas com Gargalo de Rede no Acesso ao EFS"
+  },
+  {
+   "slug": "falta-de-politicas-de-expiracao-para-snapshots-manuais-do-efs",
+   "titulo": "Falta de Políticas de Expiração para Snapshots Manuais do EFS"
+  },
+  {
+   "slug": "trafego-de-rede-via-internet-ou-nat-gateway-para-acesso-ao-efs",
+   "titulo": "Tráfego de Rede via Internet ou NAT Gateway para Acesso ao EFS"
+  },
+  {
+   "slug": "ausencia-de-alertas-de-crescimento-de-armazenamento-no-cloudwatch",
+   "titulo": "Ausência de Alertas de Crescimento de Armazenamento no CloudWatch"
+  }
+ ],
+ "amazon-emr": [
+  {
+   "slug": "uso-de-instancias-com-capacidade-de-memoria-insuficiente-no-spark",
+   "titulo": "Uso de Instâncias com Capacidade de Memória Insuficiente no Spark"
+  },
+  {
+   "slug": "clusters-emr-permanentes-e-ociosos-24-7",
+   "titulo": "Clusters EMR Permanentes e Ociosos (24/7)"
+  },
+  {
+   "slug": "uso-exclusivo-de-instancias-on-demand-para-nos-de-trabalhadores-core-task-nodes",
+   "titulo": "Uso Exclusivo de Instâncias On-Demand para Nós de Trabalhadores (Core/Task Nodes)"
+  },
+  {
+   "slug": "desativacao-do-emr-managed-scaling",
+   "titulo": "Desativação do EMR Managed Scaling"
+  },
+  {
+   "slug": "falta-de-migracao-para-efs-s3-emrfs",
+   "titulo": "Falta de Migração para EFS/S3 (EMRFS)"
+  },
+  {
+   "slug": "jobs-com-garbage-collection-gc-e-oom-no-spark",
+   "titulo": "Jobs com Garbage Collection (GC) e OOM no Spark"
+  },
+  {
+   "slug": "uso-de-instancias-de-geracoes-antigas",
+   "titulo": "Uso de Instâncias de Gerações Antigas"
+  },
+  {
+   "slug": "clusters-orfaos-de-cientistas-de-dados",
+   "titulo": "Clusters Órfãos de Cientistas de Dados"
+  },
+  {
+   "slug": "falta-de-uso-do-emr-serverless",
+   "titulo": "Falta de Uso do EMR Serverless"
+  },
+  {
+   "slug": "leitura-de-dados-nao-particionados-no-s3",
+   "titulo": "Leitura de Dados Não Particionados no S3"
+  },
+  {
+   "slug": "volumes-ebs-root-excessivamente-grandes",
+   "titulo": "Volumes EBS Root Excessivamente Grandes"
+  },
+  {
+   "slug": "retencao-descontrolada-de-spark-event-logs",
+   "titulo": "Retenção Descontrolada de Spark Event Logs"
+  },
+  {
+   "slug": "execucao-de-trafego-inter-az-na-ingestao",
+   "titulo": "Execução de Tráfego Inter-AZ na Ingestão"
+  },
+  {
+   "slug": "falta-de-ajuste-dinamico-de-alocacao-de-recursos-spark-dynamicallocation",
+   "titulo": "Falta de Ajuste Dinâmico de Alocação de Recursos (spark.dynamicAllocation)"
+  },
+  {
+   "slug": "duplicacao-de-clusters-por-equipes-de-dados",
+   "titulo": "Duplicação de Clusters por Equipes de Dados"
+  },
+  {
+   "slug": "uso-de-discos-ebs-gp2-em-vez-de-gp3-nos-core-nodes",
+   "titulo": "Uso de Discos EBS gp2 em Vez de gp3 nos Core Nodes"
+  },
+  {
+   "slug": "falta-de-utilizacao-de-emr-runtime-optimization",
+   "titulo": "Falta de Utilização de EMR Runtime Optimization"
+  },
+  {
+   "slug": "ambientes-de-teste-com-mesma-escala-de-producao",
+   "titulo": "Ambientes de Teste com Mesma Escala de Produção"
+  },
+  {
+   "slug": "falta-de-integracao-com-o-aws-glue-data-catalog",
+   "titulo": "Falta de Integração com o AWS Glue Data Catalog"
+  },
+  {
+   "slug": "ausencia-de-alertas-no-aws-budgets-para-consumo-de-emr",
+   "titulo": "Ausência de Alertas no AWS Budgets para Consumo de EMR"
+  },
+  {
+   "slug": "leitura-de-arquivos-minusculos-small-files-problem",
+   "titulo": "Leitura de Arquivos Minúsculos (Small Files Problem)"
+  }
+ ],
+ "amazon-kinesis": [
+  {
+   "slug": "falta-de-tratamento-de-retencao-estourada-em-consumidores-lentos",
+   "titulo": "Falta de Tratamento de Retenção Estourada em Consumidores Lentos"
+  },
+  {
+   "slug": "provisionamento-excessivo-de-shards-no-kinesis-data-streams",
+   "titulo": "Provisionamento Excessivo de Shards no Kinesis Data Streams"
+  },
+  {
+   "slug": "uso-do-modo-provisionado-para-cargas-intermitentes",
+   "titulo": "Uso do Modo Provisionado para Cargas Intermitentes"
+  },
+  {
+   "slug": "gravando-payloads-descompactados-no-stream",
+   "titulo": "Gravando Payloads Descompactados no Stream"
+  },
+  {
+   "slug": "falta-de-agrupamento-de-registros-na-origem-kpl-aggregation",
+   "titulo": "Falta de Agrupamento de Registros na Origem (KPL Aggregation)"
+  },
+  {
+   "slug": "retencao-prolongada-de-mensagens-no-kinesis-data-streams",
+   "titulo": "Retenção Prolongada de Mensagens no Kinesis Data Streams"
+  },
+  {
+   "slug": "kinesis-data-firehose-com-buffer-ineficiente",
+   "titulo": "Kinesis Data Firehose com Buffer Ineficiente"
+  },
+  {
+   "slug": "consumidores-sem-enhanced-fan-out-efo-sofrendo-throttling",
+   "titulo": "Consumidores sem Enhanced Fan-Out (EFO) Sofrendo Throttling"
+  },
+  {
+   "slug": "uso-desnecessario-do-enhanced-fan-out-efo",
+   "titulo": "Uso Desnecessário do Enhanced Fan-Out (EFO)"
+  },
+  {
+   "slug": "processamento-de-conversao-de-formatos-ineficiente-no-firehose",
+   "titulo": "Processamento de Conversão de Formatos Ineficiente no Firehose"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-shards-quentes-hot-shards",
+   "titulo": "Falta de Monitoramento de Shards Quentes (Hot Shards)"
+  },
+  {
+   "slug": "duplicacao-de-streams-por-silos-de-aplicacao",
+   "titulo": "Duplicação de Streams por Silos de Aplicação"
+  },
+  {
+   "slug": "streams-de-qa-e-staging-ativos-com-multiplos-shards",
+   "titulo": "Streams de QA e Staging Ativos com Múltiplos Shards"
+  },
+  {
+   "slug": "uso-do-kinesis-data-analytics-flink-sem-desligamento-automatico",
+   "titulo": "Uso do Kinesis Data Analytics (Flink) sem Desligamento Automático"
+  },
+  {
+   "slug": "ingestao-massiva-de-logs-de-baixa-relevancia",
+   "titulo": "Ingestão Massiva de Logs de Baixa Relevância"
+  },
+  {
+   "slug": "chamadas-excessivas-de-getrecords-por-pollers-mal-configurados",
+   "titulo": "Chamadas Excessivas de GetRecords por Pollers Mal Configurados"
+  },
+  {
+   "slug": "trafego-de-ingestao-via-internet-publica",
+   "titulo": "Tráfego de Ingestão via Internet Pública"
+  },
+  {
+   "slug": "falta-de-regras-de-retry-com-backoff-exponencial",
+   "titulo": "Falta de Regras de Retry com Backoff Exponencial"
+  },
+  {
+   "slug": "leitura-de-dados-do-firehose-sem-criptografia-kms-com-bucket-keys",
+   "titulo": "Leitura de Dados do Firehose sem Criptografia KMS com Bucket Keys"
+  },
+  {
+   "slug": "descarte-ineficiente-de-erros-no-firehose",
+   "titulo": "Descarte Ineficiente de Erros no Firehose"
+  },
+  {
+   "slug": "falta-de-alertas-para-a-metrica-readprovisionedthroughputexceeded",
+   "titulo": "Falta de Alertas para a Métrica ReadProvisionedThroughputExceeded"
+  }
+ ],
+ "amazon-msk": [
+  {
+   "slug": "configuracao-inadequada-da-regra-de-unclean-leader-election",
+   "titulo": "Configuração Inadequada da Regra de Unclean Leader Election"
+  },
+  {
+   "slug": "dimensionamento-excessivo-de-brokers-kafka-broker-over-provisioning",
+   "titulo": "Dimensionamento Excessivo de Brokers Kafka (Broker Over-provisioning)"
+  },
+  {
+   "slug": "retencao-prolongada-de-mensagens-em-disco-sem-necessidade-log-retention-period",
+   "titulo": "Retenção Prolongada de Mensagens em Disco sem Necessidade (Log Retention Period)"
+  },
+  {
+   "slug": "frotas-estaveis-pagando-preco-on-demand-sem-contratos-reservados",
+   "titulo": "Frotas Estáveis Pagando Preço On-Demand sem Contratos Reservados"
+  },
+  {
+   "slug": "uso-de-armazenamento-provisionado-excessivo-nos-brokers-ebs-volume-sizing",
+   "titulo": "Uso de Armazenamento Provisionado Excessivo nos Brokers (EBS Volume Sizing)"
+  },
+  {
+   "slug": "falta-de-uso-do-amazon-msk-tiered-storage-para-eventos-frios",
+   "titulo": "Falta de Uso do Amazon MSK Tiered Storage para Eventos Frios"
+  },
+  {
+   "slug": "clusters-msk-de-homologacao-e-testes-rodando-24-7-com-multi-az",
+   "titulo": "Clusters MSK de Homologação e Testes Rodando 24/7 com Multi-AZ"
+  },
+  {
+   "slug": "trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-data-transfer",
+   "titulo": "Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ Data Transfer)"
+  },
+  {
+   "slug": "subparticionamento-excessivo-de-topicos-over-partitioning",
+   "titulo": "Subparticionamento Excessivo de Tópicos (Over-partitioning)"
+  },
+  {
+   "slug": "desbalanceamento-de-carga-e-particoes-quentes-hot-partitions",
+   "titulo": "Desbalanceamento de Carga e Partições Quentes (Hot Partitions)"
+  },
+  {
+   "slug": "uso-do-amazon-msk-provisionado-para-cargas-intermitentes-em-vez-do-msk-serverless",
+   "titulo": "Uso do Amazon MSK Provisionado para Cargas Intermitentes em Vez do MSK Serverless"
+  },
+  {
+   "slug": "producao-de-mensagens-sem-compressao-de-dados",
+   "titulo": "Produção de Mensagens sem Compressão de Dados"
+  },
+  {
+   "slug": "consumidores-lentos-gerando-acumulo-de-dados-consumer-lag",
+   "titulo": "Consumidores Lentos Gerando Acúmulo de Dados (Consumer Lag)"
+  },
+  {
+   "slug": "uso-de-instancias-de-geracoes-antigas-ex-kafka-m5-em-vez-de-kafka-m6g",
+   "titulo": "Uso de Instâncias de Gerações Antigas (ex: kafka.m5 em Vez de kafka.m6g)"
+  },
+  {
+   "slug": "ingestao-massiva-de-logs-e-eventos-de-baixo-valor-sem-filtragem",
+   "titulo": "Ingestão Massiva de Logs e Eventos de Baixo Valor sem Filtragem"
+  },
+  {
+   "slug": "duplicacao-de-clusters-msk-por-silos-de-engenharia",
+   "titulo": "Duplicação de Clusters MSK por Silos de Engenharia"
+  },
+  {
+   "slug": "configuracao-do-fator-de-replicacao-replication-factor-exagerado",
+   "titulo": "Configuração do Fator de Replicação (Replication Factor) Exagerado"
+  },
+  {
+   "slug": "monitoramento-com-cloudwatch-open-monitoring-prometheus-ativado-sem-restricao",
+   "titulo": "Monitoramento com CloudWatch Open Monitoring (Prometheus) Ativado sem Restrição"
+  },
+  {
+   "slug": "falta-de-uso-de-conectores-gerenciados-msk-connect-para-ingestao-externa",
+   "titulo": "Falta de Uso de Conectores Gerenciados (MSK Connect) para Ingestão Externa"
+  },
+  {
+   "slug": "retencao-de-clusters-orfaos-de-migracoes-de-mensageria-legada",
+   "titulo": "Retenção de Clusters Órfãos de Migrações de Mensageria Legada"
+  },
+  {
+   "slug": "trafego-de-producao-e-consumo-roteado-via-internet-public-subnets",
+   "titulo": "Tráfego de Produção e Consumo Roteado via Internet / Public Subnets"
+  }
+ ],
+ "amazon-macie": [
+  {
+   "slug": "falta-de-identificadores-customizados-regex-para-formatos-internos",
+   "titulo": "Falta de Identificadores Customizados (Regex) para Formatos Internos"
+  },
+  {
+   "slug": "varredura-completa-e-continua-em-buckets-de-logs-sem-filtro-over-scanning",
+   "titulo": "Varredura Completa e Contínua em Buckets de Logs sem Filtro (Over-scanning)"
+  },
+  {
+   "slug": "falta-de-definicao-de-escopo-nos-trabalhos-de-descoberta-de-dados-discovery-jobs",
+   "titulo": "Falta de Definição de Escopo nos Trabalhos de Descoberta de Dados (Discovery Jobs)"
+  },
+  {
+   "slug": "manutencao-do-macie-ativado-em-contas-de-sandbox-e-testes-sem-dados-reais",
+   "titulo": "Manutenção do Macie Ativado em Contas de Sandbox e Testes sem Dados Reais"
+  },
+  {
+   "slug": "ignorar-achados-de-exposicao-de-dados-sensiveis-pii-cpfs-expos",
+   "titulo": "Ignorar Achados de Exposição de Dados Sensíveis (PII / CPFs Expôs)"
+  },
+  {
+   "slug": "falta-de-uso-do-recurso-de-amostragem-de-dados-sampling-depth",
+   "titulo": "Falta de Uso do Recurso de Amostragem de Dados (Sampling Depth)"
+  },
+  {
+   "slug": "falta-de-integracao-com-o-aws-security-hub-e-eventbridge",
+   "titulo": "Falta de Integração com o AWS Security Hub e EventBridge"
+  },
+  {
+   "slug": "armazenamento-de-resultados-do-macie-sem-criptografia-no-s3",
+   "titulo": "Armazenamento de Resultados do Macie sem Criptografia no S3"
+  },
+  {
+   "slug": "falta-de-criacao-de-identificadores-de-dados-customizados-custom-data-identifiers",
+   "titulo": "Falta de Criação de Identificadores de Dados Customizados (Custom Data Identifiers)"
+  },
+  {
+   "slug": "nao-utilizacao-da-avaliacao-automatizada-de-inventario-de-buckets-bucket-level-automated-discovery",
+   "titulo": "Não Utilização da Avaliação Automatizada de Inventário de Buckets (Bucket-level Automated Discovery)"
+  },
+  {
+   "slug": "desativacao-do-macie-por-medo-de-custos-sem-avaliacao-de-risco",
+   "titulo": "Desativação do Macie por Medo de Custos sem Avaliação de Risco"
+  },
+  {
+   "slug": "falta-de-regras-de-supressao-para-achados-conhecidos-e-justificados",
+   "titulo": "Falta de Regras de Supressão para Achados Conhecidos e Justificados"
+  },
+  {
+   "slug": "escaneamento-de-arquivos-compactados-grandes-ou-nao-suportados",
+   "titulo": "Escaneamento de Arquivos Compactados Grandes ou Não Suportados"
+  },
+  {
+   "slug": "falta-de-governanca-multi-conta-macie-delegated-administrator",
+   "titulo": "Falta de Governança Multi-Conta (Macie Delegated Administrator)"
+  },
+  {
+   "slug": "nao-monitorar-a-ingestao-diaria-de-novos-objetos-no-s3",
+   "titulo": "Não Monitorar a Ingestão Diária de Novos Objetos no S3"
+  },
+  {
+   "slug": "falta-de-acoes-de-automacao-para-remediacao-auto-remediation",
+   "titulo": "Falta de Ações de Automação para Remediação (Auto-remediation)"
+  },
+  {
+   "slug": "ignorar-achados-de-alteracao-de-criptografia-ou-acesso-publico",
+   "titulo": "Ignorar Achados de Alteração de Criptografia ou Acesso Público"
+  },
+  {
+   "slug": "escaneamento-de-dados-criptografados-com-chaves-kms-sem-permissao",
+   "titulo": "Escaneamento de Dados Criptografados com Chaves KMS sem Permissão"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-no-aws-budgets-para-o-consumo-do-macie",
+   "titulo": "Falta de Alertas de Custo no AWS Budgets para o Consumo do Macie"
+  },
+  {
+   "slug": "nao-documentar-o-processo-de-resposta-a-incidentes-de-vazamento",
+   "titulo": "Não Documentar o Processo de Resposta a Incidentes de Vazamento"
+  },
+  {
+   "slug": "falta-de-revisao-periodica-das-regras-de-descoberta-automatizada",
+   "titulo": "Falta de Revisão Periódica das Regras de Descoberta Automatizada"
+  }
+ ],
+ "amazon-neptune": [
+  {
+   "slug": "consultas-de-grafos-sem-limite-de-profundidade-em-ambientes-antifraude",
+   "titulo": "Consultas de Grafos sem Limite de Profundidade em Ambientes Antifraude"
+  },
+  {
+   "slug": "uso-de-instancias-superdimensionadas-para-cargas-de-grafos-com-baixo-trafego",
+   "titulo": "Uso de Instâncias Superdimensionadas para Cargas de Grafos com Baixo Tráfego"
+  },
+  {
+   "slug": "falta-de-utilizacao-de-instancias-reservadas-para-cargas-estaveis",
+   "titulo": "Falta de Utilização de Instâncias Reservadas para Cargas Estáveis"
+  },
+  {
+   "slug": "consultas-de-grafos-mal-otimizadas-full-graph-scans",
+   "titulo": "Consultas de Grafos Mal Otimizadas (Full Graph Scans)"
+  },
+  {
+   "slug": "falta-de-configuracao-de-replicas-de-leitura-para-distribuicao-de-carga",
+   "titulo": "Falta de Configuração de Réplicas de Leitura para Distribuição de Carga"
+  },
+  {
+   "slug": "manutencao-de-clusters-de-homologacion-e-testes-ativos-24-7",
+   "titulo": "Manutenção de Clusters de Homologación e Testes Ativos 24/7"
+  },
+  {
+   "slug": "falta-de-uso-de-neptune-ml-com-instancias-de-gpu-desligadas-pos-treinamento",
+   "titulo": "Falta de Uso de Neptune ML com Instâncias de GPU Desligadas Pós-Treinamento"
+  },
+  {
+   "slug": "armazenamento-de-dados-historicos-irrelevantes-na-base-de-grafos",
+   "titulo": "Armazenamento de Dados Históricos Irrelevantes na Base de Grafos"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-metricas-de-memoria-jvm-buffercachehitratio",
+   "titulo": "Falta de Monitoramento de Métricas de Memória JVM (BufferCacheHitRatio)"
+  },
+  {
+   "slug": "uso-de-instancias-de-geracoes-antigas-ex-db-r4",
+   "titulo": "Uso de Instâncias de Gerações Antigas (ex: db.r4)"
+  },
+  {
+   "slug": "trafego-de-rede-inter-az-sem-otimizacao-de-conexao-com-clientes",
+   "titulo": "Tráfego de Rede Inter-AZ sem Otimização de Conexão com Clientes"
+  },
+  {
+   "slug": "falta-de-uso-de-snapshots-automatizados-com-politica-de-limpeza",
+   "titulo": "Falta de Uso de Snapshots Automatizados com Política de Limpeza"
+  },
+  {
+   "slug": "cargas-de-dados-em-massa-bulk-load-ineficientes-via-api-individual",
+   "titulo": "Cargas de Dados em Massa (Bulk Load) Ineficientes via API Individual"
+  },
+  {
+   "slug": "clusters-orfaos-de-provas-de-conceito-pocs-descontinuadas",
+   "titulo": "Clusters \"Órfãos\" de Provas de Conceito (PoCs) Descontinuadas"
+  },
+  {
+   "slug": "falta-de-criptografia-com-kms-personalizado-para-dados-sensiveis-de-grafos",
+   "titulo": "Falta de Criptografia com KMS Personalizado para Dados Sensíveis de Grafos"
+  },
+  {
+   "slug": "uso-de-modelagem-de-dados-de-grafos-inadequada-supernodes",
+   "titulo": "Uso de Modelagem de Dados de Grafos Inadequada (Supernodes)"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-para-escalabilidade-de-armazenamento-e-computacao",
+   "titulo": "Falta de Alertas de Custo para Escalabilidade de Armazenamento e Computação"
+  },
+  {
+   "slug": "exportacoes-e-backups-frequentes-sem-necessidade-regulatoria",
+   "titulo": "Exportações e Backups Frequentes sem Necessidade Regulatória"
+  },
+  {
+   "slug": "ausencia-de-testes-de-recuperacao-de-desastres-failover-testing",
+   "titulo": "Ausência de Testes de Recuperação de Desastres (Failover Testing)"
+  },
+  {
+   "slug": "falta-de-integracao-com-cloudwatch-logs-para-auditoria-de-consultas",
+   "titulo": "Falta de Integração com CloudWatch Logs para Auditoria de Consultas"
+  },
+  {
+   "slug": "uso-do-neptune-para-tarefas-relacionais-simples",
+   "titulo": "Uso do Neptune para Tarefas Relacionais Simples"
+  }
+ ],
+ "amazon-opensearch": [
+  {
+   "slug": "falta-de-ajuste-nos-circuit-breakers-de-memoria-jvm",
+   "titulo": "Falta de Ajuste nos Circuit Breakers de Memória JVM"
+  },
+  {
+   "slug": "manutencao-de-todos-os-indices-no-armazenamento-quente-hot-storage",
+   "titulo": "Manutenção de Todos os Índices no Armazenamento Quente (Hot Storage)"
+  },
+  {
+   "slug": "uso-exclusivo-de-cobranca-on-demand-sem-reserved-instances",
+   "titulo": "Uso Exclusivo de Cobrança On-Demand sem Reserved Instances"
+  },
+  {
+   "slug": "falta-de-uso-da-camada-ultrawarm-e-cold-storage-para-dados-de-compliance",
+   "titulo": "Falta de Uso da Camada UltraWarm e Cold Storage para Dados de Compliance"
+  },
+  {
+   "slug": "sobredimensionamento-do-tamanho-e-quantidade-de-nos-do-cluster",
+   "titulo": "Sobredimensionamento do Tamanho e Quantidade de Nós do Cluster"
+  },
+  {
+   "slug": "configuracao-ineficiente-de-shards-unbalanced-or-over-sharding",
+   "titulo": "Configuração Ineficiente de Shards (Unbalanced or Over-sharding)"
+  },
+  {
+   "slug": "instancias-de-homologacao-qa-e-testes-rodando-24-7-em-multi-az",
+   "titulo": "Instâncias de Homologação, QA e Testes Rodando 24/7 em Multi-AZ"
+  },
+  {
+   "slug": "uso-inadequado-de-nos-mestres-dedicados-dedicated-master-nodes",
+   "titulo": "Uso Inadequado de Nós Mestres Dedicados (Dedicated Master Nodes)"
+  },
+  {
+   "slug": "ingestao-massiva-de-logs-em-nivel-debug-trace-sem-filtragem",
+   "titulo": "Ingestão Massiva de Logs em Nível DEBUG/TRACE sem Filtragem"
+  },
+  {
+   "slug": "ausencia-de-politicas-de-gerenciamento-do-ciclo-de-vida-do-indice-ism",
+   "titulo": "Ausência de Políticas de Gerenciamento do Ciclo de Vida do Índice (ISM)"
+  },
+  {
+   "slug": "uso-de-instancias-de-geracoes-antigas-ex-t2-m4-ou-r4-search",
+   "titulo": "Uso de Instâncias de Gerações Antigas (ex: t2, m4 ou r4.search)"
+  },
+  {
+   "slug": "duplicacao-de-armazenamento-por-replicas-excessivas-replica-count",
+   "titulo": "Duplicação de Armazenamento por Réplicas Excessivas (Replica Count)"
+  },
+  {
+   "slug": "consultas-analiticas-ineficientes-e-agregacoes-pesadas-sem-limite",
+   "titulo": "Consultas Analíticas Ineficientes e Agregações Pesadas sem Limite"
+  },
+  {
+   "slug": "mapeamento-automatico-dinamico-sem-schema-definido-dynamic-mapping",
+   "titulo": "Mapeamento Automático Dinâmico sem Schema Definido (Dynamic Mapping)"
+  },
+  {
+   "slug": "trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-na-ingestao",
+   "titulo": "Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ) na Ingestão"
+  },
+  {
+   "slug": "discos-ebs-no-formato-gp2-em-vez-do-otimizado-gp3",
+   "titulo": "Discos EBS no Formato gp2 em Vez do Otimizado gp3"
+  },
+  {
+   "slug": "clusters-orfaos-de-projetos-e-pocs-de-busca-descontinuados",
+   "titulo": "Clusters Órfãos de Projetos e POCs de Busca Descontinuados"
+  },
+  {
+   "slug": "desempenho-degradado-por-falta-de-otimizacao-no-refresh-interval",
+   "titulo": "Desempenho Degradado por Falta de Otimização no Refresh Interval"
+  },
+  {
+   "slug": "replicacao-cross-cluster-cross-cluster-replication-ccr-desnecessaria",
+   "titulo": "Replicação Cross-Cluster (Cross-Cluster Replication - CCR) Desnecessária"
+  },
+  {
+   "slug": "armazenamento-de-arquivos-grandes-payloads-inteiros-nos-documentos",
+   "titulo": "Armazenamento de Arquivos Grandes/Payloads Inteiros nos Documentos"
+  },
+  {
+   "slug": "ausencia-de-alertas-de-capacidade-de-disco-e-jvm-memory-pressure",
+   "titulo": "Ausência de Alertas de Capacidade de Disco e JVM Memory Pressure"
+  }
+ ],
+ "amazon-redshift": [
+  {
+   "slug": "falta-de-configuracao-do-concurrency-scaling",
+   "titulo": "Falta de Configuração do Concurrency Scaling"
+  },
+  {
+   "slug": "dimensionamento-excessivo-de-nos-node-over-provisioning",
+   "titulo": "Dimensionamento Excessivo de Nós (Node Over-provisioning)"
+  },
+  {
+   "slug": "clusters-de-producao-e-homologacao-rodando-24-7-sem-pausa",
+   "titulo": "Clusters de Produção e Homologação Rodando 24/7 Sem Pausa"
+  },
+  {
+   "slug": "uso-ineficiente-do-redshift-serverless-com-base-de-rpus-elevada",
+   "titulo": "Uso Ineficiente do Redshift Serverless com Base de RPUs Elevada"
+  },
+  {
+   "slug": "falta-de-otimizacao-de-chaves-de-distribuicao-e-ordenacao-distkey-e-sortkey",
+   "titulo": "Falta de Otimização de Chaves de Distribuição e Ordenação (DistKey e SortKey)"
+  },
+  {
+   "slug": "insercoes-de-dados-linha-por-linha-em-vez-de-carga-em-lote-copy-command",
+   "titulo": "Inserções de Dados Linha por Linha em Vez de Carga em Lote (COPY Command)"
+  },
+  {
+   "slug": "acumulo-de-dados-historicos-antigos-diretamente-no-armazenamento-do-redshift",
+   "titulo": "Acúmulo de Dados Históricos Antigos Diretamente no Armazenamento do Redshift"
+  },
+  {
+   "slug": "falta-de-adesao-a-contratos-de-longo-prazo-reserved-nodes",
+   "titulo": "Falta de Adesão a Contratos de Longo Prazo (Reserved Nodes)"
+  },
+  {
+   "slug": "ausencia-de-uso-de-visualizacoes-materializadas-materialized-views",
+   "titulo": "Ausência de Uso de Visualizações Materializadas (Materialized Views)"
+  },
+  {
+   "slug": "concorrencia-descontrolada-e-falta-de-gerenciamento-de-carga-wlm",
+   "titulo": "Concorrência Descontrolada e Falta de Gerenciamento de Carga (WLM)"
+  },
+  {
+   "slug": "tabelas-sem-manutencao-de-limpeza-de-registros-deletados-falta-de-vacuum",
+   "titulo": "Tabelas Sem Manutenção de Limpeza de Registros Deletados (Falta de VACUUM)"
+  },
+  {
+   "slug": "uso-incorreto-de-tipos-de-dados-inflados-varchar-max",
+   "titulo": "Uso Incorreto de Tipos de Dados Inflados (VARCHAR(MAX))"
+  },
+  {
+   "slug": "redshift-spectrum-varrendo-terabytes-de-dados-no-s3-sem-particionamento",
+   "titulo": "Redshift Spectrum Varrendo Terabytes de Dados no S3 sem Particionamento"
+  },
+  {
+   "slug": "duplicacao-de-clusters-redshift-por-silos-departamentais-data-silos",
+   "titulo": "Duplicação de Clusters Redshift por Silos Departamentais (Data Silos)"
+  },
+  {
+   "slug": "snapshots-automaticos-e-manuais-acumulados-sem-politica-de-retencao",
+   "titulo": "Snapshots Automáticos e Manuais Acumulados sem Política de Retenção"
+  },
+  {
+   "slug": "ferramentas-de-bi-e-conexoes-mantidas-abertas-ociosamente",
+   "titulo": "Ferramentas de BI e Conexões Mantidas Abertas Ociosamente"
+  },
+  {
+   "slug": "trafego-de-rede-cruzado-cross-az-na-ingestao-de-dados",
+   "titulo": "Tráfego de Rede Cruzado (Cross-AZ) na Ingestão de Dados"
+  },
+  {
+   "slug": "exportacao-excessiva-de-logs-de-auditoria-para-o-cloudwatch-sem-retencao",
+   "titulo": "Exportação Excessiva de Logs de Auditoria para o CloudWatch sem Retenção"
+  },
+  {
+   "slug": "tabelas-e-esquemas-orfaos-de-cientistas-de-dados",
+   "titulo": "Tabelas e Esquemas Órfãos de Cientistas de Dados"
+  },
+  {
+   "slug": "ausencia-de-codificacao-de-colunas-encode-auto-compression",
+   "titulo": "Ausência de Codificação de Colunas (ENCODE / Auto Compression)"
+  },
+  {
+   "slug": "ambientes-de-teste-espelhando-a-topologia-de-producao-completa",
+   "titulo": "Ambientes de Teste Espelhando a Topologia de Produção Completa"
+  }
+ ],
+ "amazon-sagemaker": [
+  {
+   "slug": "falta-de-versionamento-de-modelos-no-sagemaker-model-registry",
+   "titulo": "Falta de Versionamento de Modelos no SageMaker Model Registry"
+  },
+  {
+   "slug": "instancias-de-notebooks-e-endpoints-de-producao-ativos-24-7-sem-uso",
+   "titulo": "Instâncias de Notebooks e Endpoints de Produção Ativos 24/7 sem Uso"
+  },
+  {
+   "slug": "superdimensionamento-de-instancias-de-treinamento-training-over-provisioning",
+   "titulo": "Superdimensionamento de Instâncias de Treinamento (Training Over-provisioning)"
+  },
+  {
+   "slug": "falta-de-uso-de-instancias-spot-para-treinamento-de-modelos-managed-spot-training",
+   "titulo": "Falta de Uso de Instâncias Spot para Treinamento de Modelos (Managed Spot Training)"
+  },
+  {
+   "slug": "endpoints-de-inferencia-em-tempo-real-sem-politica-de-auto-scaling",
+   "titulo": "Endpoints de Inferência em Tempo Real sem Política de Auto Scaling"
+  },
+  {
+   "slug": "uso-excessivo-de-instancias-em-tempo-real-para-inferencias-em-lote-batch-transform",
+   "titulo": "Uso Excessivo de Instâncias em Tempo Real para Inferências em Lote (Batch Transform)"
+  },
+  {
+   "slug": "armazenamento-excessivo-em-volumes-ebs-anexados-a-notebooks-e-endpoints",
+   "titulo": "Armazenamento Excessivo em Volumes EBS Anexados a Notebooks e Endpoints"
+  },
+  {
+   "slug": "falta-de-limpeza-de-modelos-artefatos-e-endpoints-orfaos",
+   "titulo": "Falta de Limpeza de Modelos, Artefatos e Endpoints Órfãos"
+  },
+  {
+   "slug": "uso-de-instancias-desatualizadas-ou-ineficientes-para-processamento",
+   "titulo": "Uso de Instâncias Desatualizadas ou Ineficientes para Processamento"
+  },
+  {
+   "slug": "processamento-de-dados-pesados-no-sagemaker-em-vez-de-glue-ou-athena",
+   "titulo": "Processamento de Dados Pesados no SageMaker em Vez de Glue ou Athena"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-desvios-de-dados-model-monitor-sem-limite",
+   "titulo": "Falta de Monitoramento de Desvios de Dados (Model Monitor) sem Limite"
+  },
+  {
+   "slug": "pipelines-de-ci-cd-de-machine-learning-rodando-testes-descontrolados",
+   "titulo": "Pipelines de CI/CD de Machine Learning Rodando Testes Descontrolados"
+  },
+  {
+   "slug": "falta-de-uso-de-serverless-inference-para-cargas-com-baixo-volume",
+   "titulo": "Falta de Uso de Serverless Inference para Cargas com Baixo Volume"
+  },
+  {
+   "slug": "duplicacao-de-ambientes-de-trabalho-por-cientista-de-dados",
+   "titulo": "Duplicação de Ambientes de Trabalho por Cientista de Dados"
+  },
+  {
+   "slug": "logs-de-inferencia-e-depuracao-enviados-em-massa-para-o-cloudwatch",
+   "titulo": "Logs de Inferência e Depuração Enviados em Massa para o CloudWatch"
+  },
+  {
+   "slug": "treinamento-de-modelos-sem-uso-de-bibliotecas-otimizadas",
+   "titulo": "Treinamento de Modelos Sem Uso de Bibliotecas Otimizadas"
+  },
+  {
+   "slug": "multiplos-testes-e-experimentos-redundantes-sem-centralizacao-sagemaker-experiments",
+   "titulo": "Múltiplos Testes e Experimentos Redundantes sem Centralização (SageMaker Experiments)"
+  },
+  {
+   "slug": "jobs-de-processamento-com-conexoes-de-rede-via-nat-gateway-sem-otimizacao",
+   "titulo": "Jobs de Processamento com Conexões de Rede via NAT Gateway Sem Otimização"
+  },
+  {
+   "slug": "retencao-prolongada-de-imagens-docker-personalizadas-no-ecr",
+   "titulo": "Retenção Prolongada de Imagens Docker Personalizadas no ECR"
+  },
+  {
+   "slug": "falta-de-governanca-e-alertas-de-custo-por-projeto-de-ia",
+   "titulo": "Falta de Governança e Alertas de Custo por Projeto de IA"
+  },
+  {
+   "slug": "uso-de-abordagens-de-deep-learning-completo-para-problemas-lineares",
+   "titulo": "Uso de Abordagens de Deep Learning Completo para Problemas Lineares"
+  }
+ ],
+ "amazon-workspaces": [
+  {
+   "slug": "falta-de-desativacao-automatica-de-sessoes-inativas",
+   "titulo": "Falta de Desativação Automática de Sessões Inativas"
+  },
+  {
+   "slug": "uso-de-modalidade-de-cobranca-mensal-autostop-vs-alwayson-inadequada",
+   "titulo": "Uso de Modalidade de Cobrança Mensal (AutoStop vs AlwaysOn) Inadequada"
+  },
+  {
+   "slug": "manutencao-de-workspaces-no-modo-alwayson-para-prestadores-de-servico-temporarios",
+   "titulo": "Manutenção de WorkSpaces no Modo AlwaysOn para Prestadores de Serviço Temporários"
+  },
+  {
+   "slug": "superdimensionamento-de-hardware-dos-workspaces-over-provisioning-bundles",
+   "titulo": "Superdimensionamento de Hardware dos WorkSpaces (Over-provisioning Bundles)"
+  },
+  {
+   "slug": "falta-de-automacao-para-desativacao-de-workspaces-inativos-orphaned-vdis",
+   "titulo": "Falta de Automação para Desativação de WorkSpaces Inativos (Orphaned VDIs)"
+  },
+  {
+   "slug": "armazenamento-de-dados-de-usuarios-em-discos-locais-sem-backup-user-volumes",
+   "titulo": "Armazenamento de Dados de Usuários em Discos Locais sem Backup (User Volumes)"
+  },
+  {
+   "slug": "falta-de-integracao-otimizada-com-o-active-directory-local-ad-connector",
+   "titulo": "Falta de Integração Otimizada com o Active Directory Local (AD Connector)"
+  },
+  {
+   "slug": "trafego-de-conexao-roteado-ineficientemente-sem-workspaces-gateway-proxies",
+   "titulo": "Tráfego de Conexão Roteado Ineficientemente sem WorkSpaces Gateway Proxies"
+  },
+  {
+   "slug": "falta-de-uso-do-protocolo-pcoip-wsp-amazon-workspaces-streaming-protocol-otimizado",
+   "titulo": "Falta de Uso do Protocolo PCoIP / WSP (Amazon WorkSpaces Streaming Protocol) Otimizado"
+  },
+  {
+   "slug": "ausencia-de-politicas-de-grupo-gpo-para-bloqueio-de-redirecionamento-de-lixeira-clipboard",
+   "titulo": "Ausência de Políticas de Grupo (GPO) para Bloqueio de Redirecionamento de Lixeira/Clipboard"
+  },
+  {
+   "slug": "imagens-base-custom-images-desatualizadas-e-com-vulnerabilidades-de-seguranca",
+   "titulo": "Imagens Base (Custom Images) Desatualizadas e com Vulnerabilidades de Segurança"
+  },
+  {
+   "slug": "falta-de-autenticacao-multifator-mfa-exigida-no-login-do-workspaces",
+   "titulo": "Falta de Autenticação Multifator (MFA) Exigida no Login do WorkSpaces"
+  },
+  {
+   "slug": "uso-de-volumes-de-disco-fixos-excessivamente-grandes-root-user-volume-sizing",
+   "titulo": "Uso de Volumes de Disco Fixos Excessivamente Grandes (Root/User Volume Sizing)"
+  },
+  {
+   "slug": "falta-de-configuracao-de-ip-access-control-groups",
+   "titulo": "Falta de Configuração de IP Access Control Groups"
+  },
+  {
+   "slug": "workspaces-desligados-sem-aplicar-patches-de-seguranca-automatizados",
+   "titulo": "WorkSpaces Desligados sem Aplicar Patches de Segurança Automatizados"
+  },
+  {
+   "slug": "manutencao-de-licencas-de-software-microsoft-office-windows-duplicadas",
+   "titulo": "Manutenção de Licenças de Software (Microsoft Office / Windows) Duplicadas"
+  },
+  {
+   "slug": "falta-de-monitoramento-da-metrica-userconnected-e-tempo-de-sessao",
+   "titulo": "Falta de Monitoramento da Métrica UserConnected e Tempo de Sessão"
+  },
+  {
+   "slug": "criacao-manual-de-workspaces-sem-uso-de-automacao-terraform-api",
+   "titulo": "Criação Manual de WorkSpaces sem Uso de Automação (Terraform / API)"
+  },
+  {
+   "slug": "uso-de-instancias-em-zonas-de-disponibilidade-sem-redundancia-de-rede",
+   "titulo": "Uso de Instâncias em Zonas de Disponibilidade sem Redundância de Rede"
+  },
+  {
+   "slug": "falta-de-criptografia-nos-volumes-de-disco-root-e-user-kms-encryption",
+   "titulo": "Falta de Criptografia nos Volumes de Disco Root e User (KMS Encryption)"
+  },
+  {
+   "slug": "falta-de-rateio-do-custo-individual-por-centro-de-custo-no-faturamento",
+   "titulo": "Falta de Rateio do Custo Individual por Centro de Custo no Faturamento"
+  }
+ ],
+ "amazon-bedrock": [
+  {
+   "slug": "falta-de-implementacao-de-guardrails-de-seguranca-e-conteudo",
+   "titulo": "Falta de Implementação de Guardrails de Segurança e Conteúdo"
+  },
+  {
+   "slug": "uso-inadequado-de-modelos-de-alta-performance-para-tarefas-simples",
+   "titulo": "Uso Inadequado de Modelos de Alta Performance para Tarefas Simples"
+  },
+  {
+   "slug": "ausencia-de-estrategia-de-cache-de-contexto-prompt-caching",
+   "titulo": "Ausência de Estratégia de Cache de Contexto (Prompt Caching)"
+  },
+  {
+   "slug": "falta-de-otimizacao-e-reducao-do-tamanho-dos-prompts-token-bloat",
+   "titulo": "Falta de Otimização e Redução do Tamanho dos Prompts (Token Bloat)"
+  },
+  {
+   "slug": "chamadas-excessivas-e-continuas-sem-validacao-previa-guardrails",
+   "titulo": "Chamadas Excessivas e Contínuas sem Validação Prévia (Guardrails)"
+  },
+  {
+   "slug": "falta-de-uso-de-modelos-customizados-fine-tuning-vs-prompts-extensos",
+   "titulo": "Falta de Uso de Modelos Customizados (Fine-tuning) vs Prompts Extensos"
+  },
+  {
+   "slug": "configuracao-excessiva-de-parametros-de-resposta-max-tokens-temperature",
+   "titulo": "Configuração Excessiva de Parâmetros de Resposta (Max Tokens / Temperature)"
+  },
+  {
+   "slug": "ausencia-de-politicas-de-retencao-e-limpeza-de-logs-de-inferencia",
+   "titulo": "Ausência de Políticas de Retenção e Limpeza de Logs de Inferência"
+  },
+  {
+   "slug": "arquiteturas-de-rag-ineficientes-sem-chunking-otimizado",
+   "titulo": "Arquiteturas de RAG Ineficientes sem Chunking Otimizado"
+  },
+  {
+   "slug": "testes-de-estresse-e-homologacao-descontrolados-load-testing",
+   "titulo": "Testes de Estresse e Homologação Descontrolados (Load Testing)"
+  },
+  {
+   "slug": "uso-de-regioes-aws-incorretas-sem-suporte-a-precos-otimizados",
+   "titulo": "Uso de Regiões AWS Incorretas sem Suporte a Preços Otimizados"
+  },
+  {
+   "slug": "duplicacao-de-consultas-identicas-por-falta-de-cache-de-respostas",
+   "titulo": "Duplicação de Consultas Idênticas por Falta de Cache de Respostas"
+  },
+  {
+   "slug": "falta-de-configuracao-de-limites-de-orcamento-e-alertas-de-custo",
+   "titulo": "Falta de Configuração de Limites de Orçamento e Alertas de Custo"
+  },
+  {
+   "slug": "uso-de-agentes-do-bedrock-bedrock-agents-para-tarefas-deterministicas",
+   "titulo": "Uso de Agentes do Bedrock (Bedrock Agents) para Tarefas Determinísticas"
+  },
+  {
+   "slug": "prototipagem-e-desenvolvimento-em-ambientes-produtivos",
+   "titulo": "Prototipagem e Desenvolvimento em Ambientes Produtivos"
+  },
+  {
+   "slug": "ingestao-excessiva-de-dados-desestruturados-em-bases-de-conhecimento",
+   "titulo": "Ingestão Excessiva de Dados Desestruturados em Bases de Conhecimento"
+  },
+  {
+   "slug": "falta-de-uso-de-modelos-regionais-ou-cross-region-inference-otimizada",
+   "titulo": "Falta de Uso de Modelos Regionais ou Cross-Region Inference Otimizada"
+  },
+  {
+   "slug": "ausencia-de-filtragem-de-conteudo-guardrails-na-origem",
+   "titulo": "Ausência de Filtragem de Conteúdo (Guardrails) na Origem"
+  },
+  {
+   "slug": "retencao-de-embeddings-redundantes-em-bancos-vetoriais",
+   "titulo": "Retenção de Embeddings Redundantes em Bancos Vetoriais"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-metricas-de-latencia-e-taxa-de-erro-invocation-throttling",
+   "titulo": "Falta de Monitoramento de Métricas de Latência e Taxa de Erro (Invocation Throttling)"
+  },
+  {
+   "slug": "uso-de-ia-generativa-para-tarefas-que-exigem-precisao-deterministica",
+   "titulo": "Uso de IA Generativa para Tarefas que Exigem Precisão Determinística"
+  }
+ ],
+ "aws-batch": [
+  {
+   "slug": "falta-de-limites-de-tempo-de-execucao-job-timeouts",
+   "titulo": "Falta de Limites de Tempo de Execução (Job Timeouts)"
+  },
+  {
+   "slug": "uso-exclusivo-de-instancias-on-demand-em-filas-de-lote-batch-queues",
+   "titulo": "Uso Exclusivo de Instâncias On-Demand em Filas de Lote (Batch Queues)"
+  },
+  {
+   "slug": "falta-de-uso-de-instancias-spot-com-estrategia-de-diversificacao",
+   "titulo": "Falta de Uso de Instâncias Spot com Estratégia de Diversificação"
+  },
+  {
+   "slug": "alocacao-de-instancias-gigantes-para-trabalhos-leves",
+   "titulo": "Alocação de Instâncias Gigantes para Trabalhos Leves"
+  },
+  {
+   "slug": "falta-de-configuracao-de-limites-de-tempo-timeouts-em-jobs",
+   "titulo": "Falta de Configuração de Limites de Tempo (Timeouts) em Jobs"
+  },
+  {
+   "slug": "configuracao-inadequada-de-minvcpus-em-ambientes-de-computacao",
+   "titulo": "Configuração Inadequada de MinvCpus em Ambientes de Computação"
+  },
+  {
+   "slug": "armazenamento-ebs-excessivo-em-cada-instancia-do-compute-environment",
+   "titulo": "Armazenamento EBS Excessivo em Cada Instância do Compute Environment"
+  },
+  {
+   "slug": "envio-excessivo-de-logs-de-baixo-nivel-para-o-cloudwatch",
+   "titulo": "Envio Excessivo de Logs de Baixo Nível para o CloudWatch"
+  },
+  {
+   "slug": "falta-de-separacao-de-filas-por-prioridade-e-tamanho-de-carga",
+   "titulo": "Falta de Separação de Filas por Prioridade e Tamanho de Carga"
+  },
+  {
+   "slug": "falta-de-tratamento-de-retentativas-retries-inteligentes",
+   "titulo": "Falta de Tratamento de Retentativas (Retries) Inteligentes"
+  },
+  {
+   "slug": "uso-de-conteineres-pesados-com-imagens-nao-otimizadas",
+   "titulo": "Uso de Contêineres Pesados com Imagens Não Otimizadas"
+  },
+  {
+   "slug": "manutencao-de-instancias-ociosas-apos-o-termino-dos-jobs",
+   "titulo": "Manutenção de Instâncias Ociosas Após o Término dos Jobs"
+  },
+  {
+   "slug": "execucao-de-tarefas-unicas-cronjobs-simples-via-aws-batch",
+   "titulo": "Execução de Tarefas Únicas (Cronjobs Simples) via AWS Batch"
+  },
+  {
+   "slug": "falta-de-monitoramento-do-uso-real-de-recursos-por-job-vcpu-memory",
+   "titulo": "Falta de Monitoramento do Uso Real de Recursos por Job (vCPU/Memory)"
+  },
+  {
+   "slug": "duplicacao-de-processamento-por-falta-de-idempotencia",
+   "titulo": "Duplicação de Processamento por Falta de Idempotência"
+  },
+  {
+   "slug": "trafego-cruzado-entre-zonas-de-disponibilidade-nos-trabalhos",
+   "titulo": "Tráfego Cruzado Entre Zonas de Disponibilidade nos Trabalhos"
+  },
+  {
+   "slug": "falta-de-uso-de-armazenamento-compartilhado-adequado-amazon-efs-vs-ebs",
+   "titulo": "Falta de Uso de Armazenamento Compartilhado Adequado (Amazon EFS vs EBS)"
+  },
+  {
+   "slug": "uso-de-arquitetura-x86-antiga-em-vez-de-graviton-para-processamento-massivo",
+   "titulo": "Uso de Arquitetura x86 Antiga em vez de Graviton para Processamento Massivo"
+  },
+  {
+   "slug": "falta-de-limites-de-concorrencia-por-definicao-de-job-job-definition",
+   "titulo": "Falta de Limites de Concorrência por Definição de Job (Job Definition)"
+  },
+  {
+   "slug": "ambientes-de-batch-de-homologacao-ativos-sem-governanca",
+   "titulo": "Ambientes de Batch de Homologação Ativos sem Governança"
+  },
+  {
+   "slug": "falta-de-integracao-com-s3-event-notifications-para-disparo-de-lotes",
+   "titulo": "Falta de Integração com S3 Event Notifications para Disparo de Lotes"
+  }
+ ],
+ "aws-config": [
+  {
+   "slug": "falta-de-integracao-com-aws-systems-manager-para-remediacao-automatizada",
+   "titulo": "Falta de Integração com AWS Systems Manager para Remediação Automatizada"
+  },
+  {
+   "slug": "gravacao-de-historico-para-todos-os-tipos-de-recursos-sem-filtragem",
+   "titulo": "Gravação de Histórico para Todos os Tipos de Recursos sem Filtragem"
+  },
+  {
+   "slug": "falta-de-regras-customizadas-otimizadas-aws-config-rules",
+   "titulo": "Falta de Regras Customizadas Otimizadas (AWS Config Rules)"
+  },
+  {
+   "slug": "conexao-de-multiplas-contas-sem-agregacao-centralizada-config-aggregators",
+   "titulo": "Conexão de Múltiplas Contas sem Agregação Centralizada (Config Aggregators)"
+  },
+  {
+   "slug": "retencao-prolongada-e-ineficiente-no-s3-sem-regras-de-ciclo-de-vida",
+   "titulo": "Retenção Prolongada e Ineficiente no S3 sem Regras de Ciclo de Vida"
+  },
+  {
+   "slug": "execucao-frequente-de-remediacoes-automaticas-sem-testes-previos",
+   "titulo": "Execução Frequente de Remediações Automáticas sem Testes Prévios"
+  },
+  {
+   "slug": "falta-de-exclusao-de-recursos-temporarios-das-regras-de-compliance",
+   "titulo": "Falta de Exclusão de Recursos Temporários das Regras de Compliance"
+  },
+  {
+   "slug": "uso-do-aws-config-para-auditoria-de-dados-de-aplicacao-em-vez-de-infraestrutura",
+   "titulo": "Uso do AWS Config para Auditoria de Dados de Aplicação em Vez de Infraestrutura"
+  },
+  {
+   "slug": "ausencia-de-alertas-para-falhas-de-gravacao-do-recorder-config-recorder-stopped",
+   "titulo": "Ausência de Alertas para Falhas de Gravação do Recorder (Config Recorder Stopped)"
+  },
+  {
+   "slug": "entrega-de-notificacoes-de-mudanca-via-sns-sem-consumidor-ativo",
+   "titulo": "Entrega de Notificações de Mudança via SNS sem Consumidor Ativo"
+  },
+  {
+   "slug": "conexoes-de-s3-com-permissoes-inadequadas-para-armazenamento-de-configs",
+   "titulo": "Conexões de S3 com Permissões Inadequadas para Armazenamento de Configs"
+  },
+  {
+   "slug": "avaliacao-continua-de-contas-de-desenvolvimento-com-regras-de-producao",
+   "titulo": "Avaliação Contínua de Contas de Desenvolvimento com Regras de Produção"
+  },
+  {
+   "slug": "falta-de-uso-do-aws-config-advanced-queries-para-auditorias-rapidas",
+   "titulo": "Falta de Uso do AWS Config Advanced Queries para Auditorias Rápidas"
+  },
+  {
+   "slug": "duplicacao-de-ferramentas-de-inventario-config-cmdb-propria",
+   "titulo": "Duplicação de Ferramentas de Inventário (Config + CMDB Própria)"
+  },
+  {
+   "slug": "falta-de-agendamento-de-revisoes-periodicas-de-conformance-packs",
+   "titulo": "Falta de Agendamento de Revisões Periódicas de Conformance Packs"
+  },
+  {
+   "slug": "uso-de-contas-aws-de-sandbox-sem-isencao-de-regras-de-config",
+   "titulo": "Uso de Contas AWS de Sandbox sem Isenção de Regras de Config"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-custos-por-numero-de-itens-de-configuracao-evaluated",
+   "titulo": "Falta de Monitoramento de Custos por Número de Itens de Configuração Evaluated"
+  },
+  {
+   "slug": "retencao-desnecessaria-de-snapshots-manuais-de-configuracao-no-s3",
+   "titulo": "Retenção Desnecessária de Snapshots Manuais de Configuração no S3"
+  },
+  {
+   "slug": "associacao-de-regras-de-config-em-regioes-aws-inativas",
+   "titulo": "Associação de Regras de Config em Regiões AWS Inativas"
+  },
+  {
+   "slug": "falta-de-integracao-com-o-aws-security-hub",
+   "titulo": "Falta de Integração com o AWS Security Hub"
+  },
+  {
+   "slug": "ausencia-de-limpeza-de-registros-de-recursos-excluidos",
+   "titulo": "Ausência de Limpeza de Registros de Recursos Excluídos"
+  }
+ ],
+ "aws-dms": [
+  {
+   "slug": "migracao-final-cutover-sem-validacao-de-performance-previa",
+   "titulo": "Migração Final (Cutover) sem Validação de Performance Prévia"
+  },
+  {
+   "slug": "manutencao-de-instancias-de-replicacao-replication-instance-ativas-pos-migracao",
+   "titulo": "Manutenção de Instâncias de Replicação (Replication Instance) Ativas Pós-Migração"
+  },
+  {
+   "slug": "uso-de-instancias-de-replicacao-superdimensionadas-para-cargas-leves",
+   "titulo": "Uso de Instâncias de Replicação Superdimensionadas para Cargas Leves"
+  },
+  {
+   "slug": "falta-de-uso-do-dms-serverless-para-tarefas-sazonais-ou-migracoes-pontuais",
+   "titulo": "Falta de Uso do DMS Serverless para Tarefas Sazonais ou Migrações Pontuais"
+  },
+  {
+   "slug": "configuracao-inadequada-de-lobs-large-objects-causando-gargalo-de-performance",
+   "titulo": "Configuração Inadequada de LOBs (Large Objects) Causando Gargalo de Performance"
+  },
+  {
+   "slug": "falta-de-otimizacao-de-tarefas-de-carga-completa-full-load-paralelas",
+   "titulo": "Falta de Otimização de Tarefas de Carga Completa (Full Load) Paralelas"
+  },
+  {
+   "slug": "manutencao-de-tarefas-de-change-data-capture-cdc-orfas-rodando-indefinidamente",
+   "titulo": "Manutenção de Tarefas de Change Data Capture (CDC) Órfãs Rodando Indefinidamente"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-atraso-na-replicacao-cdclatency",
+   "titulo": "Falta de Monitoramento de Atraso na Replicação (CDCLatency)"
+  },
+  {
+   "slug": "uso-de-configuracoes-de-rede-sem-vpc-endpoints-para-s3-ou-redshift",
+   "titulo": "Uso de Configurações de Rede sem VPC Endpoints para S3 ou Redshift"
+  },
+  {
+   "slug": "falta-de-limpeza-de-tabelas-de-erro-e-metadados-do-dms-table-statistics",
+   "titulo": "Falta de Limpeza de Tabelas de Erro e Metadados do DMS (Table Statistics)"
+  },
+  {
+   "slug": "migracao-de-dados-historicos-inuteis-sem-filtragem-previa-transformation-rules",
+   "titulo": "Migração de Dados Históricos Inúteis sem Filtragem Prévia (Transformation Rules)"
+  },
+  {
+   "slug": "uso-de-instancias-de-geracoes-antigas-do-dms-ex-dms-t2-ou-dms-c4",
+   "titulo": "Uso de Instâncias de Gerações Antigas do DMS (ex: dms.t2 ou dms.c4)"
+  },
+  {
+   "slug": "falta-de-criptografia-em-transito-e-repouso-nas-conexoes-de-origem-e-destino",
+   "titulo": "Falta de Criptografia em Trânsito e Repouso nas Conexões de Origem e Destino"
+  },
+  {
+   "slug": "uso-do-dms-para-sincronizacao-continua-de-longo-prazo-em-vez-de-arquiteturas-de-mensageria",
+   "titulo": "Uso do DMS para Sincronização Contínua de Longo Prazo em Vez de Arquiteturas de Mensageria"
+  },
+  {
+   "slug": "falta-de-configuracao-de-alertas-de-custo-para-tarefas-de-longa-duracao",
+   "titulo": "Falta de Configuração de Alertas de Custo para Tarefas de Longa Duração"
+  },
+  {
+   "slug": "execucao-de-multiplas-tarefas-de-migracao-concorrentes-na-mesma-instancia-fraca",
+   "titulo": "Execução de Múltiplas Tarefas de Migração Concorrentes na Mesma Instância Fraca"
+  },
+  {
+   "slug": "falta-de-testes-de-carga-de-cdc-em-ambientes-de-homologacion",
+   "titulo": "Falta de Testes de Carga de CDC em Ambientes de Homologación"
+  },
+  {
+   "slug": "uso-de-permissoes-excessivas-para-o-usuario-do-banco-de-dados-no-dms",
+   "titulo": "Uso de Permissões Excessivas para o Usuário do Banco de Dados no DMS"
+  },
+  {
+   "slug": "falta-de-planejamento-de-espaco-em-disco-para-logs-de-transacao-na-origem",
+   "titulo": "Falta de Planejamento de Espaço em Disco para Logs de Transação na Origem"
+  },
+  {
+   "slug": "duplicacao-de-tarefas-de-carga-para-a-mesma-tabela-por-erro-de-mapeamento",
+   "titulo": "Duplicação de Tarefas de Carga para a Mesma Tabela por Erro de Mapeamento"
+  },
+  {
+   "slug": "ausencia-de-documentacao-dos-mapeamentos-de-tipos-de-dados-heterogeneos",
+   "titulo": "Ausência de Documentação dos Mapeamentos de Tipos de Dados Heterogêneos"
+  }
+ ],
+ "aws-direct-connect": [
+  {
+   "slug": "ignorar-erros-de-crc-interface-errors-na-porta-fisica",
+   "titulo": "Ignorar Erros de CRC (Interface Errors) na Porta Física"
+  },
+  {
+   "slug": "contratacao-de-portas-dedicadas-de-10-gbps-para-trafego-baixo",
+   "titulo": "Contratação de Portas Dedicadas de 10 Gbps para Tráfego Baixo"
+  },
+  {
+   "slug": "manutencao-de-conexoes-de-backup-dedicadas-ociosas",
+   "titulo": "Manutenção de Conexões de Backup Dedicadas Ociosas"
+  },
+  {
+   "slug": "trafego-de-dados-de-saida-sem-uso-de-direct-connect-gateway-dxgw",
+   "titulo": "Tráfego de Dados de Saída sem Uso de Direct Connect Gateway (DXGW)"
+  },
+  {
+   "slug": "falta-de-aproveitamento-de-tarifas-reduzidas-de-dto",
+   "titulo": "Falta de Aproveitamento de Tarifas Reduzidas de DTO"
+  },
+  {
+   "slug": "uso-do-transit-gateway-tgw-sobre-dx-sem-otimizacao-de-anexos",
+   "titulo": "Uso do Transit Gateway (TGW) sobre DX sem Otimização de Anexos"
+  },
+  {
+   "slug": "manutencao-de-conexoes-dx-de-testes-pocs-ativas",
+   "titulo": "Manutenção de Conexões DX de Testes/PoCs Ativas"
+  },
+  {
+   "slug": "alocacao-ineficiente-de-virtual-interfaces-vifs",
+   "titulo": "Alocação Ineficiente de Virtual Interfaces (VIFs)"
+  },
+  {
+   "slug": "transferencia-de-dados-inter-regiao-nao-planejada-via-dxgw",
+   "titulo": "Transferência de Dados Inter-Região Não Planejada via DXGW"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-banda-e-trafego-ocioso",
+   "titulo": "Falta de Monitoramento de Banda e Tráfego Ocioso"
+  },
+  {
+   "slug": "trafego-do-s3-dynamodb-roteado-pela-internet-em-vez-de-public-vif",
+   "titulo": "Tráfego do S3/DynamoDB Roteado pela Internet em Vez de Public VIF"
+  },
+  {
+   "slug": "uso-de-criptografia-macsec-sem-avaliacao-de-hardware",
+   "titulo": "Uso de Criptografia MACsec sem Avaliação de Hardware"
+  },
+  {
+   "slug": "sobrecarga-de-custos-com-links-de-operadoras-parceiras-partner-interconnects",
+   "titulo": "Sobrecarga de Custos com Links de Operadoras Parceiras (Partner Interconnects)"
+  },
+  {
+   "slug": "falta-de-resiliencia-resultando-em-redirecionamento-por-internet",
+   "titulo": "Falta de Resiliência Resultando em Redirecionamento por Internet"
+  },
+  {
+   "slug": "nao-utilizacao-do-aws-site-to-site-vpn-como-backup-economico",
+   "titulo": "Não Utilização do AWS Site-to-Site VPN como Backup Econômico"
+  },
+  {
+   "slug": "uso-de-interconexoes-multi-cloud-sem-ponto-central-de-troca",
+   "titulo": "Uso de Interconexões Multi-Cloud Sem Ponto Central de Troca"
+  },
+  {
+   "slug": "falta-de-tagging-e-rateio-de-custos-da-porta-dx",
+   "titulo": "Falta de Tagging e Rateio de Custos da Porta DX"
+  },
+  {
+   "slug": "crescimento-descontrolado-do-trafego-de-analytics-pela-rede-local",
+   "titulo": "Crescimento Descontrolado do Tráfego de Analytics pela Rede Local"
+  },
+  {
+   "slug": "manutencao-de-links-legados-em-conexoes-de-menor-velocidade",
+   "titulo": "Manutenção de Links Legados em Conexões de Menor Velocidade"
+  },
+  {
+   "slug": "ausencia-de-controle-de-mtu-jumbo-frames",
+   "titulo": "Ausência de Controle de MTU (Jumbo Frames)"
+  },
+  {
+   "slug": "falta-de-alarmes-cloudwatch-para-estado-do-link-connectionstate",
+   "titulo": "Falta de Alarmes CloudWatch para Estado do Link (ConnectionState)"
+  }
+ ],
+ "aws-direct-connect-gateway": [
+  {
+   "slug": "falta-de-sumarizacao-de-rotas-bgp-anunciadas-para-a-nuvem",
+   "titulo": "Falta de Sumarização de Rotas BGP Anunciadas para a Nuvem"
+  },
+  {
+   "slug": "uso-do-dxgw-sem-agregacao-de-vpcs-por-regiao-roteamento-ineficiente",
+   "titulo": "Uso do DXGW sem Agregação de VPCs por Região (Roteamento Ineficiente)"
+  },
+  {
+   "slug": "transferencia-de-dados-inter-regiao-nao-planejada-via-dxgw",
+   "titulo": "Transferência de Dados Inter-Região Não Planejada via DXGW"
+  },
+  {
+   "slug": "falta-de-configuracao-de-redundancia-com-multiplas-portas-dx-single-point-of-failure",
+   "titulo": "Falta de Configuração de Redundância com Múltiplas Portas DX (Single Point of Failure)"
+  },
+  {
+   "slug": "falta-de-filtros-de-prefixos-bgp-allowed-prefixes",
+   "titulo": "Falta de Filtros de Prefixos BGP (Allowed Prefixes)"
+  },
+  {
+   "slug": "uso-de-interfaces-virtuais-privadas-private-vifs-redundantes-sem-necessidade",
+   "titulo": "Uso de Interfaces Virtuais Privadas (Private VIFs) Redundantes sem Necessidade"
+  },
+  {
+   "slug": "desconsideracao-dos-limites-de-rotas-do-dxgw-maximum-200-routes",
+   "titulo": "Desconsideração dos Limites de Rotas do DXGW (Maximum 200 Routes)"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-estado-das-sessoes-bgp-bgppeerstatus",
+   "titulo": "Falta de Monitoramento de Estado das Sessões BGP (BGPPeerStatus)"
+  },
+  {
+   "slug": "uso-de-public-vifs-no-dxgw-sem-necessidade-de-acesso-a-servicos-publicos",
+   "titulo": "Uso de Public VIFs no DXGW sem Necessidade de Acesso a Serviços Públicos"
+  },
+  {
+   "slug": "falta-de-alinhamento-de-mtu-multiplos-tamanhos-de-pacote",
+   "titulo": "Falta de Alinhamento de MTU (Múltiplos Tamanhos de Pacote)"
+  },
+  {
+   "slug": "associacao-do-dxgw-a-transit-gateways-em-regioes-nao-suportadas",
+   "titulo": "Associação do DXGW a Transit Gateways em Regiões Não Suportadas"
+  },
+  {
+   "slug": "falta-de-rateio-de-custos-da-porta-e-trafego-do-dxgw-por-conta",
+   "titulo": "Falta de Rateio de Custos da Porta e Tráfego do DXGW por Conta"
+  },
+  {
+   "slug": "manutencao-de-associacoes-de-vpcs-orfas-de-ambientes-encerrados",
+   "titulo": "Manutenção de Associações de VPCs \"Órfãs\" de Ambientes Encerrados"
+  },
+  {
+   "slug": "uso-de-vpn-de-contingencia-roteada-pelo-dxgw-sem-testes-de-failover",
+   "titulo": "Uso de VPN de Contingência Roteada pelo DXGW sem Testes de Failover"
+  },
+  {
+   "slug": "trafego-de-big-data-analytics-trafegando-sem-controle-pelo-dxgw",
+   "titulo": "Tráfego de Big Data/Analytics Trafegando sem Controle pelo DXGW"
+  },
+  {
+   "slug": "ausencia-de-sumarizacao-de-rotas-da-aws-para-o-data-center-local",
+   "titulo": "Ausência de Sumarização de Rotas da AWS para o Data Center Local"
+  },
+  {
+   "slug": "falta-de-criptografia-macsec-em-conexoes-sensiveis-do-dxgw",
+   "titulo": "Falta de Criptografia MACsec em Conexões Sensíveis do DXGW"
+  },
+  {
+   "slug": "desalinhamento-de-asn-bgp-autonomous-system-number-na-configuracao",
+   "titulo": "Desalinhamento de ASN BGP (Autonomous System Number) na Configuração"
+  },
+  {
+   "slug": "uso-do-dxgw-para-trafego-inter-vpc-direto-sem-transit-gateway",
+   "titulo": "Uso do DXGW para Tráfego Inter-VPC Direto sem Transit Gateway"
+  },
+  {
+   "slug": "falta-de-governanca-na-aprovacao-de-associacoes-de-contas-externa-ao-dxgw",
+   "titulo": "Falta de Governança na Aprovação de Associações de Contas Externa ao DXGW"
+  },
+  {
+   "slug": "ausencia-de-documentacao-da-topologia-de-roteamento-global-do-dxgw",
+   "titulo": "Ausência de Documentação da Topologia de Roteamento Global do DXGW"
+  }
+ ],
+ "aws-glue": [
+  {
+   "slug": "nao-utilizacao-dos-bookmarks-nativos-em-pipelines-diarios",
+   "titulo": "Não Utilização dos Bookmarks Nativos em Pipelines Diários"
+  },
+  {
+   "slug": "dimensionamento-excessivo-de-dpu-data-processing-units-em-jobs",
+   "titulo": "Dimensionamento Excessivo de DPU (Data Processing Units) em Jobs"
+  },
+  {
+   "slug": "uso-da-versao-antiga-do-glue-glue-version-1-0-ou-2-0",
+   "titulo": "Uso da Versão Antiga do Glue (Glue Version 1.0 ou 2.0)"
+  },
+  {
+   "slug": "falta-de-uso-de-glue-flex-execution-para-cargas-tolerantes",
+   "titulo": "Falta de Uso de Glue Flex Execution para Cargas Tolerantes"
+  },
+  {
+   "slug": "job-de-glue-rodando-em-loops-infinitos-ou-com-timeouts-longos",
+   "titulo": "Job de Glue Rodando em Loops Infinitos ou com Timeouts Longos"
+  },
+  {
+   "slug": "falta-de-particionamento-de-dados-na-gravacao-em-data-lakes",
+   "titulo": "Falta de Particionamento de Dados na Gravação em Data Lakes"
+  },
+  {
+   "slug": "leitura-completa-de-arquivos-brutos-em-vez-de-consultas-incrementais",
+   "titulo": "Leitura Completa de Arquivos Brutos em Vez de Consultas Incrementais"
+  },
+  {
+   "slug": "armazenamento-excessivo-de-logs-no-cloudwatch-sem-limpeza",
+   "titulo": "Armazenamento Excessivo de Logs no CloudWatch sem Limpeza"
+  },
+  {
+   "slug": "jobs-de-glue-agendados-com-alta-frequencia-sem-necessidade",
+   "titulo": "Jobs de Glue Agendados com Alta Frequência sem Necessidade"
+  },
+  {
+   "slug": "falta-de-uso-de-formatos-colunares-compactados-parquet-orc",
+   "titulo": "Falta de Uso de Formatos Colunares Compactados (Parquet/ORC)"
+  },
+  {
+   "slug": "crawlers-do-glue-executando-desnecessariamente-em-escala",
+   "titulo": "Crawlers do Glue Executando Desnecessariamente em Escala"
+  },
+  {
+   "slug": "conexoes-de-rede-mal-configuradas-via-nat-gateway-para-fontes-locais",
+   "titulo": "Conexões de Rede Mal Configuradas via NAT Gateway para Fontes Locais"
+  },
+  {
+   "slug": "falta-de-otimizacao-de-memoria-e-shuffle-partitions-no-spark",
+   "titulo": "Falta de Otimização de Memória e Shuffle Partitions no Spark"
+  },
+  {
+   "slug": "ambientes-de-desenvolvimento-do-glue-interactive-sessions-ativos-24-7",
+   "titulo": "Ambientes de Desenvolvimento do Glue Interactive Sessions Ativos 24/7"
+  },
+  {
+   "slug": "catalogo-de-dados-do-glue-data-catalog-poluido-com-tabelas-orfas",
+   "titulo": "Catálogo de Dados do Glue (Data Catalog) Poluído com Tabelas Órfãs"
+  },
+  {
+   "slug": "duplicacao-de-pipelines-de-etl-por-diferentes-unidades-de-negocio",
+   "titulo": "Duplicação de Pipelines de ETL por Diferentes Unidades de Negócio"
+  },
+  {
+   "slug": "uso-de-glue-para-tarefas-simples-que-poderiam-rodar-em-lambda",
+   "titulo": "Uso de Glue para Tarefas Simples que Poderiam Rodar em Lambda"
+  },
+  {
+   "slug": "ausencia-de-tratamento-de-erros-e-retentativas-infinitas",
+   "titulo": "Ausência de Tratamento de Erros e Retentativas Infinitas"
+  },
+  {
+   "slug": "falta-de-limpeza-de-arquivos-temporarios-de-trabalho-glue-temp-directory",
+   "titulo": "Falta de Limpeza de Arquivos Temporários de Trabalho (Glue Temp Directory)"
+  },
+  {
+   "slug": "uso-de-multiplos-trabalhos-secundarios-isolados-em-vez-de-um-dag-consolidado",
+   "titulo": "Uso de Múltiplos Trabalhos Secundários Isolados em Vez de um DAG Consolidado"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-custos-e-alertas-de-execucao-de-dpus",
+   "titulo": "Falta de Monitoramento de Custos e Alertas de Execução de DPUs"
+  }
+ ],
+ "aws-iam-access-analyzer": [
+  {
+   "slug": "falta-de-automacao-para-bloqueio-de-politicas-iam-inseguras",
+   "titulo": "Falta de Automação para Bloqueio de Políticas IAM Inseguras"
+  },
+  {
+   "slug": "ignorar-achados-criticos-de-acesso-publico-public-findings",
+   "titulo": "Ignorar Achados Críticos de Acesso Público (Public Findings)"
+  },
+  {
+   "slug": "falta-de-integracao-com-a-organizacao-multi-account-delegated-admin",
+   "titulo": "Falta de Integração com a Organização (Multi-Account Delegated Admin)"
+  },
+  {
+   "slug": "uso-de-analises-apenas-manuais-no-console-sem-automacao",
+   "titulo": "Uso de Análises Apenas Manuais no Console sem Automação"
+  },
+  {
+   "slug": "falta-de-geracao-de-politicas-de-privilegio-minimo-baseadas-em-logs-policy-generation",
+   "titulo": "Falta de Geração de Políticas de Privilégio Mínimo baseadas em Logs (Policy Generation)"
+  },
+  {
+   "slug": "tratar-achados-intencionais-como-erros-sem-aplicar-correcao-de-escopo-archive-rules",
+   "titulo": "Tratar Achados Intencionais como Erros sem Aplicar Correção de Escopo (Archive Rules)"
+  },
+  {
+   "slug": "analise-restrita-a-recursos-em-vez-de-validar-identidades-iam",
+   "titulo": "Análise Restrita a Recursos em Vez de Validar Identidades IAM"
+  },
+  {
+   "slug": "falta-de-validacao-de-politicas-iam-no-pipeline-de-ci-cd-unused-access-analysis",
+   "titulo": "Falta de Validação de Políticas IAM no Pipeline de CI/CD (Unused Access Analysis)"
+  },
+  {
+   "slug": "inclusao-de-contas-de-sandbox-e-testes-no-escopo-de-auditoria-critica",
+   "titulo": "Inclusão de Contas de Sandbox e Testes no Escopo de Auditoria Crítica"
+  },
+  {
+   "slug": "ignorar-alertas-de-troca-de-chaves-kms-ou-filas-sqs-compartilhadas",
+   "titulo": "Ignorar Alertas de Troca de Chaves KMS ou Filas SQS Compartilhadas"
+  },
+  {
+   "slug": "falta-de-auditoria-de-acessos-nao-utilizados-unused-access",
+   "titulo": "Falta de Auditoria de Acessos Não Utilizados (Unused Access)"
+  },
+  {
+   "slug": "ausencia-de-notificacoes-automaticas-no-slack-teams-para-o-soc",
+   "titulo": "Ausência de Notificações Automáticas no Slack/Teams para o SOC"
+  },
+  {
+   "slug": "falta-de-revisao-periodica-das-regras-de-arquivamento-archived-findings",
+   "titulo": "Falta de Revisão Periódica das Regras de Arquivamento (Archived Findings)"
+  },
+  {
+   "slug": "uso-de-politicas-genericas-de-supressao-que-ocultam-riscos-reais",
+   "titulo": "Uso de Políticas Genéricas de Supressão que Ocultam Riscos Reais"
+  },
+  {
+   "slug": "nao-avaliar-conexoes-de-confianca-com-organizacoes-parceiras",
+   "titulo": "Não Avaliar Conexões de Confiança com Organizações Parceiras"
+  },
+  {
+   "slug": "ausencia-de-rateio-e-responsabilizacao-de-correcao-entre-equipes",
+   "titulo": "Ausência de Rateio e Responsabilização de Correção entre Equipes"
+  },
+  {
+   "slug": "falta-de-uso-do-access-analyzer-para-validar-alteracoes-em-trocas-de-regiao",
+   "titulo": "Falta de Uso do Access Analyzer para Validar Alterações em Trocas de Região"
+  },
+  {
+   "slug": "ignorar-alertas-de-escalacao-de-privilegios-privilege-escalation-paths",
+   "titulo": "Ignorar Alertas de Escalação de Privilégios (Privilege Escalation Paths)"
+  },
+  {
+   "slug": "falta-de-integracao-com-ferramentas-de-siem-externas-splunk-datadog",
+   "titulo": "Falta de Integração com Ferramentas de SIEM Externas (Splunk/Datadog)"
+  },
+  {
+   "slug": "nao-documentar-excecoes-regulatoria-de-acesso-externo",
+   "titulo": "Não Documentar Exceções Regulatória de Acesso Externo"
+  },
+  {
+   "slug": "falta-de-treinamento-das-equipes-de-engenharia-sobre-leitura-dos-achados",
+   "titulo": "Falta de Treinamento das Equipes de Engenharia sobre Leitura dos Achados"
+  }
+ ],
+ "aws-kms": [
+  {
+   "slug": "falta-de-monitoramento-de-limites-de-taxa-por-segundo-kms-throttling",
+   "titulo": "Falta de Monitoramento de Limites de Taxa por Segundo (KMS Throttling)"
+  },
+  {
+   "slug": "uso-de-chaves-gerenciadas-pelo-cliente-cmk-para-criptografia-de-dados-irrelevantes",
+   "titulo": "Uso de Chaves Gerenciadas pelo Cliente (CMK) para Criptografia de Dados Irrelevantes"
+  },
+  {
+   "slug": "chamadas-excessivas-e-desnecessarias-de-criptografia-por-api-encrypt-decrypt",
+   "titulo": "Chamadas Excessivas e Desnecessárias de Criptografia por API (Encrypt/Decrypt)"
+  },
+  {
+   "slug": "falta-de-ativacao-de-s3-bucket-keys-em-buckets-criptografados-com-kms",
+   "titulo": "Falta de Ativação de S3 Bucket Keys em Buckets Criptografados com KMS"
+  },
+  {
+   "slug": "rotacao-automatica-de-chaves-cmk-nao-habilitada-para-dados-sensiveis",
+   "titulo": "Rotação Automática de Chaves CMK Não Habilitada para Dados Sensíveis"
+  },
+  {
+   "slug": "politicas-de-chave-kms-excessivamente-permissivas-principal-ou-aws",
+   "titulo": "Políticas de Chave KMS Excessivamente Permissivas (Principal:  ou AWS: )"
+  },
+  {
+   "slug": "uso-de-chaves-multi-regiao-multi-region-keys-sem-justificativa-operacional",
+   "titulo": "Uso de Chaves Multi-Região (Multi-Region Keys) sem Justificativa Operacional"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-limites-de-taxa-de-requisicao-kms-throttling",
+   "titulo": "Falta de Monitoramento de Limites de Taxa de Requisição (KMS Throttling)"
+  },
+  {
+   "slug": "exclusao-agendada-de-chaves-ativas-pending-deletion-por-erro-operacional",
+   "titulo": "Exclusão Agendada de Chaves Ativas (Pending Deletion) por Erro Operacional"
+  },
+  {
+   "slug": "duplicacao-de-chaves-kms-entre-contas-sem-uso-de-aws-ram",
+   "titulo": "Duplicação de Chaves KMS entre Contas sem Uso de AWS RAM"
+  },
+  {
+   "slug": "criptografia-de-bancos-de-dados-rds-aurora-com-chaves-personalizadas-sem-necessidade-regulatoria",
+   "titulo": "Criptografia de Bancos de Dados RDS/Aurora com Chaves Personalizadas Sem Necessidade Regulatória"
+  },
+  {
+   "slug": "falta-de-auditoria-de-uso-de-chaves-via-cloudtrail",
+   "titulo": "Falta de Auditoria de Uso de Chaves via CloudTrail"
+  },
+  {
+   "slug": "uso-de-chaves-assimetricas-para-criptografia-de-grandes-volumes-de-dados",
+   "titulo": "Uso de Chaves Assimétricas para Criptografia de Grandes Volumes de Dados"
+  },
+  {
+   "slug": "falta-de-rotacao-de-credenciais-de-acesso-a-chaves-de-terceiros",
+   "titulo": "Falta de Rotação de Credenciais de Acesso a Chaves de Terceiros"
+  },
+  {
+   "slug": "criacao-de-multiplas-chaves-para-microsservicos-da-mesma-familia-de-negocio",
+   "titulo": "Criação de Múltiplas Chaves para Microsserviços da Mesma Família de Negócio"
+  },
+  {
+   "slug": "uso-de-parametros-de-criptografia-obsoletos-em-integracoes-legadas",
+   "titulo": "Uso de Parâmetros de Criptografia Obsoletos em Integrações Legadas"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-para-aumento-no-volume-de-chamadas-de-kms",
+   "titulo": "Falta de Alertas de Custo para Aumento no Volume de Chamadas de KMS"
+  },
+  {
+   "slug": "desativacao-indevida-de-chaves-de-backup-antigas",
+   "titulo": "Desativação Indevida de Chaves de Backup Antigas"
+  },
+  {
+   "slug": "uso-de-hsms-dedicados-cloudhsm-para-cargas-que-seriam-atendidas-pelo-kms",
+   "titulo": "Uso de HSMs Dedicados (CloudHSM) para Cargas que Seriam Atendidas pelo KMS"
+  },
+  {
+   "slug": "falta-de-documentacao-de-dependencias-de-chaves-criptograficas",
+   "titulo": "Falta de Documentação de Dependências de Chaves Criptográficas"
+  },
+  {
+   "slug": "ausencia-de-testes-de-recuperacao-com-chaves-kms-de-backup",
+   "titulo": "Ausência de Testes de Recuperação com Chaves KMS de Backup"
+  }
+ ],
+ "aws-memorydb-for-redis": [
+  {
+   "slug": "falta-de-dimensionamento-de-escrita-para-o-mecanismo-de-translog-duravel",
+   "titulo": "Falta de Dimensionamento de Escrita para o Mecanismo de Translog Durável"
+  },
+  {
+   "slug": "uso-de-instancias-superdimensionadas-para-cache-sessoes-com-baixo-uso-de-memoria",
+   "titulo": "Uso de Instâncias Superdimensionadas para Cache/Sessões com Baixo Uso de Memória"
+  },
+  {
+   "slug": "falta-de-definicao-de-politicas-de-expiracao-eviction-policy-ttl",
+   "titulo": "Falta de Definição de Políticas de Expiração (Eviction Policy / TTL)"
+  },
+  {
+   "slug": "manutencao-de-clusters-de-homologacao-ativos-24-7-com-multi-az",
+   "titulo": "Manutenção de Clusters de Homologação Ativos 24/7 com Multi-AZ"
+  },
+  {
+   "slug": "falta-de-utilizacao-de-instancias-reservadas-para-producao-estavel",
+   "titulo": "Falta de Utilização de Instâncias Reservadas para Produção Estável"
+  },
+  {
+   "slug": "armazenamento-de-payloads-gigantescos-no-memorydb",
+   "titulo": "Armazenamento de Payloads Gigantescos no MemoryDB"
+  },
+  {
+   "slug": "conexoes-de-clientes-nao-pooladas-connection-storms",
+   "titulo": "Conexões de Clientes Não Pooladas (Connection Storms)"
+  },
+  {
+   "slug": "trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-na-leitura-escrita",
+   "titulo": "Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ) na Leitura/Escrita"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-uso-de-memoria-via-cloudwatch-freeablememory",
+   "titulo": "Falta de Monitoramento de Uso de Memória via CloudWatch (FreeableMemory)"
+  },
+  {
+   "slug": "uso-de-instancias-de-geracoes-antigas-ex-db-r5-em-vez-de-db-r6g-graviton",
+   "titulo": "Uso de Instâncias de Gerações Antigas (ex: db.r5 em Vez de db.r6g Graviton)"
+  },
+  {
+   "slug": "clusters-orfaos-de-migracoes-ou-testes-de-poc-esquecidos-na-conta",
+   "titulo": "Clusters \"Órfãos\" de Migrações ou Testes de POC Esquecidos na Conta"
+  },
+  {
+   "slug": "falta-de-configuracao-de-snapshots-diarios-e-retencao-exagerada",
+   "titulo": "Falta de Configuração de Snapshots Diários e Retenção Exagerada"
+  },
+  {
+   "slug": "uso-de-memorydb-para-armazenamento-de-longo-prazo-sem-migracao",
+   "titulo": "Uso de MemoryDB para Armazenamento de Longo Prazo sem Migração"
+  },
+  {
+   "slug": "falta-de-uso-de-cluster-mode-para-bases-de-dados-massivas",
+   "titulo": "Falta de Uso de Cluster Mode para Bases de Dados Massivas"
+  },
+  {
+   "slug": "fragmentacao-elevada-de-memoria-sem-rotinas-de-manutencao",
+   "titulo": "Fragmentação Elevada de Memória sem Rotinas de Manutenção"
+  },
+  {
+   "slug": "falta-de-criptografia-em-transito-e-repouso-para-dados-sensiveis-de-sessao",
+   "titulo": "Falta de Criptografia em Trânsito e Repouso para Dados Sensíveis de Sessão"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-para-aumento-do-tamanho-do-cluster-e-nos",
+   "titulo": "Falta de Alertas de Custo para Aumento do Tamanho do Cluster e Nós"
+  },
+  {
+   "slug": "uso-de-comandos-bloqueantes-pesados-no-redis-keys-smembers",
+   "titulo": "Uso de Comandos Bloqueantes Pesados no Redis (KEYS  / SMEMBERS)"
+  },
+  {
+   "slug": "falta-de-testes-de-failover-e-recuperacao-do-translog",
+   "titulo": "Falta de Testes de Failover e Recuperação do Translog"
+  },
+  {
+   "slug": "duplicacao-de-chaves-de-cache-entre-microsservicos-diferentes",
+   "titulo": "Duplicação de Chaves de Cache entre Microsserviços Diferentes"
+  },
+  {
+   "slug": "ausencia-de-logs-de-slow-commands-habilitados-para-diagnostico",
+   "titulo": "Ausência de Logs de Slow Commands Habilitados para Diagnóstico"
+  }
+ ],
+ "aws-secrets-manager": [
+  {
+   "slug": "falta-de-rotacao-automatica-em-chaves-de-apis-de-terceiros",
+   "titulo": "Falta de Rotação Automática em Chaves de APIs de Terceiros"
+  },
+  {
+   "slug": "rotacao-automatica-de-segredos-configurada-com-intervalos-excessivos",
+   "titulo": "Rotação Automática de Segredos Configurada com Intervalos Excessivos"
+  },
+  {
+   "slug": "chamadas-de-api-repetidas-para-obter-credenciais-a-cada-requisicao-de-microsservico",
+   "titulo": "Chamadas de API Repetidas para Obter Credenciais a Cada Requisição de Microsserviço"
+  },
+  {
+   "slug": "armazenamento-de-dados-nao-confidenciais-ou-configuracoes-estaticas-no-secrets-manager",
+   "titulo": "Armazenamento de Dados Não Confidenciais ou Configurações Estáticas no Secrets Manager"
+  },
+  {
+   "slug": "falta-de-uso-do-parameter-store-standard-para-dados-sem-exigencia-de-rotacao",
+   "titulo": "Falta de Uso do Parameter Store Standard para Dados sem Exigência de Rotação"
+  },
+  {
+   "slug": "segredos-orfaos-de-sistemas-descontinuados-mantidos-ativos-na-conta",
+   "titulo": "Segredos \"Órfãos\" de Sistemas Descontinuados Mantidos Ativos na Conta"
+  },
+  {
+   "slug": "exposicao-de-segredos-em-logs-por-tratamento-inadequado-de-erros-no-codigo",
+   "titulo": "Exposição de Segredos em Logs por Tratamento Inadequado de Erros no Código"
+  },
+  {
+   "slug": "falta-de-rotacao-de-segredos-criticos-de-producao-por-falta-de-automacao",
+   "titulo": "Falta de Rotação de Segredos Críticos de Produção por Falta de Automação"
+  },
+  {
+   "slug": "replicacao-cross-region-desnecessaria-de-segredos-em-ambientes-de-teste",
+   "titulo": "Replicação Cross-Region Desnecessária de Segredos em Ambientes de Teste"
+  },
+  {
+   "slug": "uso-de-chaves-kms-customizadas-caras-para-criptografia-de-segredos",
+   "titulo": "Uso de Chaves KMS Customizadas Caras para Criptografia de Segredos"
+  },
+  {
+   "slug": "permissoes-iam-amplas-wildcard-para-acesso-aos-segredos",
+   "titulo": "Permissões IAM Amplas (Wildcard) para Acesso aos Segredos"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-chamadas-falhas-de-recuperacao-de-segredos",
+   "titulo": "Falta de Monitoramento de Chamadas Falhas de Recuperação de Segredos"
+  },
+  {
+   "slug": "uso-do-secrets-manager-para-armazenamento-de-arquivos-binarios-ou-certificados-gigantescos",
+   "titulo": "Uso do Secrets Manager para Armazenamento de Arquivos Binários ou Certificados Gigantescos"
+  },
+  {
+   "slug": "multiplos-segredos-separados-para-instancias-da-mesma-aplicacao",
+   "titulo": "Múltiplos Segredos Separados para Instâncias da Mesma Aplicação"
+  },
+  {
+   "slug": "falta-de-uso-de-aws-privatelink-vpc-endpoints-para-consulta-de-segredos",
+   "titulo": "Falta de Uso de AWS PrivateLink (VPC Endpoints) para Consulta de Segredos"
+  },
+  {
+   "slug": "manutencao-de-versoes-antigas-excessivas-de-segredos-staging-labels",
+   "titulo": "Manutenção de Versões Antigas Excessivas de Segredos (Staging Labels)"
+  },
+  {
+   "slug": "falta-de-testes-de-rotacao-em-ambientes-isolados",
+   "titulo": "Falta de Testes de Rotação em Ambientes Isolados"
+  },
+  {
+   "slug": "duplicacao-de-segredos-entre-contas-da-organizacao",
+   "titulo": "Duplicação de Segredos entre Contas da Organização"
+  },
+  {
+   "slug": "ausencia-de-alertas-de-custo-para-aumento-do-numero-de-segredos-ativos",
+   "titulo": "Ausência de Alertas de Custo para Aumento do Número de Segredos Ativos"
+  },
+  {
+   "slug": "uso-de-senhas-fracas-ou-padrao-em-segredos-gerenciados-manualmente",
+   "titulo": "Uso de Senhas Fracas ou Padrão em Segredos Gerenciados Manualmente"
+  },
+  {
+   "slug": "falta-de-integracao-com-o-aws-cloudtrail-para-auditoria-de-acesso",
+   "titulo": "Falta de Integração com o AWS CloudTrail para Auditoria de Acesso"
+  }
+ ],
+ "aws-shield": [
+  {
+   "slug": "falta-de-ativacao-do-suporte-do-ddos-response-team-drt",
+   "titulo": "Falta de Ativação do Suporte do DDoS Response Team (DRT)"
+  },
+  {
+   "slug": "contratacao-desnecessaria-do-aws-shield-advanced-para-recursos-sem-exposicao-publica",
+   "titulo": "Contratação Desnecessária do AWS Shield Advanced para Recursos sem Exposição Pública"
+  },
+  {
+   "slug": "falta-de-associacao-de-recursos-criticos-as-protecoes-do-shield-advanced",
+   "titulo": "Falta de Associação de Recursos Críticos às Proteções do Shield Advanced"
+  },
+  {
+   "slug": "ausencia-de-configuracao-de-alertas-e-resposta-do-ddos-response-team-drt",
+   "titulo": "Ausência de Configuração de Alertas e Resposta do DDoS Response Team (DRT)"
+  },
+  {
+   "slug": "uso-de-protecao-basica-shield-standard-em-sistemas-de-missao-critica-sem-waf-integrado",
+   "titulo": "Uso de Proteção Básica (Shield Standard) em Sistemas de Missão Crítica sem WAF Integrado"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-metricas-de-ataque-ddosdetected",
+   "titulo": "Falta de Monitoramento de Métricas de Ataque (DDoSDetected)"
+  },
+  {
+   "slug": "contratacao-do-shield-advanced-para-ambientes-de-staging-ou-dev",
+   "titulo": "Contratação do Shield Advanced para Ambientes de Staging ou Dev"
+  },
+  {
+   "slug": "desconsideracao-do-credito-de-waf-inclusos-na-assinatura-do-shield-advanced",
+   "titulo": "Desconsideração do Crédito de WAF Inclusos na Assinatura do Shield Advanced"
+  },
+  {
+   "slug": "falta-de-testes-de-resiliencia-game-days-ddos-simulation",
+   "titulo": "Falta de Testes de Resiliência (Game Days / DDoS Simulation)"
+  },
+  {
+   "slug": "associacao-incorreta-de-elastic-ips-eip-protegidos-sem-trafego-real",
+   "titulo": "Associação Incorreta de Elastic IPs (EIP) Protegidos sem Tráfego Real"
+  },
+  {
+   "slug": "falta-de-configuracao-de-limites-de-taxa-rate-limiting-em-conjunto-com-o-shield",
+   "titulo": "Falta de Configuração de Limites de Taxa (Rate Limiting) em Conjunto com o Shield"
+  },
+  {
+   "slug": "desatualizacao-de-contatos-de-emergencia-na-console-do-shield",
+   "titulo": "Desatualização de Contatos de Emergência na Console do Shield"
+  },
+  {
+   "slug": "uso-de-arquiteturas-sem-cdn-cloudfront-exponendo-albs-diretamente-ao-shield",
+   "titulo": "Uso de Arquiteturas sem CDN (CloudFront) Exponendo ALBs Diretamente ao Shield"
+  },
+  {
+   "slug": "falta-de-analise-de-relatorios-pos-ataque-ddos-assessment-reports",
+   "titulo": "Falta de Análise de Relatórios Pós-Ataque (DDoS Assessment Reports)"
+  },
+  {
+   "slug": "desconhecimento-da-cobertura-de-custos-de-escalabilidade-induzida-por-ddos",
+   "titulo": "Desconhecimento da Cobertura de Custos de Escalabilidade Induzida por DDoS"
+  },
+  {
+   "slug": "uso-de-firewalls-tradicionais-de-terceiros-em-conflito-com-o-shield",
+   "titulo": "Uso de Firewalls Tradicionais de Terceiros em Conflito com o Shield"
+  },
+  {
+   "slug": "falta-de-protecao-em-dns-route-53-associada-ao-shield",
+   "titulo": "Falta de Proteção em DNS (Route 53) Associada ao Shield"
+  },
+  {
+   "slug": "criacao-de-alertas-falsos-positivos-em-equipes-de-plantao",
+   "titulo": "Criação de Alertas Falsos Positivos em Equipes de Plantão"
+  },
+  {
+   "slug": "falta-de-governanca-de-custos-da-assinatura-mensal-fixa-do-shield-advanced",
+   "titulo": "Falta de Governança de Custos da Assinatura Mensal Fixa do Shield Advanced"
+  },
+  {
+   "slug": "inclusao-de-trafego-interno-de-parceiros-no-escopo-de-monitoramento-avancado-do-shield",
+   "titulo": "Inclusão de Tráfego Interno de Parceiros no Escopo de Monitoramento Avançado do Shield"
+  },
+  {
+   "slug": "ausencia-de-plano-de-resposta-a-incidentes-documentado-para-equipes-de-operacao",
+   "titulo": "Ausência de Plano de Resposta a Incidentes Documentado para Equipes de Operação"
+  }
+ ],
+ "aws-storage-gateway": [
+  {
+   "slug": "esgotamento-do-disco-de-buffer-de-upload-local",
+   "titulo": "Esgotamento do Disco de Buffer de Upload Local"
+  },
+  {
+   "slug": "uso-do-file-gateway-sem-regras-de-ciclo-de-vida-no-s3-standard-lifecycle",
+   "titulo": "Uso do File Gateway sem Regras de Ciclo de Vida no S3 (Standard Lifecycle)"
+  },
+  {
+   "slug": "dimensionamento-inadequado-do-cache-local-local-cache-disk-oversizing-undersizing",
+   "titulo": "Dimensionamento Inadequado do Cache Local (Local Cache Disk Oversizing/Undersizing)"
+  },
+  {
+   "slug": "manutencao-de-volume-gateway-no-modo-stored-sem-necessidade",
+   "titulo": "Manutenção de Volume Gateway no Modo Stored sem Necessidade"
+  },
+  {
+   "slug": "falta-de-limpeza-do-cache-local-do-file-gateway-apos-atualizacoes",
+   "titulo": "Falta de Limpeza do Cache Local do File Gateway após Atualizações"
+  },
+  {
+   "slug": "uso-do-tape-gateway-sem-politica-de-arquivamento-de-fitas-no-glacier-flexible-deep-archive",
+   "titulo": "Uso do Tape Gateway sem Política de Arquivamento de Fitas no Glacier Flexible/Deep Archive"
+  },
+  {
+   "slug": "transferencia-masiva-de-dados-pela-internet-em-vez-do-direct-connect",
+   "titulo": "Transferência Masiva de Dados pela Internet em Vez do Direct Connect"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-creditos-e-metricas-de-upload-buffer-uploadbufferfree",
+   "titulo": "Falta de Monitoramento de Créditos e Métricas de Upload Buffer (UploadBufferFree)"
+  },
+  {
+   "slug": "appliance-virtual-do-storage-gateway-vmware-hyper-v-com-recursos-subdimensionados",
+   "titulo": "Appliance Virtual do Storage Gateway (VMware/Hyper-V) com Recursos Subdimensionados"
+  },
+  {
+   "slug": "falta-de-criptografia-kms-na-gravacao-de-arquivos-no-s3-via-gateway",
+   "titulo": "Falta de Criptografia KMS na Gravação de Arquivos no S3 via Gateway"
+  },
+  {
+   "slug": "file-gateways-orfaos-de-projetos-de-migracao-concluidos",
+   "titulo": "File Gateways \"Órfãos\" de Projetos de Migração Concluídos"
+  },
+  {
+   "slug": "falta-de-uso-de-smb-active-directory-integration-para-controle-de-acesso",
+   "titulo": "Falta de Uso de SMB Active Directory Integration para Controle de Acesso"
+  },
+  {
+   "slug": "criacao-de-milhoes-de-arquivos-minusculos-no-file-gateway",
+   "titulo": "Criação de Milhões de Arquivos Minúsculos no File Gateway"
+  },
+  {
+   "slug": "falta-de-ativacao-do-auto-notify-para-alteracoes-no-bucket-s3",
+   "titulo": "Falta de Ativação do Auto-Notify para Alterações no Bucket S3"
+  },
+  {
+   "slug": "uso-de-volumes-ebs-com-discos-legados-no-cache-do-storage-gateway-na-nuvem",
+   "titulo": "Uso de Volumes EBS com Discos Legados no Cache do Storage Gateway na Nuvem"
+  },
+  {
+   "slug": "falta-de-testes-de-recuperacao-de-desastres-com-tape-volume-gateway",
+   "titulo": "Falta de Testes de Recuperação de Desastres com Tape/Volume Gateway"
+  },
+  {
+   "slug": "operacoes-de-backup-local-sem-janelas-de-agendamento-de-upload",
+   "titulo": "Operações de Backup Local sem Janelas de Agendamento de Upload"
+  },
+  {
+   "slug": "falta-de-restricao-de-seguranca-nos-compartilhamentos-nfs-smb-export-rules",
+   "titulo": "Falta de Restrição de Segurança nos Compartilhamentos NFS/SMB (Export Rules)"
+  },
+  {
+   "slug": "ausencia-de-alertas-no-cloudwatch-para-status-de-conectividade-do-gateway-gatewaystate",
+   "titulo": "Ausência de Alertas no CloudWatch para Status de Conectividade do Gateway (GatewayState)"
+  },
+  {
+   "slug": "falta-de-governanca-de-custos-no-rateio-de-armazenamento-por-departamento",
+   "titulo": "Falta de Governança de Custos no Rateio de Armazenamento por Departamento"
+  },
+  {
+   "slug": "ausencia-de-configuracao-de-bandwidth-rate-limits",
+   "titulo": "Ausência de Configuração de Bandwidth Rate Limits"
+  }
+ ],
+ "aws-transit-gateway": [
+  {
+   "slug": "uso-de-uma-unica-tabela-de-roteamento-para-toda-a-organizacao",
+   "titulo": "Uso de uma Única Tabela de Roteamento para Toda a Organização"
+  },
+  {
+   "slug": "cobrancas-elevadas-por-hora-de-anexo-tgw-attachment-hours",
+   "titulo": "Cobranças Elevadas por Hora de Anexo (TGW Attachment Hours)"
+  },
+  {
+   "slug": "transferencia-massiva-de-dados-processados-pelo-tgw-data-processing-charges",
+   "titulo": "Transferência Massiva de Dados Processados pelo TGW (Data Processing Charges)"
+  },
+  {
+   "slug": "trafego-cruzado-entre-zonas-de-disponibilidade-cross-az-traffic-via-tgw",
+   "titulo": "Tráfego Cruzado Entre Zonas de Disponibilidade (Cross-AZ Traffic via TGW)"
+  },
+  {
+   "slug": "falta-de-segmentacao-por-tabelas-de-roteamento-route-tables",
+   "titulo": "Falta de Segmentação por Tabelas de Roteamento (Route Tables)"
+  },
+  {
+   "slug": "uso-de-tgw-para-trafego-para-s3-e-dynamodb-em-vez-de-vpc-gateway-endpoints",
+   "titulo": "Uso de TGW para Tráfego para S3 e DynamoDB em Vez de VPC Gateway Endpoints"
+  },
+  {
+   "slug": "centralizacao-ineficiente-de-saida-de-internet-egress-vpc",
+   "titulo": "Centralização Ineficiente de Saída de Internet (Egress VPC)"
+  },
+  {
+   "slug": "falta-de-compartilhamento-via-aws-ram-resource-access-manager",
+   "titulo": "Falta de Compartilhamento via AWS RAM (Resource Access Manager)"
+  },
+  {
+   "slug": "anexos-de-tgw-orfaos-de-vpcs-excluidas",
+   "titulo": "Anexos de TGW \"Órfãos\" de VPCs Excluídas"
+  },
+  {
+   "slug": "falta-de-uso-do-transit-gateway-connect-para-sd-wan",
+   "titulo": "Falta de Uso do Transit Gateway Connect para SD-WAN"
+  },
+  {
+   "slug": "duplicacao-de-roteamento-com-direct-connect-sem-direct-connect-gateway",
+   "titulo": "Duplicação de Roteamento com Direct Connect sem Direct Connect Gateway"
+  },
+  {
+   "slug": "falta-de-monitoramento-de-metricas-de-estrangulamento-packetdropcount",
+   "titulo": "Falta de Monitoramento de Métricas de Estrangulamento (PacketDropCount)"
+  },
+  {
+   "slug": "uso-de-tgw-inter-region-peering-de-tgw-para-dados-de-alta-volumetria",
+   "titulo": "Uso de TGW Inter-Region (Peering de TGW) para Dados de Alta Volumetria"
+  },
+  {
+   "slug": "falta-de-uso-do-network-manager-para-visibilidade-da-topologia",
+   "titulo": "Falta de Uso do Network Manager para Visibilidade da Topologia"
+  },
+  {
+   "slug": "inspecao-de-trafego-de-rede-ineficiente-inline-firewalls-sem-appliance-mode",
+   "titulo": "Inspeção de Tráfego de Rede Ineficiente (Inline Firewalls sem Appliance Mode)"
+  },
+  {
+   "slug": "limites-de-rotas-excedidos-nas-tabelas-de-roteamento-do-tgw",
+   "titulo": "Limites de Rotas Excedidos nas Tabelas de Roteamento do TGW"
+  },
+  {
+   "slug": "falta-de-alertas-de-custo-no-aws-budgets-para-o-processamento-de-dados-do-tgw",
+   "titulo": "Falta de Alertas de Custo no AWS Budgets para o Processamento de Dados do TGW"
+  },
+  {
+   "slug": "configuracao-de-subredes-inadequadas-para-os-anexos-do-tgw-enis",
+   "titulo": "Configuração de Subredes Inadequadas para os Anexos do TGW (ENIs)"
+  },
+  {
+   "slug": "nao-utilizacao-do-multicast-no-tgw-quando-exigido-por-plataformas-financeiras",
+   "titulo": "Não Utilização do Multicast no TGW quando Exigido por Plataformas Financeiras"
+  },
+  {
+   "slug": "falta-de-auditoria-de-alteracoes-nas-tabelas-de-roteamento",
+   "titulo": "Falta de Auditoria de Alterações nas Tabelas de Roteamento"
+  },
+  {
+   "slug": "ausencia-de-ambientes-de-homologacao-de-rede-tgw-de-testes",
+   "titulo": "Ausência de Ambientes de Homologação de Rede (TGW de Testes)"
+  }
+ ],
+ "aws-trusted-advisor": [
+  {
+   "slug": "falta-de-automacao-no-envio-dos-relatorios-de-economia",
+   "titulo": "Falta de Automação no Envio dos Relatórios de Economia"
+  },
+  {
+   "slug": "ignorar-alertas-criticos-de-seguranca-e-portas-expostas",
+   "titulo": "Ignorar Alertas Críticos de Segurança e Portas Expostas"
+  },
+  {
+   "slug": "falta-de-integracao-com-aws-health-dashboard-e-notificacoes-automatizadas",
+   "titulo": "Falta de Integração com AWS Health Dashboard e Notificações Automatizadas"
+  },
+  {
+   "slug": "nao-utilizacao-da-api-do-trusted-advisor-para-governanca-centralizada",
+   "titulo": "Não Utilização da API do Trusted Advisor para Governança Centralizada"
+  },
+  {
+   "slug": "desconsideracao-das-recomendacoes-de-otimizacao-de-custos-cost-optimization-checks",
+   "titulo": "Desconsideração das Recomendações de Otimização de Custos (Cost Optimization Checks)"
+  },
+  {
+   "slug": "falta-de-acompanhamento-de-limites-de-servico-service-limits-quotas",
+   "titulo": "Falta de Acompanhamento de Limites de Serviço (Service Limits / Quotas)"
+  },
+  {
+   "slug": "contratacao-de-ferramentas-caras-de-terceiros-para-finops-sem-usar-o-trusted-advisor",
+   "titulo": "Contratação de Ferramentas Caras de Terceiros para FinOps sem Usar o Trusted Advisor"
+  },
+  {
+   "slug": "ignorar-alertas-de-confiabilidade-fault-tolerance",
+   "titulo": "Ignorar Alertas de Confiabilidade (Fault Tolerance)"
+  },
+  {
+   "slug": "falta-de-ativacao-de-verificacoes-avancadas-full-trusted-advisor-checks",
+   "titulo": "Falta de Ativação de Verificações Avançadas (Full Trusted Advisor Checks)"
+  },
+  {
+   "slug": "tratar-alertas-do-trusted-advisor-como-ruido-sem-investigacao",
+   "titulo": "Tratar Alertas do Trusted Advisor como \"Ruído\" sem Investigação"
+  },
+  {
+   "slug": "ausencia-de-atribuicao-de-responsaveis-para-resolucao-de-alertas",
+   "titulo": "Ausência de Atribuição de Responsáveis para Resolução de Alertas"
+  },
+  {
+   "slug": "falta-de-integracao-com-sistemas-de-chamados-jira-servicenow",
+   "titulo": "Falta de Integração com Sistemas de Chamados (Jira/ServiceNow)"
+  },
+  {
+   "slug": "ignorar-recomendacoes-de-performance-relacionadas-a-limites-de-i-o",
+   "titulo": "Ignorar Recomendações de Performance Relacionadas a Limites de I/O"
+  },
+  {
+   "slug": "uso-de-contas-de-sandbox-sem-limpeza-baseada-nas-diretrizes-do-advisor",
+   "titulo": "Uso de Contas de Sandbox sem Limpeza Baseada nas Diretrizes do Advisor"
+  },
+  {
+   "slug": "falta-de-verificacao-de-conformidade-com-licenciamento-de-software-byol",
+   "titulo": "Falta de Verificação de Conformidade com Licenciamento de Software (BYOL)"
+  },
+  {
+   "slug": "ignorar-alertas-de-certificados-ssl-proximos-da-expiracao-no-iam-acm",
+   "titulo": "Ignorar Alertas de Certificados SSL Próximos da Expiração no IAM/ACM"
+  },
+  {
+   "slug": "falta-de-personalizacao-de-excecoes-de-alertas-suppression",
+   "titulo": "Falta de Personalização de Exceções de Alertas (Suppression)"
+  },
+  {
+   "slug": "desconhecimento-dos-custos-de-chamadas-de-api-do-trusted-advisor-em-contas-multi-conta",
+   "titulo": "Desconhecimento dos Custos de Chamadas de API do Trusted Advisor em Contas Multi-Conta"
+  },
+  {
+   "slug": "falta-de-acompanhamento-da-evolucao-do-score-de-otimizacao-mensal",
+   "titulo": "Falta de Acompanhamento da Evolução do Score de Otimização Mensal"
+  },
+  {
+   "slug": "ignorar-alertas-de-desatualizacao-de-versoes-de-runtime-lambda-rds",
+   "titulo": "Ignorar Alertas de Desatualização de Versões de Runtime (Lambda/RDS)"
+  },
+  {
+   "slug": "ausencia-de-relatorios-executivos-para-a-diretoria-financeira-cfo",
+   "titulo": "Ausência de Relatórios Executivos para a Diretoria Financeira (CFO)"
+  }
+ ]
+}

@@ -166,8 +166,10 @@ FinSlash/
 │   └── index.js            # API Node.js: diagnósticos e feedback
 ├── banco-de-dados/
 │   ├── diagnosticos-postgresql.sql # Esquema e dados para PostgreSQL
+│   ├── expansao-diagnosticos-custo-postgresql.sql # Novos cenários de custo por serviço
 │   ├── aprendizado-global-e-embeddings-postgresql.sql # Migração opcional para a Navi
 │   ├── gerar-embeddings-catalogo.js # Sincronização incremental de embeddings
+│   ├── gerar-expansao-sql.cjs # Gera o SQL de expansão a partir dos dados
 │   └── permissoes-api-postgresql.sql # Permissões para a API
 ├── package.json            # Dependência do driver PostgreSQL
 ├── vercel.json             # Configuração de rotas e cron

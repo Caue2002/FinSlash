@@ -1,0 +1,2910 @@
+{
+ "amazon-eks": [
+  {
+   "title": "EKS Compute and Autoscaling cost optimization",
+   "url": "https://docs.aws.amazon.com/eks/latest/best-practices/cost-opt-compute.html"
+  },
+  {
+   "title": "Scale cluster compute with Karpenter and Cluster Autoscaler",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html"
+  },
+  {
+   "title": "EKS node and workload efficiency",
+   "url": "https://docs.aws.amazon.com/eks/latest/best-practices/node_and_workload_efficiency.html"
+  },
+  {
+   "title": "Simplify node lifecycle with managed node groups",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html"
+  },
+  {
+   "title": "Amazon EKS pricing",
+   "url": "https://aws.amazon.com/eks/pricing/"
+  },
+  {
+   "title": "Best practices for Amazon EKS networking",
+   "url": "https://docs.aws.amazon.com/eks/latest/best-practices/networking.html"
+  },
+  {
+   "title": "Amazon VPC pricing",
+   "url": "https://aws.amazon.com/vpc/pricing/"
+  },
+  {
+   "title": "Configuring cluster logging in Amazon EKS",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/cluster-logging.html"
+  },
+  {
+   "title": "What is Amazon CloudWatch Logs?",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html"
+  },
+  {
+   "title": "Working with log groups and log streams",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html"
+  },
+  {
+   "title": "Route application and HTTP traffic with Application Load Balancers",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html"
+  },
+  {
+   "title": "Understand the Kubernetes version lifecycle on EKS",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html"
+  },
+  {
+   "title": "Automate cluster infrastructure with EKS Auto Mode",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/automode.html"
+  },
+  {
+   "title": "Simplify compute management with AWS Fargate",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/fargate.html"
+  },
+  {
+   "title": "Create nodes with optimized Amazon Linux AMIs",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html"
+  },
+  {
+   "title": "Use Kubernetes volume storage with Amazon EBS",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html"
+  },
+  {
+   "title": "Container Insights",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html"
+  },
+  {
+   "title": "EKS workload scaling best practices",
+   "url": "https://docs.aws.amazon.com/eks/latest/best-practices/scale-workloads.html"
+  },
+  {
+   "title": "Troubleshoot problems with Amazon EKS clusters and nodes",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html"
+  },
+  {
+   "title": "What Is AWS App Mesh?",
+   "url": "https://docs.aws.amazon.com/app-mesh/latest/userguide/what-is-app-mesh.html"
+  },
+  {
+   "title": "Deploy private clusters with limited internet access",
+   "url": "https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html"
+  }
+ ],
+ "amazon-dynamodb": [
+  {
+   "title": "DynamoDB: Evaluate your table capacity mode",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CostOptimization_TableCapacityMode.html"
+  },
+  {
+   "title": "DynamoDB throughput capacity",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html"
+  },
+  {
+   "title": "Considerations when switching capacity modes in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-switching-capacity-modes.html"
+  },
+  {
+   "title": "DynamoDB table classes",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CostOptimization_TableClasses.html"
+  },
+  {
+   "title": "Best practices for designing and using partition keys effectively in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html"
+  },
+  {
+   "title": "Designing partition keys to distribute your workload in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-uniform-load.html"
+  },
+  {
+   "title": "Global secondary indexes",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html"
+  },
+  {
+   "title": "DynamoDB read consistency",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html"
+  },
+  {
+   "title": "Querying data in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html"
+  },
+  {
+   "title": "Scanning tables in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html"
+  },
+  {
+   "title": "DynamoDB Streams and AWS Lambda triggers",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.html"
+  },
+  {
+   "title": "Filtering event source mappings for AWS Lambda",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-eventfiltering.html"
+  },
+  {
+   "title": "Using time to live (TTL) in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html"
+  },
+  {
+   "title": "DynamoDB item sizes and formats",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CapacityUnitCalculations.html"
+  },
+  {
+   "title": "Amazon DynamoDB pricing",
+   "url": "https://aws.amazon.com/dynamodb/pricing/"
+  },
+  {
+   "title": "BatchWriteItem API reference",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BatchWriteItem.html"
+  },
+  {
+   "title": "Error handling with DynamoDB: Batch operations and error handling",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.Errors.html#Programming.Errors.BatchOperations"
+  },
+  {
+   "title": "Global tables - multi-active, multi-Region replication",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"
+  },
+  {
+   "title": "How DynamoDB global tables work",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/V2globaltables_HowItWorks.html"
+  },
+  {
+   "title": "Understanding Amazon DynamoDB billing for global tables",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/global-tables-billing.html"
+  },
+  {
+   "title": "Backup and restore for DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Backup-and-Restore.html"
+  },
+  {
+   "title": "Using on-demand DynamoDB backup and restore",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backuprestore_HowItWorks.html"
+  },
+  {
+   "title": "Understanding Amazon DynamoDB billing for backups",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backup-restore-billing.html"
+  },
+  {
+   "title": "Filter expressions for the Query operation in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.FilterExpression.html"
+  },
+  {
+   "title": "Amazon DynamoDB Transactions: How it works",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html"
+  },
+  {
+   "title": "TransactWriteItems API reference",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html"
+  },
+  {
+   "title": "Improving data access with secondary indexes",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SecondaryIndexes.html"
+  },
+  {
+   "title": "Online index operations in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.OnlineOps.html"
+  },
+  {
+   "title": "Query pagination in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.Pagination.html"
+  },
+  {
+   "title": "Scan pagination in DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.Pagination.html"
+  },
+  {
+   "title": "DynamoDB Accelerator (DAX)",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html"
+  },
+  {
+   "title": "DAX concepts",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.concepts.html"
+  },
+  {
+   "title": "DAX deployment scenarios",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.DeploymentScenarios.html"
+  },
+  {
+   "title": "Service quotas for DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ServiceQuotas.html"
+  },
+  {
+   "title": "PutItem API reference",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_PutItem.html"
+  },
+  {
+   "title": "Best practices for using DynamoDB",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html"
+  },
+  {
+   "title": "DynamoDB on-demand capacity mode",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/on-demand-capacity-mode.html"
+  },
+  {
+   "title": "How DynamoDB read and write capacity modes work",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadWriteCapacityMode.html"
+  },
+  {
+   "title": "Considerations for read and write capacity limits",
+   "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-limits.html"
+  }
+ ],
+ "amazon-rds": [
+  {
+   "title": "RDS: Stopping an Amazon RDS DB instance temporarily",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_StopInstance.html"
+  },
+  {
+   "title": "Introduction to backups",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html"
+  },
+  {
+   "title": "Viewing Aurora and RDS database recommendations",
+   "url": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-rds-recommendations.html"
+  },
+  {
+   "title": "Reserved DB instances for Amazon RDS",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html"
+  },
+  {
+   "title": "Amazon RDS DB instance storage",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html"
+  },
+  {
+   "title": "Configuring and managing a Multi-AZ deployment for Amazon RDS",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html"
+  },
+  {
+   "title": "Creating a DB snapshot for a Single-AZ DB instance",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html"
+  },
+  {
+   "title": "Working with storage for Amazon RDS DB instances",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.StorageTypes.html"
+  },
+  {
+   "title": "Amazon RDS Proxy",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
+  },
+  {
+   "title": "Deleting a DB instance",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html"
+  },
+  {
+   "title": "Working with DB instance read replicas",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+  },
+  {
+   "title": "Maintaining a DB instance",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html"
+  },
+  {
+   "title": "Managing capacity automatically with Amazon RDS storage autoscaling",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html"
+  },
+  {
+   "title": "Monitoring Amazon RDS log files",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.html"
+  },
+  {
+   "title": "Exporting DB snapshot data to Amazon S3 for Amazon RDS",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ExportSnapshot.html"
+  },
+  {
+   "title": "Managing the lifecycle of objects",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+  },
+  {
+   "title": "Database load, Top SQL, wait events, and plans",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.ActiveSessions.html"
+  },
+  {
+   "title": "Amazon RDS pricing",
+   "url": "https://aws.amazon.com/rds/pricing/"
+  },
+  {
+   "title": "Amazon VPC pricing",
+   "url": "https://aws.amazon.com/vpc/pricing/"
+  },
+  {
+   "title": "Working with a DB instance in a VPC",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html"
+  },
+  {
+   "title": "Best practices for AWS Database Migration Service",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_BestPractices.html"
+  },
+  {
+   "title": "Parameters for MySQL",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.MySQL.Parameters.html"
+  },
+  {
+   "title": "Monitoring Amazon RDS DB instances",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MonitoringOverview.html"
+  },
+  {
+   "title": "Parameter groups for Amazon RDS",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html"
+  }
+ ],
+ "amazon-s3": [
+  {
+   "title": "Managing object lifecycle",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+  },
+  {
+   "title": "Abort incomplete multipart uploads with S3 Lifecycle",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpu-abort-incomplete-mpu-lifecycle-config.html"
+  },
+  {
+   "title": "Gateway endpoints for Amazon S3",
+   "url": "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html"
+  },
+  {
+   "title": "S3 Versioning and lifecycle management",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html"
+  },
+  {
+   "title": "S3 Intelligent-Tiering",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering.html"
+  },
+  {
+   "title": "Monitoring activity and storage costs with S3 Intelligent-Tiering",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering-monitoring.html"
+  },
+  {
+   "title": "Cost optimization for S3",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/cost-optimization.html"
+  },
+  {
+   "title": "Performance guidelines for S3",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html"
+  },
+  {
+   "title": "Amazon S3 storage classes",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+  },
+  {
+   "title": "Restoring archived objects",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects.html"
+  },
+  {
+   "title": "Transitioning objects using lifecycle configuration",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html"
+  },
+  {
+   "title": "Partitioned data for queries",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/partition-optimized-queries.html"
+  },
+  {
+   "title": "Partitioning in Athena",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/partitioning.html"
+  },
+  {
+   "title": "Using S3 Object Lock",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html"
+  },
+  {
+   "title": "S3 Object Lock overview",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html"
+  },
+  {
+   "title": "Security best practices for S3",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html"
+  },
+  {
+   "title": "Monitoring metrics with Amazon S3",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudwatch-metrics.html"
+  },
+  {
+   "title": "Request metrics for S3 buckets",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/request-metrics-s3.html"
+  },
+  {
+   "title": "Replicating objects",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+  },
+  {
+   "title": "Logging requests with server access logging",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html"
+  },
+  {
+   "title": "Serving static website content from Amazon S3",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html"
+  },
+  {
+   "title": "S3 Express One Zone",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-express-one-zone.html"
+  },
+  {
+   "title": "Directory buckets",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/directory-buckets-overview.html"
+  },
+  {
+   "title": "Blocking public access to your S3 storage",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+  },
+  {
+   "title": "Access control best practices",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-managing-acl.html"
+  },
+  {
+   "title": "Using encryption with AWS KMS",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html"
+  },
+  {
+   "title": "Bucket keys",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-keys.html"
+  }
+ ],
+ "amazon-ebs": [
+  {
+   "title": "Amazon EBS volume types",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html"
+  },
+  {
+   "title": "Amazon EBS pricing",
+   "url": "https://aws.amazon.com/ebs/pricing/"
+  },
+  {
+   "title": "Amazon EBS volume recommendations",
+   "url": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-ebs-recommendations.html"
+  },
+  {
+   "title": "Amazon EBS snapshots",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html"
+  },
+  {
+   "title": "Automate backups with Amazon Data Lifecycle Manager",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-lifecycle.html"
+  },
+  {
+   "title": "Amazon EBS General Purpose SSD volumes",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/general-purpose.html"
+  },
+  {
+   "title": "Modify an Amazon EBS volume using Elastic Volumes operations",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-modify-volume.html"
+  },
+  {
+   "title": "Amazon CloudWatch metrics for Amazon EBS",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/using_cloudwatch_ebs.html"
+  },
+  {
+   "title": "Stop and start Amazon EC2 instances",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html"
+  },
+  {
+   "title": "Metrics collected by the CloudWatch agent",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/metrics-collected-by-CloudWatch-agent.html"
+  },
+  {
+   "title": "View information about an Amazon EBS volume",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-describing-volumes.html"
+  },
+  {
+   "title": "Create a snapshot of an EBS volume",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-create-snapshot.html"
+  },
+  {
+   "title": "Install the CloudWatch agent",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html"
+  },
+  {
+   "title": "Instance store temporary block storage for EC2 instances",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html"
+  },
+  {
+   "title": "Data persistence for Amazon EC2 instance store volumes",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-store-lifetime.html"
+  },
+  {
+   "title": "Amazon EBS encryption",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-encryption.html"
+  },
+  {
+   "title": "Copy an Amazon EBS snapshot",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-copy-snapshot.html"
+  },
+  {
+   "title": "Amazon EBS-optimized instance types",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html"
+  },
+  {
+   "title": "Amazon EBS volume performance",
+   "url": "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-performance.html"
+  },
+  {
+   "title": "What is Amazon Elastic File System?",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html"
+  },
+  {
+   "title": "Monitor EBS volumes",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-volume-status.html"
+  },
+  {
+   "title": "Alarms on metrics",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Alarm-On-Metric-Alarm-Name.html"
+  }
+ ],
+ "nat-gateway": [
+  {
+   "title": "NAT gateway pricing",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+  },
+  {
+   "title": "Gateway VPC endpoints",
+   "url": "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html"
+  },
+  {
+   "title": "NAT gateways",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html"
+  },
+  {
+   "title": "VPC flow logs",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html"
+  },
+  {
+   "title": "NAT gateway pricing",
+   "url": "https://aws.amazon.com/vpc/pricing/"
+  },
+  {
+   "title": "Interface VPC endpoints",
+   "url": "https://docs.aws.amazon.com/vpc/latest/privatelink/interface-endpoints.html"
+  },
+  {
+   "title": "VPC endpoints",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html"
+  },
+  {
+   "title": "NAT gateway CloudWatch metrics",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-cloudwatch.html"
+  },
+  {
+   "title": "VPC networking FAQs",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Networking_FAQs.html"
+  },
+  {
+   "title": "NAT instances",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_NAT_Instance.html"
+  },
+  {
+   "title": "Security groups for your VPC",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html"
+  },
+  {
+   "title": "Managing your costs with AWS Budgets",
+   "url": "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+  },
+  {
+   "title": "Elastic IP addresses",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html"
+  },
+  {
+   "title": "Regions and Availability Zones",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html"
+  }
+ ],
+ "aws-lambda": [
+  {
+   "title": "Lambda: Configure memory",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-memory.html"
+  },
+  {
+   "title": "Set retention for log groups",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_PutRetentionPolicy.html"
+  },
+  {
+   "title": "Configuring reserved concurrency for a Lambda function",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html"
+  },
+  {
+   "title": "Understanding the Lambda execution environment lifecycle",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html"
+  },
+  {
+   "title": "Configuring provisioned concurrency for a Lambda function",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html"
+  },
+  {
+   "title": "Configure Lambda function timeout",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html"
+  },
+  {
+   "title": "How Lambda handles errors and retries with asynchronous invocation",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html"
+  },
+  {
+   "title": "Capturing records of Lambda asynchronous invocations",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html"
+  },
+  {
+   "title": "Using AWS Lambda with Amazon RDS",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-rds.html"
+  },
+  {
+   "title": "Amazon RDS Proxy",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
+  },
+  {
+   "title": "Enable internet access for VPC-connected Lambda functions",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc-internet.html"
+  },
+  {
+   "title": "Best practices for working with AWS Lambda functions",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html"
+  },
+  {
+   "title": "Deploying Lambda functions as .zip file archives",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-function-zip.html"
+  },
+  {
+   "title": "Lambda function runtimes and runtime support policy",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html"
+  },
+  {
+   "title": "Types of metrics for Lambda functions",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics-types.html"
+  },
+  {
+   "title": "How Lambda processes records from stream and queue-based event sources",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-eventsourcemapping.html"
+  },
+  {
+   "title": "Managing your costs with AWS Budgets",
+   "url": "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+  },
+  {
+   "title": "Working with Lambda environment variables",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html"
+  },
+  {
+   "title": "Use Secrets Manager secrets in Lambda functions",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-secrets-manager.html"
+  },
+  {
+   "title": "Selecting and configuring an instruction set architecture for your Lambda function",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/foundation-arch.html"
+  },
+  {
+   "title": "StartQueryExecution API reference",
+   "url": "https://docs.aws.amazon.com/athena/latest/APIReference/API_StartQueryExecution.html"
+  },
+  {
+   "title": "GetQueryExecution API reference",
+   "url": "https://docs.aws.amazon.com/athena/latest/APIReference/API_GetQueryExecution.html"
+  },
+  {
+   "title": "Visualize Lambda function invocations using AWS X-Ray",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html"
+  }
+ ],
+ "amazon-ec2": [
+  {
+   "title": "EC2 recommendations from AWS Compute Optimizer",
+   "url": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-ec2-recommendations.html"
+  },
+  {
+   "title": "What are Savings Plans?",
+   "url": "https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html"
+  },
+  {
+   "title": "Stop and start Amazon EC2 instances",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html"
+  },
+  {
+   "title": "Terminate Amazon EC2 instances and preserve data",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/terminating-instances.html"
+  },
+  {
+   "title": "What is AWS Compute Optimizer?",
+   "url": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html"
+  },
+  {
+   "title": "EC2 recommendations",
+   "url": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/ec2-recommendations.html"
+  },
+  {
+   "title": "Savings plan types",
+   "url": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/savings-plan-types.html"
+  },
+  {
+   "title": "Amazon RDS overview",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+  },
+  {
+   "title": "Instance types",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html"
+  },
+  {
+   "title": "Spot Instances",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html"
+  },
+  {
+   "title": "What is AWS Batch?",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html"
+  },
+  {
+   "title": "Auto Scaling termination policies",
+   "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-termination.html"
+  },
+  {
+   "title": "Install the CloudWatch agent",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html"
+  },
+  {
+   "title": "Monitor EBS volumes",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-volume-status.html"
+  },
+  {
+   "title": "Amazon EC2 Graviton processors",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/arm-graviton.html"
+  },
+  {
+   "title": "Idle EC2 instance recommendations",
+   "url": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/ec2-idle-recommendations.html"
+  },
+  {
+   "title": "Elastic IP addresses",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html"
+  },
+  {
+   "title": "EC2 resource limits",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html"
+  },
+  {
+   "title": "Amazon EventBridge Scheduler",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule.html"
+  },
+  {
+   "title": "AWS Lambda",
+   "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+  },
+  {
+   "title": "Hosting a static website on Amazon S3",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html"
+  },
+  {
+   "title": "Getting started with CloudFront",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/GettingStarted.html"
+  },
+  {
+   "title": "Amazon EBS volume types",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html"
+  },
+  {
+   "title": "EC2 concepts",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+  },
+  {
+   "title": "Regions and Availability Zones",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html"
+  },
+  {
+   "title": "VPC network pricing",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-pricing.html"
+  },
+  {
+   "title": "Amazon EBS snapshots",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSSnapshots.html"
+  },
+  {
+   "title": "Snapshot lifecycle policies",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html"
+  },
+  {
+   "title": "Reserved Instances",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances.html"
+  }
+ ],
+ "amazon-ecs": [
+  {
+   "title": "ECS on Fargate recommendations from AWS Compute Optimizer",
+   "url": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/view-ecs-recommendations.html"
+  },
+  {
+   "title": "Use scheduled actions to scale Amazon ECS services",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-autoscaling-schedulescaling.html"
+  },
+  {
+   "title": "Automatically scale your Amazon ECS service",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html"
+  },
+  {
+   "title": "Amazon ECS clusters for Fargate capacity providers",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html"
+  },
+  {
+   "title": "Use a target metric to scale Amazon ECS services",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-autoscaling-targettracking.html"
+  },
+  {
+   "title": "Optimizing Amazon ECS service auto scaling",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-autoscaling-best-practice.html"
+  },
+  {
+   "title": "Use strategies to define Amazon ECS task placement",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-strategies.html"
+  },
+  {
+   "title": "Instance selection best practices for Amazon ECS Managed Instances",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/bestpracticesguide/managed-instances-instance-selection-best-practices.html"
+  },
+  {
+   "title": "Amazon ECS task definition parameters for Fargate",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html"
+  },
+  {
+   "title": "Best practices for Amazon ECS container images",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/bestpracticesguide/container-considerations.html"
+  },
+  {
+   "title": "Automate the cleanup of images by using lifecycle policies in Amazon ECR",
+   "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html"
+  },
+  {
+   "title": "Amazon VPC pricing",
+   "url": "https://aws.amazon.com/vpc/pricing/"
+  },
+  {
+   "title": "Send Amazon ECS logs to CloudWatch",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html"
+  },
+  {
+   "title": "Working with log groups and log streams",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html"
+  },
+  {
+   "title": "Determine Amazon ECS task health using container health checks",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/healthcheck.html"
+  },
+  {
+   "title": "Health checks for Application Load Balancer target groups",
+   "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html"
+  },
+  {
+   "title": "Pass sensitive data to an Amazon ECS container",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data.html"
+  },
+  {
+   "title": "Storage options for Amazon ECS tasks",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html"
+  },
+  {
+   "title": "Amazon ECS service utilization metrics",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service_utilization.html"
+  },
+  {
+   "title": "Amazon ECS interface VPC endpoints",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/vpc-endpoints.html"
+  },
+  {
+   "title": "Updating the Amazon ECS container agent",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-update.html"
+  },
+  {
+   "title": "Amazon ECS clusters",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html"
+  },
+  {
+   "title": "How the Amazon ECS deployment circuit breaker detects failures",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-circuit-breaker.html"
+  },
+  {
+   "title": "Managing your costs with AWS Budgets",
+   "url": "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+  },
+  {
+   "title": "Deploy Amazon ECS services by replacing tasks",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html"
+  },
+  {
+   "title": "Amazon ECS task definition states",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-definition-state.html"
+  },
+  {
+   "title": "DeregisterTaskDefinition API reference",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DeregisterTaskDefinition.html"
+  },
+  {
+   "title": "DeleteService API reference",
+   "url": "https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DeleteService.html"
+  }
+ ],
+ "amazon-cloudwatch": [
+  {
+   "title": "PutRetentionPolicy API reference",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_PutRetentionPolicy.html"
+  },
+  {
+   "title": "What is Amazon CloudWatch Logs?",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html"
+  },
+  {
+   "title": "CloudWatch metrics concepts: periods and high-resolution alarms",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html"
+  },
+  {
+   "title": "Use CloudWatch metric streams",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html"
+  },
+  {
+   "title": "CloudWatch Logs Insights query syntax and best practices",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html"
+  },
+  {
+   "title": "Working with log groups and log streams",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html"
+  },
+  {
+   "title": "Using Amazon CloudWatch alarms",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Alarms.html"
+  },
+  {
+   "title": "Synthetic monitoring with CloudWatch Synthetics",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries.html"
+  },
+  {
+   "title": "Collect metrics, logs, and traces using the CloudWatch agent",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html"
+  },
+  {
+   "title": "Working with SSM Agent",
+   "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html"
+  },
+  {
+   "title": "Exporting log data to Amazon S3",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/S3Export.html"
+  },
+  {
+   "title": "Managing the lifecycle of objects",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+  },
+  {
+   "title": "Access logs for an Application Load Balancer",
+   "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html"
+  },
+  {
+   "title": "Creating a subscription to an Amazon SNS topic",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-create-subscribe-endpoint-to-topic.html"
+  },
+  {
+   "title": "Use Contributor Insights to analyze high-cardinality data",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContributorInsights.html"
+  },
+  {
+   "title": "Managing your costs with AWS Budgets",
+   "url": "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+  },
+  {
+   "title": "Detecting unusual spend with AWS Cost Anomaly Detection",
+   "url": "https://docs.aws.amazon.com/cost-management/latest/userguide/manage-ad.html"
+  },
+  {
+   "title": "Container Insights",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html"
+  },
+  {
+   "title": "Amazon EKS and Kubernetes Container Insights metrics",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-metrics-EKS.html"
+  },
+  {
+   "title": "Using Amazon CloudWatch dashboards",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html"
+  },
+  {
+   "title": "Composite alarms",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CompositeAlarms.html"
+  },
+  {
+   "title": "Alarms on metrics",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Alarm-On-Metric-Alarm-Name.html"
+  }
+ ],
+ "amazon-cloudfront": [
+  {
+   "title": "Configuring cache behaviors",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ConfiguringCaching.html"
+  },
+  {
+   "title": "Adding security headers with response headers policies",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-response-headers-policies.html"
+  },
+  {
+   "title": "Security best practices for CloudFront",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/security-best-practices.html"
+  },
+  {
+   "title": "Price classes",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-price-class.html"
+  },
+  {
+   "title": "Controlling CloudFront costs",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html"
+  },
+  {
+   "title": "Invalidating files",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html"
+  },
+  {
+   "title": "Cache expiration settings",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html"
+  },
+  {
+   "title": "Controlling the cache key",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/header-caching.html"
+  },
+  {
+   "title": "Serving compressed files",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html"
+  },
+  {
+   "title": "Lambda@Edge",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html"
+  },
+  {
+   "title": "CloudFront Functions",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html"
+  },
+  {
+   "title": "Origin Shield",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/origin-shield.html"
+  },
+  {
+   "title": "How AWS WAF works",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works.html"
+  },
+  {
+   "title": "Associating a web ACL with CloudFront",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-associating-aws-cloudfront.html"
+  },
+  {
+   "title": "Managing origins",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ManagingOrigins.html"
+  },
+  {
+   "title": "Disabling a distribution",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/DisableDistribution.html"
+  },
+  {
+   "title": "Deleting a distribution",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowToDeleteDistribution.html"
+  },
+  {
+   "title": "Uploading and copying objects using multipart upload",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html"
+  },
+  {
+   "title": "Uploading an object",
+   "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpu-upload-object.html"
+  },
+  {
+   "title": "Requesting a public certificate",
+   "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-certificate-requests.html"
+  },
+  {
+   "title": "AWS Certificate Manager pricing",
+   "url": "https://aws.amazon.com/certificate-manager/pricing/"
+  },
+  {
+   "title": "Amazon CloudFront pricing",
+   "url": "https://aws.amazon.com/cloudfront/pricing/"
+  },
+  {
+   "title": "Restricting access to an S3 origin",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html"
+  },
+  {
+   "title": "Real-time logs",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/real-time-logs.html"
+  },
+  {
+   "title": "Monitoring CloudFront with CloudWatch",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/monitoring-using-cloudwatch.html"
+  },
+  {
+   "title": "Using CORS with CloudFront",
+   "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/UsingCORS.html"
+  },
+  {
+   "title": "Alarms on metrics",
+   "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Alarm-On-Metric-Alarm-Name.html"
+  }
+ ],
+ "aws-waf": [
+  {
+   "title": "AWS WAF pricing",
+   "url": "https://aws.amazon.com/waf/pricing/"
+  },
+  {
+   "title": "AWS WAF developer guide",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html"
+  },
+  {
+   "title": "AWS WAF logging",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/logging.html"
+  },
+  {
+   "title": "AWS Managed Rules rule groups",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html"
+  },
+  {
+   "title": "AWS WAF Bot Control",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-bot-control.html"
+  },
+  {
+   "title": "AWS WAF ATP",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-atp.html"
+  },
+  {
+   "title": "AWS WAF getting started",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/getting-started.html"
+  },
+  {
+   "title": "AWS WAF rate-based rule statements",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html"
+  },
+  {
+   "title": "Amazon CloudFront pricing",
+   "url": "https://aws.amazon.com/cloudfront/pricing/"
+  },
+  {
+   "title": "Associating a web ACL with CloudFront",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-associating-aws-cloudfront.html"
+  },
+  {
+   "title": "AWS WAF size constraint statement",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-size-constraint-attack.html"
+  },
+  {
+   "title": "AWS Shield Standard",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-standard.html"
+  },
+  {
+   "title": "AWS WAF rule action",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-action.html"
+  },
+  {
+   "title": "AWS WAF Regex Pattern Set",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-regex-pattern-set-reference-statement.html"
+  },
+  {
+   "title": "AWS Firewall Manager",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/fms-chapter.html"
+  },
+  {
+   "title": "AWS WAF CAPTCHA and Challenge",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-captcha-and-challenge.html"
+  }
+ ],
+ "amazon-sns": [
+  {
+   "title": "Amazon SNS security",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-security.html"
+  },
+  {
+   "title": "Amazon SNS pricing",
+   "url": "https://aws.amazon.com/sns/pricing/"
+  },
+  {
+   "title": "Amazon SNS SMS charging",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-sms-charging.html"
+  },
+  {
+   "title": "Amazon SNS message filtering",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html"
+  },
+  {
+   "title": "Amazon SNS welcome",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html"
+  },
+  {
+   "title": "Amazon SNS dead-letter queues",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-dead-letter-queues.html"
+  },
+  {
+   "title": "Amazon SNS delivery status",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-delivery-status-checking.html"
+  },
+  {
+   "title": "Amazon SNS FIFO deduplication",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topic-message-ordering-deduplication.html"
+  },
+  {
+   "title": "Amazon SNS message formats",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-and-json-formats.html"
+  },
+  {
+   "title": "Amazon SNS monitoring",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-monitoring-using-cloudwatch.html"
+  },
+  {
+   "title": "Amazon SNS access policy",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-access-policy-use-cases.html"
+  },
+  {
+   "title": "Amazon SNS VPC endpoints",
+   "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-vpc-endpoints.html"
+  },
+  {
+   "title": "Publish API",
+   "url": "https://docs.aws.amazon.com/sns/latest/api/API_Publish.html"
+  }
+ ],
+ "amazon-sqs": [
+  {
+   "title": "Amazon SQS monitoring",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-monitoring-using-cloudwatch.html"
+  },
+  {
+   "title": "Amazon SQS pricing",
+   "url": "https://aws.amazon.com/sqs/pricing/"
+  },
+  {
+   "title": "Amazon SQS FIFO queues",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html"
+  },
+  {
+   "title": "Amazon SQS dead-letter queues",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html"
+  },
+  {
+   "title": "Amazon SQS short and long polling",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html"
+  },
+  {
+   "title": "Amazon SQS visibility timeout",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html"
+  },
+  {
+   "title": "Amazon SQS quotas",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/quotas-messages.html"
+  },
+  {
+   "title": "Amazon SQS batch actions",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-batch-api-actions.html"
+  },
+  {
+   "title": "Amazon SQS welcome",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html"
+  },
+  {
+   "title": "Amazon SQS developing with SQS",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-developing-with-sqs.html"
+  },
+  {
+   "title": "Amazon SQS message TTL",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-configuring-queue-message-ttl.html"
+  },
+  {
+   "title": "Amazon SQS server-side encryption",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-server-side-encryption.html"
+  },
+  {
+   "title": "Amazon SQS VPC endpoints",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-vpc-endpoints.html"
+  },
+  {
+   "title": "Amazon SQS message attributes",
+   "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html"
+  }
+ ],
+ "amazon-vpc": [
+  {
+   "title": "Amazon VPC route tables",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html"
+  },
+  {
+   "title": "Amazon VPC pricing",
+   "url": "https://aws.amazon.com/vpc/pricing/"
+  },
+  {
+   "title": "Amazon VPC IPv4 address plan",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_IPv4_Address_Plan.html"
+  },
+  {
+   "title": "Amazon VPC subnets",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-subnets.html"
+  },
+  {
+   "title": "Amazon VPC endpoints",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html"
+  },
+  {
+   "title": "Amazon VPC security groups",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html"
+  },
+  {
+   "title": "Amazon VPC network ACLs",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Network_ACLs.html"
+  },
+  {
+   "title": "Amazon VPC flow logs",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-flow-logs.html"
+  },
+  {
+   "title": "Amazon EC2 Elastic IPs",
+   "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html"
+  },
+  {
+   "title": "Amazon VPC peering",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-peering.html"
+  },
+  {
+   "title": "Amazon VPC Transit Gateway",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-transit-gateway.html"
+  },
+  {
+   "title": "Amazon VPC DNS",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-dns.html"
+  },
+  {
+   "title": "Amazon VPC default VPC",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html"
+  },
+  {
+   "title": "Amazon VPC Internet Gateway",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"
+  },
+  {
+   "title": "AWS Network Firewall",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/network-firewall.html"
+  },
+  {
+   "title": "Amazon VPC what is",
+   "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+  }
+ ],
+ "amazon-api-gateway": [
+  {
+   "title": "API Gateway gateway responses",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-gateway-responses.html"
+  },
+  {
+   "title": "API Gateway overview",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-overview.html"
+  },
+  {
+   "title": "HTTP APIs vs REST APIs",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html"
+  },
+  {
+   "title": "API Gateway pricing",
+   "url": "https://aws.amazon.com/api-gateway/pricing/"
+  },
+  {
+   "title": "API Gateway caching",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html"
+  },
+  {
+   "title": "API Gateway logging",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-logging.html"
+  },
+  {
+   "title": "API Gateway VPC links",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-vpc-links.html"
+  },
+  {
+   "title": "API Gateway authentication",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-authentication-and-authorization.html"
+  },
+  {
+   "title": "API Gateway request throttling",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html"
+  },
+  {
+   "title": "API Gateway metrics",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html"
+  },
+  {
+   "title": "API Gateway usage plans",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html"
+  },
+  {
+   "title": "API Gateway quotas",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/limits.html"
+  },
+  {
+   "title": "API Gateway mapping templates",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template.html"
+  },
+  {
+   "title": "API Gateway WebSocket APIs",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api.html"
+  },
+  {
+   "title": "API Gateway custom domain names",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-custom-domains.html"
+  },
+  {
+   "title": "API Gateway WAF integration",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-aws-waf.html"
+  },
+  {
+   "title": "API Gateway set up WAF",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-waf.html"
+  },
+  {
+   "title": "API Gateway private endpoints",
+   "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-private-endpoints.html"
+  }
+ ],
+ "amazon-eventbridge": [
+  {
+   "title": "EventBridge schemas",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-schema.html"
+  },
+  {
+   "title": "EventBridge pricing",
+   "url": "https://aws.amazon.com/eventbridge/pricing/"
+  },
+  {
+   "title": "EventBridge what is",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html"
+  },
+  {
+   "title": "EventBridge event patterns",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html"
+  },
+  {
+   "title": "EventBridge DLQ",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rule-dlq.html"
+  },
+  {
+   "title": "EventBridge input transformer",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html"
+  },
+  {
+   "title": "EventBridge cross-account",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-cross-account.html"
+  },
+  {
+   "title": "EventBridge API",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-api.html"
+  },
+  {
+   "title": "EventBridge monitoring",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-monitoring.html"
+  },
+  {
+   "title": "EventBridge Scheduler",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduler.html"
+  },
+  {
+   "title": "EventBridge rules",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rules.html"
+  },
+  {
+   "title": "EventBridge encryption",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-kms.html"
+  },
+  {
+   "title": "EventBridge targets",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-targets.html"
+  },
+  {
+   "title": "EventBridge partner event sources",
+   "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-partner.html"
+  }
+ ],
+ "amazon-athena": [
+  {
+   "title": "Athena Apache Iceberg",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/iceberg.html"
+  },
+  {
+   "title": "Athena pricing",
+   "url": "https://aws.amazon.com/athena/pricing/"
+  },
+  {
+   "title": "Athena partitions",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/tables-partitions.html"
+  },
+  {
+   "title": "Athena tables",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/tables-databases-columns.html"
+  },
+  {
+   "title": "Athena querying",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/querying.html"
+  },
+  {
+   "title": "Athena workgroups",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/workgroups-settings.html"
+  },
+  {
+   "title": "Athena what is",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/what-is.html"
+  },
+  {
+   "title": "Athena monitoring",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/monitoring-cloudwatch-metrics.html"
+  },
+  {
+   "title": "Athena tables",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/tables-creating.html"
+  },
+  {
+   "title": "Athena prepared statements",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/prepared-statements.html"
+  },
+  {
+   "title": "Athena cross-account",
+   "url": "https://docs.aws.amazon.com/athena/latest/ug/cross-account-permissions.html"
+  }
+ ],
+ "amazon-cognito": [
+  {
+   "title": "Cognito user pools",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools.html"
+  },
+  {
+   "title": "Cognito pricing",
+   "url": "https://aws.amazon.com/cognito/pricing/"
+  },
+  {
+   "title": "Cognito advanced security",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-advanced-security.html"
+  },
+  {
+   "title": "Cognito email/phone",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-email-phone.html"
+  },
+  {
+   "title": "Cognito identity pools",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html"
+  },
+  {
+   "title": "Cognito SAML/OIDC",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-using-tokens-with-identity-providers.html"
+  },
+  {
+   "title": "Cognito Lambda triggers",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda.html"
+  },
+  {
+   "title": "Cognito managed login",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-the-managed-login.html"
+  },
+  {
+   "title": "Cognito authentication flow",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-authentication-flow.html"
+  },
+  {
+   "title": "Cognito managing users",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-managing-users.html"
+  },
+  {
+   "title": "Cognito MFA",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-mfa.html"
+  },
+  {
+   "title": "Cognito app clients",
+   "url": "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-client-apps.html"
+  }
+ ],
+ "aws-cloudtrail": [
+  {
+   "title": "CloudTrail log file validation",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html"
+  },
+  {
+   "title": "CloudTrail pricing",
+   "url": "https://aws.amazon.com/cloudtrail/pricing/"
+  },
+  {
+   "title": "CloudTrail multi-region trails",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-multi-region-trails.html"
+  },
+  {
+   "title": "CloudTrail data events",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-data-events.html"
+  },
+  {
+   "title": "CloudTrail read-only events",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-management-events-read-only.html"
+  },
+  {
+   "title": "CloudTrail log delivery",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-delivery.html"
+  },
+  {
+   "title": "CloudTrail best practices",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/best-practices-security.html"
+  },
+  {
+   "title": "CloudTrail Insights",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-insights.html"
+  },
+  {
+   "title": "CloudTrail organizations",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-organizations.html"
+  },
+  {
+   "title": "CloudTrail concepts",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-concepts.html"
+  },
+  {
+   "title": "CloudTrail Lake",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake.html"
+  },
+  {
+   "title": "CloudTrail event reference",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference.html"
+  },
+  {
+   "title": "CloudTrail user guide",
+   "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html"
+  }
+ ],
+ "amazon-aurora": [
+  {
+   "title": "Aurora replica usage",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.ReplicaUsage.html"
+  },
+  {
+   "title": "Aurora pricing",
+   "url": "https://aws.amazon.com/rds/aurora/pricing/"
+  },
+  {
+   "title": "Aurora Serverless v2",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html"
+  },
+  {
+   "title": "Aurora best practices",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.BestPractices.html"
+  },
+  {
+   "title": "Aurora managing backups",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Backups.html"
+  },
+  {
+   "title": "Aurora Global Database",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraGlobalDatabase.html"
+  },
+  {
+   "title": "Aurora reference",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Reference.html"
+  },
+  {
+   "title": "Performance Insights",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_PerfInsights.Overview.html"
+  },
+  {
+   "title": "Aurora PostgreSQL reference",
+   "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraPostgreSQL.Reference.html"
+  }
+ ],
+ "amazon-elasticache": [
+  {
+   "title": "ElastiCache Redis overview",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html"
+  },
+  {
+   "title": "ElastiCache pricing",
+   "url": "https://aws.amazon.com/elasticache/pricing/"
+  },
+  {
+   "title": "Reserved Nodes",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/ReservedNodes.html"
+  },
+  {
+   "title": "ElastiCache parameter groups",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/ParameterGroups.html"
+  },
+  {
+   "title": "ElastiCache best practices",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/BestPractices.html"
+  },
+  {
+   "title": "ElastiCache Multi-AZ",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/MultiAZ.html"
+  },
+  {
+   "title": "ElastiCache Memcached",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/WhatIs.html"
+  },
+  {
+   "title": "ElastiCache metrics",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Metrics.html"
+  },
+  {
+   "title": "ElastiCache auto scaling",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/AutoScalingUserGuide.html"
+  },
+  {
+   "title": "ElastiCache security",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Clusters.Create.html"
+  }
+ ],
+ "amazon-documentdb": [
+  {
+   "title": "DocumentDB indexes",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/indexes.html"
+  },
+  {
+   "title": "DocumentDB pricing",
+   "url": "https://aws.amazon.com/documentdb/pricing/"
+  },
+  {
+   "title": "DocumentDB replica sets",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/replica_sets.html"
+  },
+  {
+   "title": "DocumentDB performance insights",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/performance_insights.html"
+  },
+  {
+   "title": "DocumentDB security",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/security.html"
+  },
+  {
+   "title": "DocumentDB instance types",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/DBInstance.Types.html"
+  },
+  {
+   "title": "DocumentDB backups",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/DBCluster.Managing.html"
+  },
+  {
+   "title": "DocumentDB reserved instances",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/RESERVEDINSTANCES.html"
+  },
+  {
+   "title": "DocumentDB storage",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/DBInstance.Storage.html"
+  },
+  {
+   "title": "DocumentDB overview",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/what-is.html"
+  },
+  {
+   "title": "DocumentDB migrating",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/migrating.html"
+  },
+  {
+   "title": "DocumentDB parameter groups",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/db-instance-config.html"
+  },
+  {
+   "title": "DocumentDB auditing",
+   "url": "https://docs.aws.amazon.com/documentdb/latest/developerguide/auditing.html"
+  }
+ ],
+ "amazon-efs": [
+  {
+   "title": "EFS monitoring",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/monitoring-efs.html"
+  },
+  {
+   "title": "EFS performance",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/performance.html"
+  },
+  {
+   "title": "EFS overview",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html"
+  },
+  {
+   "title": "EFS pricing",
+   "url": "https://aws.amazon.com/efs/pricing/"
+  },
+  {
+   "title": "EFS lifecycle management",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/lifecycle-management-efs.html"
+  },
+  {
+   "title": "EFS mounting",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/mounting-fs.html"
+  },
+  {
+   "title": "EFS backup",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/backup.html"
+  },
+  {
+   "title": "EFS access points",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html"
+  },
+  {
+   "title": "EFS encryption",
+   "url": "https://docs.aws.amazon.com/efs/latest/ug/encryption-at-rest.html"
+  }
+ ],
+ "amazon-emr": [
+  {
+   "title": "EMR Spark configuration",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-configuration-spark.html"
+  },
+  {
+   "title": "EMR pricing",
+   "url": "https://aws.amazon.com/emr/pricing/"
+  },
+  {
+   "title": "EMR overview",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html"
+  },
+  {
+   "title": "EMR Spot best practices",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-spot-best-practices.html"
+  },
+  {
+   "title": "EMR managed scaling",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-managed-scaling.html"
+  },
+  {
+   "title": "EMR FS",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-fs.html"
+  },
+  {
+   "title": "EMR configuration",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-configuration.html"
+  },
+  {
+   "title": "EMR Serverless",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-serverless.html"
+  },
+  {
+   "title": "EMR best practices",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/security.html"
+  },
+  {
+   "title": "EMR runtime optimization",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-runtime-optimization.html"
+  },
+  {
+   "title": "EMR Glue integration",
+   "url": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/glue.html"
+  }
+ ],
+ "amazon-kinesis": [
+  {
+   "title": "Kinesis troubleshooting",
+   "url": "https://docs.aws.amazon.com/streams/latest/dev/troubleshooting.html"
+  },
+  {
+   "title": "Kinesis pricing",
+   "url": "https://aws.amazon.com/kinesis/data-streams/pricing/"
+  },
+  {
+   "title": "Kinesis key concepts",
+   "url": "https://docs.aws.amazon.com/streams/latest/dev/key-concepts.html"
+  },
+  {
+   "title": "Kinesis data bytes",
+   "url": "https://docs.aws.amazon.com/streams/latest/dev/data-bytes.html"
+  },
+  {
+   "title": "Firehose overview",
+   "url": "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html"
+  },
+  {
+   "title": "Firehose limits",
+   "url": "https://docs.aws.amazon.com/firehose/latest/dev/limits.html"
+  },
+  {
+   "title": "Kinesis enhanced consumers",
+   "url": "https://docs.aws.amazon.com/streams/latest/dev/enhanced-consumers.html"
+  },
+  {
+   "title": "Firehose data format conversion",
+   "url": "https://docs.aws.amazon.com/firehose/latest/dev/data-format-conversion.html"
+  },
+  {
+   "title": "Kinesis monitoring",
+   "url": "https://docs.aws.amazon.com/streams/latest/dev/monitoring-with-cloudwatch.html"
+  },
+  {
+   "title": "Managed Service for Apache Flink",
+   "url": "https://docs.aws.amazon.com/managed-flink/latest/java/what-is.html"
+  },
+  {
+   "title": "Kinesis introduction",
+   "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html"
+  }
+ ],
+ "amazon-msk": [
+  {
+   "title": "MSK Kafka configs",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/kafka-configs.html"
+  },
+  {
+   "title": "MSK best practices",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/best-practices.html"
+  },
+  {
+   "title": "MSK what is",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html"
+  },
+  {
+   "title": "MSK pricing",
+   "url": "https://aws.amazon.com/msk/pricing/"
+  },
+  {
+   "title": "MSK reserved instances",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/reserved-instance.html"
+  },
+  {
+   "title": "MSK tiered storage",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/msk-tiered-storage.html"
+  },
+  {
+   "title": "MSK multi-AZ",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/multi-az.html"
+  },
+  {
+   "title": "MSK monitoring",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/monitoring.html"
+  },
+  {
+   "title": "MSK Serverless",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/serverless.html"
+  },
+  {
+   "title": "MSK compression",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/compression.html"
+  },
+  {
+   "title": "MSK Connect",
+   "url": "https://docs.aws.amazon.com/msk/latest/developerguide/connect.html"
+  }
+ ],
+ "amazon-macie": [
+  {
+   "title": "Macie custom data identifiers",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/custom-data-identifiers.html"
+  },
+  {
+   "title": "Macie pricing",
+   "url": "https://aws.amazon.com/macie/pricing/"
+  },
+  {
+   "title": "Macie discovery jobs",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/discovery-jobs.html"
+  },
+  {
+   "title": "Macie what is",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html"
+  },
+  {
+   "title": "Macie findings",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/findings.html"
+  },
+  {
+   "title": "Macie classifying objects",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/classifying-objects-sensitive-data.html"
+  },
+  {
+   "title": "Macie Security Hub integration",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/security-hub-integration.html"
+  },
+  {
+   "title": "Macie EventBridge integration",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/eventbridge-integration.html"
+  },
+  {
+   "title": "Macie automated discovery",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/automated-discovery.html"
+  },
+  {
+   "title": "Macie suppression rules",
+   "url": "https://docs.aws.amazon.com/macie/latest/user/suppression-rules.html"
+  }
+ ],
+ "amazon-neptune": [
+  {
+   "title": "Neptune best practices",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/best-practices.html"
+  },
+  {
+   "title": "Neptune performance",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/performance.html"
+  },
+  {
+   "title": "Neptune pricing",
+   "url": "https://aws.amazon.com/neptune/pricing/"
+  },
+  {
+   "title": "Neptune create cluster",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/create-cluster.html"
+  },
+  {
+   "title": "Neptune what is",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/what-is-neptune.html"
+  },
+  {
+   "title": "Neptune ML",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/neptune-ml.html"
+  },
+  {
+   "title": "Neptune monitoring",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/monitoring-neptune.html"
+  },
+  {
+   "title": "Neptune snapshots",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/snapshots.html"
+  },
+  {
+   "title": "Neptune bulk load",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/neptune-bulk-load.html"
+  },
+  {
+   "title": "Neptune security",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/security.html"
+  },
+  {
+   "title": "Neptune graph model",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/neptune-graph-model.html"
+  },
+  {
+   "title": "Neptune backup restore",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/backup-restore.html"
+  },
+  {
+   "title": "Neptune audit logs",
+   "url": "https://docs.aws.amazon.com/neptune/latest/userguide/audit-logs.html"
+  }
+ ],
+ "amazon-opensearch": [
+  {
+   "title": "OpenSearch best practices",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/best-practices.html"
+  },
+  {
+   "title": "OpenSearch monitoring",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/monitoring-cloudwatch.html"
+  },
+  {
+   "title": "OpenSearch pricing",
+   "url": "https://aws.amazon.com/opensearch-service/pricing/"
+  },
+  {
+   "title": "OpenSearch ISM",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ism.html"
+  },
+  {
+   "title": "OpenSearch cold storage",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cold-storage.html"
+  },
+  {
+   "title": "OpenSearch ultrawarm",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ultrawarm.html"
+  },
+  {
+   "title": "OpenSearch what is",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
+  },
+  {
+   "title": "OpenSearch create domain",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/createdomain.html"
+  },
+  {
+   "title": "OpenSearch instance types",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/instance-types.html"
+  },
+  {
+   "title": "OpenSearch dynamic mapping",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/dynamic-mapping.html"
+  },
+  {
+   "title": "OpenSearch CCR",
+   "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ccr.html"
+  }
+ ],
+ "amazon-redshift": [
+  {
+   "title": "Redshift best practices",
+   "url": "https://docs.aws.amazon.com/redshift/latest/mgmt/best-practices.html"
+  },
+  {
+   "title": "Redshift serverless",
+   "url": "https://docs.aws.amazon.com/redshift/latest/mgmt/serverless.html"
+  },
+  {
+   "title": "Redshift pricing",
+   "url": "https://aws.amazon.com/redshift/pricing/"
+  },
+  {
+   "title": "Redshift what is",
+   "url": "https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html"
+  },
+  {
+   "title": "Redshift sorting data",
+   "url": "https://docs.aws.amazon.com/redshift/latest/dg/t_Sorting_data.html"
+  },
+  {
+   "title": "Redshift COPY command",
+   "url": "https://docs.aws.amazon.com/redshift/latest/dg/copy.html"
+  },
+  {
+   "title": "Redshift materialized views",
+   "url": "https://docs.aws.amazon.com/redshift/latest/dg/materialized-view-overview.html"
+  },
+  {
+   "title": "Redshift VACUUM",
+   "url": "https://docs.aws.amazon.com/redshift/latest/dg/vacuum.html"
+  },
+  {
+   "title": "Redshift working with data",
+   "url": "https://docs.aws.amazon.com/redshift/latest/dg/working-with-data.html"
+  },
+  {
+   "title": "Redshift managing snapshots",
+   "url": "https://docs.aws.amazon.com/redshift/latest/mgmt/managing-snapshots.html"
+  },
+  {
+   "title": "Redshift managing cluster admin events",
+   "url": "https://docs.aws.amazon.com/redshift/latest/mgmt/managing-cluster-admin-events.html"
+  }
+ ],
+ "amazon-sagemaker": [
+  {
+   "title": "SageMaker model registry",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry.html"
+  },
+  {
+   "title": "SageMaker pricing",
+   "url": "https://aws.amazon.com/sagemaker/pricing/"
+  },
+  {
+   "title": "SageMaker notebooks",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/notebooks-prototypes-environments.html"
+  },
+  {
+   "title": "SageMaker build train deploy",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/build-train-deploy.html"
+  },
+  {
+   "title": "SageMaker managed spot training",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/managed-spot-training.html"
+  },
+  {
+   "title": "SageMaker endpoint auto scaling",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/endpoint-auto-scaling.html"
+  },
+  {
+   "title": "SageMaker what is",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/what-is-amazon-sagemaker.html"
+  },
+  {
+   "title": "SageMaker model monitor",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor.html"
+  },
+  {
+   "title": "SageMaker serverless inference",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/serverless-inference.html"
+  },
+  {
+   "title": "SageMaker debugger",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/debugger.html"
+  },
+  {
+   "title": "SageMaker experiments",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-experiments.html"
+  },
+  {
+   "title": "SageMaker cost optimization",
+   "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/cost-optimization.html"
+  }
+ ],
+ "amazon-workspaces": [
+  {
+   "title": "WorkSpaces manage",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/manage-workspaces.html"
+  },
+  {
+   "title": "WorkSpaces pricing",
+   "url": "https://aws.amazon.com/workspaces/pricing/"
+  },
+  {
+   "title": "WorkSpaces what is",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/what-is-workspaces.html"
+  },
+  {
+   "title": "WorkSpaces bundles",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/bundles.html"
+  },
+  {
+   "title": "WorkSpaces customize user volumes",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/customize-user-volumes.html"
+  },
+  {
+   "title": "WorkSpaces gateway",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/workspaces-gateway.html"
+  },
+  {
+   "title": "WorkSpaces GPO",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/workspaces-gpo.html"
+  },
+  {
+   "title": "WorkSpaces IP access control",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/ip-access-control-groups.html"
+  },
+  {
+   "title": "WorkSpaces monitor",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/monitor-workspaces.html"
+  },
+  {
+   "title": "WorkSpaces terraform",
+   "url": "https://docs.aws.amazon.com/workspaces/latest/adminguide/terraform.html"
+  }
+ ],
+ "amazon-bedrock": [
+  {
+   "title": "Bedrock guardrails",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html"
+  },
+  {
+   "title": "Bedrock pricing",
+   "url": "https://aws.amazon.com/bedrock/pricing/"
+  },
+  {
+   "title": "Bedrock what is",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html"
+  },
+  {
+   "title": "Bedrock prompt caching",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html"
+  },
+  {
+   "title": "Bedrock model customization",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-customization.html"
+  },
+  {
+   "title": "Bedrock monitoring",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring-bedrock.html"
+  },
+  {
+   "title": "Bedrock knowledge base",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html"
+  },
+  {
+   "title": "Bedrock model evaluation",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html"
+  },
+  {
+   "title": "Bedrock agents",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html"
+  },
+  {
+   "title": "Bedrock inference profiles",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles.html"
+  },
+  {
+   "title": "Bedrock invocation metrics",
+   "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/invocation-metrics.html"
+  }
+ ],
+ "aws-batch": [
+  {
+   "title": "Batch jobs",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/jobs.html"
+  },
+  {
+   "title": "Batch pricing",
+   "url": "https://aws.amazon.com/batch/pricing/"
+  },
+  {
+   "title": "Batch spot fleet",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/spot_fleet.html"
+  },
+  {
+   "title": "Batch compute environments",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/compute_environments.html"
+  },
+  {
+   "title": "Batch monitoring",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/monitoring.html"
+  },
+  {
+   "title": "Batch job queues",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/job_queues.html"
+  },
+  {
+   "title": "Batch what is",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/what-is-Batch.html"
+  },
+  {
+   "title": "Batch EFS",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/efs.html"
+  },
+  {
+   "title": "Batch job definitions",
+   "url": "https://docs.aws.amazon.com/batch/latest/userguide/job_definitions.html"
+  }
+ ],
+ "aws-config": [
+  {
+   "title": "Config remediation",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html"
+  },
+  {
+   "title": "Config pricing",
+   "url": "https://aws.amazon.com/config/pricing/"
+  },
+  {
+   "title": "Config recorder",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-recorder.html"
+  },
+  {
+   "title": "Config rules",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config_develop-rules.html"
+  },
+  {
+   "title": "Config aggregators",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-aggregators.html"
+  },
+  {
+   "title": "Config delivery channel",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/delivery-channel.html"
+  },
+  {
+   "title": "Config what is",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html"
+  },
+  {
+   "title": "Config advanced query",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/advanced-query.html"
+  },
+  {
+   "title": "Config conformance packs",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/conformance-packs.html"
+  },
+  {
+   "title": "Config Security Hub",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/security-hub.html"
+  },
+  {
+   "title": "Config troubleshooting",
+   "url": "https://docs.aws.amazon.com/config/latest/developerguide/troubleshooting.html"
+  }
+ ],
+ "aws-dms": [
+  {
+   "title": "DMS best practices",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_BestPractices.html"
+  },
+  {
+   "title": "DMS pricing",
+   "url": "https://aws.amazon.com/dms/pricing/"
+  },
+  {
+   "title": "DMS replication instance",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_ReplicationInstance.html"
+  },
+  {
+   "title": "DMS serverless",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/dms-serverless.html"
+  },
+  {
+   "title": "DMS task settings",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_TaskSettings.html"
+  },
+  {
+   "title": "DMS tasks",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Tasks.html"
+  },
+  {
+   "title": "DMS monitoring",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Monitoring.html"
+  },
+  {
+   "title": "DMS security",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/security.html"
+  },
+  {
+   "title": "DMS troubleshooting",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Troubleshooting.html"
+  },
+  {
+   "title": "DMS what is",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html"
+  },
+  {
+   "title": "DMS endpoints",
+   "url": "https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Endpoints.html"
+  }
+ ],
+ "aws-direct-connect": [
+  {
+   "title": "Direct Connect troubleshooting",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/troubleshooting.html"
+  },
+  {
+   "title": "Direct Connect monitoring",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/monitoring-connection-health.html"
+  },
+  {
+   "title": "Direct Connect getting started",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/getting_started.html"
+  },
+  {
+   "title": "Direct Connect pricing",
+   "url": "https://aws.amazon.com/directconnect/pricing/"
+  },
+  {
+   "title": "Direct Connect gateways",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways.html"
+  },
+  {
+   "title": "Direct Connect what is",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html"
+  },
+  {
+   "title": "Direct Connect transit gateways",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/transit-gateways.html"
+  },
+  {
+   "title": "Direct Connect virtual interfaces",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/WorkWithVirtualInterfaces.html"
+  },
+  {
+   "title": "Direct Connect public VIFs",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/publicvirtualinterfaces.html"
+  },
+  {
+   "title": "Direct Connect MACsec",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/macsec.html"
+  }
+ ],
+ "aws-direct-connect-gateway": [
+  {
+   "title": "Direct Connect gateways",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways.html"
+  },
+  {
+   "title": "Direct Connect pricing",
+   "url": "https://aws.amazon.com/directconnect/pricing/"
+  },
+  {
+   "title": "Direct Connect monitoring",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/monitoring-connection-health.html"
+  },
+  {
+   "title": "Direct Connect private VIFs",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/privatevirtualinterfaces.html"
+  },
+  {
+   "title": "Direct Connect public VIFs",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/publicvirtualinterfaces.html"
+  },
+  {
+   "title": "Direct Connect troubleshooting",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/troubleshooting.html"
+  },
+  {
+   "title": "Direct Connect transit gateways",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/transit-gateways.html"
+  },
+  {
+   "title": "Direct Connect MACsec",
+   "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/macsec.html"
+  }
+ ],
+ "aws-glue": [
+  {
+   "title": "Glue what is",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html"
+  },
+  {
+   "title": "Glue pricing",
+   "url": "https://aws.amazon.com/glue/pricing/"
+  },
+  {
+   "title": "Glue monitoring",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/monitoring-overview.html"
+  },
+  {
+   "title": "Glue flexibility",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/glue-flexibility.html"
+  },
+  {
+   "title": "Glue job timeouts",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/job-timeouts.html"
+  },
+  {
+   "title": "Glue data catalog",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/glue-data-catalog.html"
+  },
+  {
+   "title": "Glue crawlers",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/crawlers-overview.html"
+  },
+  {
+   "title": "Glue security",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/security.html"
+  },
+  {
+   "title": "Glue interactive sessions",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/interactive-sessions.html"
+  },
+  {
+   "title": "Glue workflows",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/workflows-overview.html"
+  },
+  {
+   "title": "Glue troubleshooting",
+   "url": "https://docs.aws.amazon.com/glue/latest/dg/troubleshooting.html"
+  }
+ ],
+ "aws-iam-access-analyzer": [
+  {
+   "title": "Access Analyzer what is",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html"
+  },
+  {
+   "title": "IAM pricing",
+   "url": "https://aws.amazon.com/iam/pricing/"
+  },
+  {
+   "title": "Access Analyzer view findings",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-view-findings.html"
+  },
+  {
+   "title": "Access Analyzer getting started",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-getting-started.html"
+  },
+  {
+   "title": "Access Analyzer policy generation",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-policy-generation.html"
+  },
+  {
+   "title": "Access Analyzer archiving rules",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-archiving-rules.html"
+  },
+  {
+   "title": "Access Analyzer policy validation",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-policy-validation.html"
+  },
+  {
+   "title": "Access Analyzer unused access",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-unused-access.html"
+  },
+  {
+   "title": "Access Analyzer monitor with EventBridge",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-monitor-with-eventbridge.html"
+  },
+  {
+   "title": "Access Analyzer suppress findings",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-suppress-findings.html"
+  },
+  {
+   "title": "Access Analyzer trusted entity access",
+   "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-trusted-entity-access.html"
+  }
+ ],
+ "aws-kms": [
+  {
+   "title": "KMS API",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/kms-api.html"
+  },
+  {
+   "title": "KMS pricing",
+   "url": "https://aws.amazon.com/kms/pricing/"
+  },
+  {
+   "title": "KMS overview",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/overview.html"
+  },
+  {
+   "title": "KMS S3 bucket keys",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/s3-bucket-keys.html"
+  },
+  {
+   "title": "KMS rotate keys",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
+  },
+  {
+   "title": "KMS key policies",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html"
+  },
+  {
+   "title": "KMS multi-region keys",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/multi-region-keys.html"
+  },
+  {
+   "title": "KMS key deletion",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/key-deletion.html"
+  },
+  {
+   "title": "KMS symmetric vs asymmetric",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/sym-asym-choose.html"
+  },
+  {
+   "title": "KMS encrypting data",
+   "url": "https://docs.aws.amazon.com/kms/latest/developerguide/encrypting-data.html"
+  }
+ ],
+ "aws-memorydb-for-redis": [
+  {
+   "title": "MemoryDB user guide",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/memorydb.html"
+  },
+  {
+   "title": "MemoryDB pricing",
+   "url": "https://aws.amazon.com/memorydb/pricing/"
+  },
+  {
+   "title": "MemoryDB nodes and clusters",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/nodes-clusters.html"
+  },
+  {
+   "title": "MemoryDB clusters",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/clusters.html"
+  },
+  {
+   "title": "MemoryDB multi-AZ",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/multi-az.html"
+  },
+  {
+   "title": "MemoryDB monitoring",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/monitoring.html"
+  },
+  {
+   "title": "MemoryDB snapshots",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/snapshots.html"
+  },
+  {
+   "title": "MemoryDB what is",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/MemoryDB-User-Guide.html"
+  },
+  {
+   "title": "MemoryDB cluster mode",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/cluster-mode.html"
+  },
+  {
+   "title": "MemoryDB security",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/security.html"
+  },
+  {
+   "title": "MemoryDB backup and restore",
+   "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/backup-restore.html"
+  }
+ ],
+ "aws-secrets-manager": [
+  {
+   "title": "Secrets Manager rotating secrets",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html"
+  },
+  {
+   "title": "Secrets Manager pricing",
+   "url": "https://aws.amazon.com/secrets-manager/pricing/"
+  },
+  {
+   "title": "Secrets Manager caching secrets",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/caching-secrets.html"
+  },
+  {
+   "title": "Secrets Manager vs Parameter Store",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/parameter-store.html"
+  },
+  {
+   "title": "Secrets Manager using secrets",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/using-secrets.html"
+  },
+  {
+   "title": "Secrets Manager security best practices",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/security-best-practices.html"
+  },
+  {
+   "title": "Secrets Manager replicating secrets",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/replicating-secrets.html"
+  },
+  {
+   "title": "Secrets Manager troubleshooting",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/troubleshooting.html"
+  },
+  {
+   "title": "Secrets Manager versioning secrets",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/versioning-secrets.html"
+  },
+  {
+   "title": "Secrets Manager intro",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html"
+  },
+  {
+   "title": "Secrets Manager logging",
+   "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/logging.html"
+  }
+ ],
+ "aws-shield": [
+  {
+   "title": "AWS Shield DDoS Response Team",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-ddos-response-team.html"
+  },
+  {
+   "title": "AWS Shield pricing",
+   "url": "https://aws.amazon.com/shield/pricing/"
+  },
+  {
+   "title": "AWS Shield subscriptions",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-subscriptions.html"
+  },
+  {
+   "title": "AWS Shield advanced DDoS protection",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-advanced-ddos.html"
+  },
+  {
+   "title": "AWS Shield DDoS detection",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-ddos-detection.html"
+  },
+  {
+   "title": "AWS Shield vs firewalls",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-overview.html"
+  },
+  {
+   "title": "AWS Shield best practices",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-best-practices.html"
+  },
+  {
+   "title": "AWS Shield Elastic IP",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-elastic-ip.html"
+  },
+  {
+   "title": "AWS Shield security incidents",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-security-incidents.html"
+  },
+  {
+   "title": "AWS Shield DDoS scaling",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-ddos-scaling.html"
+  },
+  {
+   "title": "AWS Shield DDoS attacks",
+   "url": "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-ddos-attacks.html"
+  }
+ ],
+ "aws-storage-gateway": [
+  {
+   "title": "Storage Gateway cache",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/cache.html"
+  },
+  {
+   "title": "Storage Gateway monitoring",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/monitoring.html"
+  },
+  {
+   "title": "Storage Gateway S3 storage class",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/s3-storage-class.html"
+  },
+  {
+   "title": "Storage Gateway pricing",
+   "url": "https://aws.amazon.com/storagegateway/pricing/"
+  },
+  {
+   "title": "Storage Gateway best practices",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/best-practices.html"
+  },
+  {
+   "title": "Storage Gateway volume gateway",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/volume-gateway.html"
+  },
+  {
+   "title": "Storage Gateway repair",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/repair.html"
+  },
+  {
+   "title": "Storage Gateway tape gateway",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/tape-gateway.html"
+  },
+  {
+   "title": "Storage Gateway what is",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/Welcome.html"
+  },
+  {
+   "title": "Storage Gateway security",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/security.html"
+  },
+  {
+   "title": "Storage Gateway file gateway",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/file-gateway.html"
+  },
+  {
+   "title": "Storage Gateway NFS SMB",
+   "url": "https://docs.aws.amazon.com/storagegateway/latest/userguide/nfs-smb.html"
+  }
+ ],
+ "aws-transit-gateway": [
+  {
+   "title": "Transit Gateway route tables",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-route-tables.html"
+  },
+  {
+   "title": "Transit Gateway concepts",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-concepts.html"
+  },
+  {
+   "title": "Transit Gateway pricing",
+   "url": "https://aws.amazon.com/transit-gateway/pricing/"
+  },
+  {
+   "title": "Transit Gateway what is",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-what-is.html"
+  },
+  {
+   "title": "Transit Gateway attachments",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-attachments.html"
+  },
+  {
+   "title": "Transit Gateway Connect",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-connect.html"
+  },
+  {
+   "title": "Transit Gateway VPN",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-vpn.html"
+  },
+  {
+   "title": "Transit Gateway monitoring",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-monitoring.html"
+  },
+  {
+   "title": "Transit Gateway peering",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-peering.html"
+  },
+  {
+   "title": "Transit Gateway security",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-security.html"
+  },
+  {
+   "title": "Transit Gateway limits",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-limits.html"
+  },
+  {
+   "title": "Transit Gateway multicast",
+   "url": "https://docs.aws.amazon.com/vpc/latest/tgw/tgw-multicast.html"
+  }
+ ],
+ "aws-trusted-advisor": [
+  {
+   "title": "Trusted Advisor",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html"
+  },
+  {
+   "title": "Trusted Advisor pricing",
+   "url": "https://aws.amazon.com/premiumsupport/technology/trusted-advisor/"
+  },
+  {
+   "title": "Trusted Advisor security checks",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/security-checks.html"
+  },
+  {
+   "title": "Trusted Advisor support plans",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor-support-plans.html"
+  },
+  {
+   "title": "Trusted Advisor API",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor-api.html"
+  },
+  {
+   "title": "Trusted Advisor cost optimization",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/cost-optimization-checks.html"
+  },
+  {
+   "title": "Trusted Advisor service limits",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/service-limits-checks.html"
+  },
+  {
+   "title": "Trusted Advisor fault tolerance",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/fault-tolerance-checks.html"
+  },
+  {
+   "title": "Trusted Advisor performance checks",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/performance-checks.html"
+  },
+  {
+   "title": "Trusted Advisor BYOL",
+   "url": "https://docs.aws.amazon.com/awssupport/latest/user/byol.html"
+  }
+ ]
+}

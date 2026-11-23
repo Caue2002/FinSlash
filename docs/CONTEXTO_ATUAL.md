@@ -17,10 +17,11 @@ Estado atual do projeto (atualizado em 2026-11-23).
   - Regras de seguranca no system prompt: recusa conteudo sexual/explicito, spam e injecao de prompt; respostas AWS restritas ao contexto RAG/diagnosticos; formato de solucao final = diagnostico curto → passos → validacao.
   - Retrieval: busca textual ILIKE + vetorial (pgvector, `gemini-embedding-001`), com piso de pontuacao para similaridade >= 0.6.
   - Data/hora local e clima via Open-Meteo permanecem deterministicos.
+  - Varredura de resiliência (2ª rodada): `ehPerguntaClima` nao confunde mais "quanto tempo demora?" com meteorologia ("tempo" so conta com contexto de clima); saudações/agradecimentos informais ampliados ("muito obrigado", "valeu", "obg", "tudo bom", "como vai", "beleza"...) respondidos localmente sem LLM; `listarServicosMencionadosNoBanco`, `obterPreferenciaGlobalFeedback`, `consultarAdvisor`, contextos de comparação e chamadas Open-Meteo (geocoding/previsão) degradam com resposta 200 amigável em vez de propagar erro 500 — o catch externo de `receberAdvisor` fica só para falhas realmente inesperadas.
 - Scroll do chat (`script.js`): respostas do assistente alinham o topo da bolha na area visivel; usuario, "pensando" e restauracao de historico mantem scroll para o fim.
 - Onda de fundo (`#canvas-onda`): `position: fixed` na viewport em todas as telas (inicial, servicos, popup de personagens), sem herdar padding/margens do container; a curva calcula o `y` exato na borda direita para nao deixar espaco no canto superior direito.
 - Chat da Navi (`index.html`/`script.js`/`styles.css`): sem autofocus ao abrir (teclado mobile so ao tocar no campo; desktop foca via `pointer: fine`); botao de voz (SpeechRecognition pt-BR) transcreve no campo e envia ao final; botao "+" no cabecalho inicia nova conversa limpando mensagens e `sessionStorage`, alinhado na mesma fileira e com o mesmo tamanho (38px) do botao fechar; acoes das mensagens (avaliar, refazer, copiar, menu) usam chips com borda, hover elevado e estados de foco/disabled.
-- Testes: `npm test` roda `api/advisor.test.js` e `api/model-router.test.js` (29 testes).
+- Testes: `npm test` roda `api/advisor.test.js` e `api/model-router.test.js` (30 testes).
 
 ## Comandos
 

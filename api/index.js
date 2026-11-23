@@ -363,6 +363,7 @@ async function obterPreferenciaGlobalFeedback() {
         return null;
     }
 
+    try {
     const banco = obterPoolBanco();
     const disponibilidade = await banco.query(
         `SELECT
@@ -412,6 +413,12 @@ async function obterPreferenciaGlobalFeedback() {
         return null;
     }
     return principal.preferencia;
+    } catch (erro) {
+        // Preferencia global e acessorio: falha no banco nao pode quebrar
+        // a geracao da resposta
+        console.warn('Falha ao ler preferencia global de feedback:', erro?.message || erro);
+        return null;
+    }
 }
 
 function responder(status, corpo, cabecalhos = {}) {
@@ -902,13 +909,21 @@ async function identificarServicoPorBanco(pergunta) {
 
 async function listarServicosMencionadosNoBanco(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
-    const resultado = await obterPoolBanco().query(
+    let resultado;
+    try {
+        resultado = await obterPoolBanco().query(
         `SELECT DISTINCT service.name
          FROM aws_services AS service
          JOIN cost_scenarios AS scenario ON scenario.service_id = service.id
          WHERE scenario.is_published = TRUE
           ORDER BY service.name`
-    );
+        );
+    } catch (erro) {
+        // Banco indisponivel: degrada para as listas locais de servicos em
+        // vez de derrubar a requisicao inteira com erro 500
+        console.error('Falha ao listar serviços no banco; usando listas locais:', erro);
+        return [];
+    }
     const servicosEncontrados = resultado.rows
         .map((linha) => linha.name)
         .filter((nome) => {
@@ -1259,8 +1274,16 @@ function identificarPedidoDataHora(pergunta) {
 }
 
 function ehPerguntaClima(pergunta) {
-    return /\b(clima|tempo|temperatura|graus|chuv\w*|chov\w*|chuva|previs\w*|vento|umidade|calor|frio)\b/u
-        .test(normalizarTextoAdvisor(pergunta));
+    const normalizada = normalizarTextoAdvisor(pergunta);
+    // Termos inequivocos de meteorologia
+    if (/\b(clima|previs\w*|chuva|chov\w*|ventania|vento|umidade|umidade|neblina|geada|granizo|temperatura|graus|calor|frio)\b/u
+        .test(normalizada)) {
+        return true;
+    }
+    // "tempo" sozinho e ambiguo ("quanto tempo demora?"): so conta como
+    // clima quando acompanhado de contexto meteorologico ou temporal curto
+    return /\btempo\b/u.test(normalizada)
+        && /\b(hoje|agora|amanha|clima|previs|fora|atmosfera|cidade|aqui)\b/u.test(normalizada);
 }
 
 function extrairLocalidade(pergunta, aceitarRespostaDireta = false) {
@@ -1489,8 +1512,12 @@ function criarRespostaDataHora(pergunta, fusoHorario, local = null) {
 
 function ehSaudacao(pergunta) {
     const normalizada = normalizarTextoAdvisor(pergunta);
-    return /^(?:navi )?(?:oi|ola|hello|hey|bom dia|boa tarde|boa noite|tudo bem|obrigado|obrigada|tchau|ate logo)(?: navi)?(?: tudo bem)?$/u
-        .test(normalizada);
+    if (/^(?:navi )?(?:oi|ola|hello|hey|opa|e ai|eae|bom dia|boa tarde|boa noite|tudo bem|tudo bom|como vai|como vai voce|tudo joia|muito obrigado|muito obrigada|mto obrigado|mto obrigada|valeu|valeu demais|brigado|brigada|obg|vlw|flw|tchau|ate logo|ate mais|fui|beleza|blz|show|perfeito|otimo|maravilha)(?: navi)?(?: tudo bem)?[!.? ]*$/u
+        .test(normalizada)
+        || /^(?:navi )?obrigad[oa](?: por tudo| pela ajuda| pelo help| navi)?[!.? ]*$/u.test(normalizada)) {
+        return true;
+    }
+    return false;
 }
 
 function gerarSaudacaoNavi(pergunta) {
@@ -1504,14 +1531,24 @@ function gerarSaudacaoNavi(pergunta) {
     if (normalizada.includes('boa noite')) {
         return 'Boa noite! Sou a Navi. Como posso ajudar?';
     }
-    if (normalizada.includes('obrigad')) {
+    if (normalizada.includes('obrigad')
+        || normalizada.includes('valeu')
+        || normalizada.includes('brigad')
+        || /\b(obg|vlw|mto)\b/u.test(normalizada)) {
         return 'De nada! Se precisar de ajuda, estou por aqui.';
     }
-    if (normalizada.includes('tchau') || normalizada.includes('ate logo')) {
+    if (normalizada.includes('tchau') || normalizada.includes('ate logo') || normalizada.includes('ate mais') || normalizada === 'fui') {
         return 'Até logo! Se precisar de ajuda, estarei por aqui.';
     }
-    if (normalizada.includes('tudo bem')) {
+    if (normalizada.includes('tudo bem') || normalizada.includes('tudo bom')) {
         return 'Tudo certo por aqui! Sou a Navi. Como posso ajudar?';
+    }
+    if (normalizada.includes('beleza') || normalizada.includes('blz') || normalizada.includes('show')
+        || normalizada.includes('perfeito') || normalizada.includes('otimo') || normalizada.includes('maravilha')) {
+        return 'Que bom! Sou a Navi. Como posso ajudar?';
+    }
+    if (normalizada.includes('como vai') || normalizada.includes('opa') || normalizada.includes('e ai') || normalizada.includes('eae')) {
+        return 'Oi! Tudo bem por aqui. Sou a Navi. Como posso ajudar?';
     }
     return 'Olá! Sou a Navi. Como posso ajudar?';
 }
@@ -2378,8 +2415,16 @@ async function receberAdvisor(request, origemPermitida) {
             let local = null;
             let fusoHorario = entradaAdvisor.timezone;
             if (localidade) {
-                local = await geocodificarLocalidade(localidade);
-                if (!local) {
+                let geoIndisponivel = false;
+                try {
+                    local = await geocodificarLocalidade(localidade);
+                } catch (erroGeo) {
+                    // Geocodificacao indisponivel: responde o horario com o
+                    // fuso informado em vez de falhar a requisicao
+                    console.error('Falha ao geocodificar localidade para horário:', erroGeo);
+                    geoIndisponivel = true;
+                }
+                if (!local && !geoIndisponivel) {
                     return responder(200, {
                         modo: 'conversacao',
                         encontrado: false,
@@ -2414,7 +2459,33 @@ async function receberAdvisor(request, origemPermitida) {
                     conversaAtiva?.contexto || ''
                 ), cabecalhos);
             }
-            const local = await geocodificarLocalidade(localidade);
+            let local = null;
+            let geoClimaFalhou = false;
+            try {
+                local = await geocodificarLocalidade(localidade);
+            } catch (erroGeo) {
+                console.error('Falha ao geocodificar localidade para clima:', erroGeo);
+                geoClimaFalhou = true;
+            }
+            if (geoClimaFalhou) {
+                return responder(200, {
+                    modo: 'conversacao',
+                    encontrado: false,
+                    diagnostico: 'Previsão indisponível',
+                    servico: null,
+                    resposta: 'O serviço de previsão do tempo está indisponível no momento. Tente novamente em alguns instantes.',
+                    confianca: 0,
+                    fonte: 'servico-indisponivel',
+                    sources: [],
+                    validacao: null,
+                    resultados: [],
+                    sugestoes: [],
+                    agente: {
+                        status: 'erro',
+                        erro: null
+                    }
+                }, cabecalhos);
+            }
             if (!local) {
                 return responder(200, criarPerguntaLocalizacaoClima(
                     perguntaOriginal,
@@ -2422,7 +2493,28 @@ async function receberAdvisor(request, origemPermitida) {
                     `Não encontrei "${localidade}". Qual é a cidade e o estado ou país?`
                 ), cabecalhos);
             }
-            return responder(200, await criarRespostaClima(perguntaOriginal, local), cabecalhos);
+            try {
+                return responder(200, await criarRespostaClima(perguntaOriginal, local), cabecalhos);
+            } catch (erroClima) {
+                console.error('Falha ao consultar previsão do tempo:', erroClima);
+                return responder(200, {
+                    modo: 'conversacao',
+                    encontrado: false,
+                    diagnostico: 'Previsão indisponível',
+                    servico: null,
+                    resposta: 'Consegui localizar a cidade, mas o serviço de previsão está indisponível agora. Tente novamente em alguns instantes.',
+                    confianca: 0,
+                    fonte: 'servico-indisponivel',
+                    sources: [],
+                    validacao: null,
+                    resultados: [],
+                    sugestoes: [],
+                    agente: {
+                        status: 'erro',
+                        erro: null
+                    }
+                }, cabecalhos);
+            }
         }
 
         const opcoesGeracao = {
@@ -2542,9 +2634,31 @@ async function receberAdvisor(request, origemPermitida) {
                 return responder(200, resposta, cabecalhos);
             }
 
-            const contextos = await Promise.all(
-                servicosMencionados.map((servico) => obterContextoVisaoGeral(servico))
-            );
+            let contextos;
+            try {
+                contextos = await Promise.all(
+                    servicosMencionados.map((servico) => obterContextoVisaoGeral(servico))
+                );
+            } catch (erroContextos) {
+                console.error('Falha ao obter contextos para comparação:', erroContextos);
+                return responder(200, {
+                    modo: 'conversacao',
+                    encontrado: false,
+                    diagnostico: 'Comparação indisponível',
+                    servico: servicosMencionados.join(' × '),
+                    resposta: 'O catálogo está temporariamente indisponível para montar a comparação. Tente novamente em instantes.',
+                    confianca: 0,
+                    fonte: 'banco-validado',
+                    validacao: {
+                        status: 'contexto-insuficiente',
+                        origem: 'PostgreSQL do FinSlash'
+                    },
+                    agente: {
+                        status: 'erro',
+                        erro: null
+                    }
+                }, cabecalhos);
+            }
             if (contextos.some((contexto) => !contexto)) {
                 return responder(200, {
                     modo: 'conversacao',
@@ -2795,7 +2909,33 @@ async function receberAdvisor(request, origemPermitida) {
                 }, cabecalhos);
             }
         }
-        let resultado = await consultarAdvisor(pergunta);
+        let resultado;
+        try {
+            resultado = await consultarAdvisor(pergunta);
+        } catch (erroConsulta) {
+            // Catalogo indisponivel (banco fora, timeout): em vez de erro 500,
+            // a Navi avisa que os diagnosticos estao temporariamente fora e
+            // segue disponivel para conversa geral
+            console.error('Falha ao consultar o catálogo da Navi:', erroConsulta);
+            return responder(200, {
+                modo: 'conversacao',
+                encontrado: false,
+                diagnostico: 'Catálogo temporariamente indisponível',
+                servico: null,
+                resposta: 'Os diagnósticos do catálogo AWS estão temporariamente indisponíveis. Posso conversar sobre outros assuntos ou você pode tentar novamente em instantes.',
+                confianca: 0,
+                fonte: 'catalogo-indisponivel',
+                validacao: null,
+                resultados: [],
+                sugestoes: [],
+                agente: {
+                    status: 'erro',
+                    erro: erroConsulta instanceof Error
+                        ? erroConsulta.message.replace(/Bearer [^\s]+/gu, 'Bearer [oculto]').slice(0, 160)
+                        : 'Falha desconhecida.'
+                }
+            }, cabecalhos);
+        }
         let agenteStatus = 'desativado';
         let agenteErro = null;
         if (process.env.GEMINI_API_KEY) {

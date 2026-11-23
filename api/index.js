@@ -180,22 +180,30 @@ async function chamarGemini({
             if (json) {
                 generationConfig.responseMimeType = 'application/json';
             }
-            const corpo = {
+            const corpoBase = {
                 systemInstruction: {
                     parts: [{ text: systemInstruction }]
                 },
                 contents: criarConteudoGemini(prompt, historico),
                 generationConfig
             };
-            if (googleSearch) {
-                corpo.tools = [{ google_search: {} }];
-            }
-            const resposta = await fetch(url, {
+            const chamarModelo = (comBusca) => fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(corpo),
+                body: JSON.stringify(comBusca
+                    ? { ...corpoBase, tools: [{ google_search: {} }] }
+                    : corpoBase),
                 signal: AbortSignal.timeout(15000)
             });
+            let groundingAtivo = googleSearch;
+            let resposta = await chamarModelo(groundingAtivo);
+            // Alguns modelos nao aceitam a tool google_search (400/INVALID_ARGUMENT):
+            // repete a mesma chamada sem grounding em vez de queimar a fila inteira
+            if (!resposta.ok && groundingAtivo && resposta.status === 400) {
+                console.warn(`Modelo ${modelo} rejeitou google_search; repetindo sem grounding.`);
+                groundingAtivo = false;
+                resposta = await chamarModelo(false);
+            }
             if (!resposta.ok) {
                 const erroStatus = new Error(`Gemini respondeu com o status ${resposta.status}.`);
                 erroStatus.status = resposta.status;
@@ -209,7 +217,7 @@ async function chamarGemini({
             if (!texto) {
                 throw new Error('Gemini devolveu uma resposta vazia.');
             }
-            const sources = googleSearch
+            const sources = groundingAtivo
                 ? obterFontesGoogleGrounding(payload.candidates?.[0]?.groundingMetadata)
                 : [];
             let resultado;
@@ -224,9 +232,9 @@ async function chamarGemini({
                         throw new Error('Gemini devolveu JSON inválido.');
                     }
                 }
-                resultado = googleSearch ? { ...resultado, sources } : resultado;
+                resultado = groundingAtivo ? { ...resultado, sources } : resultado;
             } else {
-                resultado = googleSearch ? { texto, sources } : texto;
+                resultado = groundingAtivo ? { texto, sources } : texto;
             }
             return { resultado, usage: payload.usageMetadata };
         }
@@ -1069,6 +1077,30 @@ function obterContextoUsuarioConversa(historico, pergunta) {
     return combinarContextoConversa(mensagensAnteriores.join('\n'), pergunta);
 }
 
+// Ultima instancia da conversa geral: falha total do LLM vira resposta local
+// amigavel (com orientacao para os diagnosticos AWS) em vez do erro 500
+const RESPOSTA_GERAL_FALLBACK =
+    'Tive uma dificuldade técnica agora para conversar. Posso te ajudar com os diagnósticos AWS do FinSlash — pergunte sobre um serviço como EC2, S3 ou Lambda — ou tente novamente em instantes.';
+
+function respostaGeralIndisponivel(erro) {
+    return {
+        modo: 'conversacao',
+        encontrado: false,
+        diagnostico: 'Conversa geral indisponível',
+        servico: null,
+        resposta: RESPOSTA_GERAL_FALLBACK,
+        confianca: 0,
+        fonte: 'geral-indisponivel',
+        validacao: null,
+        resultados: [],
+        sugestoes: [],
+        agente: {
+            status: 'erro',
+            erro
+        }
+    };
+}
+
 async function criarRespostaGeral(pergunta, historico = [], contextoAnterior = '', opcoes = {}) {
     if (!process.env.GEMINI_API_KEY) {
         return {
@@ -1098,7 +1130,9 @@ async function criarRespostaGeral(pergunta, historico = [], contextoAnterior = '
         opcoes.motivoFeedback,
         opcoes.preferenciaResposta
     );
-    const respostaGemini = await chamarGemini({
+    let respostaGemini;
+    try {
+        respostaGemini = await chamarGemini({
         temperature: 0.8,
         systemInstruction: `Você é a Navi, a assistente de IA do FinSlash. Você conversa em
 português do Brasil de forma leve, natural e inteligente — como uma pessoa curiosa e
@@ -1106,6 +1140,11 @@ prestativa, não como um formulário. Conduza a conversa: reaja ao que a pessoa 
 fique à vontade para fazer perguntas de acompanhamento quando isso ajudar, use humor
 sutil quando couber e adapte o tamanho da resposta ao momento — curta em papo casual,
 mais completa quando pedirem detalhe ou explicação.
+Sobre o FinSlash: é um portfólio interativo que ajuda pessoas a explorar serviços da
+Amazon Web Services (AWS) e a reduzir custos. A Navi responde perguntas gerais e cruza
+dúvidas de AWS com diagnósticos validados do catálogo. Quando perguntarem o que você
+sabe fazer ou como pode ajudar, responda em poucas frases com essa descrição e sugira
+exemplos práticos (por exemplo, "como reduzir custos com EC2").
 Você tem autonomia para conversar sobre qualquer assunto: dúvidas aleatórias, curiosidades,
 conselhos, opiniões leves, matemática, explicações e cultura geral. Use seu próprio
 conhecimento para responder com confiança no que é estável e deixe claro quando algo
@@ -1136,16 +1175,26 @@ ${DIRETRIZES_CONVERSA_NAVI}
 Retorne somente JSON válido no formato {"resposta":"texto","precisa_esclarecimento":boolean,"precisa_fontes":boolean}.`,
         prompt,
         historico,
-json: true,
-googleSearch: true
-    });
+        json: true,
+        googleSearch: true
+        });
+    } catch (erroGeral) {
+        // Falha total do LLM (fila esgotada, JSON invalido em todos os modelos):
+        // degrada para uma resposta local amigavel em vez de propagar o erro 500
+        console.error('Falha na conversa geral da Navi:', erroGeral);
+        return respostaGeralIndisponivel(
+            erroGeral instanceof Error
+                ? erroGeral.message.replace(/Bearer [^\s]+/gu, 'Bearer [oculto]').slice(0, 160)
+                : 'Falha desconhecida.'
+        );
+    }
     if (!respostaGemini
         || typeof respostaGemini.resposta !== 'string'
         || !respostaGemini.resposta.trim()
         || typeof respostaGemini.precisa_esclarecimento !== 'boolean'
         || (respostaGemini.precisa_fontes !== undefined
             && typeof respostaGemini.precisa_fontes !== 'boolean')) {
-        throw new TypeError('Gemini devolveu uma resposta geral incompleta.');
+        return respostaGeralIndisponivel('Gemini devolveu uma resposta geral incompleta.');
     }
 
     const precisaEsclarecimento = respostaGemini.precisa_esclarecimento;

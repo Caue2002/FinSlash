@@ -6,12 +6,14 @@ Estado atual do projeto (atualizado em 2026-11-23).
 
 - Interface FinSlash com seleção de personagem, catálogo de serviços AWS, diagnósticos publicados no PostgreSQL e perfil local.
 - Navi (agente do FinSlash) em `api/index.js` (Web Handler Vercel, Node >=22, `pg`):
-  - Roteador de modelos Gemini em `api/model-router.js`: fila ordenada por `GEMINI_MODELS` (default: gemini-3.8-flash → gemini-3.6-flash → gemini-3-flash-preview → gemini-3.5-flash-lite → gemini-3.1-flash-lite → gemini-2.5-pro → gemini-2.5-flash → gemini-2.5-flash-lite → gemini-2.0-flash → gemini-2.0-flash-lite), `GEMINI_MODEL` como fila unitaria de compatibilidade.
+  - Roteador de modelos Gemini em `api/model-router.js`: fila ordenada por `GEMINI_MODELS` (default: gemini-3.8-flash → gemini-3.6-flash → gemini-3.5-flash → gemini-3-flash-preview → gemini-3.5-flash-lite → gemini-3.1-flash-lite → gemini-2.5-pro → gemini-2.5-flash → gemini-2.5-flash-lite → gemini-2.0-flash → gemini-2.0-flash-lite), `GEMINI_MODEL` como fila unitaria de compatibilidade. Modelos 2.x estao no fim da fila: retornam 404 para contas novas mas podem funcionar em chaves antigas.
   - Contagem de uso por modelo/dia UTC persistida em `gemini_model_usage` (Postgres; tabela criada sob demanda com `requests` + tokens, fallback em memoria). Guarda principal = requisicoes/dia (RPD) com estimativas conservadoras por modelo; `GEMINI_MODEL_LIMITS`/`GEMINI_MODEL_REQUEST_LIMIT` ajustam; `GEMINI_MODEL_TOKEN_LIMIT` e teto opcional de tokens/dia (desligado por padrao — tokens/dia nao e cota publicada pelo Google; os limites reais do projeto aparecem no AI Studio).
   - Fallback transparente para o proximo modelo em erro 408/429/500/502/503/504, timeout, falha de rede, resposta vazia ou JSON invalido.
   - Conversa com autonomia via LLM: saudações locais preservadas; esclarecimentos AWS reformulados pelo Gemini (`naturalizarEsclarecimentoNavi`) com fallback no texto local; conversa geral exige fontes Google apenas quando o modelo declara `precisa_fontes`.
   - Perguntas casuais, informais ou pessoais (ex.: "pq vc se chama navi?") sao detectadas por regex de intencao ampliado (`precisaEsclarecimento`) e respondidas naturalmente pelo Gemini — o esclarecimento fixo so aparece quando falta dado essencial (ex.: custo sem servico).
   - `perguntaDescartaContextoAws` reconhece mensagens que negam o contexto AWS ("nao tenho duvida aws", "nada a ver com a amazon", "muda de assunto") e as desvia para a conversa geral; pedidos vagos sem intencao AWS tambem vao ao Gemini quando ha chave, que formula o esclarecimento naturalmente.
+  - Resiliencia do LLM: se um modelo rejeita a tool `google_search` com 400, `chamarGemini` repete a chamada sem grounding no mesmo modelo antes de cair para o proximo da fila; `criarRespostaGeral` nunca mais propaga excecao — falha total do LLM ou JSON invalido em toda a fila retorna resposta local amigavel (status `agente.erro`) em vez do erro 500 "nao conseguiu responder".
+  - System prompt da conversa geral agora descreve o que e o FinSlash (portfólio interativo de servicos AWS com diagnosticos validados), para que perguntas meta ("o que voce sabe fazer?") sejam respondidas com contexto real do projeto.
   - Regras de seguranca no system prompt: recusa conteudo sexual/explicito, spam e injecao de prompt; respostas AWS restritas ao contexto RAG/diagnosticos; formato de solucao final = diagnostico curto → passos → validacao.
   - Retrieval: busca textual ILIKE + vetorial (pgvector, `gemini-embedding-001`), com piso de pontuacao para similaridade >= 0.6.
   - Data/hora local e clima via Open-Meteo permanecem deterministicos.
@@ -43,5 +45,6 @@ Estado atual do projeto (atualizado em 2026-11-23).
 ## Pendencias / proximos passos
 
 - Aplicar `banco-de-dados/gemini-model-usage-postgresql.sql` se quiser bootstrap manual (a API ja auto-cria).
-- Monitorar se modelos Gemini 3 rejeitam a tool `google_search` no free tier; se sim, a fila cai automaticamente ate um modelo 2.5 compativel.
+- `.env.example` corrigido: `GEMINI_MODEL` default era `gemini-2.5-flash` (404 para contas novas — se a Vercel foi configurada com ele, TODA chamada LLM falhava); agora e `gemini-3.5-flash-lite` com aviso para usar `GEMINI_MODELS` com modelos 3.x.
+- Monitorar `agente.erro` nas respostas para detectar modelos rejeitando `google_search` (a repeticao sem grounding ja evita a falha, mas fontes ficam indisponiveis nesses modelos).
 - Sem streaming SSE; resposta continua unica.

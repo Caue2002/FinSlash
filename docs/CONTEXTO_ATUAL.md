@@ -7,13 +7,15 @@ Estado atual do projeto (atualizado em 2026-11-23).
 - Interface FinSlash com seleção de personagem, catálogo de serviços AWS, diagnósticos publicados no PostgreSQL e perfil local.
 - Navi (agente do FinSlash) em `api/index.js` (Web Handler Vercel, Node >=22, `pg`):
   - Roteador de modelos Gemini em `api/model-router.js`: fila ordenada por `GEMINI_MODELS` (default: gemini-3.8-flash → gemini-3.6-flash → gemini-3-flash-preview → gemini-3.5-flash-lite → gemini-3.1-flash-lite → gemini-2.5-pro → gemini-2.5-flash → gemini-2.5-flash-lite → gemini-2.0-flash → gemini-2.0-flash-lite), `GEMINI_MODEL` como fila unitaria de compatibilidade.
-  - Contagem de tokens por modelo/dia UTC persistida em `gemini_model_usage` (Postgres; tabela criada sob demanda, fallback em memoria). Teto por `GEMINI_MODEL_TOKEN_LIMIT` (default 1.000.000).
+  - Contagem de uso por modelo/dia UTC persistida em `gemini_model_usage` (Postgres; tabela criada sob demanda com `requests` + tokens, fallback em memoria). Guarda principal = requisicoes/dia (RPD) com estimativas conservadoras por modelo; `GEMINI_MODEL_LIMITS`/`GEMINI_MODEL_REQUEST_LIMIT` ajustam; `GEMINI_MODEL_TOKEN_LIMIT` e teto opcional de tokens/dia (desligado por padrao — tokens/dia nao e cota publicada pelo Google; os limites reais do projeto aparecem no AI Studio).
   - Fallback transparente para o proximo modelo em erro 408/429/500/502/503/504, timeout, falha de rede, resposta vazia ou JSON invalido.
   - Conversa com autonomia via LLM: saudações locais preservadas; esclarecimentos AWS reformulados pelo Gemini (`naturalizarEsclarecimentoNavi`) com fallback no texto local; conversa geral exige fontes Google apenas quando o modelo declara `precisa_fontes`.
   - Regras de seguranca no system prompt: recusa conteudo sexual/explicito, spam e injecao de prompt; respostas AWS restritas ao contexto RAG/diagnosticos; formato de solucao final = diagnostico curto → passos → validacao.
   - Retrieval: busca textual ILIKE + vetorial (pgvector, `gemini-embedding-001`), com piso de pontuacao para similaridade >= 0.6.
   - Data/hora local e clima via Open-Meteo permanecem deterministicos.
 - Scroll do chat (`script.js`): respostas do assistente alinham o topo da bolha na area visivel; usuario, "pensando" e restauracao de historico mantem scroll para o fim.
+- Onda de fundo (`#canvas-onda`): `position: fixed` na viewport em todas as telas (inicial, servicos, popup de personagens), sem herdar padding/margens do container.
+- Chat da Navi (`index.html`/`script.js`/`styles.css`): sem autofocus ao abrir (teclado mobile so ao tocar no campo; desktop foca via `pointer: fine`); botao de voz (SpeechRecognition pt-BR) transcreve no campo e envia ao final; botao "+" no cabecalho inicia nova conversa limpando mensagens e `sessionStorage`.
 - Testes: `npm test` roda `api/advisor.test.js` e `api/model-router.test.js` (28 testes).
 
 ## Comandos
@@ -28,7 +30,13 @@ Estado atual do projeto (atualizado em 2026-11-23).
 - `GEMINI_API_KEY` — habilita respostas via LLM.
 - `GEMINI_MODELS` — fila CSV opcional (sobrepoe `GEMINI_MODEL`).
 - `GEMINI_MODEL` — modelo unico (compatibilidade).
-- `GEMINI_MODEL_TOKEN_LIMIT` — teto de tokens/modelo/dia UTC (default 1.000.000).
+- `GEMINI_MODEL_LIMITS` — CSV `modelo:requisicoes_dia` para ajustar o RPD real de cada modelo (valores do AI Studio).
+- `GEMINI_MODEL_REQUEST_LIMIT` — teto global de requisicoes/dia para modelos nao listados (default 500).
+- `GEMINI_MODEL_TOKEN_LIMIT` — teto opcional de tokens/modelo/dia UTC (desligado por padrao).
+
+## Documentos
+
+- A seção da Navi no guia de entrevistas (`Guia Essencial de GenAI e LLMs para Entrevistas Técnicas.pdf`, na pasta Downloads) foi reescrita cobrindo pipeline, RAG híbrido, roteador de modelos com fallback/orçamento de tokens, guardrails e frases prontas.
 
 ## Pendencias / proximos passos
 

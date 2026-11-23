@@ -46,11 +46,12 @@ api/advisor.test.js                       → testes do roteador
 ### Persistencia de uso
 
 - Nova tabela `gemini_model_usage`:
-  `model TEXT`, `usage_date DATE` (dia UTC), `input_tokens BIGINT`, `output_tokens BIGINT`, `updated_at TIMESTAMPTZ`, PK `(model, usage_date)`.
-- Janela = dia UTC (`(NOW() AT TIME ZONE 'UTC')::date`).
-- Teto por modelo via env `GEMINI_MODEL_TOKEN_LIMIT` (default `1000000`), aplicado a `input + output` do dia.
+  `model TEXT`, `usage_date DATE` (dia UTC), `input_tokens BIGINT`, `output_tokens BIGINT`, `requests BIGINT`, `updated_at TIMESTAMPTZ`, PK `(model, usage_date)`.
+- Janela = dia UTC.
+- Guarda principal = requisicoes/dia (RPD) por modelo: estimativas conservadoras no mapa padrao (ex.: 2.5-flash=250, 2.5-flash-lite=1000, 2.0-flash=1500, desconhecidos=500), ajustaveis via `GEMINI_MODEL_LIMITS` (CSV `modelo:limite`) e `GEMINI_MODEL_REQUEST_LIMIT` (teto global). O Google nao publica os valores free tier — sao por projeto no AI Studio.
+- Teto opcional de tokens/dia via `GEMINI_MODEL_TOKEN_LIMIT` (desligado por padrao), aplicado a `input + output`.
 - Leituras/escritas com `INSERT ... ON CONFLICT DO UPDATE` atomico; falha de banco degrada para contadores em memoria da instancia (best-effort) sem derrubar a requisicao.
-- Erro de API nao consome tokens; somente respostas com `usageMetadata` contabilizam.
+- Somente respostas bem-sucedidas contam: 1 request + tokens do `usageMetadata`.
 
 ### Algoritmo do roteador
 
@@ -86,7 +87,7 @@ api/advisor.test.js                       → testes do roteador
 
 ## Out of Scope (Deferred)
 
-- Contadores por RPM/minuto (o teto e de tokens por dia, nao rate limit).
+- Contadores por RPM/minuto (a guarda diaria e RPD; rate limit por minuto segue coberto pelo fallback em 429).
 - Modelos pagos ou `gemini-embedding` na fila de fallback.
 - Telemetria exposta ao frontend (status de qual modelo atendeu).
 - Retentativa com backoff exponencial por modelo (uma tentativa por modelo por requisicao).

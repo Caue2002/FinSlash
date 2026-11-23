@@ -3,10 +3,17 @@ import test from 'node:test';
 import {
     chamarGeminiComFallback,
     obterFilaModelosGemini,
+    obterLimiteRequisicoesModelo,
     obterLimiteTokensModelo
 } from './model-router.js';
 
-const CHAVES_AMBIENTE = ['GEMINI_MODELS', 'GEMINI_MODEL', 'GEMINI_MODEL_TOKEN_LIMIT'];
+const CHAVES_AMBIENTE = [
+    'GEMINI_MODELS',
+    'GEMINI_MODEL',
+    'GEMINI_MODEL_TOKEN_LIMIT',
+    'GEMINI_MODEL_LIMITS',
+    'GEMINI_MODEL_REQUEST_LIMIT'
+];
 
 function preservarAmbiente(context) {
     const anterior = Object.fromEntries(
@@ -43,7 +50,18 @@ test('resolve a fila de modelos por GEMINI_MODELS, GEMINI_MODEL ou padrao', (con
     process.env.GEMINI_MODEL_TOKEN_LIMIT = '250000';
     assert.equal(obterLimiteTokensModelo(), 250000);
     process.env.GEMINI_MODEL_TOKEN_LIMIT = 'invalido';
-    assert.equal(obterLimiteTokensModelo(), 1000000);
+    assert.equal(obterLimiteTokensModelo(), Number.POSITIVE_INFINITY);
+
+    delete process.env.GEMINI_MODEL_LIMITS;
+    delete process.env.GEMINI_MODEL_REQUEST_LIMIT;
+    assert.equal(obterLimiteRequisicoesModelo('gemini-2.5-flash'), 250);
+    assert.equal(obterLimiteRequisicoesModelo('modelo-desconhecido'), 500);
+
+    process.env.GEMINI_MODEL_LIMITS = 'gemini-2.5-flash:42, outro:7';
+    assert.equal(obterLimiteRequisicoesModelo('gemini-2.5-flash'), 42);
+    assert.equal(obterLimiteRequisicoesModelo('outro'), 7);
+    process.env.GEMINI_MODEL_REQUEST_LIMIT = '300';
+    assert.equal(obterLimiteRequisicoesModelo('gemini-2.0-flash'), 300);
 });
 
 test('falls back to the next model on retryable errors and records usage', async (context) => {
@@ -54,7 +72,7 @@ test('falls back to the next model on retryable errors and records usage', async
     const inserts = [];
     const banco = {
         async query(sql, values = []) {
-            if (sql.includes('CREATE TABLE')) {
+            if (sql.includes('CREATE TABLE') || sql.includes('ALTER TABLE')) {
                 return { rows: [] };
             }
             if (sql.includes('FROM gemini_model_usage')) {
@@ -100,14 +118,15 @@ test('skips models that reached the daily token limit', async (context) => {
     const tentativas = [];
     const banco = {
         async query(sql) {
-            if (sql.includes('CREATE TABLE')) {
+            if (sql.includes('CREATE TABLE') || sql.includes('ALTER TABLE')) {
                 return { rows: [] };
             }
             if (sql.includes('FROM gemini_model_usage')) {
                 return {
                     rows: [{
                         model: 'modelo-cheio',
-                        total: 1500
+                        tokens: 1500,
+                        requests: 0
                     }]
                 };
             }

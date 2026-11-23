@@ -40,6 +40,17 @@ body::-webkit-scrollbar,
     z-index: 1;
 }
 
+/* O canvas principal da onda e sempre fixed na viewport: onde quer que o JS o
+   mova (tela inicial, servicos, popup de personagens), ele cobre a tela inteira
+   sem herdar padding ou margens do container. */
+#canvas-onda {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100lvh;
+}
+
 /* Tela inicial com cartao central */
 #tela-inicial {
     position: relative;
@@ -1685,6 +1696,28 @@ body.tela-servicos-ativa > .canvas-onda {
     padding-right: 44px;
 }
 
+.botao-novo-chat-advisor {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    margin-left: auto;
+    border: 1px solid #334155;
+    border-radius: 50%;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-family: inherit;
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.botao-novo-chat-advisor:hover {
+    background: #334155;
+    color: #f8fafc;
+}
+
 .boas-vindas-advisor {
     display: flex;
     min-height: 230px;
@@ -1828,6 +1861,48 @@ body.tela-servicos-ativa > .canvas-onda {
 .botao-enviar-advisor:disabled {
     opacity: 0.55;
     cursor: wait;
+}
+
+.botao-voz-advisor {
+    display: inline-flex;
+    min-width: 36px;
+    min-height: 36px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #334155;
+    border-radius: 50%;
+    background: transparent;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.botao-voz-advisor:hover {
+    background: #334155;
+    color: #f8fafc;
+}
+
+.botao-voz-advisor.ouvindo {
+    border-color: #f87171;
+    background: #450a0a;
+    color: #fca5a5;
+    animation: pulsar-microfone-advisor 1.2s ease-in-out infinite;
+}
+
+.botao-voz-advisor:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+@keyframes pulsar-microfone-advisor {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.45);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(248, 113, 113, 0);
+    }
 }
 
 .status-advisor {

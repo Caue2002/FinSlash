@@ -1,7 +1,13 @@
-// Roteador de modelos Gemini: fila de prioridade, teto de tokens por dia e
+// Roteador de modelos Gemini: fila de prioridade, cotas diarias por modelo e
 // fallback transparente entre modelos. A contagem persistida fica em
 // gemini_model_usage (Postgres); sem banco, usa contadores em memoria da
 // instancia — sempre em modo best-effort para nunca bloquear a resposta.
+//
+// Sobre cotas: o Google nao publica numeros fixos de free tier — RPM, TPM e
+// RPD variam por projeto e aparecem no AI Studio. A guarda principal aqui e
+// RPD (requisicoes/dia), a dimensao documentada de cota diaria; limites por
+// minuto sao cobertos pelo fallback em 429. GEMINI_MODEL_LIMITS permite
+// ajustar o RPD de cada modelo com os valores reais do projeto.
 
 const MODELOS_GEMINI_PADRAO = [
     'gemini-3.8-flash',
@@ -16,7 +22,21 @@ const MODELOS_GEMINI_PADRAO = [
     'gemini-2.0-flash-lite'
 ];
 
-const LIMITE_TOKENS_PADRAO_MODELO = 1000000;
+// Estimativas conservadoras de RPD free tier publicadas historicamente pela
+// Google para a familia 2.x. Modelos 3.x e desconhecidos usam o padrao.
+// Ajuste com GEMINI_MODEL_LIMITS usando os valores reais do AI Studio.
+const LIMITE_REQUISICOES_PADRAO_MODELO = 500;
+const LIMITE_REQUISICOES_POR_MODELO = {
+    'gemini-2.5-pro': 100,
+    'gemini-2.5-flash': 250,
+    'gemini-2.5-flash-lite': 1000,
+    'gemini-2.0-flash': 1500,
+    'gemini-2.0-flash-lite': 1500
+};
+
+// Teto diario de tokens e opcional: tokens/dia nao e uma cota publicada pela
+// Google. Sem GEMINI_MODEL_TOKEN_LIMIT, fica desligado (Infinity).
+const LIMITE_TOKENS_PADRAO_MODELO = Number.POSITIVE_INFINITY;
 const STATUS_RETRY_AVEL_GEMINI = new Set([408, 429, 500, 502, 503, 504]);
 
 let tabelaUsoVerificada = false;
@@ -28,6 +48,38 @@ function obterLimiteTokensModelo() {
     return Number.isFinite(limiteConfigurado) && limiteConfigurado > 0
         ? Math.floor(limiteConfigurado)
         : LIMITE_TOKENS_PADRAO_MODELO;
+}
+
+// Limite de requisicoes/dia por modelo. GEMINI_MODEL_LIMITS aceita CSV no
+// formato "modelo:limite,modelo:limite"; GEMINI_MODEL_REQUEST_LIMIT define um
+// teto global para modelos nao listados; sem nada, usa o mapa padrao.
+function obterLimiteRequisicoesModelo(modelo) {
+    const configurados = new Map(
+        (process.env.GEMINI_MODEL_LIMITS || '')
+            .split(',')
+            .map((par) => par.trim())
+            .filter(Boolean)
+            .map((par) => {
+                const separador = par.lastIndexOf(':');
+                if (separador <= 0) {
+                    return null;
+                }
+                const nome = par.slice(0, separador).trim();
+                const limite = Number(par.slice(separador + 1).trim());
+                return nome && Number.isFinite(limite) && limite > 0
+                    ? [nome, Math.floor(limite)]
+                    : null;
+            })
+            .filter(Boolean)
+    );
+    if (configurados.has(modelo)) {
+        return configurados.get(modelo);
+    }
+    const limiteGlobal = Number(process.env.GEMINI_MODEL_REQUEST_LIMIT);
+    if (Number.isFinite(limiteGlobal) && limiteGlobal > 0) {
+        return Math.floor(limiteGlobal);
+    }
+    return LIMITE_REQUISICOES_POR_MODELO[modelo] ?? LIMITE_REQUISICOES_PADRAO_MODELO;
 }
 
 // A fila vem de GEMINI_MODELS (CSV, do mais capaz ao mais leve). GEMINI_MODEL
@@ -56,7 +108,15 @@ function chaveMemoria(modelo) {
 }
 
 function consumoMemoriaModelo(modelo) {
-    return consumoMemoria.get(chaveMemoria(modelo)) || 0;
+    return consumoMemoria.get(chaveMemoria(modelo)) || { tokens: 0, requests: 0 };
+}
+
+function somarConsumoMemoria(modelo, tokens, requests) {
+    const atual = consumoMemoriaModelo(modelo);
+    consumoMemoria.set(chaveMemoria(modelo), {
+        tokens: atual.tokens + tokens,
+        requests: atual.requests + requests
+    });
 }
 
 // Cria a tabela de uso sob demanda (uma vez por instancia) para nao exigir
@@ -73,9 +133,14 @@ async function garantirTabelaUso(banco) {
                 usage_date DATE NOT NULL,
                 input_tokens BIGINT NOT NULL DEFAULT 0,
                 output_tokens BIGINT NOT NULL DEFAULT 0,
+                requests BIGINT NOT NULL DEFAULT 0,
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 PRIMARY KEY (model, usage_date)
             )`
+        );
+        await banco.query(
+            `ALTER TABLE gemini_model_usage
+             ADD COLUMN IF NOT EXISTS requests BIGINT NOT NULL DEFAULT 0`
         );
     } catch (error) {
         persistenciaIndisponivel = true;
@@ -83,7 +148,7 @@ async function garantirTabelaUso(banco) {
     }
 }
 
-// Retorna um Map modelo -> tokens consumidos no dia UTC corrente.
+// Retorna um Map modelo -> { tokens, requests } do dia UTC corrente.
 // null indica que a persistencia esta indisponivel e o chamador deve usar memoria.
 async function obterConsumoDiario(banco) {
     if (!banco || persistenciaIndisponivel) {
@@ -96,12 +161,19 @@ async function obterConsumoDiario(banco) {
         }
         const resultado = await banco.query(
             `SELECT model,
-                    COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0) AS total
+                    COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0) AS tokens,
+                    COALESCE(requests, 0) AS requests
              FROM gemini_model_usage
              WHERE usage_date = $1::date`,
             [dataUtcAtual()]
         );
-        return new Map(resultado.rows.map((linha) => [linha.model, Number(linha.total) || 0]));
+        return new Map(resultado.rows.map((linha) => [
+            linha.model,
+            {
+                tokens: Number(linha.tokens) || 0,
+                requests: Number(linha.requests) || 0
+            }
+        ]));
     } catch (error) {
         persistenciaIndisponivel = true;
         console.warn('Leitura do consumo Gemini falhou; usando memoria da instancia.', error?.message || error);
@@ -109,8 +181,9 @@ async function obterConsumoDiario(banco) {
     }
 }
 
-// Persiste o consumo de um modelo apos uma chamada bem-sucedida. Best-effort:
-// nunca deve derrubar nem atrasar a resposta alem de uma query simples.
+// Persiste o consumo de um modelo apos uma chamada bem-sucedida: uma
+// requisicao e os tokens informados pelos metadados. Best-effort: nunca deve
+// derrubar nem atrasar a resposta alem de uma query simples.
 async function registrarConsumoModelo(banco, modelo, usage) {
     const inputTokens = Number.isFinite(usage?.promptTokenCount)
         ? Math.max(0, Math.floor(usage.promptTokenCount))
@@ -121,31 +194,30 @@ async function registrarConsumoModelo(banco, modelo, usage) {
         + (Number.isFinite(usage?.thoughtsTokenCount)
             ? Math.max(0, Math.floor(usage.thoughtsTokenCount))
             : 0);
-    if (!inputTokens && !outputTokens) {
-        return;
-    }
     if (!banco || persistenciaIndisponivel) {
-        consumoMemoria.set(chaveMemoria(modelo), consumoMemoriaModelo(modelo) + inputTokens + outputTokens);
+        somarConsumoMemoria(modelo, inputTokens + outputTokens, 1);
         return;
     }
     try {
         await garantirTabelaUso(banco);
         if (persistenciaIndisponivel) {
-            consumoMemoria.set(chaveMemoria(modelo), consumoMemoriaModelo(modelo) + inputTokens + outputTokens);
+            somarConsumoMemoria(modelo, inputTokens + outputTokens, 1);
             return;
         }
         await banco.query(
-            `INSERT INTO gemini_model_usage (model, usage_date, input_tokens, output_tokens, updated_at)
-             VALUES ($1, $2::date, $3, $4, NOW())
+            `INSERT INTO gemini_model_usage
+                (model, usage_date, input_tokens, output_tokens, requests, updated_at)
+             VALUES ($1, $2::date, $3, $4, 1, NOW())
              ON CONFLICT (model, usage_date) DO UPDATE SET
                 input_tokens = gemini_model_usage.input_tokens + EXCLUDED.input_tokens,
                 output_tokens = gemini_model_usage.output_tokens + EXCLUDED.output_tokens,
+                requests = gemini_model_usage.requests + 1,
                 updated_at = NOW()`,
             [modelo, dataUtcAtual(), inputTokens, outputTokens]
         );
     } catch (error) {
         persistenciaIndisponivel = true;
-        consumoMemoria.set(chaveMemoria(modelo), consumoMemoriaModelo(modelo) + inputTokens + outputTokens);
+        somarConsumoMemoria(modelo, inputTokens + outputTokens, 1);
         console.warn('Registro do consumo Gemini falhou; usando memoria da instancia.', error?.message || error);
     }
 }
@@ -166,16 +238,21 @@ function erroRetryavelGemini(erro) {
 // proximo modelo. Retorna o resultado do primeiro modelo saudavel.
 async function chamarGeminiComFallback({ banco = null, executar }) {
     const fila = obterFilaModelosGemini();
-    const limite = obterLimiteTokensModelo();
+    const limiteTokens = obterLimiteTokensModelo();
     const consumoPersistido = await obterConsumoDiario(banco);
     const consumo = consumoPersistido || new Map(
         fila.map((modelo) => [modelo, consumoMemoriaModelo(modelo)])
     );
     let ultimoErro = null;
     for (const modelo of fila) {
-        const consumido = consumo.get(modelo) || 0;
-        if (consumido >= limite) {
-            console.warn(`Modelo Gemini ${modelo} esgotado no ciclo atual (${consumido}/${limite} tokens).`);
+        const { tokens: consumidoTokens, requests: consumidoRequests } = consumo.get(modelo)
+            || { tokens: 0, requests: 0 };
+        const limiteRequests = obterLimiteRequisicoesModelo(modelo);
+        if (consumidoRequests >= limiteRequests || consumidoTokens >= limiteTokens) {
+            console.warn(
+                `Modelo Gemini ${modelo} esgotado no ciclo atual `
+                + `(${consumidoRequests}/${limiteRequests} requisicoes, ${consumidoTokens}/${limiteTokens} tokens).`
+            );
             continue;
         }
         try {
@@ -196,6 +273,7 @@ async function chamarGeminiComFallback({ banco = null, executar }) {
 export {
     chamarGeminiComFallback,
     obterFilaModelosGemini,
+    obterLimiteRequisicoesModelo,
     obterLimiteTokensModelo,
     registrarConsumoModelo
 };

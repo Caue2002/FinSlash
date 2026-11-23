@@ -625,11 +625,7 @@ test('answers general questions with Gemini without requiring AWS diagnostics', 
     assert.match(chamadasGemini[0].body.contents[2].parts[0].text, /hábito simples/u);
     assert.match(
         chamadasGemini[0].body.systemInstruction.parts[0].text,
-        /Se perguntarem sobre sua identidade, diga que é a Navi/u
-    );
-    assert.match(
-        chamadasGemini[0].body.systemInstruction.parts[0].text,
-        /confirme que é um agente de inteligência artificial/u
+        /diga que é a Navi, um agente de inteligência artificial/u
     );
     assert.doesNotMatch(
         chamadasGemini[0].body.systemInstruction.parts[0].text,
@@ -1115,7 +1111,7 @@ test('uses Google grounding, feedback, and conversation preferences in generated
     assert.deepEqual(corposGemini[0].tools, [{ google_search: {} }]);
     assert.match(corposGemini[0].contents[0].parts[0].text, /Gere uma nova resposta/u);
     assert.match(corposGemini[0].contents[0].parts[0].text, /prefira linguagem simples/u);
-    assert.match(corposGemini[0].systemInstruction.parts[0].text, /fontes primárias oficiais/u);
+    assert.match(corposGemini[0].systemInstruction.parts[0].text, /fontes\s*\n?primárias oficiais/u);
     assert.match(corposGemini[0].systemInstruction.parts[0].text, /não repita perguntas já respondidas/u);
 
     const respostaSeguinte = await advisor.fetch(new Request(

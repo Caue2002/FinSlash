@@ -266,6 +266,8 @@ const formularioAdvisor = document.getElementById('formulario-advisor');
 const campoAdvisor = document.getElementById('campo-advisor');
 const contadorAdvisor = document.getElementById('contador-advisor');
 const botaoEnviarAdvisor = document.getElementById('botao-enviar-advisor');
+const botaoVozAdvisor = document.getElementById('botao-voz-advisor');
+const botaoNovoChatAdvisor = document.getElementById('botao-novo-chat-advisor');
 const statusAdvisor = document.getElementById('status-advisor');
 const cenariosAdvisor = document.getElementById('cenarios-advisor');
 const mensagensAdvisor = document.getElementById('mensagens-advisor');
@@ -597,10 +599,16 @@ function abrirAdvisor() {
             telaAnterior: window.history.state.tela
         });
     }
-    window.setTimeout(() => campoAdvisor.focus(), 0);
+    // No mobile o foco abre o teclado na hora; só foca automaticamente em
+    // dispositivos com ponteiro preciso (desktop). No toque, o usuário mesmo
+    // toca no campo para digitar.
+    if (window.matchMedia?.('(pointer: fine)').matches) {
+        window.setTimeout(() => campoAdvisor.focus(), 0);
+    }
 }
 
 function fecharAdvisor(retornarFoco = true) {
+    pararReconhecimentoVozAdvisor(false);
     if (!popupAdvisor.classList.contains('hidden')
         && window.history.state?.app === 'FinSlash'
         && window.history.state.tela === 'advisor') {
@@ -614,6 +622,7 @@ function fecharAdvisor(retornarFoco = true) {
 }
 
 function fecharAdvisorVisual(retornarFoco = false) {
+    pararReconhecimentoVozAdvisor(false);
     popupAdvisor.classList.add('hidden');
     popupAdvisor.classList.remove('advisor-teclado');
     popupAdvisor.querySelector('.painel-advisor')?.classList.remove('advisor-digitando');
@@ -1422,6 +1431,7 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
     }
 
     enviandoAdvisor = true;
+    pararReconhecimentoVozAdvisor(false);
     const acoesOrigem = opcoes.mensagemOrigem
         ? Array.from(opcoes.mensagemOrigem.querySelectorAll('button'))
         : [];
@@ -1548,6 +1558,161 @@ async function enviarPerguntaAdvisor(pergunta, opcoes = {}) {
             botao.disabled = false;
         });
     }
+}
+
+// Reconhecimento de voz do chat da Navi: mostra a transcrição parcial no campo
+// e envia a mensagem automaticamente quando o reconhecimento termina.
+let reconhecimentoVozAdvisor = null;
+let transcricaoVozAdvisor = '';
+let vozAdvisorEnviando = false;
+
+function definirEstadoVozAdvisor(ativo) {
+    botaoVozAdvisor?.classList.toggle('ouvindo', ativo);
+    botaoVozAdvisor?.setAttribute('aria-pressed', ativo ? 'true' : 'false');
+    botaoVozAdvisor?.setAttribute(
+        'aria-label',
+        ativo ? 'Parar gravação de voz' : 'Falar com a Navi'
+    );
+}
+
+function pararReconhecimentoVozAdvisor(enviar = false) {
+    if (!reconhecimentoVozAdvisor) {
+        return;
+    }
+    vozAdvisorEnviando = enviar;
+    const reconhecimento = reconhecimentoVozAdvisor;
+    reconhecimentoVozAdvisor = null;
+    try {
+        reconhecimento.stop();
+    } catch (error) {
+        console.warn('Não foi possível parar o reconhecimento de voz da Navi.', error);
+    }
+}
+
+function alternarReconhecimentoVozAdvisor() {
+    if (reconhecimentoVozAdvisor) {
+        pararReconhecimentoVozAdvisor(false);
+        return;
+    }
+    if (enviandoAdvisor) {
+        return;
+    }
+
+    const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!window.isSecureContext) {
+        statusAdvisor.textContent = 'O microfone exige HTTPS ou acesso pelo endereço localhost.';
+        return;
+    }
+    if (!Reconhecimento) {
+        statusAdvisor.textContent = 'Este navegador não oferece suporte a mensagens de voz. Use Chrome ou Edge.';
+        return;
+    }
+
+    transcricaoVozAdvisor = '';
+    vozAdvisorEnviando = true;
+    let reconhecimento;
+    try {
+        reconhecimento = new Reconhecimento();
+        reconhecimento.lang = 'pt-BR';
+        reconhecimento.interimResults = true;
+        reconhecimento.continuous = false;
+        reconhecimento.maxAlternatives = 1;
+    } catch (error) {
+        vozAdvisorEnviando = false;
+        console.error('Não foi possível preparar o reconhecimento de voz da Navi.', error);
+        statusAdvisor.textContent = 'Não foi possível preparar o microfone. Tente novamente.';
+        return;
+    }
+
+    reconhecimentoVozAdvisor = reconhecimento;
+    reconhecimento.onstart = () => {
+        if (reconhecimentoVozAdvisor === reconhecimento) {
+            definirEstadoVozAdvisor(true);
+            statusAdvisor.textContent = 'Ouvindo... fale sua pergunta.';
+        }
+    };
+    reconhecimento.onresult = (event) => {
+        if (reconhecimentoVozAdvisor !== reconhecimento) {
+            return;
+        }
+        let textoParcial = '';
+        for (let indice = event.resultIndex; indice < event.results.length; indice += 1) {
+            const resultado = event.results[indice];
+            const texto = resultado[0]?.transcript?.trim() || '';
+            if (!texto) {
+                continue;
+            }
+            if (resultado.isFinal) {
+                transcricaoVozAdvisor = `${transcricaoVozAdvisor} ${texto}`.trim();
+            } else {
+                textoParcial = texto;
+            }
+        }
+        const exibicao = `${transcricaoVozAdvisor} ${textoParcial}`.trim();
+        campoAdvisor.value = exibicao.slice(0, 300);
+        contadorAdvisor.textContent = `${campoAdvisor.value.length}/300`;
+    };
+    reconhecimento.onerror = (event) => {
+        if (reconhecimentoVozAdvisor !== reconhecimento) {
+            return;
+        }
+        const mensagensErro = {
+            'audio-capture': 'Não foi possível acessar o microfone deste dispositivo.',
+            'network': 'Falha no serviço de reconhecimento de voz. Verifique a conexão e tente novamente.',
+            'not-allowed': 'Permita o acesso ao microfone nas configurações do navegador.',
+            'service-not-allowed': 'O serviço de reconhecimento de voz foi bloqueado pelo navegador.',
+            'no-speech': 'Não ouvi nenhuma fala. Tente novamente.'
+        };
+        vozAdvisorEnviando = false;
+        statusAdvisor.textContent = mensagensErro[event.error]
+            || 'Ocorreu um erro no reconhecimento de voz.';
+    };
+    reconhecimento.onend = () => {
+        if (reconhecimentoVozAdvisor !== reconhecimento) {
+            return;
+        }
+        reconhecimentoVozAdvisor = null;
+        definirEstadoVozAdvisor(false);
+        const textoFinal = transcricaoVozAdvisor.trim();
+        transcricaoVozAdvisor = '';
+        if (vozAdvisorEnviando && textoFinal) {
+            statusAdvisor.textContent = '';
+            enviarPerguntaAdvisor(textoFinal);
+        } else if (vozAdvisorEnviando) {
+            statusAdvisor.textContent = 'Não consegui entender a fala. Tente novamente.';
+        }
+        vozAdvisorEnviando = false;
+    };
+
+    try {
+        reconhecimento.start();
+    } catch (error) {
+        reconhecimentoVozAdvisor = null;
+        vozAdvisorEnviando = false;
+        definirEstadoVozAdvisor(false);
+        console.error('Não foi possível iniciar o reconhecimento de voz da Navi.', error);
+        statusAdvisor.textContent = 'Não foi possível iniciar o microfone. Tente novamente.';
+    }
+}
+
+// Limpa mensagens e o histórico da sessão para recomeçar a conversa do zero.
+function iniciarNovaConversaAdvisor() {
+    if (enviandoAdvisor) {
+        return;
+    }
+    pararReconhecimentoVozAdvisor(false);
+    mensagensAdvisor.replaceChildren();
+    campoAdvisor.value = '';
+    contadorAdvisor.textContent = '0/300';
+    statusAdvisor.textContent = '';
+    try {
+        window.sessionStorage.removeItem(chaveHistoricoAdvisor);
+    } catch (error) {
+        console.error('Não foi possível limpar o histórico da Navi nesta aba.', error);
+    }
+    popupAdvisor.querySelector('.painel-advisor')?.classList.remove('advisor-consulta');
+    boasVindasAdvisor?.classList.remove('hidden');
+    rolarMensagensParaMaisRecente();
 }
 
 // Controla o perfil, as conquistas e a restauração das telas navegadas.
@@ -3741,6 +3906,8 @@ botaoPerfilApp.addEventListener('click', abrirPerfil);
 botaoFecharPerfil.addEventListener('click', fecharPerfil);
 botaoAdvisorApp.addEventListener('click', abrirAdvisor);
 botaoFecharAdvisor.addEventListener('click', () => fecharAdvisor());
+botaoVozAdvisor?.addEventListener('click', alternarReconhecimentoVozAdvisor);
+botaoNovoChatAdvisor?.addEventListener('click', iniciarNovaConversaAdvisor);
 popupAdvisor.addEventListener('click', event => {
     if (event.target === popupAdvisor) {
         fecharAdvisor();

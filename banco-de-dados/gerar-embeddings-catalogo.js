@@ -6,7 +6,7 @@ const { Pool } = pg;
 const MODELO_EMBEDDING = 'gemini-embedding-001';
 const DIMENSOES_EMBEDDING = 768;
 const TAMANHO_LOTE = 32;
-const TENTATIVAS_MAXIMAS = 4;
+const TENTATIVAS_MAXIMAS = 8;
 
 function criarTextoDocumento(cenario) {
     const etapas = Array.isArray(cenario.steps) ? cenario.steps : [];
@@ -68,6 +68,7 @@ async function gerarEmbeddings(textos, chave) {
             if (!resposta.ok) {
                 const detalhe = (await resposta.text()).slice(0, 300);
                 const erro = new Error(`Gemini respondeu HTTP ${resposta.status}: ${detalhe}`);
+                erro.status = resposta.status;
                 erro.retryable = resposta.status >= 500 || resposta.status === 429;
                 if (!erro.retryable) {
                     throw erro;
@@ -89,7 +90,12 @@ async function gerarEmbeddings(textos, chave) {
         }
 
         if (tentativa < TENTATIVAS_MAXIMAS - 1) {
-            await new Promise((resolve) => setTimeout(resolve, 500 * (2 ** tentativa)));
+            // 429 de quota costuma precisar de mais tempo que erro transiente;
+            // backoff maior nas tentativas finais evita abortar o lote inteiro.
+            const esperaMs = ultimaFalha && ultimaFalha.status === 429
+                ? Math.min(30000, 5000 * (tentativa + 1))
+                : 500 * (2 ** tentativa);
+            await new Promise((resolve) => setTimeout(resolve, esperaMs));
         }
     }
     throw ultimaFalha || new Error('Não foi possível gerar embeddings para o catálogo.');
@@ -153,6 +159,8 @@ async function sincronizarCatalogo(pool, chave) {
             parametros
         );
         console.log(`Embeddings sincronizados: ${Math.min(inicio + lote.length, pendentes.length)}/${pendentes.length}.`);
+        // pequena pausa entre lotes para nao esgotar a cota por minuto do Gemini
+        await new Promise((resolve) => setTimeout(resolve, 1200));
     }
 
     return { total: resultado.rowCount, pendentes: pendentes.length };
